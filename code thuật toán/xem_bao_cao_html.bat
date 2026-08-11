@@ -28,7 +28,9 @@ if "%PYEXE%"=="" (
 
 if not exist "results" (
     echo [LOI] Chua co thu muc results\. Hay chay cai_dat_va_chay_full.bat
-    echo truoc (co the dung khi con dang chay de xem bao cao TAM THOI).
+    rem Dau ngoac PHAI escape bang ^ khi nam trong khoi "if ... ( ... )",
+    rem neu khong cmd se coi ) la dau dong khoi va bao loi cu phap roi ABORT.
+    echo truoc ^(co the dung khi con dang chay de xem bao cao TAM THOI^).
     pause
     exit /b 1
 )

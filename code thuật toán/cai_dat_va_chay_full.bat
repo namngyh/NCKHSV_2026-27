@@ -3,6 +3,22 @@ setlocal enabledelayedexpansion
 chcp 65001 >nul
 cd /d "%~dp0"
 
+rem --- Tu boc lai trong "cmd /k" NGAY TU DAU: dam bao cua so KHONG THE tu
+rem dong lang le du gap loi/crash bat ky o dau trong script (vd. loi cmd.exe
+rem noi bo, loi PowerShell, mat ket noi mang giua chung...). Neu double-click
+rem lan dau (chua co bien danh dau MSGARCHX_RELAUNCHED), script se tu mo mot
+rem cua so cmd MOI voi /k (giu cua so lai sau khi script ket thuc, du thanh
+rem cong hay loi) roi thoat cua so goc ngay lap tuc.
+if not "%MSGARCHX_RELAUNCHED%"=="1" (
+    set "MSGARCHX_RELAUNCHED=1"
+    start "MS-GARCH-X -- Cai dat va chay FULL" cmd /k "%~f0"
+    exit /b
+)
+
+if not exist logs mkdir logs
+for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"`) do set "TS=%%T"
+set "LOGFILE=logs\run_full_%TS%.log"
+
 echo ============================================================
 echo  MS-GARCH-X VN30F1M -- Cai dat thu vien va chay uoc luong FULL
 echo ============================================================
@@ -24,8 +40,7 @@ if "%PYEXE%"=="" (
     echo [LOI] Khong tim thay Python trong PATH.
     echo Hay cai Python 3.10+ tu https://www.python.org/downloads/ va nho tich
     echo chon "Add python.exe to PATH" luc cai dat, roi chay lai file nay.
-    pause
-    exit /b 1
+    goto :ketthuc
 )
 
 echo Dung trinh thong dich: %PYEXE%
@@ -39,14 +54,17 @@ echo.
 %PYEXE% -m pip install -r requirements.txt
 if errorlevel 1 (
     echo.
-    echo [Canh bao] Cai dat mac dinh that bai, thu lai voi quyen nguoi dung (--user) ...
+    rem Dau ngoac trong "^(--user^)" PHAI duoc escape bang dau ^: neu de tran
+    rem la "(--user)" thi cmd coi dau ) do la dau dong khoi "if errorlevel 1 ("
+    rem o tren, khien phan con lai ("...") thanh lenh la va bao
+    rem "... was unexpected at this time." roi ABORT ca file .bat.
+    echo [Canh bao] Cai dat mac dinh that bai, thu lai voi quyen nguoi dung ^(--user^) ...
     %PYEXE% -m pip install --user -r requirements.txt
     if errorlevel 1 (
         echo [LOI] Cai dat thu vien that bai. Kiem tra ket noi mang, quyen ghi,
         echo       hoac chay thu cmd nay bang tay de xem chi tiet loi:
         echo         %PYEXE% -m pip install -r requirements.txt
-        pause
-        exit /b 1
+        goto :ketthuc
     )
 )
 
@@ -55,8 +73,7 @@ echo Kiem tra file du lieu ohlc_export.csv ...
 if not exist "ohlc_export.csv" (
     echo [LOI] Khong tim thay ohlc_export.csv trong thu muc nay: "%cd%"
     echo Hay dat file du lieu VN30F1M vao dung thu muc "code thuat toan" roi chay lai.
-    pause
-    exit /b 1
+    goto :ketthuc
 )
 
 echo.
@@ -70,29 +87,30 @@ echo   Ket qua duoc ghi checkpoint LIEN TUC vao thu muc results\ -- neu tat may
 echo   hoac dong cua so nay giua chung, chay lai file .bat nay se TU DONG bo
 echo   qua cac buoc da xong, khong mat tien do.
 echo.
-echo   Nhat ky day du duoc luu vao thu muc logs\ (va van hien tren man hinh nay).
+echo   LUU Y: trong luc chay, cua so nay co the im lang VAI PHUT giua hai dong
+echo   log (dac biet o buoc MLE cua B4/M1) -- do la BINH THUONG, khong phai bi
+echo   treo; moi diem khoi tao MLE in tien do dinh ky (moi ~100-200 buoc toi
+echo   uu). Neu im lang QUA 30-45 phut khong co dong moi, moi thuc su dang nghi.
 echo.
 pause
 
-if not exist logs mkdir logs
-
-rem Lay timestamp qua PowerShell (khong dung %date%/%time% vi dinh dang phu
-rem thuoc locale Windows, co the sai voi Windows tieng Viet).
-for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"`) do set "TS=%%T"
-set "LOGFILE=logs\run_full_%TS%.log"
-
-echo Nhat ky: %LOGFILE%
+rem Chay THANG ra cua so nay, KHONG qua pipe/PowerShell: giu duoc tien do
+rem thoi gian thuc (ke ca thanh tien do tqdm cua MCMC) va tranh loi
+rem NativeCommandError cua PowerShell 5.1 khi boc stderr chuong trinh ngoai.
+rem "-u" tat buffering de moi dong print hien ra ngay lap tuc.
+rem Viec ghi nhat ky do chinh Python dam nhan qua --log-file.
+echo Nhat ky day du: %LOGFILE%
 echo.
+%PYEXE% -u scripts\run_full_study.py --preset full --log-file "%LOGFILE%"
 
-rem Chi dung dau nhay don ben trong chuoi -Command de tranh loi escape dau
-rem ngoac kep long nhau cua cmd.exe (cmd KHONG ho tro \" nhu POSIX shell).
-powershell -NoProfile -ExecutionPolicy Bypass -Command "& '%PYEXE%' scripts\run_full_study.py --preset full 2>&1 | Tee-Object -FilePath '%LOGFILE%'"
-
+:ketthuc
 echo.
 echo ============================================================
 echo  Da dung (hoan tat hoac gap loi). Kiem tra:
 echo    - Thu muc results\  (ket qua da checkpoint)
-echo    - Thu muc logs\     (nhat ky day du)
+echo    - File nhat ky: %LOGFILE%
 echo  Chay lai file nay bat cu luc nao de tiep tuc cac buoc con thieu.
+echo.
+echo  Cua so nay KHONG tu dong dong (dung cmd /k). Dong bang tay khi da doc
+echo  xong, hoac go "exit" roi Enter.
 echo ============================================================
-pause

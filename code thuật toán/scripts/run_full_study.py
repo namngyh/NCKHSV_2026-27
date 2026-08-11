@@ -198,8 +198,15 @@ def run_preliminary_tests_step(cfg: StudyConfig, data: dict) -> dict:
 # Buoc 1: MLE (B1-B4, M1)
 # ============================================================
 def run_mle_step(cfg: StudyConfig, r_train: torch.Tensor, X_train: torch.Tensor) -> dict:
+    """`verbose=True` o day CO CHU DICH: voi preset "full" (6 diem khoi tao x
+    500 Adam x 250 L-BFGS, vong lap Python qua ~1735 quan sat cho B4/M1), moi
+    model co the chay lieu vai chuc phut MA KHONG in gi neu tat verbose --
+    de nguoi dung tuong cua so bi treo va dong nham giua chung. Bat verbose
+    de in tien do moi ~100-200 buoc/diem khoi tao, lam "nhip tim" hien thi
+    lien tuc (xem README.md / cai_dat_va_chay_full.bat)."""
     zero_X = torch.zeros(r_train.shape[0], 0)
-    kw = dict(n_starts=cfg.mle_n_starts, n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs, base_seed=cfg.seed)
+    kw = dict(n_starts=cfg.mle_n_starts, n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs,
+              base_seed=cfg.seed, verbose=True)
 
     print("  -- B1: GARCH(1,1) chuan, khong X --")
     b1 = fit_garch_mle(r_train, zero_X, dist="normal", **kw)
@@ -216,13 +223,13 @@ def run_mle_step(cfg: StudyConfig, r_train: torch.Tensor, X_train: torch.Tensor)
     print("  -- B4: MS-GARCH chuan (nu co dinh lon), khong X --")
     config_b4 = ModelConfig(n_exog=0, state_specific_nu=False)
     b4 = fit_mle(r_train, zero_X, config_b4, n_starts=cfg.mle_n_starts, base_seed=cfg.seed,
-                 n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs, fixed_nu=1e6)
+                 n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs, fixed_nu=1e6, verbose=True)
     print(f"     loglik={b4.loglik:.2f} AIC={b4.aic:.2f}")
 
     print("  -- M1: MS-GARCH-X Student-t --")
     config_m1 = ModelConfig(n_exog=X_train.shape[1], state_specific_nu=False)
     m1 = fit_mle(r_train, X_train, config_m1, n_starts=cfg.mle_n_starts, base_seed=cfg.seed,
-                 n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs)
+                 n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs, verbose=True)
     print(f"     loglik={m1.loglik:.2f} AIC={m1.aic:.2f} nu={m1.params.nu.item():.3f}")
 
     print("     Tinh sai so chuan (delta method tu Hessian) cho M1 ...")
@@ -515,12 +522,57 @@ def run_simulation_all_scenarios(cfg: StudyConfig) -> dict:
 STAGE_ORDER = ["data", "prelim", "mle", "vb", "mcmc", "r1", "oos", "simulation"]
 
 
+class _Tee:
+    """Nhan doi stdout/stderr sang mot file nhat ky, KHONG dung pipe cua shell.
+
+    Ly do khong dung `| Tee-Object` cua PowerShell trong file .bat: (1) khi
+    stdout bi noi qua pipe, Python chuyen sang block-buffering nen tien do
+    hien thi tre rat lau; (2) PowerShell 5.1 boc moi dong stderr cua chuong
+    trinh ngoai (vd. thanh tien do tqdm cua MCMC) thanh NativeCommandError khi
+    dung `2>&1`, lam nhieu output va sai ma loi. Tee trong Python tranh ca hai.
+    """
+
+    def __init__(self, stream, log_handle):
+        self._stream = stream
+        self._log = log_handle
+
+    def write(self, text):
+        self._stream.write(text)
+        self._stream.flush()
+        try:
+            self._log.write(text)
+            self._log.flush()
+        except (ValueError, OSError):
+            pass
+        return len(text)
+
+    def flush(self):
+        self._stream.flush()
+        try:
+            self._log.flush()
+        except (ValueError, OSError):
+            pass
+
+    def isatty(self):
+        return getattr(self._stream, "isatty", lambda: False)()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--preset", choices=list(PRESETS.keys()), default="full")
     parser.add_argument("--only", nargs="*", choices=STAGE_ORDER, default=None,
                          help="Chi chay cac buoc duoc chi dinh (mac dinh: tat ca theo thu tu)")
+    parser.add_argument("--log-file", default=None,
+                         help="Ghi toan bo man hinh ra file nay (van hien binh thuong tren cmd)")
     args = parser.parse_args()
+
+    if args.log_file:
+        log_path = Path(args.log_file)
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        log_handle = open(log_path, "a", encoding="utf-8", errors="replace")
+        sys.stdout = _Tee(sys.stdout, log_handle)
+        sys.stderr = _Tee(sys.stderr, log_handle)
+        print(f"[nhat ky] Ghi toan bo man hinh vao: {log_path}")
 
     cfg = PRESETS[args.preset]
     stages = args.only if args.only else STAGE_ORDER
