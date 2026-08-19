@@ -4,10 +4,12 @@ ngoại sinh point-in-time.
 
 ĐÂY LÀ BẢN PROTOTYPE, KHÔNG PHẢI WALK-FORWARD: tham số MS-GARCH-X được ước
 lượng MLE MỘT LẦN trên đoạn train của QP, rồi bộ lọc tiến chạy suốt lịch sử
-với tham số cố định đó. README của package này đã ghi: MCMC full study ước
-tính 35-40 giờ, refit lặp lại theo từng fold walk-forward là không khả thi
-trên CPU với bộ lọc tuần tự này. Xem cảnh báo tương ứng in ra khi chiến lược
-qp sử dụng chuỗi này (qp/strategy/library.py::vol_regime_gate).
+với tham số cố định đó. README của package này đã ghi: một mô hình MLE 2
+trạng thái mất khoảng 2.5 giờ ở cấu hình full (đo thực nghiệm, xem "Lưu ý
+hiệu năng" trong README.md), còn MCMC (NUTS) có thể mất hơn một ngày tùy
+hình học hậu nghiệm -- refit lặp lại theo từng fold walk-forward là không
+khả thi trên CPU với bộ lọc tuần tự này. Xem cảnh báo tương ứng in ra khi
+chiến lược qp sử dụng chuỗi này (qp/strategy/library.py::vol_regime_gate).
 
 Hai điểm point-in-time quan trọng:
 

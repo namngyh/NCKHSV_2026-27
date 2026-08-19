@@ -924,6 +924,14 @@ Hai kết luận quan trọng:
   tensor chỉ 2 phần tử, không phải bởi phép nhân ma trận. Một tiến trình chạy
   thực tế chỉ dùng khoảng 0,92 nhân.
 
+**Số liệu trên là ĐẶC THÙ THEO MÁY** (một lần forward+backward phụ thuộc tốc độ
+CPU đơn nhân, không tận dụng được đa luồng). Trên máy khác dùng để chạy
+`run_full_study.py` trong `code thuật toán/`, cùng phép đo cho **~3,57 giây**
+tại $T=1735$ (chậm hơn ~2,5 lần) — xem bảng đo trực tiếp và ước tính thời gian
+theo từng bước trong mục "Lưu ý hiệu năng" của `code thuật toán/README.md`.
+Luôn đo lại trên chính máy sẽ chạy `--preset full` trước khi lập kế hoạch thời
+gian, thay vì dùng nguyên số liệu ở đây.
+
 ### 13.2 Vì sao MCMC đắt hơn MLE khoảng 100 lần
 
 | | MLE (M1) | MCMC (M4) |
@@ -933,8 +941,14 @@ Hai kết luận quan trọng:
 | Thời gian ước tính | ~1,4 giờ | ~128 giờ |
 
 Con số $2.600$ là $4$ chuỗi $\times\,(250$ khởi động $+\ 400$ mẫu$)$. Con số $127$
-là số bước leapfrog tối đa ở độ sâu cây $D=7$, tức $2^7-1$. Nói cách khác, **một
-mẫu duy nhất** tốn khoảng 3 phút.
+là số bước leapfrog tối đa ở độ sâu cây $D=7$, tức $2^7-1$ — đây là **giới hạn
+TRÊN** (giả định mọi mẫu đều chạm trần 127 bước, hiếm khi xảy ra thực tế; NUTS
+thường dừng sớm hơn nhờ tiêu chí U-turn). ~128 giờ tính trên máy tham chiếu ở
+13.1 (~1,4 giây/lần chạy bộ lọc); trên máy chậm hơn (vd. ~3,57 giây/lần như đo
+trong `code thuật toán/README.md`), giới hạn trên tương ứng dài hơn theo cùng
+tỷ lệ. Vì đây chỉ là cận trên lý thuyết, **cách đáng tin cậy nhất để biết thời
+gian thực tế là theo dõi trực tiếp thanh tiến trình (`s/it`) khi chạy MCMC
+thật**, không phải con số tính sẵn nào ở đây.
 
 Nguyên nhân sâu xa: hậu nghiệm có hình học "cứng" — NUTS thích nghi bước tích
 phân xuống khoảng $10^{-4}$ do tương quan mạnh giữa $\omega_s,\alpha_s,\beta_s$ và
