@@ -106,9 +106,9 @@
   \fancyhf{}
   \fancyhead[L]{\footnotesize\itshape Nguyễn Hoài Nam, Nguyễn Thuận Hiếu, Đặng Chí Hiếu}
   \fancyhead[R]{\footnotesize\itshape MS-GARCH-X Student-t cho VN30F1M}
-  \fancyfoot[L]{\footnotesize\color{JournalGray} Nghiên cứu khoa học sinh viên 2026-2027}
+  \fancyfoot[L]{\footnotesize\color{JournalGray} Nghiên cứu khoa học sinh viên \NienKhoa}
   \fancyfoot[C]{\footnotesize \thepage}
-  \fancyfoot[R]{\footnotesize\color{JournalGray} Tháng 7 năm 2027}
+  \fancyfoot[R]{\footnotesize\color{JournalGray} \NgayBanThao}
   \renewcommand{\headrulewidth}{0.4pt}
   \renewcommand{\footrulewidth}{0.3pt}
 }
@@ -235,7 +235,7 @@
     \includegraphics[width=0.31\textwidth]{logo.png}
 
     \vspace{0.90cm}
-    {\fontsize{21pt}{25pt}\selectfont\bfseries CÔNG TRÌNH NGHIÊN CỨU KHOA HỌC SINH VIÊN 2026-2027\par}
+    {\fontsize{21pt}{25pt}\selectfont\bfseries CÔNG TRÌNH NGHIÊN CỨU KHOA HỌC SINH VIÊN \NienKhoa\par}
 
     \vspace{0.70cm}
     \begin{minipage}{0.78\textwidth}
@@ -283,7 +283,7 @@
     \end{minipage}
     \begin{minipage}[t]{0.35\textwidth}
         \raggedleft
-        {\footnotesize\color{JournalGray} Tháng 7 năm 2027}\par
+        {\footnotesize\color{JournalGray} \NgayBanThao}\par
         {\footnotesize\color{JournalGray} TP. Hồ Chí Minh}
     \end{minipage}
 
@@ -324,7 +324,7 @@
     \noindent\begin{minipage}{\linewidth}
         \small
         \textbf{Tác giả liên hệ:} \TacGiaBa,
-        \href{mailto:\EmailMot}{\nolinkurl{\EmailBa}}.\\[0.35em]
+        \href{mailto:\EmailBa}{\nolinkurl{\EmailBa}}.\\[0.35em]
         \textbf{Hướng dẫn khoa học:} Nghiên cứu được thực hiện dưới sự hướng dẫn của \GiangVienHuongDan. 
     \end{minipage}
 
@@ -416,7 +416,7 @@ Bên cạnh tính tập trung theo cụm, lợi suất tài chính thường có
 
 Một hạn chế khác của mô hình GARCH một trạng thái là giả định toàn bộ mẫu dữ liệu được tạo ra bởi một cơ chế biến động duy nhất. Trên thực tế, phản ứng của thị trường đối với thông tin mới, mức độ dai dẳng của biến động và xác suất xuất hiện các biến cố cực đoan có thể khác nhau giữa giai đoạn bình thường và giai đoạn căng thẳng. Mô hình chuyển trạng thái Markov cho phép các tham số thay đổi theo một trạng thái ẩn, trong đó trạng thái hiện tại phụ thuộc xác suất vào trạng thái liền trước \cite{hamilton1989}. Khi kết hợp chuỗi Markov với phương trình GARCH, mô hình có thể mô tả đồng thời tính dai dẳng bên trong từng trạng thái và sự chuyển đổi giữa các chế độ biến động \cite{gray1996,klaassen2002,haas2004}.
 
-Đối với hợp đồng tương lai VN30F1M, biến động có thể chịu tác động của thanh khoản, biến động quan sát trong ngày, chênh lệch giữa giá hợp đồng tương lai và chỉ số cơ sở, ngày đáo hạn và quá trình chuyển sang hợp đồng kế tiếp. Việc đưa các đại lượng này vào phương trình phương sai tạo thành cấu trúc GARCH-X. Ký hiệu ``X'' nhấn mạnh rằng ngoài thành phần ARCH và GARCH, phương sai có điều kiện còn phụ thuộc vào một vector biến ngoại sinh được xác định trước thời điểm dự báo.
+Đối với hợp đồng tương lai VN30F1M, biến động có thể chịu tác động của thanh khoản, biến động quan sát trong ngày, chênh lệch giữa giá hợp đồng tương lai và chỉ số cơ sở, ngày đáo hạn và quá trình chuyển sang hợp đồng kế tiếp. Việc đưa các đại lượng này vào phương trình phương sai tạo thành cấu trúc GARCH-X. Ký hiệu ``X'' nhấn mạnh rằng ngoài thành phần ARCH và GARCH, phương sai có điều kiện còn phụ thuộc vào một vector biến ngoại sinh được xác định trước thời điểm dự báo. Mức độ mà mỗi biến này thực sự được đưa vào mô hình chính phụ thuộc vào khả năng tiếp cận dữ liệu tương ứng; \cref{subsec:exogenous-variables} trình bày cụ thể tập biến khả dụng với nguồn dữ liệu hiện có của nghiên cứu.
 
 Nghiên cứu này tập trung vào hai nhóm bất định. Nhóm thứ nhất là bất định ngẫu nhiên của lợi suất tương lai ngay cả khi biết tham số mô hình. Nhóm thứ hai là bất định nhận thức do tham số, trạng thái và cấu trúc mô hình chưa được biết chính xác. Ước lượng hợp lý cực đại cung cấp một nghiệm ước lượng điểm và thường dựa vào xấp xỉ tiệm cận để xây dựng sai số chuẩn. Ngược lại, suy diễn Bayes biểu diễn bất định tham số bằng phân phối hậu nghiệm. MCMC có thể mô tả hậu nghiệm tương đối linh hoạt nhưng thường tốn thời gian tính toán, trong khi Variational Bayes chuyển bài toán tích phân thành một bài toán tối ưu và thường nhanh hơn \cite{jordan1999,blei2017}.
 
@@ -463,7 +463,7 @@ Nếu xác suất trong \cref{eq:tail-probability} gần $1$, dữ liệu cung c
 
 \subsection{Đóng góp của nghiên cứu}\label{subsec:dong-gop}
 
-Bài báo dự kiến đóng góp theo năm hướng. Thứ nhất, nghiên cứu xây dựng một khung MS-GARCH-X Student-t dành cho chuỗi hợp đồng tương lai VN30F1M và xử lý rõ vấn đề tạo chuỗi hợp đồng liên tục. Thứ hai, ba phương pháp MLE, Variational Bayes và MCMC được so sánh trên cùng một hàm hợp lý và cùng cấu trúc mô hình, qua đó hạn chế việc quy kết sai khác kết quả cho những đặc tả không đồng nhất. Thứ ba, việc đánh giá không dừng ở dự báo điểm mà mở rộng sang dự báo mật độ, VaR và độ hiệu chỉnh xác suất trạng thái. Thứ tư, nghiên cứu mô phỏng được sử dụng để đánh giá sai lệch, RMSE và xác suất bao phủ khi tham số thật được biết. Thứ năm, nghiên cứu lượng hóa mức đánh đổi giữa chất lượng suy diễn và chi phí tính toán, một yếu tố quan trọng khi mô hình cần tái ước lượng định kỳ.
+Bài báo dự kiến đóng góp theo năm hướng. Thứ nhất, nghiên cứu xây dựng một khung MS-GARCH-X Student-t dành cho chuỗi hợp đồng tương lai VN30F1M, đồng thời trình bày minh bạch vấn đề tạo chuỗi hợp đồng liên tục và chỉ rõ giới hạn cụ thể của nguồn dữ liệu hiện có đối với việc xây dựng chuỗi này (\cref{subsec:continuous-contract}), làm cơ sở cho hướng mở rộng khi có dữ liệu tách theo từng hợp đồng thành phần. Thứ hai, ba phương pháp MLE, Variational Bayes và MCMC được so sánh trên cùng một hàm hợp lý và cùng cấu trúc mô hình, qua đó hạn chế việc quy kết sai khác kết quả cho những đặc tả không đồng nhất. Thứ ba, việc đánh giá không dừng ở dự báo điểm mà mở rộng sang dự báo mật độ, VaR và độ hiệu chỉnh xác suất trạng thái. Thứ tư, nghiên cứu mô phỏng được sử dụng để đánh giá sai lệch, RMSE và xác suất bao phủ khi tham số thật được biết. Thứ năm, nghiên cứu lượng hóa mức đánh đổi giữa chất lượng suy diễn và chi phí tính toán, một yếu tố quan trọng khi mô hình cần tái ước lượng định kỳ.
 
 \subsection{Cấu trúc bài báo}\label{subsec:cau-truc}
 
@@ -757,6 +757,8 @@ Phương trình \cref{eq:main-variance} là đặc tả làm việc dựa trên 
 \end{equation}
 để trạng thái $1$ luôn được gọi là trạng thái biến động thấp và trạng thái $2$ là trạng thái biến động cao. Quy tắc này giúp hạn chế hiện tượng đổi nhãn trong suy diễn Bayes.
 
+Khi phương sai có điều kiện phụ thuộc thêm biến ngoại sinh như trong \cref{eq:main-variance}, kỳ vọng vô điều kiện $\E(h_t\mid S_t=s)$ không còn có dạng đóng đơn giản $\omega_s/(1-\alpha_s-\beta_s)$ như trong \cref{eq:garch-unconditional-var}, vì đại lượng này còn phụ thuộc $\E(\bm\gamma_s^{\top}\Xvec_{t-1}\mid S_t=s)$. Trong thực hành, quy tắc \cref{eq:label-identification} nên được áp dụng bằng trung bình mẫu của $h_{t,s}$ đã ước lượng được, có điều kiện trên $S_t=s$ (ví dụ trung bình theo mẫu huấn luyện của $\widehat h_{t,s}$ tại các thời điểm mà xác suất làm trơn $\xi_{t\mid T}(s)$ vượt một ngưỡng cho trước), thay vì tính theo công thức lý thuyết vô điều kiện.
+
 Mô hình mở rộng thay \cref{eq:main-dist} bằng
 \begin{equation}
   z_t\mid S_t=s\sim t_{\nu_s}^{*},
@@ -854,29 +856,56 @@ Việc tính \cref{eq:loglikelihood} phải dùng kỹ thuật log-sum-exp để
 \end{equation}
 trong đó $\Theta$ là miền tham số thỏa các điều kiện xác suất, tính dương của phương sai và điều kiện moment được lựa chọn.
 
+\textbf{Phép biến đổi sang không gian không ràng buộc.}
+Để bài toán tối ưu \cref{eq:mle} có thể được giải bằng các thuật toán gradient tiêu chuẩn trên $\R^d$ mà không cần xử lý ràng buộc biên một cách tường minh, mọi tham số bị ràng buộc được ánh xạ từ một tham số hóa không ràng buộc $\widetilde{\Param}\in\R^d$ thông qua một song ánh khả vi $\Param=T(\widetilde{\Param})$. Đối với xác suất duy trì trạng thái,
+\begin{equation}
+  p_{ss}=\frac{1}{1+\exp(-\eta_s)},
+  \qquad \eta_s\in\R,
+  \label{eq:logit-transition}
+\end{equation}
+đối với bậc tự do,
+\begin{equation}
+  \nu=2+\softplus(\eta_{\nu})
+  =2+\log\left(1+e^{\eta_{\nu}}\right),
+  \qquad \eta_{\nu}\in\R,
+  \label{eq:df-transform}
+\end{equation}
+nhằm bảo đảm $\nu>2$; và đối với các hệ số phương sai cần dương,
+\begin{equation}
+  \omega_s=\softplus(\eta_{\omega,s}),
+  \qquad
+  \alpha_s=\softplus(\eta_{\alpha,s}),
+  \qquad
+  \beta_s=\softplus(\eta_{\beta,s}),
+  \label{eq:variance-coef-transform}
+\end{equation}
+trong khi $\mu_s$ và $\bm\gamma_s$ được giữ trên $\R$ vì miền giá trị của chúng không bị ràng buộc dấu (xem thảo luận về điều kiện $h_t>0$ ở \cref{subsec:garchx-theory} khi $\Xvec_t$ có thể âm). Tối ưu số khi đó được thực hiện trên $\widetilde{\Param}$, và toàn bộ suy diễn (điểm ước lượng, sai số chuẩn, khoảng tin cậy) được ánh xạ ngược lại $\Theta$ bằng $T$ và, khi cần khoảng tin cậy đối xứng trên thang gốc, bằng phương pháp delta với Jacobian $\partial T/\partial\widetilde{\Param}$.
+
+\textbf{Thuật toán tối ưu số.}
+Vì $\ell_T$ trong \cref{eq:loglikelihood} khả vi theo $\widetilde{\Param}$ (bộ lọc tiến ở \cref{app:forward-filter} là một phép hợp thành khả vi của các bước cộng, nhân và log-sum-exp), nghiên cứu nên ưu tiên các thuật toán tựa Newton như BFGS hoặc L-BFGS-B, sử dụng gradient chính xác thông qua vi phân tự động thay vì sai phân hữu hạn để tránh khuếch đại sai số số học qua đệ quy theo thời gian. Điều kiện dừng cần kết hợp chuẩn gradient nhỏ hơn một ngưỡng cho trước (ví dụ $10^{-6}$ trên thang $\widetilde{\Param}$) và biến thiên tương đối của $\ell_T$ giữa hai vòng lặp liên tiếp nhỏ hơn một ngưỡng cho trước; chỉ một trong hai điều kiện là không đủ vì hàm hợp lý có thể rất phẳng gần nghiệm mà gradient vẫn còn lớn, hoặc ngược lại. Trong quá trình đệ quy $h_{t,s}$, nên áp đặt một cận dưới dương rất nhỏ để tránh chia cho số gần $0$ khi tối ưu đi qua vùng tham số cực đoan trước khi hội tụ.
+
 Do hàm hợp lý MS-GARCH có thể đa đỉnh, một lần tối ưu duy nhất không đủ để bảo đảm nghiệm tốt. Quy trình MLE cần:
 \begin{enumerate}
-  \item biến đổi tham số không ràng buộc sang miền hợp lệ;
-  \item sử dụng nhiều điểm khởi tạo, gồm cả khởi tạo ngẫu nhiên và khởi tạo từ mô hình đơn giản hơn;
-  \item lưu giá trị hàm hợp lý, mã hội tụ và chuẩn gradient tại nghiệm;
+  \item biến đổi tham số không ràng buộc sang miền hợp lệ theo \cref{eq:logit-transition,eq:df-transform,eq:variance-coef-transform};
+  \item sử dụng nhiều điểm khởi tạo theo chiến lược \emph{khởi tạo tuần tự theo thứ bậc mô hình}: ước lượng B1 (GARCH một trạng thái, sai số chuẩn) trước, dùng nghiệm này để khởi tạo B2 (thêm Student-t), dùng nghiệm B2 để khởi tạo B3 (thêm biến ngoại sinh), rồi dùng nghiệm B3 để khởi tạo M1 bằng cách nhân đôi bộ tham số cho hai trạng thái và thêm nhiễu ngẫu nhiên có biên độ nhỏ giữa hai bản sao; nếu hai trạng thái được khởi tạo với giá trị hoàn toàn trùng nhau, hàm hợp lý đối xứng qua phép hoán vị nhãn trạng thái và thuật toán gradient có nguy cơ hội tụ về điểm yên ngựa (saddle point) ứng với cấu hình đối xứng đó thay vì phân tách về hai trạng thái khác biệt; cần bổ sung một số điểm khởi tạo ngẫu nhiên độc lập (chẳng hạn từ $20$ đến $50$ điểm) để giảm rủi ro chỉ thu được nghiệm cục bộ lân cận điểm khởi tạo tuần tự nêu trên;
+  \item lưu giá trị hàm hợp lý, mã hội tụ và chuẩn gradient tại nghiệm của từng lần khởi tạo, sau đó chọn nghiệm có hàm hợp lý cao nhất trong số các nghiệm hội tụ hợp lệ (không nằm quá sát biên tham số một cách bất thường);
   \item kiểm tra nghiệm gần biên, đặc biệt $p_{ss}$ gần $1$, $\alpha_s+\beta_s$ gần $1$ hoặc $\nu$ gần $2$;
   \item tính sai số chuẩn từ nghịch đảo Hessian quan sát nếu ma trận xác định dương và có điều kiện số chấp nhận được;
   \item thực hiện bootstrap tham số hoặc bootstrap phần dư như một kiểm định độ bền nếu xấp xỉ Hessian không ổn định.
 \end{enumerate}
 
-Một tham số hóa hữu ích cho xác suất chuyển là
+\textbf{Suy diễn tiệm cận và sai số chuẩn.}
+Dưới các điều kiện chính quy phù hợp, ước lượng MLE thỏa tính chất tiệm cận chuẩn
 \begin{equation}
-  p_{ss}=\frac{1}{1+\exp(-\eta_s)},
-  \qquad \eta_s\in\R.
-  \label{eq:logit-transition}
+  \sqrt{T}\left(\widehat{\Param}_{\mathrm{MLE}}-\Param_0\right)
+  \xrightarrow{d}
+  \mathcal{N}\!\left(\bm 0,\, \bm H(\Param_0)^{-1}\bm J(\Param_0)\bm H(\Param_0)^{-1}\right),
+  \label{eq:mle-avar}
 \end{equation}
-Bậc tự do được tham số hóa bởi
-\begin{equation}
-  \nu=2+\softplus(\eta_{\nu})
-  =2+\log\left(1+e^{\eta_{\nu}}\right),
-  \label{eq:df-transform}
-\end{equation}
-nhằm bảo đảm $\nu>2$.
+trong đó $\bm H(\Param_0)=-\E\!\left[\partial^2\ell_T/\partial\Param\partial\Param^{\top}\right]/T$ là thông tin Hessian trung bình và $\bm J(\Param_0)=\E\!\left[(\partial\ell_T/\partial\Param)(\partial\ell_T/\partial\Param)^{\top}\right]/T$ là thông tin dạng tích ngoài của gradient (OPG). Khi đặc tả phân phối Student-t đúng, $\bm H(\Param_0)=\bm J(\Param_0)$ theo đẳng thức thông tin và \cref{eq:mle-avar} rút gọn về dạng quen thuộc $\bm H(\Param_0)^{-1}$ đã dùng ở bước tính sai số chuẩn phía trên. Khi có nghi ngờ đặc tả sai (ví dụ phân phối sai số thật không hoàn toàn là Student-t chuẩn hóa), nên báo cáo thêm sai số chuẩn kiểu \emph{sandwich} theo toàn bộ vế phải của \cref{eq:mle-avar}, ước lượng bằng Hessian và OPG mẫu tương ứng; đây là sai số chuẩn hợp lý cực đại tựa (quasi-MLE) vững dưới đặc tả sai của phân phối có điều kiện \cite{bollerslev1992}. Với GARCH một trạng thái, lý thuyết tiệm cận dạng \cref{eq:mle-avar} đã được thiết lập trong tài liệu kinh tế lượng dưới các điều kiện moment và tính ergodic phù hợp; với MS-GARCH, các điều kiện chính quy khó kiểm tra hơn và có thể không thỏa mãn gần biên tham số (ví dụ khi $p_{ss}\to 1$), nên khoảng tin cậy Wald đối xứng dựa trên \cref{eq:mle-avar} chỉ nên dùng như một xấp xỉ sơ bộ; khi nghiệm gần biên, khoảng tin cậy dựa trên đảo ngược thống kê tỷ số hợp lý (khoảng tin cậy hợp lý hồ sơ) thường đáng tin cậy hơn vì không giả định tính đối xứng của phân phối ước lượng.
+
+\textbf{Kiểm định số trạng thái và vấn đề tham số gây nhiễu không nhận dạng được.}
+So sánh B4 (MS-GARCH chuẩn một trạng thái ẩn) với B1 (GARCH chuẩn không chuyển trạng thái), hoặc tổng quát hơn là kiểm định giả thuyết ``chỉ có một trạng thái'' trong đặc tả MS-GARCH-X, không thể thực hiện bằng kiểm định tỷ số hợp lý (LR) tiêu chuẩn với phân phối tiệm cận $\chi^2$. Lý do là dưới giả thuyết gốc một trạng thái, một số tham số của mô hình chuyển trạng thái (ví dụ $p_{11}$, $p_{22}$, hoặc hiệu $\mu_2-\mu_1$, $\omega_2-\omega_1$) trở thành tham số gây nhiễu không nhận dạng được, vi phạm điều kiện chính quy cần thiết cho lý thuyết LR cổ điển; thống kê LR khi đó hội tụ về một phân phối tiệm cận không chuẩn phụ thuộc vào một quá trình ngẫu nhiên trên không gian tham số gây nhiễu, đòi hỏi mô phỏng hoặc chặn trên/dưới để có giá trị tới hạn hợp lệ \cite{hansen1992}. Do đó, nghiên cứu không nên dùng kiểm định LR trực tiếp để khẳng định MS-GARCH-X ``có ý nghĩa thống kê'' so với mô hình một trạng thái; bằng chứng cho \RQ{2} nên dựa trên so sánh AIC/BIC mang tính mô tả (\cref{subsec:model-selection}) cùng với chất lượng dự báo ngoài mẫu, như đã nêu ở \cref{subsec:garchx-msgarchx-results}.
 
 \subsection{Suy diễn Bayes}\label{subsec:bayes}
 
@@ -956,7 +985,37 @@ Hai họ xấp xỉ được xem xét:
   trong đó $\bm L$ là ma trận tam giác dưới. Cấu trúc này linh hoạt hơn nhưng có nhiều tham số tối ưu hơn.
 \end{enumerate}
 
-Trong triển khai chính, trạng thái rời rạc $S_{1:T}$ nên được lấy tổng chính xác trong hàm hợp lý thông qua bộ lọc tiến, thay vì buộc một thuật toán gradient liên tục phải lấy mẫu trực tiếp trạng thái rời rạc. Quy trình Variational Bayes cần báo cáo số lần khởi tạo, số vòng tối ưu, lịch tốc độ học, giá trị ELBO cuối, độ biến thiên ELBO và độ ổn định giữa các lần chạy.
+Trong triển khai chính, trạng thái rời rạc $S_{1:T}$ nên được lấy tổng chính xác trong hàm hợp lý thông qua bộ lọc tiến, thay vì buộc một thuật toán gradient liên tục phải lấy mẫu trực tiếp trạng thái rời rạc. Cả hai họ xấp xỉ đều được đặt trên cùng không gian không ràng buộc $\widetilde{\Param}$ đã dùng cho MLE ở \cref{eq:logit-transition,eq:df-transform,eq:variance-coef-transform}, theo đúng cách tiếp cận biến đổi tự động (automatic differentiation variational inference) \cite{kucukelbir2017}. Vì $q$ được đặt trên $\widetilde{\Param}$ trong khi hàm hợp lý và tiền nghiệm được viết trên $\Param=T(\widetilde{\Param})$, ELBO trong \cref{eq:elbo} phải được hiệu chỉnh bằng số hạng Jacobian của phép đổi biến:
+\begin{equation}
+  \ELBO(q)
+  =
+  \E_{q}\!\left[
+    \log p\!\left(\Data_T, T(\widetilde{\Param})\right)
+    +\log\left|\det J_T(\widetilde{\Param})\right|
+  \right]
+  -\E_{q}\!\left[\log q(\widetilde{\Param})\right],
+  \label{eq:elbo-jacobian}
+\end{equation}
+trong đó $J_T(\widetilde{\Param})=\partial T/\partial\widetilde{\Param}$. Việc bỏ sót số hạng Jacobian là một sai sót thường gặp khi triển khai Variational Bayes trên tham số đã biến đổi, làm sai lệch cả hậu nghiệm xấp xỉ lẫn giá trị ELBO dùng để so sánh mô hình.
+
+\textbf{Ước lượng ELBO và gradient bằng lấy mẫu lại tham số hóa (reparameterization).}
+Kỳ vọng theo $q$ trong \cref{eq:elbo-jacobian} không có dạng đóng và phải được xấp xỉ Monte Carlo. Với họ Gaussian đầy đủ, biến đổi tham số hóa lại
+\begin{equation}
+  \widetilde{\Param}^{(k)}=\bm m+\bm L\bm\epsilon^{(k)},
+  \qquad
+  \bm\epsilon^{(k)}\sim\mathcal{N}(\bm 0,\bm I),
+  \qquad k=1,\ldots,K,
+  \label{eq:reparam-trick}
+\end{equation}
+tách nguồn ngẫu nhiên ($\bm\epsilon^{(k)}$) khỏi tham số biến phân ($\bm m,\bm L$), cho phép tính đạo hàm của ước lượng ELBO theo $\bm m$ và $\bm L$ bằng quy tắc dây chuyền trực tiếp qua $K$ mẫu $\bm\epsilon^{(k)}$ (ước lượng gradient đường dẫn). Ước lượng này thường có phương sai thấp hơn nhiều so với ước lượng gradient kiểu hàm điểm số (score-function/REINFORCE), vốn không tận dụng được tính khả vi của $\log p(\Data_T,T(\widetilde{\Param}))$ theo $\widetilde{\Param}$. Với họ mean-field, phép biến đổi tương tự được áp dụng theo từng thành phần độc lập.
+
+\textbf{Đặc thù của dữ liệu chuỗi thời gian đối với việc lấy mẫu con.} Khác với các ứng dụng VB điển hình trên dữ liệu độc lập, trong đó có thể ước lượng gradient của log-hợp lý bằng một tập con ngẫu nhiên nhỏ các quan sát rồi nhân tỷ lệ (stochastic variational inference kiểu lấy mẫu dữ liệu), hàm hợp lý \cref{eq:loglikelihood} của MS-GARCH-X là một tích lũy tuần tự qua bộ lọc tiến: số hạng tại thời điểm $t$ phụ thuộc toàn bộ lịch sử qua $\bar h_{t-1}$ và $\xi_{t\mid t-1}$. Do đó, không thể lấy mẫu ngẫu nhiên một tập con các thời điểm $t$ độc lập để xấp xỉ không chệch $\ell_T(\Param)$ như trong lấy mẫu dữ liệu i.i.d.; mỗi lần ước lượng ELBO trong nghiên cứu này phải chạy bộ lọc tiến trên toàn bộ $T$ quan sát. Tính ngẫu nhiên trong gradient ở đây chỉ đến từ số mẫu Monte Carlo $K$ của $\bm\epsilon^{(k)}$ trong \cref{eq:reparam-trick}, không đến từ việc lấy mẫu con dữ liệu; nếu các nghiên cứu mở rộng sau này muốn giảm chi phí tính toán bằng cách chỉ sử dụng một đoạn con của chuỗi thời gian, cần một hiệu chỉnh riêng (ví dụ trọng số theo độ dài đoạn và xử lý điều kiện đầu $h_{0,s}$ của đoạn), và kết quả khi đó cần được trình bày như một xấp xỉ có khả năng gây chệch, không phải một ước lượng không chệch theo nghĩa tiêu chuẩn.
+
+\textbf{Lịch tối ưu và tiêu chí dừng.} Việc tối đa hóa \cref{eq:elbo-jacobian} theo $(\bm m,\bm L)$ hoặc theo các tham số mean-field nên dùng một thuật toán gradient ngẫu nhiên thích ứng (ví dụ Adam) với tốc độ học giảm dần thỏa điều kiện kiểu Robbins--Monro để bảo đảm hội tụ dưới nhiễu Monte Carlo. Vì ước lượng ELBO tại mỗi vòng lặp có nhiễu, tiêu chí dừng nên dựa trên trung bình trượt của ELBO qua một cửa sổ các vòng lặp gần nhất thay vì giá trị ELBO tức thời của một vòng lặp. Vì bài toán tối ưu ELBO kế thừa tính đa đỉnh từ hàm hợp lý bên dưới, cần khởi tạo lại nhiều lần với các giá trị $(\bm m,\bm L)$ ban đầu khác nhau, tương tự chiến lược đa khởi tạo đã mô tả cho MLE, và chọn lần chạy có ELBO cuối cao nhất.
+
+\textbf{Kiểm tra chất lượng xấp xỉ.} Vì Variational Bayes tối thiểu hóa $\KL(q\Vert p)$ thay vì $\KL(p\Vert q)$, nghiệm $q^{*}$ có xu hướng tập trung vào một vùng khối lượng xác suất của hậu nghiệm thật và có thể đánh giá thấp phương sai hoặc bỏ sót các đỉnh phụ, đặc biệt với xấp xỉ mean-field. Một cách kiểm tra thực hành là lấy mẫu lại (importance reweighting) từ $q^{*}$ với trọng số tỷ lệ với $p(\Data_T,\Param)/q^{*}(\Param)$ và theo dõi độ phân tán của log-trọng số: log-trọng số phân tán rất rộng hoặc có đuôi nặng là dấu hiệu cho thấy $q^{*}$ khác biệt đáng kể so với hậu nghiệm thật ở các vùng đuôi, và kết quả VB tại vùng đó (ví dụ đuôi phân phối hậu nghiệm của $\nu$) nên được đối chiếu trực tiếp với MCMC trước khi diễn giải.
+
+Quy trình Variational Bayes cần báo cáo số lần khởi tạo, số vòng tối ưu, lịch tốc độ học, giá trị ELBO cuối, độ biến thiên ELBO và độ ổn định giữa các lần chạy.
 
 \subsection{Markov Chain Monte Carlo}\label{subsec:mcmc}
 
@@ -966,24 +1025,33 @@ MCMC tạo một dãy mẫu
   \sim p(\Param\mid\Data_T)
   \label{eq:mcmc-samples}
 \end{equation}
-ở nghĩa tiệm cận. Có hai chiến lược phù hợp với MS-GARCH:
-\begin{enumerate}
-  \item lấy tổng trạng thái rời rạc bằng bộ lọc tiến, sau đó dùng HMC hoặc NUTS cho tham số liên tục;
-  \item dùng lấy mẫu có cấu trúc, chẳng hạn lấy mẫu trạng thái bằng lọc tiến--lấy mẫu lùi và cập nhật tham số liên tục bằng Metropolis--Hastings hoặc các bước có điều kiện.
-\end{enumerate}
+ở nghĩa tiệm cận: nếu chuỗi Markov được xây dựng khả nghịch (hoặc thỏa điều kiện cân bằng tổng quát hơn) đối với $p(\Param\mid\Data_T)$ và có tính ergodic, định lý ergodic cho MCMC bảo đảm trung bình mẫu $\frac{1}{M}\sum_{m}g(\Param^{(m)})$ hội tụ hầu chắc chắn về $\E[g(\Param)\mid\Data_T]$ với mọi hàm $g$ khả tích, không phụ thuộc việc các mẫu $\Param^{(m)}$ có độc lập hay không. Có hai chiến lược phù hợp với MS-GARCH, khác nhau ở cách xử lý trạng thái ẩn rời rạc $S_{1:T}$.
 
-HMC và NUTS không cập nhật trực tiếp biến rời rạc. Do đó, nếu sử dụng NUTS, đường trạng thái phải được lấy tổng khỏi hàm hợp lý hoặc xử lý bằng một bước riêng. Việc bỏ qua điểm này có thể dẫn đến một mô hình được mô tả khác với mô hình thực sự được ước lượng.
+\textbf{Chiến lược 1: lấy tổng trạng thái (collapsed) kết hợp HMC/NUTS.} Trạng thái rời rạc được lấy tổng chính xác khỏi hàm hợp lý bằng bộ lọc tiến, đúng như đã dùng cho MLE và Variational Bayes ở \cref{eq:loglikelihood}, để thu được một hàm mục tiêu $\log p(\Data_T,\Param)$ khả vi liên tục theo $\widetilde{\Param}$ (tham số hóa không ràng buộc như \cref{eq:logit-transition,eq:df-transform,eq:variance-coef-transform}). HMC mô phỏng động lực Hamilton trên $\widetilde{\Param}$ với một biến động lượng phụ trợ, sử dụng gradient của $\log p(\Data_T,\Param)+\log p(\Param)$ để đề xuất bước nhảy xa nhưng vẫn được chấp nhận với xác suất cao \cite{neal2011}; NUTS mở rộng HMC bằng cách chọn tự động số bước rời rạc hóa cho mỗi lần lấy mẫu, tránh phải tinh chỉnh thủ công độ dài quỹ đạo \cite{hoffman2014}. Giai đoạn khởi động (warm-up) cần thích ứng đồng thời hai loại siêu tham số: kích thước bước rời rạc hóa, thường bằng thuật toán trung bình đối ngẫu (dual averaging) nhằm đạt một tỷ lệ chấp nhận mục tiêu (thường xấp xỉ $0{,}8$); và ma trận khối lượng (mass matrix), có thể ước lượng dạng đường chéo trước rồi dạng đầy đủ nếu tương quan hậu nghiệm giữa các tham số lớn. Vì HMC và NUTS không cập nhật trực tiếp biến rời rạc, việc bỏ sót bước lấy tổng trạng thái nêu trên sẽ dẫn đến một mô hình được lấy mẫu khác với mô hình đã đặc tả trong \cref{eq:main-mean,eq:main-error,eq:main-dist,eq:main-variance}.
+
+\textbf{Chiến lược 2: tăng cường dữ liệu bằng lấy mẫu trạng thái đầy đủ (FFBS).} Thay vì lấy tổng xác suất trạng thái, chiến lược này lấy mẫu trực tiếp toàn bộ đường đi rời rạc $S_{1:T}$ từ phân phối có điều kiện chính xác của nó, theo thuật toán lọc tiến--lấy mẫu lùi (forward-filtering backward-sampling, FFBS) cho mô hình chuyển trạng thái Markov \cite{chib1996,fruhwirth2006}. Sau bước lọc tiến tính $\xi_{t\mid t}(\cdot)$ theo \cref{eq:filtered-state-prob}, trạng thái được lấy mẫu lùi theo thời gian bắt đầu từ $t=T$:
+\begin{equation}
+  S_T\sim\xi_{T\mid T}(\cdot),
+  \qquad
+  \Prob(S_t=i\mid S_{t+1}=j,\Data_T)
+  \propto
+  \xi_{t\mid t}(i)\,p_{ij},
+  \qquad t=T-1,\ldots,1.
+  \label{eq:ffbs-backward}
+\end{equation}
+Sau khi có một đường đi $S_{1:T}$ đầy đủ được lấy mẫu, các tham số liên tục $(\mu_s,\omega_s,\alpha_s,\beta_s,\bm\gamma_s,\nu)$ được cập nhật bằng Metropolis--Hastings hoặc các bước có điều kiện (Gibbs) theo từng khối, có điều kiện trên đường đi $S_{1:T}$ vừa lấy mẫu; ma trận chuyển $\Pmat$ có thể được cập nhật bằng Gibbs trực tiếp từ hậu nghiệm Dirichlet liên hợp với tiền nghiệm \cref{eq:prior-transition} vì với $S_{1:T}$ đã biết, số lần chuyển từ trạng thái $i$ sang $j$ được đếm trực tiếp. Một điểm khác biệt quan trọng so với Chiến lược 1 là: có điều kiện trên một đường đi $S_{1:T}$ cụ thể (không phải phân phối xác suất trạng thái), phương sai có điều kiện $h_{t,S_t}$ được tính đệ quy trực tiếp từ $S_{t-1}$ thực tế đã lấy mẫu chứ không cần đến moment thu gọn $\bar h_{t-1}$ ở \cref{eq:collapsed-mean,eq:collapsed-variance}; nói cách khác, FFBS không cần đến xấp xỉ thu gọn kiểu Gray dùng cho Chiến lược 1 và cho MLE/Variational Bayes, nhưng phải trả giá bằng việc lấy mẫu thêm $T$ biến rời rạc mỗi vòng lặp và chịu tự tương quan cao hơn giữa các đường đi trạng thái liên tiếp khi hai trạng thái khó phân biệt.
 
 Chẩn đoán MCMC tối thiểu bao gồm:
 \begin{itemize}
-  \item ít nhất bốn chuỗi khởi tạo phân tán;
-  \item biểu đồ chuỗi cho các tham số quan trọng;
+  \item ít nhất bốn chuỗi khởi tạo phân tán, lý tưởng là khởi tạo từ các điểm đa dạng trong không gian tham số (bao gồm cả các nghiệm MLE đa khởi tạo ở \cref{subsec:mle} để phát hiện khả năng đa đỉnh của hậu nghiệm);
+  \item biểu đồ chuỗi (trace plot) cho các tham số quan trọng, đặc biệt $\nu$, $p_{11}$, $p_{22}$ và các hệ số $\bm\gamma_s$;
   \item chỉ số $\widehat R$, ưu tiên gần $1$ và thông thường nhỏ hơn $1{,}01$;
-  \item cỡ mẫu hiệu dụng cho trung tâm và đuôi phân phối;
+  \item cỡ mẫu hiệu dụng (ESS) cho trung tâm và đuôi phân phối, cùng hiệu suất lấy mẫu theo thời gian thực $\mathrm{ESS}/\text{giây}$ để đưa vào bảng so sánh chi phí tính toán (\cref{tab:computation-template});
   \item số phân kỳ, độ sâu cây và năng lượng nếu dùng NUTS;
-  \item tự tương quan chuỗi và độ nhạy đối với số vòng khởi động.
+  \item tự tương quan chuỗi và độ nhạy đối với số vòng khởi động;
+  \item đối với Chiến lược 2, thêm tỷ lệ đổi nhãn trạng thái giữa các vòng lặp liên tiếp và độ ổn định của số lần chuyển trạng thái ước lượng được từ $S_{1:T}$.
 \end{itemize}
-Các chẩn đoán hiện đại của $\widehat R$ và ESS được thảo luận bởi \cite{vehtari2021}.
+Các chẩn đoán hiện đại của $\widehat R$ và ESS được thảo luận bởi \cite{vehtari2021}. Hai chiến lược nên được đối chiếu chéo trên cùng một tập dữ liệu mô phỏng ở \cref{sec:mo-phong} trước khi áp dụng cho dữ liệu thật, vì chúng dựa trên hai cách xử lý trạng thái ẩn khác nhau (lấy tổng xác suất so với lấy mẫu đường đi); nếu tồn tại khác biệt kết quả giữa hai chiến lược, khác biệt đó cung cấp thông tin về mức độ phù hợp của xấp xỉ thu gọn dùng trong Chiến lược 1.
 
 \subsection{Dự báo hậu nghiệm}\label{subsec:posterior-predictive}
 
@@ -1133,6 +1201,7 @@ sau đó
   \widehat p(r_{T_0+2}\mid\Data_{1:T_0+1}).
   \label{eq:second-oos}
 \end{equation}
+Sơ đồ \cref{eq:first-oos,eq:second-oos} mô tả nguyên tắc chung của dự báo cuốn chiếu không nhìn trước; thiết kế thực tế áp dụng cho VN30F1M trong nghiên cứu này là một phiên bản đơn giản hóa của nguyên tắc này, được trình bày cụ thể ở cuối mục này.
 
 Ba phần dữ liệu được sử dụng:
 \begin{enumerate}
@@ -1198,7 +1267,7 @@ Kiểm định ADF mở rộng hồi quy Dickey--Fuller bằng các sai phân tr
   +\sum_{j=1}^{p}\phi_j\Delta r_{t-j}+u_t.
   \label{eq:adf}
 \end{equation}
-Giả thuyết gốc là chuỗi có nghiệm đơn vị, tương ứng $\delta=0$. Kiểm định Phillips--Perron sử dụng một hiệu chỉnh phi tham số cho tương quan chuỗi và phương sai thay đổi của nhiễu. Kiểm định KPSS đảo chiều giả thuyết: giả thuyết gốc là chuỗi dừng quanh mức hoặc quanh xu thế \cite{dickey1979,kpss1992}.
+Giả thuyết gốc là chuỗi có nghiệm đơn vị, tương ứng $\delta=0$. Kiểm định Phillips--Perron sử dụng một hiệu chỉnh phi tham số cho tương quan chuỗi và phương sai thay đổi của nhiễu \cite{phillips1988}. Kiểm định KPSS đảo chiều giả thuyết: giả thuyết gốc là chuỗi dừng quanh mức hoặc quanh xu thế \cite{dickey1979,kpss1992}.
 
 Việc kết hợp ADF hoặc Phillips--Perron với KPSS giúp tránh diễn giải kết quả chỉ dựa trên một giả thuyết gốc. Lựa chọn thành phần hằng, xu thế và số độ trễ phải dựa trên đặc điểm chuỗi và được báo cáo rõ.
 
@@ -1346,7 +1415,7 @@ Với tham số thật $\theta_0$ và ước lượng $\widehat\theta_b$ tại l
   \right]^2.
   \label{eq:brier-state}
 \end{equation}
-Có thể báo cáo thêm độ chính xác phân lớp sau khi ánh xạ nhãn, balanced accuracy và sai số của ma trận chuyển.
+Vì \cref{eq:brier-state} cộng bình phương sai số qua cả hai hạng mục $s=1,2$, đại lượng này nhận giá trị trong $[0,2]$ và bằng hai lần Brier score nhị phân quy ước (thường định nghĩa chỉ với xác suất của một hạng mục, thang $[0,1]$). Khi so sánh với các nghiên cứu khác, cần nêu rõ quy ước đang dùng hoặc chia đôi \cref{eq:brier-state} để quy về thang $[0,1]$ quen thuộc. Có thể báo cáo thêm độ chính xác phân lớp sau khi ánh xạ nhãn, balanced accuracy và sai số của ma trận chuyển.
 
 \subsection{So sánh hậu nghiệm Variational Bayes và MCMC}\label{subsec:posterior-comparison}
 
@@ -1691,18 +1760,18 @@ Phần thảo luận phải tách kết quả thống kê khỏi ý nghĩa kinh 
 \section{Hạn chế và định hướng nghiên cứu}\label{sec:han-che}
 % ============================================================
 
-Nghiên cứu có một số hạn chế dự kiến. Thứ nhất, kết quả chỉ dựa trên một thị trường và có thể không khái quát cho hợp đồng tương lai khác. Thứ hai, mô hình hai trạng thái là một đơn giản hóa; thị trường có thể đồng thời thay đổi theo mức biến động, xu hướng, thanh khoản và điều kiện vĩ mô. Thứ ba, kết quả phụ thuộc vào chất lượng chuỗi hợp đồng liên tục và quy tắc rollover. Thứ tư, MS-GARCH có hàm hợp lý phức tạp, có thể đa đỉnh và nhạy với điều kiện đầu. Thứ năm, MCMC có thể khó hội tụ, trong khi Variational Bayes có thể đánh giá thấp bất định. Thứ sáu, Student-t đối xứng không mô tả độ lệch phân phối. Thứ bảy, mô hình GARCH đối xứng không phân biệt tác động của cú sốc âm và dương. Thứ tám, dữ liệu ngày có thể bỏ qua cấu trúc biến động nội ngày. Thứ chín, kiểm định VaR ở mức $1\%$ có thể có ít vi phạm nếu tập ngoài mẫu ngắn.
+Nghiên cứu có một số hạn chế dự kiến. Thứ nhất, kết quả chỉ dựa trên một thị trường và có thể không khái quát cho hợp đồng tương lai khác. Thứ hai, mô hình hai trạng thái là một đơn giản hóa; thị trường có thể đồng thời thay đổi theo mức biến động, xu hướng, thanh khoản và điều kiện vĩ mô. Thứ ba, kết quả phụ thuộc vào chất lượng chuỗi hợp đồng liên tục và quy tắc rollover; vì chuỗi ``VN30F1M'' do Data Pro cung cấp đã được nhà cung cấp tự nối mà không công bố cơ chế điều chỉnh khoảng nhảy giá tại điểm chuyển hợp đồng, không thể loại trừ khả năng lợi suất log tại một số ngày chứa nhảy giá kỹ thuật thay vì biến động thị trường thực, điều này có thể ảnh hưởng đến ước lượng bậc tự do $\nu$ và kiểm định VaR. Thứ tư, MS-GARCH có hàm hợp lý phức tạp, có thể đa đỉnh và nhạy với điều kiện đầu. Thứ năm, MCMC có thể khó hội tụ, trong khi Variational Bayes có thể đánh giá thấp bất định. Thứ sáu, Student-t đối xứng không mô tả độ lệch phân phối. Thứ bảy, mô hình GARCH đối xứng không phân biệt tác động của cú sốc âm và dương. Thứ tám, dữ liệu ngày có thể bỏ qua cấu trúc biến động nội ngày. Thứ chín, kiểm định VaR ở mức $1\%$ có thể có ít vi phạm nếu tập ngoài mẫu ngắn.
 
 Các hướng phát triển gồm:
 \begin{enumerate}
-  \item thay GARCH bằng MS-EGARCH-X hoặc MS-GJR-GARCH-X để mô tả bất đối xứng;
+  \item thay GARCH bằng MS-EGARCH-X \cite{nelson1991} hoặc MS-GJR-GARCH-X \cite{glosten1993} để mô tả bất đối xứng;
   \item sử dụng phân phối Student-t lệch hoặc phân phối hỗn hợp;
   \item tăng lên ba trạng thái nếu tiêu chí dự báo và nhận dạng hỗ trợ;
   \item cho xác suất chuyển phụ thuộc biến ngoại sinh;
   \item xây dựng prior phân cấp để chia sẻ thông tin giữa trạng thái;
   \item áp dụng Sequential Monte Carlo hoặc lọc hạt cho suy diễn trực tuyến;
   \item phát triển Online Variational Bayes cho tái ước lượng nhanh;
-  \item so sánh với Realized GARCH, GARCH-MIDAS hoặc mô hình biến động ngẫu nhiên;
+  \item so sánh với Realized GARCH \cite{hansen2012}, GARCH-MIDAS \cite{engle2013} hoặc mô hình biến động ngẫu nhiên;
   \item mở rộng từ VaR sang Expected Shortfall;
   \item đánh giá quyết định phân bổ rủi ro dựa trên xác suất trạng thái trong một thiết kế kinh tế ngoài mẫu.
 \end{enumerate}
@@ -1741,6 +1810,24 @@ A conditionally heteroskedastic time series model for speculative prices and rat
 \textit{The Review of Economics and Statistics}, 69(3), 542--547.
 \href{https://doi.org/10.2307/1925546}{doi: \nolinkurl{10.2307/1925546}}.
 
+\bibitem{bollerslev1992}
+Bollerslev, T., \& Wooldridge, J. M. (1992).
+Quasi-maximum likelihood estimation and inference in dynamic models with time-varying covariances.
+\textit{Econometric Reviews}, 11(2), 143--172.
+\href{https://doi.org/10.1080/07474939208800229}{doi: \nolinkurl{10.1080/07474939208800229}}.
+
+\bibitem{nelson1991}
+Nelson, D. B. (1991).
+Conditional heteroskedasticity in asset returns: A new approach.
+\textit{Econometrica}, 59(2), 347--370.
+\href{https://doi.org/10.2307/2938260}{doi: \nolinkurl{10.2307/2938260}}.
+
+\bibitem{glosten1993}
+Glosten, L. R., Jagannathan, R., \& Runkle, D. E. (1993).
+On the relation between the expected value and the volatility of the nominal excess return on stocks.
+\textit{The Journal of Finance}, 48(5), 1779--1801.
+\href{https://doi.org/10.1111/j.1540-6261.1993.tb05128.x}{doi: \nolinkurl{10.1111/j.1540-6261.1993.tb05128.x}}.
+
 \bibitem{hamilton1989}
 Hamilton, J. D. (1989).
 A new approach to the economic analysis of nonstationary time series and the business cycle.
@@ -1765,6 +1852,12 @@ A new approach to Markov-switching GARCH models.
 \textit{Journal of Financial Econometrics}, 2(4), 493--530.
 \href{https://doi.org/10.1093/jjfinec/nbh020}{doi: \nolinkurl{10.1093/jjfinec/nbh020}}.
 
+\bibitem{hansen1992}
+Hansen, B. E. (1992).
+The likelihood ratio test under nonstandard conditions: Testing the Markov switching model of GNP.
+\textit{Journal of Applied Econometrics}, 7(S1), S61--S82.
+\href{https://doi.org/10.1002/jae.3950070506}{doi: \nolinkurl{10.1002/jae.3950070506}}.
+
 \bibitem{jordan1999}
 Jordan, M. I., Ghahramani, Z., Jaakkola, T. S., \& Saul, L. K. (1999).
 An introduction to variational methods for graphical models.
@@ -1776,6 +1869,12 @@ Blei, D. M., Kucukelbir, A., \& McAuliffe, J. D. (2017).
 Variational inference: A review for statisticians.
 \textit{Journal of the American Statistical Association}, 112(518), 859--877.
 \href{https://doi.org/10.1080/01621459.2017.1285773}{doi: \nolinkurl{10.1080/01621459.2017.1285773}}.
+
+\bibitem{kucukelbir2017}
+Kucukelbir, A., Tran, D., Ranganath, R., Gelman, A., \& Blei, D. M. (2017).
+Automatic differentiation variational inference.
+\textit{Journal of Machine Learning Research}, 18(14), 430--474.
+\url{https://jmlr.org/papers/v18/16-107.html}.
 
 \bibitem{metropolis1953}
 Metropolis, N., Rosenbluth, A. W., Rosenbluth, M. N., Teller, A. H., \& Teller, E. (1953).
@@ -1789,11 +1888,28 @@ Monte Carlo sampling methods using Markov chains and their applications.
 \textit{Biometrika}, 57(1), 97--109.
 \href{https://doi.org/10.1093/biomet/57.1.97}{doi: \nolinkurl{10.1093/biomet/57.1.97}}.
 
+\bibitem{chib1996}
+Chib, S. (1996).
+Calculating posterior distributions and modal estimates in Markov mixture models.
+\textit{Journal of Econometrics}, 75(1), 79--97.
+\href{https://doi.org/10.1016/0304-4076(95)01770-4}{doi: \nolinkurl{10.1016/0304-4076(95)01770-4}}.
+
+\bibitem{fruhwirth2006}
+Frühwirth-Schnatter, S. (2006).
+\textit{Finite Mixture and Markov Switching Models}.
+New York: Springer Series in Statistics.
+
 \bibitem{hoffman2014}
 Hoffman, M. D., \& Gelman, A. (2014).
 The No-U-Turn sampler: Adaptively setting path lengths in Hamiltonian Monte Carlo.
 \textit{Journal of Machine Learning Research}, 15, 1593--1623.
 \url{https://jmlr.org/papers/v15/hoffman14a.html}.
+
+\bibitem{neal2011}
+Neal, R. M. (2011).
+MCMC using Hamiltonian dynamics.
+In S. Brooks, A. Gelman, G. L. Jones, \& X.-L. Meng (Eds.), \textit{Handbook of Markov Chain Monte Carlo} (pp. 113--162).
+Boca Raton: Chapman \& Hall/CRC.
 
 \bibitem{vehtari2021}
 Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., \& Bürkner, P.-C. (2021).
@@ -1806,6 +1922,12 @@ Dickey, D. A., \& Fuller, W. A. (1979).
 Distribution of the estimators for autoregressive time series with a unit root.
 \textit{Journal of the American Statistical Association}, 74(366a), 427--431.
 \href{https://doi.org/10.1080/01621459.1979.10482531}{doi: \nolinkurl{10.1080/01621459.1979.10482531}}.
+
+\bibitem{phillips1988}
+Phillips, P. C. B., \& Perron, P. (1988).
+Testing for a unit root in time series regression.
+\textit{Biometrika}, 75(2), 335--346.
+\href{https://doi.org/10.1093/biomet/75.2.335}{doi: \nolinkurl{10.1093/biomet/75.2.335}}.
 
 \bibitem{kpss1992}
 Kwiatkowski, D., Phillips, P. C. B., Schmidt, P., \& Shin, Y. (1992).
@@ -1830,6 +1952,18 @@ Patton, A. J. (2011).
 Volatility forecast comparison using imperfect volatility proxies.
 \textit{Journal of Econometrics}, 160(1), 246--256.
 \href{https://doi.org/10.1016/j.jeconom.2010.03.034}{doi: \nolinkurl{10.1016/j.jeconom.2010.03.034}}.
+
+\bibitem{engle2013}
+Engle, R. F., Ghysels, E., \& Sohn, B. (2013).
+Stock market volatility and macroeconomic fundamentals.
+\textit{Review of Economics and Statistics}, 95(3), 776--797.
+\href{https://doi.org/10.1162/REST_a_00300}{doi: \nolinkurl{10.1162/REST_a_00300}}.
+
+\bibitem{hansen2012}
+Hansen, P. R., Huang, Z., \& Shek, H. H. (2012).
+Realized GARCH: A joint model for returns and realized measures of volatility.
+\textit{Journal of Applied Econometrics}, 27(6), 877--906.
+\href{https://doi.org/10.1002/jae.1234}{doi: \nolinkurl{10.1002/jae.1234}}.
 
 \bibitem{gneiting2007}
 Gneiting, T., \& Raftery, A. E. (2007).
