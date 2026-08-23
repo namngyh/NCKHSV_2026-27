@@ -1,0 +1,5 @@
+=== R1 | R1: MS-GARCH-X, nu_s theo trang thai, VB mean-field ===
+Bat dau: 2026-08-19 21:24:22 | T_train = 1735
+[VB mean_field] step 0: ELBO=-2955.8709
+     P(nu_2 < nu_1 | Data) ~= 0.5500 (eq:tail-probability)
+=== XONG R1 sau 0.6 phut -> results_mergetest\parts\r1.pt ===

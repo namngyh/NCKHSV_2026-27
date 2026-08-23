@@ -1,0 +1,38 @@
+[2026-08-20 08:35:33] [b4] bat dau
+[seed=0] adam iter 0: nll=3085.0502
+[seed=0] adam iter 100: nll=2862.4158
+[seed=0] adam iter 200: nll=2855.1673
+[seed=0] adam iter 300: nll=2853.7761
+[seed=0] adam iter 400: nll=2851.1896
+[seed=0] het chu ky 0: nll=2847.8504 ||grad||=0.0261
+[seed=1] adam iter 0: nll=3210.7628
+[seed=1] adam iter 100: nll=2856.3676
+[seed=1] adam iter 200: nll=2855.2628
+[seed=1] adam iter 300: nll=2854.7845
+[seed=1] adam iter 400: nll=2854.4324
+[seed=1] het chu ky 0: nll=2854.1469 ||grad||=0.0024
+[seed=2] adam iter 0: nll=3176.1705
+[seed=2] adam iter 100: nll=2872.1794
+[seed=2] adam iter 200: nll=2852.3075
+[seed=2] adam iter 300: nll=2850.3069
+[seed=2] adam iter 400: nll=2849.1708
+[seed=2] het chu ky 0: nll=2847.8504 ||grad||=0.0026
+[seed=3] adam iter 0: nll=3363.8879
+[seed=3] adam iter 100: nll=2864.9849
+[seed=3] adam iter 200: nll=2855.4449
+[seed=3] adam iter 300: nll=2853.6446
+[seed=3] adam iter 400: nll=2850.9891
+[seed=3] het chu ky 0: nll=2847.8504 ||grad||=0.0034
+[seed=4] adam iter 0: nll=4283.8513
+[seed=4] adam iter 100: nll=2879.8770
+[seed=4] adam iter 200: nll=2855.1358
+[seed=4] adam iter 300: nll=2854.4513
+[seed=4] adam iter 400: nll=2854.2890
+[seed=4] het chu ky 0: nll=2854.1468 ||grad||=0.0123
+[seed=5] adam iter 0: nll=3045.3139
+[seed=5] adam iter 100: nll=2856.7434
+[seed=5] adam iter 200: nll=2855.4598
+[seed=5] adam iter 300: nll=2855.0471
+[seed=5] adam iter 400: nll=2854.6334
+[seed=5] het chu ky 0: nll=2854.1469 ||grad||=0.0094
+[2026-08-20 10:02:18] [b4] xong sau 86.7 phut: loglik=-2847.8504

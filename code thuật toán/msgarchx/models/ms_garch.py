@@ -15,7 +15,7 @@ from typing import NamedTuple, Optional
 
 import torch
 
-from msgarchx.distributions import std_t_logpdf
+from msgarchx.distributions import std_t_log_const, std_t_logpdf
 from msgarchx.transforms import positive_variance_link
 
 
@@ -77,9 +77,23 @@ def ms_garch_forward_filter(
         h0 = torch.var(r).detach().expand(2).clone()
 
     mu, omega, alpha, beta, gamma = params.mu, params.omega, params.alpha, params.beta, params.gamma
+    nu = params.nu
+
+    # Tinh truoc cac dai luong KHONG phu thuoc t. Day thuan tuy la toi uu toc
+    # do, KHONG doi cong thuc: gamma_s^T X_{t-1} cho moi t duoc lay bang MOT
+    # phep nhan ma tran thay vi T phep nhan vector rieng le, va hang so cua
+    # mat do Student-t chi phu thuoc nu nen khong can tinh lai moi buoc.
+    # Phan con lai cua vong lap la de quy that su theo t (h_t phu thuoc
+    # bar_h_{t-1}) nen khong the vector hoa -- xem Muc 5.3 trong README.md.
+    gX = X @ gamma.T                     # (T, 2)
+    t_log_const = std_t_log_const(nu)    # vo huong, hoac (2,) khi nu theo trang thai
+    t_half_nu1 = (nu + 1.0) / 2.0
+    t_nu_m2 = nu - 2.0
+    mu_sq = mu * mu
+    P_T = params.P.T.contiguous()        # xi_{t-1|t-1} @ P == P^T mv xi_{t-1|t-1}
 
     bar_mu0 = (xi0 * mu).sum()
-    bar_h0 = (xi0 * (h0 + mu**2)).sum() - bar_mu0**2
+    bar_h0 = (xi0 * (h0 + mu_sq)).sum() - bar_mu0**2
     bar_eps0 = r[0] - bar_mu0
 
     xi_filt_list = [xi0]
@@ -87,39 +101,37 @@ def ms_garch_forward_filter(
     h_list = [h0]
     bar_mu_list = [bar_mu0]
     bar_h_list = [bar_h0]
-    bar_eps_list = [bar_eps0]
+
+    xi_filt_t = xi0
+    bar_eps_prev = bar_eps0
+    bar_h_prev = bar_h0
 
     loglik = torch.zeros((), dtype=dtype)
 
     for t in range(1, T):
-        xi_pred_t = xi_filt_list[t - 1] @ params.P  # eq:predicted-state-prob
-        bar_eps_prev = bar_eps_list[t - 1]
-        bar_h_prev = bar_h_list[t - 1]
+        xi_pred_t = torch.mv(P_T, xi_filt_t)  # eq:predicted-state-prob
 
-        h_raw = (
-            omega
-            + alpha * bar_eps_prev**2
-            + beta * bar_h_prev
-            + gamma @ X[t]
-        )
+        h_raw = omega + alpha * bar_eps_prev * bar_eps_prev + beta * bar_h_prev + gX[t]
         h_t = positive_variance_link(h_raw, floor=floor, mode=variance_link)
 
         z_t = (r[t] - mu) / torch.sqrt(h_t)
-        if params.state_specific_nu:
-            log_f = torch.stack(
-                [std_t_logpdf(z_t[s], params.nu[s]) for s in range(2)]
-            )
-        else:
-            log_f = std_t_logpdf(z_t, params.nu)
-        log_f = log_f - 0.5 * torch.log(h_t)
+        # eq:standardized-t-density, viet truc tiep de dung lai hang so da tinh
+        # san. Broadcast dung cho ca nu vo huong lan nu theo trang thai (R1),
+        # thay cho vong lap torch.stack([... for s in range(2)]) truoc day.
+        log_f = (
+            t_log_const
+            - t_half_nu1 * torch.log1p(z_t * z_t / t_nu_m2)
+            - 0.5 * torch.log(h_t)
+        )
 
         log_joint = torch.log(xi_pred_t) + log_f
         loglik_t = torch.logsumexp(log_joint, dim=0)
         xi_filt_t = torch.exp(log_joint - loglik_t)  # eq:filtered-state-prob
 
         bar_mu_t = (xi_filt_t * mu).sum()
-        bar_h_t = (xi_filt_t * (h_t + mu**2)).sum() - bar_mu_t**2
-        bar_eps_t = r[t] - bar_mu_t
+        bar_h_t = (xi_filt_t * (h_t + mu_sq)).sum() - bar_mu_t**2
+        bar_eps_prev = r[t] - bar_mu_t
+        bar_h_prev = bar_h_t
 
         loglik = loglik + loglik_t
         xi_filt_list.append(xi_filt_t)
@@ -127,7 +139,6 @@ def ms_garch_forward_filter(
         h_list.append(h_t)
         bar_mu_list.append(bar_mu_t)
         bar_h_list.append(bar_h_t)
-        bar_eps_list.append(bar_eps_t)
 
     return {
         "loglik": loglik,

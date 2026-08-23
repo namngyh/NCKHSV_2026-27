@@ -1,0 +1,14 @@
+[2026-08-20 08:01:58] [m1 start 5] khoi tao: ngau nhien (seed 1005)
+[seed=5] adam iter 0: nll=3013.9479
+[seed=5] adam iter 100: nll=2817.7421
+[seed=5] adam iter 200: nll=2813.3139
+[seed=5] adam iter 300: nll=2812.4036
+[seed=5] adam iter 400: nll=2812.3042
+[seed=5] het chu ky 0: nll=2807.2053 ||grad||=140.2275
+[seed=5] adam iter 0: nll=2807.2053
+[seed=5] adam iter 100: nll=2811.4324
+[seed=5] adam iter 200: nll=2811.0236
+[seed=5] adam iter 300: nll=2810.9572
+[seed=5] adam iter 400: nll=2810.8591
+[seed=5] het chu ky 1: nll=2810.8550 ||grad||=0.1092
+[2026-08-20 08:35:21] [m1 start 5] xong sau 33.4 phut: loglik=-2810.8550 ||grad||=0.1092 hoi_tu=co

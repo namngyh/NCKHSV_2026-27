@@ -1,0 +1,42 @@
+[2026-08-20 07:47:42] ======================================================================
+[2026-08-20 07:47:42] CACH 3: chay lai M1 va B4 voi alpha_s, beta_s thuoc (0,1) [sigmoid]
+[2026-08-20 07:47:42]   thu muc rieng: C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results_sigmoid
+[2026-08-20 07:47:42] ======================================================================
+[2026-08-20 07:47:42]   bat dau worker-m1-start_0 (pid 33504)
+[2026-08-20 07:47:42]   bat dau worker-m1-start_1 (pid 17708)
+[2026-08-20 07:47:42]   bat dau worker-m1-start_2 (pid 20984)
+[2026-08-20 07:47:42]   bat dau worker-m1-start_3 (pid 26708)
+[2026-08-20 07:47:42]   bat dau worker-m1-start_4 (pid 35816)
+[2026-08-20 08:01:52]   XONG worker-m1-start_1 (14 phut tu dau buoc)
+[2026-08-20 08:01:53]   bat dau worker-m1-start_5 (pid 34708)
+[2026-08-20 08:04:43]   XONG worker-m1-start_4 (17 phut tu dau buoc)
+[2026-08-20 08:04:43]   bat dau worker-m1-start_6 (pid 35668)
+[2026-08-20 08:04:53]   XONG worker-m1-start_2 (17 phut tu dau buoc)
+[2026-08-20 08:04:53]   bat dau worker-m1-start_7 (pid 21308)
+[2026-08-20 08:05:53]   XONG worker-m1-start_0 (18 phut tu dau buoc)
+[2026-08-20 08:05:53]   bat dau worker-m1-start_8 (pid 18756)
+[2026-08-20 08:21:23]   XONG worker-m1-start_3 (34 phut tu dau buoc)
+[2026-08-20 08:21:24]   bat dau worker-m1-start_9 (pid 29948)
+[2026-08-20 08:35:24]   XONG worker-m1-start_5 (48 phut tu dau buoc)
+[2026-08-20 08:35:24]   bat dau worker-b4_results-dir (pid 18236)
+[2026-08-20 08:44:05]   XONG worker-m1-start_6 (56 phut tu dau buoc)
+[2026-08-20 08:59:45]   XONG worker-m1-start_7 (72 phut tu dau buoc)
+[2026-08-20 09:03:45]   XONG worker-m1-start_8 (76 phut tu dau buoc)
+[2026-08-20 09:03:45]   XONG worker-m1-start_9 (76 phut tu dau buoc)
+[2026-08-20 10:02:25]   XONG worker-b4_results-dir (135 phut tu dau buoc)
+[2026-08-20 10:03:02]   Bang chan doan tung diem khoi tao:
+[2026-08-20 10:03:02]     loglik= -2804.0939 ||grad||=      0.4136 d_s=[27.4, 3.7] hoi tu chinh quy
+[2026-08-20 10:03:02]     loglik= -2807.0426 ||grad||=     37.5202 d_s=[85.2, 8.2] CHUA hoi tu chinh quy
+[2026-08-20 10:03:02]     loglik= -2807.5154 ||grad||=    205.9054 d_s=[760.4, 24.9] CHUA hoi tu chinh quy
+[2026-08-20 10:03:02]     loglik= -2807.5597 ||grad||=      0.6414 d_s=[62.9, 3.4] hoi tu chinh quy
+[2026-08-20 10:03:02]     loglik= -2810.2904 ||grad||=      0.0562 d_s=[719.0, 147.0] hoi tu chinh quy
+[2026-08-20 10:03:02]     loglik= -2810.8543 ||grad||=      0.0175 d_s=[4.7, 3.4] hoi tu chinh quy
+[2026-08-20 10:03:02]     loglik= -2810.8550 ||grad||=      0.1092 d_s=[4.7, 3.4] hoi tu chinh quy
+[2026-08-20 10:03:02]     loglik= -2810.8591 ||grad||=      0.1684 d_s=[4.7, 3.5] hoi tu chinh quy
+[2026-08-20 10:03:02]     loglik= -2810.9024 ||grad||=      0.4111 d_s=[4.5, 3.5] hoi tu chinh quy
+[2026-08-20 10:03:02]     loglik= -2810.9114 ||grad||=      0.2397 d_s=[3.6, 4.5] hoi tu chinh quy
+[2026-08-20 10:03:02]   Chon nghiem: DA HOI TU va THOA DIEU KIEN CHINH QUY
+[2026-08-20 10:03:03] [m1] gop 10 diem khoi tao | hoi tu 8/10 | chinh quy 8/10 | loglik=-2804.0939 ||grad||=0.4136
+[2026-08-20 10:03:03] [m1] tinh sai so chuan (delta method tu Hessian) ...
+[2026-08-20 10:03:50] [m1] da ghi C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results_sigmoid\parts\m1.pt
+[2026-08-20 10:03:50] CACH 3 HOAN TAT

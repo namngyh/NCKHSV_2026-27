@@ -1,0 +1,48 @@
+=== M1 | M1: MS-GARCH-X Student-t + sai so chuan  (2 trang thai, MLE) ===
+Bat dau: 2026-08-19 21:07:31 | T_train = 1735
+[seed=0] adam iter 0: nll=276705.9288
+[seed=0] adam iter 100: nll=2820.6017
+[seed=0] adam iter 200: nll=2812.3951
+[seed=0] adam iter 300: nll=2812.1299
+[seed=0] adam iter 400: nll=2812.7859
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\scripts\run_models_parallel.py", line 342, in <module>
+    if __name__ == "__main__":
+                 ^^^^^^
+  File "C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\scripts\run_models_parallel.py", line 332, in main
+    if args.model:
+        ^^^^^^^^^^
+  File "C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\scripts\run_models_parallel.py", line 146, in run_model
+    payload = fit_one(name, cfg, r_train, X_train)
+  File "C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\scripts\run_models_parallel.py", line 108, in fit_one
+    m1 = fit_mle(r_train, X_train, config_m1, **mle_kw)
+  File "C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\msgarchx\inference\mle.py", line 158, in fit_mle
+    raw, loglik, diag = _single_start(
+                        ~~~~~~~~~~~~~^
+        base_seed + i, config, r, X, n_adam, n_lbfgs, lr_adam, filter_kwargs, verbose,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        fixed_nu=fixed_nu,
+        ^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\msgarchx\inference\mle.py", line 112, in _single_start
+    lbfgs.step(closure)
+    ~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\torch\optim\optimizer.py", line 530, in wrapper
+    out = func(*args, **kwargs)
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\torch\utils\_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\torch\optim\lbfgs.py", line 471, in step
+    loss, flat_grad, t, ls_func_evals = _strong_wolfe(
+                                        ~~~~~~~~~~~~~^
+        obj_func,
+        ^^^^^^^^^
+    ...<6 lines>...
+        max_ls=max_eval - current_evals,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Admin\AppData\Local\Packages\PythonSoftwareFoundation.Python.3.13_qbz5n2kfra8p0\LocalCache\local-packages\Python313\site-packages\torch\optim\lbfgs.py", line 199, in _strong_wolfe
+    t = bracket[low_pos]  # type: ignore[possibly-undefined]
+        ~~~~~~~^^^^^^^^^
+IndexError: list index out of range

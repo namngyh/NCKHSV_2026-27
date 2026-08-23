@@ -1,0 +1,19 @@
+=== B1 | B1: GARCH(1,1) chuan, khong X            (1 trang thai, MLE) ===
+Bat dau: 2026-08-19 21:29:23 | T_train = 1735
+  [seed=0] adam 0: nll=15959.0078
+  [seed=0] adam 200: nll=2944.8978
+  [seed=0] adam 400: nll=2944.8978
+  [seed=1] adam 0: nll=212864.0390
+  [seed=1] adam 200: nll=2944.8978
+  [seed=1] adam 400: nll=2944.8978
+  [seed=2] adam 0: nll=180779.6923
+  [seed=2] adam 200: nll=2944.8978
+  [seed=2] adam 400: nll=2944.8978
+  [seed=3] adam 0: nll=215134.9771
+  [seed=3] adam 200: nll=2944.8978
+  [seed=3] adam 400: nll=2944.8978
+  [seed=4] adam 0: nll=inf
+  [seed=5] adam 0: nll=160334.8327
+  [seed=5] adam 200: nll=2944.8978
+  [seed=5] adam 400: nll=2944.8978
+=== XONG B1 sau 13.6 phut -> results_dryrun\parts\b1.pt ===

@@ -1,0 +1,18 @@
+=== M2 | M2: MS-GARCH-X Student-t, VB mean-field ===
+Bat dau: 2026-08-19 21:07:31 | T_train = 1735
+[VB mean_field] step 0: ELBO=-2937.1128
+[VB mean_field] step 200: ELBO=-2893.0695
+[VB mean_field] step 400: ELBO=-2884.4536
+[VB mean_field] step 600: ELBO=-2861.3850
+[VB mean_field] step 800: ELBO=-2870.2337
+[VB mean_field] step 1000: ELBO=-2860.7617
+[VB mean_field] step 1200: ELBO=-2862.7494
+[VB mean_field] step 1400: ELBO=-2867.8297
+[VB mean_field] step 1600: ELBO=-2860.7596
+[VB mean_field] step 1800: ELBO=-2863.8649
+[VB mean_field] step 2000: ELBO=-2863.9956
+[VB mean_field] step 2200: ELBO=-2860.3282
+[VB mean_field] step 2400: ELBO=-2868.8112
+[VB mean_field] step 2600: ELBO=-2862.6036
+[VB mean_field] step 2800: ELBO=-2865.2778
+=== XONG M2 sau 77.9 phut -> C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results_dryrun\parts\m2.pt ===

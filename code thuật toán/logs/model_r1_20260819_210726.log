@@ -1,0 +1,19 @@
+=== R1 | R1: MS-GARCH-X, nu_s theo trang thai, VB mean-field ===
+Bat dau: 2026-08-19 21:07:31 | T_train = 1735
+[VB mean_field] step 0: ELBO=-2955.8709
+[VB mean_field] step 200: ELBO=-2886.8938
+[VB mean_field] step 400: ELBO=-2871.3463
+[VB mean_field] step 600: ELBO=-2861.9039
+[VB mean_field] step 800: ELBO=-2884.5997
+[VB mean_field] step 1000: ELBO=-2878.0475
+[VB mean_field] step 1200: ELBO=-2867.0578
+[VB mean_field] step 1400: ELBO=-2857.7378
+[VB mean_field] step 1600: ELBO=-2860.5615
+[VB mean_field] step 1800: ELBO=-2874.7530
+[VB mean_field] step 2000: ELBO=-2882.4566
+[VB mean_field] step 2200: ELBO=-2868.5925
+[VB mean_field] step 2400: ELBO=-2869.7159
+[VB mean_field] step 2600: ELBO=-2864.5100
+[VB mean_field] step 2800: ELBO=-2873.1760
+     P(nu_2 < nu_1 | Data) ~= 0.0000 (eq:tail-probability)
+=== XONG R1 sau 76.2 phut -> C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results_dryrun\parts\r1.pt ===

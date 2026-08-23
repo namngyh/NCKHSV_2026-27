@@ -1,0 +1,276 @@
+==============================================================================
+TOM TAT KET QUA UOC LUONG -- MS-GARCH-X Student-t cho VN30F1M
+Sinh luc: 2026-08-20 22:13:02
+Thu muc ket qua: C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results
+==============================================================================
+
+DU LIEU
+------------------------------------------------------------------------------
+  tong so quan sat loi suat = 2170
+  tap huan luyen = 1735   tap kiem dinh = 435
+  bien ngoai sinh k = 2
+  loi suat: trung binh = 0.0381, do lech chuan = 1.5070, min = -11.6612, max = 6.7631
+
+==============================================================================
+PHAN 1 -- UOC LUONG HOP LY CUC DAI (MLE)
+==============================================================================
+
+B1  GARCH(1,1) chuan, khong X                     (1 trang thai)
+------------------------------------------------------------------------------
+  log-hop-ly = -2944.8978    AIC = 5897.80    BIC = 5919.63    so tham so = 4
+  mu    = 0.0463
+  omega = 0.0568
+  alpha = 0.1162
+  beta  = 0.8635
+  alpha + beta = 0.9796
+  nu    = -- (phan phoi chuan)
+
+  Chan doan tung diem khoi tao:
+    seed=0  loglik=  -2944.8978  hoi_tu=co   ||grad||=0.0007
+    seed=1  loglik=  -2944.8978  hoi_tu=co   ||grad||=0.0000
+    seed=2  loglik=  -2944.8978  hoi_tu=co   ||grad||=0.0000
+    seed=3  loglik=  -2944.8978  hoi_tu=co   ||grad||=0.0000
+    seed=4  loglik=         nan  hoi_tu=KHONG  ||grad||=0.0000
+    seed=5  loglik=  -2944.8978  hoi_tu=co   ||grad||=0.0000
+  => hoi tu 5/6 diem khoi tao
+  => thoi gian chay: 13.6 phut
+
+B2  GARCH(1,1) Student-t, khong X                 (1 trang thai)
+------------------------------------------------------------------------------
+  log-hop-ly = -2825.8112    AIC = 5661.62    BIC = 5688.92    so tham so = 5
+  mu    = 0.0970
+  omega = 0.0580
+  alpha = 0.1546
+  beta  = 0.8405
+  alpha + beta = 0.9951   <-- GAN BIEN (>0.995)
+  nu    = 3.9250
+
+  Chan doan tung diem khoi tao:
+    seed=0  loglik=  -2825.8112  hoi_tu=co   ||grad||=0.0022
+    seed=1  loglik=  -2825.8112  hoi_tu=co   ||grad||=0.0000
+    seed=2  loglik=  -2825.8112  hoi_tu=co   ||grad||=0.0000
+    seed=3  loglik=  -2825.8112  hoi_tu=co   ||grad||=0.0000
+    seed=4  loglik=         nan  hoi_tu=KHONG  ||grad||=0.0000
+    seed=5  loglik=  -2825.8112  hoi_tu=co   ||grad||=0.0000
+  => hoi tu 5/6 diem khoi tao
+  => thoi gian chay: 13.7 phut
+
+B3  GARCH-X Student-t                             (1 trang thai)
+------------------------------------------------------------------------------
+  log-hop-ly = -2817.4345    AIC = 5648.87    BIC = 5687.08    so tham so = 7
+  mu    = 0.0971
+  omega = 0.2028
+  alpha = 0.1342
+  beta  = 0.7889
+  alpha + beta = 0.9232
+  nu    = 4.0185
+  gamma = [-0.0536, 0.1142]
+
+  Chan doan tung diem khoi tao:
+    seed=0  loglik=  -2817.4345  hoi_tu=co   ||grad||=0.0009
+    seed=1  loglik=  -2817.4345  hoi_tu=co   ||grad||=0.0009
+    seed=2  loglik=  -2817.4345  hoi_tu=co   ||grad||=0.0013
+    seed=3  loglik=  -2817.4345  hoi_tu=co   ||grad||=0.0008
+    seed=4  loglik=         nan  hoi_tu=KHONG  ||grad||=0.0000
+    seed=5  loglik=  -2817.4345  hoi_tu=co   ||grad||=0.0027
+  => hoi tu 5/6 diem khoi tao
+  => thoi gian chay: 14.6 phut
+
+B4  MS-GARCH chuan (nu co dinh lon), khong X      (2 trang thai)
+------------------------------------------------------------------------------
+  log-hop-ly = -2854.1465    AIC = 5728.29    BIC = 5782.88
+  (trang thai da sap xep theo eq:label-identification E(h|S=1) < E(h|S=2); khong can hoan vi)
+  mu    = [0.1386, -0.4790]
+  omega = [0.3717, 5.4631]
+  alpha = [0.0000, 0.1735]
+  beta  = [0.3383, 0.0847]
+  alpha + beta = [0.3383, 0.2583]
+  P     = [[0.9604, 0.0396], [0.1328, 0.8672]]
+  thoi gian ton tai ky vong d_s = [25.25, 7.53] phien
+  phan phoi dung pi = [0.7702, 0.2298]
+  nu    = 1000000.0000
+
+  Chan doan tung diem khoi tao:
+    seed=0  loglik=  -2833.8595  hoi_tu=co   ||grad||=    0.0020  gan_bien=co
+    seed=1  loglik=  -2833.8595  hoi_tu=co   ||grad||=    0.0006  gan_bien=co
+    seed=2  loglik=  -2833.8595  hoi_tu=co   ||grad||=    0.0002  gan_bien=co
+    seed=3  loglik=  -2833.8595  hoi_tu=co   ||grad||=    0.0004  gan_bien=co
+    seed=4  loglik=  -2854.1468  hoi_tu=co   ||grad||=    0.0103  gan_bien=khong
+    seed=5  loglik=  -2854.1465  hoi_tu=co   ||grad||=    0.0347  gan_bien=khong
+    seed=6  loglik=  -2854.1468  hoi_tu=co   ||grad||=    0.0129  gan_bien=khong
+    seed=7  loglik=  -2833.8595  hoi_tu=co   ||grad||=    0.0010  gan_bien=co
+    seed=8  loglik=  -2833.8595  hoi_tu=co   ||grad||=    0.0003  gan_bien=co
+    seed=9  loglik=  -2854.1468  hoi_tu=co   ||grad||=    0.0068  gan_bien=khong
+  => hoi tu 10/10 diem khoi tao
+  => thoi gian chay: 157.4 phut
+
+M1  MS-GARCH-X Student-t                          (2 trang thai)
+------------------------------------------------------------------------------
+  log-hop-ly = -2810.2902    AIC = 5650.58    BIC = 5732.46
+  (trang thai da sap xep theo eq:label-identification E(h|S=1) < E(h|S=2); khong can hoan vi)
+  mu    = [0.0592, 0.3471]
+  omega = [0.1001, 1.0767]
+  alpha = [0.1091, 0.3288]
+  beta  = [0.8463, 0.3006]
+  alpha + beta = [0.9554, 0.6294]
+  gamma = [-0.0200, 0.0502, -0.1730, 0.6194]   (hang 1 = trang thai 1, hang 2 = trang thai 2)
+  P     = [[0.9986, 0.0014], [0.0068, 0.9932]]
+  thoi gian ton tai ky vong d_s = [717.91, 146.96] phien
+  phan phoi dung pi = [0.8301, 0.1699]
+  nu    = 4.0761
+
+  Sai so chuan (delta method tu Hessian quan sat):
+    SE(mu   ) = [0.0255, 0.0990]
+    SE(omega) = [0.0563, 0.4362]
+    SE(alpha) = [0.0269, 0.1434]
+    SE(beta ) = [0.0375, 0.2323]
+    SE(gamma) = [0.0231, 0.0369, 0.1335, 0.2268]
+    SE(p11  ) = [0.0011]
+    SE(p22  ) = [0.0055]
+    SE(nu   ) = [0.4281]
+
+  Chan doan tung diem khoi tao:
+    seed=0  loglik=  -2799.5779  hoi_tu=co   ||grad||=    0.1764  gan_bien=co
+    seed=1  loglik=  -2810.2912  hoi_tu=co   ||grad||=    0.0509  gan_bien=co
+    seed=2  loglik=  -2801.8352  hoi_tu=KHONG  ||grad||= 2486.8102  gan_bien=co
+    seed=3  loglik=  -2810.2902  hoi_tu=co   ||grad||=    0.2267  gan_bien=co
+    seed=4  loglik=  -2799.6970  hoi_tu=KHONG  ||grad||=828750816.9598  gan_bien=co
+    seed=5  loglik=  -2807.7183  hoi_tu=KHONG  ||grad||= 1985.7330  gan_bien=co
+    seed=6  loglik=  -2800.7008  hoi_tu=KHONG  ||grad||=   34.0906  gan_bien=co
+    seed=7  loglik=  -2811.6118  hoi_tu=co   ||grad||=    0.1539  gan_bien=co
+    seed=9  loglik=  -2807.1343  hoi_tu=KHONG  ||grad||=  353.3613  gan_bien=co
+  => hoi tu 4/9 diem khoi tao
+  => thoi gian chay: 424.7 phut
+
+------------------------------------------------------------------------------
+SO SANH MO HINH (nho hon la tot hon)
+------------------------------------------------------------------------------
+  Mo hinh       log-hop-ly         AIC         BIC
+  B1              -2944.90     5897.80     5919.63
+  B2              -2825.81     5661.62     5688.92
+  B3              -2817.43     5648.87     5687.08
+  B4              -2854.15     5728.29     5782.88
+  M1              -2810.29     5650.58     5732.46
+  => AIC thap nhat: B3
+
+==============================================================================
+PHAN 2 -- SUY DIEN BAYES BANG VARIATIONAL BAYES
+==============================================================================
+
+M2  MS-GARCH-X Student-t, VB mean-field
+------------------------------------------------------------------------------
+  ELBO cuoi (trung binh 50 buoc cuoi) = -2863.1609
+  so buoc SVI = 3000    so mau hau nghiem = 1000
+
+  Tham so        trung binh  do lech chuan        q2.5%       q97.5%
+  mu[0]              0.3125         0.0837       0.1588       0.4826
+  mu[1]              0.0423         0.0299      -0.0175       0.0985
+  omega[0]           0.7412         0.0841       0.5934       0.9318
+  omega[1]           0.5433         0.0356       0.4782       0.6152
+  alpha[0]           0.2932         0.1206       0.1036       0.5654
+  alpha[1]           0.2089         0.0299       0.1549       0.2738
+  beta[0]            0.2766         0.0633       0.1570       0.4091
+  beta[1]            0.6487         0.0201       0.6108       0.6884
+  gamma[0]          -0.2745         0.0859      -0.4300      -0.1068
+  gamma[1]           0.2707         0.0720       0.1203       0.4103
+  gamma[2]          -0.1332         0.0374      -0.2070      -0.0591
+  gamma[3]           0.3212         0.0216       0.2792       0.3611
+  p11                0.7182         0.0741       0.5581       0.8435
+  p22                0.9346         0.0217       0.8820       0.9664
+  nu_minus_2         1.5204         0.1771       1.2003       1.9054
+
+  Nhan trang thai: E(h|S=1) = 2.1707, E(h|S=2) = 2.7695  -> quy uoc eq:label-identification DUOC THOA
+  => thoi gian chay: 77.9 phut
+
+M3  MS-GARCH-X Student-t, VB full-rank
+------------------------------------------------------------------------------
+  ELBO cuoi (trung binh 50 buoc cuoi) = -2866.3628
+  so buoc SVI = 3000    so mau hau nghiem = 1000
+
+  Tham so        trung binh  do lech chuan        q2.5%       q97.5%
+  mu[0]              0.1879         0.0516       0.0880       0.2888
+  mu[1]              0.0810         0.0334       0.0190       0.1477
+  omega[0]           0.6013         0.1222       0.3959       0.8627
+  omega[1]           0.6619         0.0808       0.5130       0.8275
+  alpha[0]           0.2943         0.1558       0.0681       0.6578
+  alpha[1]           0.3602         0.1023       0.1822       0.5755
+  beta[0]            0.7010         0.0851       0.5197       0.8468
+  beta[1]            0.5438         0.0614       0.4172       0.6638
+  gamma[0]          -0.0923         0.1114      -0.3054       0.1211
+  gamma[1]           0.5471         0.1028       0.3420       0.7570
+  gamma[2]          -0.2014         0.0424      -0.2855      -0.1200
+  gamma[3]           0.2413         0.0395       0.1635       0.3193
+  p11                0.8019         0.0784       0.6174       0.9189
+  p22                0.9097         0.0327       0.8330       0.9594
+  nu_minus_2         0.9779         0.2004       0.6556       1.4348
+
+  Nhan trang thai: E(h|S=1) = 3.8099, E(h|S=2) = 3.4636  -> quy uoc eq:label-identification BI VI PHAM
+  !! CANH BAO: trang thai 1/2 o bang tren BI DAO so voi quy uoc cua bai
+     bao (trang thai 1 phai la bien dong THAP). Hau nghiem VB/MCMC khong
+     duoc sap xep nhan tu dong o bat ky dau trong pipeline, ke ca
+     build_html_report.py::_posterior_rows. Phai hoan vi truoc khi dua
+     vao bang cua bai bao va truoc khi tinh ty so do lech chuan VB/MCMC.
+  => thoi gian chay: 77.2 phut
+
+R1  MS-GARCH-X, nu_s rieng theo trang thai, VB mean-field
+------------------------------------------------------------------------------
+  ELBO cuoi (trung binh 50 buoc cuoi) = -2865.6254
+  so buoc SVI = 3000    so mau hau nghiem = 1000
+
+  Tham so        trung binh  do lech chuan        q2.5%       q97.5%
+  mu[0]              0.1508         0.0312       0.0886       0.2100
+  mu[1]             -0.0824         0.0648      -0.2081       0.0482
+  omega[0]           0.6906         0.0438       0.6073       0.7801
+  omega[1]           0.6628         0.0716       0.5294       0.8070
+  alpha[0]           0.2661         0.0455       0.1806       0.3546
+  alpha[1]           0.2468         0.0749       0.1212       0.4150
+  beta[0]            0.6100         0.0223       0.5668       0.6556
+  beta[1]            0.4839         0.0535       0.3765       0.5912
+  gamma[0]          -0.1436         0.0483      -0.2405      -0.0474
+  gamma[1]           0.3548         0.0388       0.2818       0.4303
+  gamma[2]          -0.3158         0.0878      -0.4852      -0.1490
+  gamma[3]           0.3109         0.0603       0.1951       0.4289
+  p11                0.8927         0.0299       0.8270       0.9417
+  p22                0.7206         0.0656       0.5801       0.8359
+  nu_minus_2[0]       0.8828         0.1122       0.6919       1.1102
+  nu_minus_2[1]       9.7391         5.8797       2.6598      25.0453
+
+  Nhan trang thai: E(h|S=1) = 3.1826, E(h|S=2) = 2.7235  -> quy uoc eq:label-identification BI VI PHAM
+  !! CANH BAO: trang thai 1/2 o bang tren BI DAO so voi quy uoc cua bai
+     bao (trang thai 1 phai la bien dong THAP). Hau nghiem VB/MCMC khong
+     duoc sap xep nhan tu dong o bat ky dau trong pipeline, ke ca
+     build_html_report.py::_posterior_rows. Phai hoan vi truoc khi dua
+     vao bang cua bai bao va truoc khi tinh ty so do lech chuan VB/MCMC.
+
+  P(nu_2 < nu_1 | Data_T) tren mau THO = 0.0000
+     (day la con so run_full_study.py::run_r1_step dang ghi lai -- tinh truc tiep tu mau, KHONG sap xep nhan)
+  P(nu_bien-dong-CAO < nu_bien-dong-THAP | Data_T) = 0.9170   <-- CON SO DUNG cho RQ6
+     (nu trung binh: bien dong thap = 10.946, bien dong cao = 3.676)
+     ty le mau phai hoan vi nhan = 0.917
+  => thoi gian chay: 76.2 phut
+
+==============================================================================
+CHI PHI TINH TOAN
+==============================================================================
+
+  01_preliminary_tests          0.0 phut  (0 giay)
+  02_mle                      623.9 phut  (37436 giay)
+  03_vb                       155.1 phut  (9306 giay)
+  05_r1                        76.2 phut  (4573 giay)
+  model_b1                     13.6 phut  (816 giay)
+  model_b2                     13.7 phut  (820 giay)
+  model_b3                     14.6 phut  (874 giay)
+  model_b4                    157.4 phut  (9443 giay)
+  model_m1                    424.7 phut  (25483 giay)
+  model_m2                     77.9 phut  (4672 giay)
+  model_m3                     77.2 phut  (4634 giay)
+  model_r1                     76.2 phut  (4573 giay)
+  TONG (cong don, khong ke chay song song)   1710.5 phut
+
+==============================================================================
+CAC BUOC CHUA CHAY
+==============================================================================
+  - M4 (MCMC/NUTS)      : chua chay -> results/04_mcmc.pt
+  - Danh gia ngoai mau  : CHO MCMC xong roi hay chay, neu khong bang so sanh
+                          se AM THAM thieu M4 (xem README muc 'Cach 2')
+  - Mo phong S1-S8      : chua chay

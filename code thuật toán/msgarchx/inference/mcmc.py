@@ -47,6 +47,8 @@ def fit_mcmc(
     floor: float = 1e-8,
     verbose: bool = False,
     max_tree_depth: int = 8,
+    full_mass: bool = False,
+    initial_params: dict | None = None,
 ) -> MCMCResult:
     """max_tree_depth gioi han so buoc leapfrog toi da moi mau (2^depth) --
     mac dinh cua NUTS la 10 (toi 1024 buoc/mau), rat ton kem vi bo loc tien
@@ -65,8 +67,16 @@ def fit_mcmc(
     n_div = 0
     for c in range(n_chains):
         pyro.set_rng_seed(seed + c)
+        # full_mass=True: ma tran khoi luong DAC thay vi duong cheo. Can thiet
+        # khi cac tham so co TUONG QUAN MANH voi nhau -- voi MS-GARCH-X thi
+        # omega_s, alpha_s, beta_s tuong quan rat manh (chung cung xac dinh muc
+        # va do dai dang cua phuong sai). Ma tran duong cheo khong the hien
+        # duoc tuong quan do, nen NUTS buoc phai ha buoc tich phan xuong rat
+        # nho va khong di chuyen duoc (xem chan doan lan chay dau: R-hat ~ 4,
+        # ESS ~ 4.4, buoc tich phan ~ 8e-4).
         kernel = NUTS(
             bayes_model,
+            full_mass=full_mass,
             target_accept_prob=0.85,
             max_tree_depth=max_tree_depth,
         )
@@ -75,6 +85,7 @@ def fit_mcmc(
             num_samples=n_samples,
             warmup_steps=n_warmup,
             num_chains=1,
+            initial_params=initial_params,
             disable_progbar=not verbose,
         )
         mcmc_chain.run(r, X, config, prior, variance_link, floor)
@@ -100,9 +111,11 @@ def fit_mcmc(
     samples = {name: draws.reshape(-1, *draws.shape[2:]) for name, draws in samples_by_chain.items()}
 
     try:
-        idata = az.from_dict(
-            posterior={name: draws.numpy() for name, draws in samples_by_chain.items()}
-        )
+        post = {name: draws.numpy() for name, draws in samples_by_chain.items()}
+        try:
+            idata = az.from_dict({"posterior": post})      # arviz >= 1.0
+        except TypeError:
+            idata = az.from_dict(posterior=post)            # arviz < 1.0
         rhat_ds = az.rhat(idata)
         ess_ds = az.ess(idata, method="bulk")
         rhat = {name: float(rhat_ds[name].values.max()) for name in samples_by_chain}

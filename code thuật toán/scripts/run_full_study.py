@@ -51,7 +51,8 @@ from msgarchx.inference.forecast import predictive_variance_path
 from msgarchx.inference.garch_mle import fit_garch_mle
 from msgarchx.inference.mcmc import fit_mcmc
 from msgarchx.inference.mle import fit_mle, natural_scale_standard_errors
-from msgarchx.inference.param_spec import ModelConfig
+from msgarchx.inference.param_spec import ModelConfig, warm_starts_from_garch
+from msgarchx.inference.summary import relabel_posterior_samples
 from msgarchx.inference.variational import fit_vb
 from msgarchx.models.garch import garch_forward
 from msgarchx.models.ms_garch import ms_garch_forward_filter
@@ -70,17 +71,21 @@ class StudyConfig:
     train_frac: float = 0.8
     seed: int = 0
 
-    mle_n_starts: int = 6
+    mle_n_starts: int = 10
     mle_n_adam: int = 500
     mle_n_lbfgs: int = 250
+    mle_n_cycles: int = 3      # so chu ky Adam+L-BFGS moi diem khoi tao
 
     vb_n_steps: int = 3000
     vb_n_draws: int = 1000
 
     mcmc_n_chains: int = 4
-    mcmc_n_warmup: int = 250
+    # warmup 250 la QUA IT de thich nghi ma tran khoi luong DAC; Stan mac dinh
+    # 1000. Lan chay dau (250 vong, ma tran duong cheo) cho R-hat ~ 4, ESS ~ 4.4.
+    mcmc_n_warmup: int = 1000
     mcmc_n_samples: int = 400
     mcmc_max_tree_depth: int = 7
+    mcmc_full_mass: bool = True
 
     oos_n_posterior_draws: int = 200
 
@@ -94,6 +99,10 @@ class StudyConfig:
     sim_mle_n_adam: int = 200
     sim_mle_n_lbfgs: int = 100
     sim_vb_n_steps: int = 800
+    # fit_vb mac dinh lay 2000 mau hau nghiem; trong mo phong ta chi can
+    # trung binh/do lech chuan/khoang 2.5-97.5% de tinh bias, RMSE va coverage,
+    # 500 mau la du va tiet kiem hon mot nua chi phi cua buoc nay.
+    sim_vb_n_draws: int = 500
     sim_mcmc_n_chains: int = 4
     sim_mcmc_n_warmup: int = 100
     sim_mcmc_n_samples: int = 150
@@ -105,9 +114,10 @@ PRESETS = {
     "dry-run": StudyConfig(
         csv_path=str(ROOT / "ohlc_export.csv"),
         results_dir=ROOT / "results_dryrun",
-        mle_n_starts=1, mle_n_adam=20, mle_n_lbfgs=10,
+        mle_n_starts=1, mle_n_adam=20, mle_n_lbfgs=10, mle_n_cycles=1,
         vb_n_steps=20, vb_n_draws=20,
         mcmc_n_chains=1, mcmc_n_warmup=5, mcmc_n_samples=5, mcmc_max_tree_depth=4,
+        mcmc_full_mass=True,
         oos_n_posterior_draws=5,
         sim_T=80, sim_burn_in=20, sim_B_mle=2, sim_B_vb=2, sim_B_mcmc=1,
         sim_mle_n_starts=1, sim_mle_n_adam=15, sim_mle_n_lbfgs=5,
@@ -220,16 +230,29 @@ def run_mle_step(cfg: StudyConfig, r_train: torch.Tensor, X_train: torch.Tensor)
     b3 = fit_garch_mle(r_train, X_train, dist="student_t", **kw)
     print(f"     loglik={b3.loglik:.2f} AIC={b3.aic:.2f} nu={b3.params.nu.item():.3f}")
 
+    # Hai mo hinh 2 trang thai duoi day dung THEM ba thu so voi mac dinh cua
+    # fit_mle, deu bam theo Muc 4.2 cua ban thao:
+    #   (a) khoi tao AM tu nghiem mot trang thai (B1 cho B4, B3 cho M1) --
+    #       "khoi tao tuan tu theo thu bac mo hinh";
+    #   (b) nhieu chu ky Adam+L-BFGS, dung som khi ||grad|| < 1;
+    #   (c) chon CUC DAI DIA PHUONG LON NHAT THOA DIEU KIEN CHINH QUY
+    #       (select="regular") thay vi log-hop-ly cao nhat -- ham hop ly
+    #       MS-GARCH co dinh gia tuong ung voi trang thai chi ton tai 1 phien.
+    # Khong co (a)-(c), ca B4 lan M1 deu hoi tu ve nghiem suy biến.
     print("  -- B4: MS-GARCH chuan (nu co dinh lon), khong X --")
     config_b4 = ModelConfig(n_exog=0, state_specific_nu=False)
     b4 = fit_mle(r_train, zero_X, config_b4, n_starts=cfg.mle_n_starts, base_seed=cfg.seed,
-                 n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs, fixed_nu=1e6, verbose=True)
+                 n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs, fixed_nu=1e6, verbose=True,
+                 init_raws=warm_starts_from_garch(b1.params, config_b4),
+                 n_cycles=cfg.mle_n_cycles, select="regular")
     print(f"     loglik={b4.loglik:.2f} AIC={b4.aic:.2f}")
 
     print("  -- M1: MS-GARCH-X Student-t --")
     config_m1 = ModelConfig(n_exog=X_train.shape[1], state_specific_nu=False)
     m1 = fit_mle(r_train, X_train, config_m1, n_starts=cfg.mle_n_starts, base_seed=cfg.seed,
-                 n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs, verbose=True)
+                 n_adam=cfg.mle_n_adam, n_lbfgs=cfg.mle_n_lbfgs, verbose=True,
+                 init_raws=warm_starts_from_garch(b3.params, config_m1),
+                 n_cycles=cfg.mle_n_cycles, select="regular")
     print(f"     loglik={m1.loglik:.2f} AIC={m1.aic:.2f} nu={m1.params.nu.item():.3f}")
 
     print("     Tinh sai so chuan (delta method tu Hessian) cho M1 ...")
@@ -277,10 +300,23 @@ def run_r1_step(cfg: StudyConfig, r_train: torch.Tensor, X_train: torch.Tensor) 
     config_r1 = ModelConfig(n_exog=X_train.shape[1], state_specific_nu=True)
     r1 = fit_vb(r_train, X_train, config_r1, guide_type="mean_field",
                 n_steps=cfg.vb_n_steps, n_posterior_draws=cfg.vb_n_draws, seed=cfg.seed, verbose=True)
-    nu_samples = r1.samples["nu_minus_2"] + 2.0
+    # PHAI sap xep nhan trang thai TRUOC khi tinh eq:tail-probability. Mau hau
+    # nghiem khong duoc tu dong sap xep, ma dai luong nay duoc dinh nghia theo
+    # quy uoc trang thai 2 = bien dong CAO (eq:label-identification). Tinh
+    # truc tiep tren mau tho co the cho ket qua NGUOC HAN.
+    samples_da_sap, ty_le_hoan_vi = relabel_posterior_samples(r1.samples)
+    nu_samples = samples_da_sap["nu_minus_2"] + 2.0
     p_tail = float((nu_samples[:, 1] < nu_samples[:, 0]).float().mean())
-    print(f"     P(nu_2 < nu_1 | Data) ~= {p_tail:.4f} (eq:tail-probability)")
-    return {"r1": r1, "config_r1": config_r1, "p_tail": p_tail}
+    p_tail_tho = float(((r1.samples["nu_minus_2"] + 2.0)[:, 1]
+                        < (r1.samples["nu_minus_2"] + 2.0)[:, 0]).float().mean())
+    print(f"     P(nu_2 < nu_1 | Data) ~= {p_tail:.4f} (eq:tail-probability, "
+          f"sau khi sap xep nhan; tren mau tho la {p_tail_tho:.4f})")
+    print(f"     ty le mau bi hoan vi nhan: {ty_le_hoan_vi:.3f}"
+          + ("  <-- gan 0.5: hau nghiem dang doi nhan qua lai, can bao cao ro"
+             if 0.2 < ty_le_hoan_vi < 0.8 else ""))
+    return {"r1": r1, "config_r1": config_r1, "p_tail": p_tail,
+            "p_tail_mau_tho": p_tail_tho, "ty_le_hoan_vi_nhan": ty_le_hoan_vi,
+            "samples_da_sap_xep": samples_da_sap}
 
 
 # ============================================================
@@ -478,7 +514,8 @@ def run_one_scenario(cfg: StudyConfig, code: str, scenario, config: ModelConfig)
 
     vb_scn = replace(scenario, B=cfg.sim_B_vb, burn_in=cfg.sim_burn_in)
     t0 = time.time()
-    vb_kwargs = {"vb_mean_field": {"n_steps": cfg.sim_vb_n_steps}}
+    vb_kwargs = {"vb_mean_field": {"n_steps": cfg.sim_vb_n_steps,
+                                   "n_posterior_draws": cfg.sim_vb_n_draws}}
     scenario_result["vb_mean_field"] = run_scenario(
         vb_scn, config, methods=("vb_mean_field",), base_seed=cfg.seed, method_kwargs=vb_kwargs
     )["vb_mean_field"]

@@ -1,0 +1,18 @@
+=== M3 | M3: MS-GARCH-X Student-t, VB full-rank ===
+Bat dau: 2026-08-19 21:07:31 | T_train = 1735
+[VB full_rank] step 0: ELBO=-3010.6943
+[VB full_rank] step 200: ELBO=-2880.9703
+[VB full_rank] step 400: ELBO=-2866.2092
+[VB full_rank] step 600: ELBO=-2856.3089
+[VB full_rank] step 800: ELBO=-2868.4620
+[VB full_rank] step 1000: ELBO=-2860.5726
+[VB full_rank] step 1200: ELBO=-2851.4645
+[VB full_rank] step 1400: ELBO=-2855.6083
+[VB full_rank] step 1600: ELBO=-2856.4866
+[VB full_rank] step 1800: ELBO=-2860.7754
+[VB full_rank] step 2000: ELBO=-2862.6981
+[VB full_rank] step 2200: ELBO=-2889.7652
+[VB full_rank] step 2400: ELBO=-2871.6167
+[VB full_rank] step 2600: ELBO=-2911.5758
+[VB full_rank] step 2800: ELBO=-2889.3554
+=== XONG M3 sau 77.2 phut -> C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results_dryrun\parts\m3.pt ===

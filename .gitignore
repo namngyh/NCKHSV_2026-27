@@ -12,11 +12,14 @@ dist/
 venv/
 env/
 
-# Kết quả pipeline (dung lượng lớn, sinh lại được bằng run_full_study.py)
-results/
+# Kết quả pipeline.
+# TRƯỚC ĐÂY loại trừ toàn bộ vì cho là "dung lượng lớn". Đo lại: results/ chỉ
+# 3,5 MB, logs/ 502 KB — nhỏ, và chúng là BẰNG CHỨNG cho các bảng số trong bài
+# báo (chẩn đoán hội tụ MCMC, từng điểm khởi tạo MLE, nhật ký thời gian chạy).
+# Nên nay được theo dõi. Chỉ loại các thư mục chạy thử tạm thời.
 results_dryrun/
-logs/
-*.pt
+results_mergetest/
+.venv_gpu_test/
 
 # Trình soạn thảo và hệ điều hành
 .vscode/

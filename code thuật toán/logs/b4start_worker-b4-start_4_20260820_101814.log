@@ -1,0 +1,8 @@
+[2026-08-20 10:33:39] [b4 start 4] khoi tao: ngau nhien (seed 2004)
+[seed=4] adam iter 0: nll=81014.9657
+[seed=4] adam iter 100: nll=2861.7893
+[seed=4] adam iter 200: nll=2855.3974
+[seed=4] adam iter 300: nll=2854.9445
+[seed=4] adam iter 400: nll=2854.7033
+[seed=4] het chu ky 0: nll=2854.1468 ||grad||=0.0103
+[2026-08-20 10:49:44] [b4 start 4] xong 16.1 phut: loglik=-2854.1468 ||grad||=0.0103

@@ -80,7 +80,25 @@ def _single_start(seed, r, X, dist, h0, n_adam, n_lbfgs, lr_adam, verbose):
         loss.backward()
         return loss
 
-    lbfgs.step(closure)
+    before_lbfgs = {k_: v.detach().clone() for k_, v in vars_.items()}
+    try:
+        lbfgs.step(closure)
+    except (IndexError, RuntimeError) as exc:
+        # torch.optim.LBFGS._strong_wolfe co the vo hieu (IndexError tren
+        # `bracket`) khi ham muc tieu tra ve NaN/Inf giua luc do duong -- xay
+        # ra khi mot buoc lon day tham so ra ngoai vung hop le. Closure o tren
+        # da luong truoc NaN nhung L-BFGS cua torch thi khong. Bat loi, quay
+        # ve nghiem cua giai doan Adam va danh dau diem khoi tao nay la KHONG
+        # hoi tu, thay vi lam sap ca qua trinh nhieu diem khoi tao.
+        print(f"  [seed={seed}] L-BFGS that bai ({type(exc).__name__}: {exc}); "
+              f"giu nghiem cua giai doan Adam.")
+        with torch.no_grad():
+            for k_, v in vars_.items():
+                v.copy_(before_lbfgs[k_])
+                v.grad = None
+        recomputed = -garch_loglik(_unpack(vars_, dist), r, X, h0=h0)
+        if torch.isfinite(recomputed):
+            recomputed.backward()
 
     with torch.no_grad():
         final_loss = -garch_loglik(_unpack(vars_, dist), r, X, h0=h0)
@@ -112,9 +130,14 @@ def fit_garch_mle(
     for i in range(n_starts):
         params, loglik, diag = _single_start(base_seed + i, r, X, dist, h0, n_adam, n_lbfgs, lr_adam, verbose)
         runs.append(diag)
-        if best is None or loglik > best[1]:
+        # `loglik > best[1]` luon False khi loglik la NaN, nen neu diem khoi
+        # tao DAU TIEN cho NaN thi `best` se ket lai o NaN vinh vien. Kiem tra
+        # huu han truoc, giong cach fit_mle (2 trang thai) da lam.
+        if torch.isfinite(torch.tensor(loglik)) and (best is None or loglik > best[1]):
             best = (params, loglik)
 
+    if best is None:
+        raise RuntimeError("Tat ca cac diem khoi tao MLE deu that bai (NaN/Inf).")
     params, loglik = best
     n_params = 4 + X.shape[1] + (1 if dist == "student_t" else 0)  # mu, omega, alpha, beta + gamma + (nu)
     aic = -2.0 * loglik + 2.0 * n_params

@@ -73,3 +73,59 @@ def positive_variance_link(
     if mode == "softplus":
         return softplus(h_raw - floor) + floor
     raise ValueError(f"mode khong hop le: {mode!r}")
+
+
+# ---------------------------------------------------------------------------
+# Ham lien ket cho alpha_s, beta_s
+#
+# "softplus" la dac ta CHINH THUC cua ban thao (eq:variance-coef-transform,
+# Bai bao chinh.tex dong 877-879): alpha_s, beta_s = softplus(.) thuoc (0, +vc).
+#
+# "sigmoid" la bien the KIEM TRA DO BEN: alpha_s, beta_s thuoc (0, 1), trung
+# voi mien cua tien nghiem Beta(a,a) ma bayes_model.py dat cho hai tham so nay.
+# Voi softplus, MLE tim tren (0,+vc) con VB/MCMC tim tren (0,1) -- hai phuong
+# phap lam viec tren HAI khong gian tham so khac nhau, nen so sanh M1 voi
+# M2/M3/M4 khong hoan toan cung dieu kien. Bien the sigmoid xoa bo khac biet
+# do, va dong thoi loai bo theo cau truc cac dinh gia co beta_s > 1.
+#
+# LUU Y: rang buoc alpha_s, beta_s < 1 KHONG phai yeu cau ly thuyet cua
+# MS-GARCH (mot che do rieng le duoc phep no ma qua trinh tong the van dung);
+# day la mot rang buoc dieu chuan do nguoi nghien cuu ap dat va PHAI duoc khai
+# bao neu dung lam ket qua chinh.
+#
+# Chon bang bien moi truong MSGARCHX_AB_LINK = "softplus" (mac dinh) | "sigmoid".
+# ---------------------------------------------------------------------------
+import os as _os
+
+AB_LINK = _os.environ.get("MSGARCHX_AB_LINK", "softplus").lower()
+if AB_LINK not in ("softplus", "sigmoid"):
+    raise ValueError(f"MSGARCHX_AB_LINK khong hop le: {AB_LINK!r}")
+
+
+def ab_from_raw(x: torch.Tensor) -> torch.Tensor:
+    """Doi eta -> alpha/beta theo ham lien ket dang chon."""
+    return sigmoid(x) if AB_LINK == "sigmoid" else softplus(x)
+
+
+def raw_from_ab(y: torch.Tensor) -> torch.Tensor:
+    """Nghich dao cua ab_from_raw."""
+    y = torch.as_tensor(y, dtype=torch.get_default_dtype())
+    return logit(y) if AB_LINK == "sigmoid" else torch.log(torch.expm1(y))
+
+
+def ab_init_center() -> tuple[float, float]:
+    """Tam khoi tao (eta_alpha, eta_beta) cua init_raw.
+
+    softplus: GIU NGUYEN (-1.5, +1.0) nhu code goc, de moi ket qua da tinh
+      truoc do van tai lap duoc chinh xac tu ma nguon nay.
+      LUU Y da biet: softplus(+1.0) = 1.313, tuc voi ham lien ket softplus thi
+      MOI diem khoi tao ngau nhien deu bat dau TRONG vung no alpha+beta > 1.
+      Day co the la mot nguyen nhan khien bo toi uu bi hut ve cac dinh gia co
+      beta_s lon. Doi tam nay se lam thay doi ket qua cua cac lan chay cu nen
+      KHONG tu y doi -- can quyet dinh rieng va khai bao neu doi.
+
+    sigmoid: dat tam theo dung gia tri muc tieu alpha ~ 0.1, beta ~ 0.8.
+    """
+    if AB_LINK == "sigmoid":
+        return (-2.1972, 1.3863)        # logit(0.1), logit(0.8)
+    return (-1.5, 1.0)                  # nguyen ban cua code goc

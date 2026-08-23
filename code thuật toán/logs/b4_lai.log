@@ -1,0 +1,42 @@
+[2026-08-20 10:18:14] ======================================================================
+[2026-08-20 10:18:14] B4: chay lai voi nhieu diem khoi tao song song + quy tac chinh quy
+[2026-08-20 10:18:14] ======================================================================
+[2026-08-20 10:18:14]   bat dau worker-b4-start_0 (pid 33168)
+[2026-08-20 10:18:14]   bat dau worker-b4-start_1 (pid 35252)
+[2026-08-20 10:18:14]   bat dau worker-b4-start_2 (pid 31848)
+[2026-08-20 10:18:14]   bat dau worker-b4-start_3 (pid 33552)
+[2026-08-20 10:33:34]   XONG worker-b4-start_0 (15 phut tu dau buoc)
+[2026-08-20 10:33:34]   bat dau worker-b4-start_4 (pid 13604)
+[2026-08-20 10:33:44]   XONG worker-b4-start_2 (16 phut tu dau buoc)
+[2026-08-20 10:33:44]   bat dau worker-b4-start_5 (pid 35676)
+[2026-08-20 10:33:54]   XONG worker-b4-start_3 (16 phut tu dau buoc)
+[2026-08-20 10:33:54]   bat dau worker-b4-start_6 (pid 3796)
+[2026-08-20 10:34:14]   XONG worker-b4-start_1 (16 phut tu dau buoc)
+[2026-08-20 10:34:14]   bat dau worker-b4-start_7 (pid 24732)
+[2026-08-20 10:49:54]   XONG worker-b4-start_4 (32 phut tu dau buoc)
+[2026-08-20 10:49:54]   bat dau worker-b4-start_8 (pid 3156)
+[2026-08-20 10:50:04]   XONG worker-b4-start_5 (32 phut tu dau buoc)
+[2026-08-20 10:50:04]   bat dau worker-b4-start_9 (pid 20344)
+[2026-08-20 10:50:24]   XONG worker-b4-start_6 (32 phut tu dau buoc)
+[2026-08-20 10:50:34]   XONG worker-b4-start_7 (32 phut tu dau buoc)
+[2026-08-20 11:04:44]   XONG worker-b4-start_9 (47 phut tu dau buoc)
+[2026-08-20 11:06:24]   XONG worker-b4-start_8 (48 phut tu dau buoc)
+[2026-08-20 11:06:24]   Bang chan doan B4:
+[2026-08-20 11:06:24]     loglik= -2833.8595 ||grad||=     0.0020 d_s=[7.1, 1.1] hoi tu SUY BIEN: d_s=[7.13, 1.08] < 2.0
+[2026-08-20 11:06:24]     loglik= -2833.8595 ||grad||=     0.0004 d_s=[7.1, 1.1] hoi tu SUY BIEN: d_s=[7.13, 1.08] < 2.0
+[2026-08-20 11:06:24]     loglik= -2833.8595 ||grad||=     0.0003 d_s=[1.1, 7.1] hoi tu SUY BIEN: d_s=[1.08, 7.13] < 2.0
+[2026-08-20 11:06:24]     loglik= -2833.8595 ||grad||=     0.0002 d_s=[7.1, 1.1] hoi tu SUY BIEN: d_s=[7.13, 1.08] < 2.0
+[2026-08-20 11:06:24]     loglik= -2833.8595 ||grad||=     0.0006 d_s=[7.1, 1.1] hoi tu SUY BIEN: d_s=[7.13, 1.08] < 2.0
+[2026-08-20 11:06:24]     loglik= -2833.8595 ||grad||=     0.0010 d_s=[7.1, 1.1] hoi tu SUY BIEN: d_s=[7.13, 1.08] < 2.0
+[2026-08-20 11:06:24]     loglik= -2854.1465 ||grad||=     0.0347 d_s=[25.3, 7.5] hoi tu chinh quy
+[2026-08-20 11:06:24]     loglik= -2854.1468 ||grad||=     0.0068 d_s=[25.3, 7.5] hoi tu chinh quy
+[2026-08-20 11:06:24]     loglik= -2854.1468 ||grad||=     0.0103 d_s=[25.3, 7.5] hoi tu chinh quy
+[2026-08-20 11:06:24]     loglik= -2854.1468 ||grad||=     0.0129 d_s=[25.3, 7.5] hoi tu chinh quy
+[2026-08-20 11:06:24]   Da BO QUA 6 nghiem log-hop-ly cao hon (cao nhat -2833.8595) vi khong chinh quy
+[2026-08-20 11:06:25]   da giu lai B4 cu tai b4_lan_chay_truoc.pt
+[2026-08-20 11:06:25] [b4] hoi tu 10/10, chinh quy 4/10, chon loglik=-2854.1465 AIC=5728.29
+[gop] 02_mle.pt  <- b1, b2, b3, b4, m1
+[gop] 03_vb.pt   <- m2, m3
+[gop] 05_r1.pt   <- r1
+[gop] 09_timing.pt cap nhat (12 muc)
+[2026-08-20 11:06:30] B4 HOAN TAT

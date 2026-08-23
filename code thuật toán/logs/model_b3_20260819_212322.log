@@ -1,0 +1,4 @@
+=== B3 | B3: GARCH-X Student-t                    (1 trang thai, MLE) ===
+Bat dau: 2026-08-19 21:25:47 | T_train = 1735
+  [seed=0] adam 0: nll=15332.2180
+=== XONG B3 sau 0.1 phut -> results_mergetest\parts\b3.pt ===

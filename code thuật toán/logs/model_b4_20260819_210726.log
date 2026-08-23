@@ -1,0 +1,33 @@
+=== B4 | B4: MS-GARCH chuan (nu co dinh), khong X (2 trang thai, MLE) ===
+Bat dau: 2026-08-19 21:07:31 | T_train = 1735
+[seed=0] adam iter 0: nll=273915.4596
+[seed=0] adam iter 100: nll=2860.1919
+[seed=0] adam iter 200: nll=2847.5761
+[seed=0] adam iter 300: nll=2837.2309
+[seed=0] adam iter 400: nll=2834.3360
+[seed=1] adam iter 0: nll=49018.4358
+[seed=1] adam iter 100: nll=2856.0291
+[seed=1] adam iter 200: nll=2854.8440
+[seed=1] adam iter 300: nll=2854.4814
+[seed=1] adam iter 400: nll=2854.3264
+[seed=2] adam iter 0: nll=276569.7012
+[seed=2] adam iter 100: nll=2892.0146
+[seed=2] adam iter 200: nll=2850.6086
+[seed=2] adam iter 300: nll=2844.3513
+[seed=2] adam iter 400: nll=2838.4732
+[seed=3] adam iter 0: nll=277816.6153
+[seed=3] adam iter 100: nll=2872.6828
+[seed=3] adam iter 200: nll=2854.8128
+[seed=3] adam iter 300: nll=2850.1605
+[seed=3] adam iter 400: nll=2843.4487
+[seed=4] adam iter 0: nll=54787.5793
+[seed=4] adam iter 100: nll=2863.3071
+[seed=4] adam iter 200: nll=2854.8211
+[seed=4] adam iter 300: nll=2854.4357
+[seed=4] adam iter 400: nll=2854.3072
+[seed=5] adam iter 0: nll=40790.7607
+[seed=5] adam iter 100: nll=2856.5901
+[seed=5] adam iter 200: nll=2855.3546
+[seed=5] adam iter 300: nll=2854.8580
+[seed=5] adam iter 400: nll=2854.5365
+=== XONG B4 sau 82.3 phut -> C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results_dryrun\parts\b4.pt ===

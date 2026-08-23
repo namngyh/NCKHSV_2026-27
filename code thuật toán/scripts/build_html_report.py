@@ -419,11 +419,27 @@ def section_mle_baselines(mle, data) -> str:
 _POSTERIOR_ORDER = ["mu", "omega", "alpha", "beta", "gamma", "p11", "p22"]
 
 
+def _summary_da_sap_xep(res):
+    """Tom tat hau nghiem SAU khi sap xep nhan trang thai (eq:label-identification).
+
+    Mau hau nghiem cua VB/MCMC khong duoc sap xep o bat ky dau trong pipeline,
+    nen bang tham so co the in trang thai 1/2 dao nhau. Tra ve
+    (summary, ty_le_mau_bi_hoan_vi).
+    """
+    from msgarchx.inference.summary import posterior_summary, relabel_posterior_samples
+    if not hasattr(res, "samples") or not res.samples:
+        return res.summary, 0.0
+    mau, ty_le = relabel_posterior_samples(res.samples)
+    if ty_le == 0.0:
+        return res.summary, 0.0
+    return posterior_summary(mau), ty_le
+
+
 def _posterior_rows(res, exog_names: list[str] | None = None) -> list[list]:
     """Bang hau nghiem day du: trung binh, do lech chuan va KTC 95%
     (tab:parameter-template). Bao gom CA gamma -- he so bien ngoai sinh, tham
     so trung tam cua mo hinh GARCH-X -- va nu doi lai tu nu_minus_2."""
-    s = res.summary
+    s, _ty_le = _summary_da_sap_xep(res)
     rows = []
 
     def add(name: str, stat: dict, shift: float = 0.0):
@@ -499,9 +515,19 @@ def section_sd_ratio(vb, mcmc, mle, data) -> str:
         return "<p>Chua co du lieu (can ca 'vb' va 'mcmc').</p>"
     exog = _exog_names(data, mle["config_m1"].n_exog if mle else 0)
     m4 = mcmc["m4"]
+    # PHAI sap xep nhan trang thai cho CA HAI ben truoc khi lap ty so: neu
+    # nhan cua VB va cua MCMC khac nhau thi R_sd,j se so trang thai bien dong
+    # THAP cua ben nay voi trang thai CAO cua ben kia -- vo nghia.
+    m4_summary, m4_ty_le = _summary_da_sap_xep(m4)
+    canh_bao = []
+    if m4_ty_le > 0.2:
+        canh_bao.append(f"M4: {m4_ty_le:.1%} mau bi hoan vi nhan")
     rows = []
     for label, res in [("M2 (mean-field)", vb["m2"]), ("M3 (full-rank)", vb["m3"])]:
-        ratios = sd_ratio(res.summary, m4.summary)
+        res_summary, ty_le = _summary_da_sap_xep(res)
+        if ty_le > 0.2:
+            canh_bao.append(f"{label}: {ty_le:.1%} mau bi hoan vi nhan")
+        ratios = sd_ratio(res_summary, m4_summary)
         for name in _POSTERIOR_ORDER + ["nu_minus_2"]:
             if name not in ratios:
                 continue
@@ -511,13 +537,21 @@ def section_sd_ratio(vb, mcmc, mle, data) -> str:
             flat = val.reshape(-1)
             for i, lab in enumerate(labels):
                 rows.append([label, lab, _fmt(flat[i].item(), 3)])
-    return (
+    ghi_chu = ""
+    if canh_bao:
+        ghi_chu = ('<p class="note"><b>Luu y:</b> hau nghiem da duoc sap xep lai '
+                   'nhan trang thai theo eq:label-identification truoc khi lap ty so. '
+                   'Ty le mau phai hoan vi: ' + "; ".join(canh_bao) +
+                   '. Ty le gan 50% nghia la hau nghiem doi nhan qua lai giua cac mau '
+                   '(label switching), khong chi la mot phep hoan vi toan cuc -- can '
+                   'neu ro khi bao cao.</p>')
+    return (ghi_chu + (
         "<p>Ty so do lech chuan R_sd,j = sd_VB(theta_j) / sd_MCMC(theta_j) (eq:sd-ratio). "
         "Gia tri < 1 cho thay Variational Bayes danh gia thap do bat dinh hau nghiem; "
         "chi nen doc bang nay sau khi M4 dat chuan hoi tu.</p>"
         + _table(["Guide VB", "Tham so", "R_sd = sd_VB / sd_MCMC"], rows,
                  caption="So sanh do bat dinh hau nghiem: VB so voi MCMC (eq:sd-ratio)")
-    )
+    ))
 
 
 def section_r1(r1_data, mle, data) -> str:

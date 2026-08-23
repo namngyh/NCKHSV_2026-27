@@ -43,6 +43,40 @@ class MLEResult:
     filter_output: dict | None = None
 
 
+
+# ===========================================================================
+# Dieu kien chinh quy cua nghiem (Muc 4.2, buoc chon nghiem)
+#
+# Ham hop ly cua mo hinh chuyen trang thai co CAC DINH GIA voi gia tri tuy y
+# cao: mot trang thai thoai hoa thanh "bay bat diem ngoai le" chi ton tai dung
+# mot phien se keo log-hop-ly len ma khong mang y nghia kinh te nao. Day la
+# benh da biet cua lop mo hinh hon hop, khong phai loi cai dat. Thuc hanh
+# chuan la bao cao CUC DAI DIA PHUONG LON NHAT THOA DIEU KIEN CHINH QUY.
+#
+#   C1  Da hoi tu       : ||grad|| < 1 tren thang khong rang buoc
+#   C2  Moi trang thai la MOT CHE DO : d_s = 1/(1-p_ss) >= MIN_DURATION phien
+#   C3  p_ss khong sat bien          : P_LOW < p_ss < P_HIGH
+#
+# KHONG ap dieu kien alpha_s + beta_s < 1 cho tung trang thai: trong MS-GARCH
+# mot che do rieng le duoc phep no ma qua trinh tong the van dung, nen do se la
+# rang buoc do nguoi nghien cuu tu dat chu khong phai yeu cau ly thuyet.
+# ===========================================================================
+MIN_DURATION = 2.0
+P_LOW, P_HIGH = 0.01, 0.999
+
+
+def kiem_tra_chinh_quy(params: MSGARCHXParams) -> tuple[bool, str]:
+    """Tra ve (dat_chinh_quy, ly_do_neu_khong_dat)."""
+    p_diag = torch.diagonal(params.P)
+    dur = 1.0 / (1.0 - p_diag)
+    ly_do = []
+    if bool((dur < MIN_DURATION).any()):
+        ly_do.append(f"d_s={[round(v, 2) for v in dur.tolist()]} < {MIN_DURATION}")
+    if bool((p_diag <= P_LOW).any() or (p_diag >= P_HIGH).any()):
+        ly_do.append(f"p_ss={[round(v, 4) for v in p_diag.tolist()]} sat bien")
+    return (not ly_do), "; ".join(ly_do)
+
+
 def _neg_loglik(raw: torch.Tensor, config: ModelConfig, r: torch.Tensor, X: torch.Tensor, **filter_kwargs):
     params = unpack_raw(raw, config)
     out = ms_garch_forward_filter(params, r, X, **filter_kwargs)
@@ -71,8 +105,11 @@ def _single_start(
     filter_kwargs: dict,
     verbose: bool,
     fixed_nu: float | None = None,
+    init_raw_vec: torch.Tensor | None = None,
+    n_cycles: int = 1,
 ) -> tuple[torch.Tensor, float, MLERunDiagnostics]:
-    raw = init_raw(config, seed=seed).clone()
+    raw = (init_raw_vec.detach().clone() if init_raw_vec is not None
+           else init_raw(config, seed=seed).clone())
     nu_slice = param_slices(config)["eta_nu"] if fixed_nu is not None else None
     if fixed_nu is not None:
         with torch.no_grad():
@@ -83,6 +120,47 @@ def _single_start(
         if fixed_nu is not None and raw.grad is not None:
             raw.grad[nu_slice] = 0.0
 
+    # Mot "chu ky" = Adam roi L-BFGS. Lap lai toi da `n_cycles` lan, dung
+    # ngay khi ||grad|| < 1 (tieu chi hoi tu o Muc 4.2). Ly do: tren du lieu
+    # that, mot chu ky duy nhat thuong dung lai o diem co ||grad|| rat lon --
+    # tuc L-BFGS dung tren vach chu khong tren dinh. Danh bong them vai chu ky
+    # KHONG doi bai toan uoc luong, chi co gang giai no ky hon.
+    for cycle in range(max(1, n_cycles)):
+        lr_cycle = lr_adam / (2.0 ** cycle)
+        _run_one_cycle(raw, config, r, X, n_adam, n_lbfgs, lr_cycle, filter_kwargs,
+                       verbose, seed, cycle, _mask_fixed_nu_grad)
+        with torch.no_grad():
+            probe, _ = _neg_loglik(raw, config, r, X, **filter_kwargs)
+        raw.grad = None
+        probe2, _ = _neg_loglik(raw, config, r, X, **filter_kwargs)
+        if torch.isfinite(probe2):
+            probe2.backward()
+            _mask_fixed_nu_grad()
+        gn = float(raw.grad.norm().item()) if raw.grad is not None else float("nan")
+        if verbose:
+            print(f"[seed={seed}] het chu ky {cycle}: nll={float(probe):.4f} ||grad||={gn:.4f}")
+        if gn == gn and gn < 1.0:
+            break
+
+    with torch.no_grad():
+        final_loss, out = _neg_loglik(raw, config, r, X, **filter_kwargs)
+    raw_grad = raw.grad
+    grad_norm = float(raw_grad.norm().item()) if raw_grad is not None else float("nan")
+    converged = bool(torch.isfinite(final_loss)) and grad_norm < 1.0
+    params = unpack_raw(raw.detach(), config)
+    diag = MLERunDiagnostics(
+        seed=seed,
+        loglik=float(-final_loss.item()),
+        converged=converged,
+        grad_norm=grad_norm,
+        near_boundary=_near_boundary(params),
+    )
+    return raw.detach(), float(-final_loss.item()), diag
+
+
+def _run_one_cycle(raw, config, r, X, n_adam, n_lbfgs, lr_adam, filter_kwargs,
+                   verbose, seed, cycle, _mask_fixed_nu_grad):
+    """Mot chu ky Adam roi L-BFGS, cap nhat `raw` tai cho."""
     opt = torch.optim.Adam([raw], lr=lr_adam)
     for it in range(n_adam):
         opt.zero_grad()
@@ -109,22 +187,25 @@ def _single_start(
         _mask_fixed_nu_grad()
         return loss
 
-    lbfgs.step(closure)
-
-    with torch.no_grad():
-        final_loss, out = _neg_loglik(raw, config, r, X, **filter_kwargs)
-    raw_grad = raw.grad
-    grad_norm = float(raw_grad.norm().item()) if raw_grad is not None else float("nan")
-    converged = bool(torch.isfinite(final_loss)) and grad_norm < 1.0
-    params = unpack_raw(raw.detach(), config)
-    diag = MLERunDiagnostics(
-        seed=seed,
-        loglik=float(-final_loss.item()),
-        converged=converged,
-        grad_norm=grad_norm,
-        near_boundary=_near_boundary(params),
-    )
-    return raw.detach(), float(-final_loss.item()), diag
+    raw_before_lbfgs = raw.detach().clone()
+    try:
+        lbfgs.step(closure)
+    except (IndexError, RuntimeError) as exc:
+        # torch.optim.LBFGS._strong_wolfe co the vo hieu (IndexError tren
+        # `bracket`) khi ham muc tieu tra ve NaN/Inf giua luc do duong -- xay
+        # ra khi mot buoc lon day tham so ra ngoai vung hop le. Closure o tren
+        # da luong truoc NaN nhung L-BFGS cua torch thi khong. Bat loi, quay
+        # ve nghiem cua giai doan Adam va danh dau diem khoi tao nay la KHONG
+        # hoi tu, thay vi lam sap ca qua trinh nhieu diem khoi tao.
+        print(f"[seed={seed}] L-BFGS that bai ({type(exc).__name__}: {exc}); "
+              f"giu nghiem cua giai doan Adam.")
+        with torch.no_grad():
+            raw.copy_(raw_before_lbfgs)
+        raw.grad = None
+        recomputed, _ = _neg_loglik(raw, config, r, X, **filter_kwargs)
+        if torch.isfinite(recomputed):
+            recomputed.backward()
+            _mask_fixed_nu_grad()
 
 
 def fit_mle(
@@ -140,6 +221,9 @@ def fit_mle(
     floor: float = 1e-8,
     verbose: bool = False,
     fixed_nu: float | None = None,
+    init_raws: list[torch.Tensor] | None = None,
+    n_cycles: int = 1,
+    select: str = "max_loglik",
 ) -> MLEResult:
     """Chay MLE voi `n_starts` diem khoi tao doc lap, giu nghiem tot nhat.
 
@@ -151,20 +235,42 @@ def fit_mle(
     de fit mo hinh doi chung B4 (MS-GARCH chuan) bang chinh khung MS-GARCH-X
     hien co, ma khong can mot mo hinh phan phoi chuan rieng.
     """
+    if select not in ("max_loglik", "regular"):
+        raise ValueError(f"select khong hop le: {select!r}")
     filter_kwargs = {"variance_link": variance_link, "floor": floor}
-    best_raw, best_loglik, best_diag = None, -float("inf"), None
-    runs = []
+    runs, ket_qua = [], []
     for i in range(n_starts):
+        iv = init_raws[i] if (init_raws is not None and i < len(init_raws)) else None
         raw, loglik, diag = _single_start(
             base_seed + i, config, r, X, n_adam, n_lbfgs, lr_adam, filter_kwargs, verbose,
-            fixed_nu=fixed_nu,
+            fixed_nu=fixed_nu, init_raw_vec=iv, n_cycles=n_cycles,
         )
         runs.append(diag)
-        if loglik > best_loglik and torch.isfinite(torch.tensor(loglik)):
-            best_raw, best_loglik, best_diag = raw, loglik, diag
+        if torch.isfinite(torch.tensor(loglik)):
+            ket_qua.append({"raw": raw, "loglik": loglik, "diag": diag,
+                            "params": unpack_raw(raw, config)})
 
-    if best_raw is None:
+    if not ket_qua:
         raise RuntimeError("Tat ca cac diem khoi tao MLE deu that bai (NaN/Inf).")
+
+    if select == "regular":
+        for k in ket_qua:
+            k["ok"], k["ly_do"] = kiem_tra_chinh_quy(k["params"])
+        chinh_quy = [k for k in ket_qua if k["diag"].converged and k["ok"]]
+        hoi_tu = [k for k in ket_qua if k["diag"].converged]
+        pool = chinh_quy or hoi_tu or ket_qua
+        if verbose and not chinh_quy:
+            print("[fit_mle] CANH BAO: khong diem khoi tao nao vua hoi tu vua chinh quy")
+    else:
+        pool = ket_qua
+
+    best = max(pool, key=lambda k: k["loglik"])
+    if verbose and select == "regular":
+        bo_qua = [k["loglik"] for k in ket_qua if k["loglik"] > best["loglik"]]
+        if bo_qua:
+            print(f"[fit_mle] da BO QUA {len(bo_qua)} nghiem log-hop-ly cao hon "
+                  f"(cao nhat {max(bo_qua):.4f}) vi khong thoa dieu kien chinh quy")
+    best_raw, best_loglik, best_diag = best["raw"], best["loglik"], best["diag"]
 
     params = unpack_raw(best_raw, config)
     with torch.no_grad():

@@ -36,15 +36,16 @@ def garch_forward(
     if h0 is None:
         h0 = torch.var(r).detach()
     eps = r - params.mu
+    # Toi uu toc do, khong doi cong thuc: eps^2 va gamma^T X_{t-1} cho moi t
+    # deu tinh duoc mot lan ngoai vong lap (xem ghi chu tuong tu o ms_garch.py).
+    eps_sq = eps * eps
+    gX = X @ params.gamma          # (T,)
     h_list = [h0]
+    h_prev = h0
     for t in range(1, T):
-        h_raw = (
-            params.omega
-            + params.alpha * eps[t - 1] ** 2
-            + params.beta * h_list[t - 1]
-            + X[t] @ params.gamma
-        )
-        h_list.append(positive_variance_link(h_raw, floor=floor, mode=variance_link))
+        h_raw = params.omega + params.alpha * eps_sq[t - 1] + params.beta * h_prev + gX[t]
+        h_prev = positive_variance_link(h_raw, floor=floor, mode=variance_link)
+        h_list.append(h_prev)
     return torch.stack(h_list)
 
 

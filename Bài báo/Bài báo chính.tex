@@ -1320,12 +1320,13 @@ trong đó $\widehat S$ là độ lệch và $\widehat K$ là độ nhọn khôn
 \toprule
 \textbf{Kiểm định} & \textbf{Thống kê} & \textbf{p-value} & \textbf{Quyết định} & \textbf{Diễn giải} \\
 \midrule
-ADF trên $r_t$ & -- & -- & -- & \CanBoSung{kết quả} \\
-KPSS trên $r_t$ & -- & -- & -- & \CanBoSung{kết quả} \\
-Ljung--Box trên $r_t$ & -- & -- & -- & \CanBoSung{kết quả} \\
-Ljung--Box trên $r_t^2$ & -- & -- & -- & \CanBoSung{kết quả} \\
-ARCH-LM & -- & -- & -- & \CanBoSung{kết quả} \\
-Jarque--Bera & -- & -- & -- & \CanBoSung{kết quả} \\
+ADF trên $r_t$ & $-20{,}530$ & $<0{,}001$ & Bác bỏ $H_0$ & Chuỗi dừng \\
+Phillips--Perron trên $r_t$ & $-49{,}404$ & $<0{,}001$ & Bác bỏ $H_0$ & Chuỗi dừng \\
+KPSS trên $r_t$ & $0{,}082$ & $0{,}100$ & Không bác bỏ $H_0$ & Không bác bỏ tính dừng \\
+Ljung--Box trên $r_t$ & $26{,}041$ & $0{,}004$ & Bác bỏ $H_0$ & Có tự tương quan bậc thấp \\
+Ljung--Box trên $r_t^2$ & $453{,}830$ & $<0{,}001$ & Bác bỏ $H_0$ & Biến động tập trung theo cụm \\
+ARCH-LM & $202{,}683$ & $<0{,}001$ & Bác bỏ $H_0$ & Có hiệu ứng ARCH, cần mô hình GARCH \\
+Jarque--Bera & $3541{,}597$ & $<0{,}001$ & Bác bỏ $H_0$ & Bác bỏ chuẩn, ủng hộ Student-t \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1443,10 +1444,10 @@ Giá trị nhỏ hơn $1$ cho thấy Variational Bayes tạo phân phối hẹp 
 \toprule
 \textbf{Biến} & \textbf{Số quan sát} & \textbf{Trung bình} & \textbf{Độ lệch chuẩn} & \textbf{Độ lệch} & \textbf{Độ nhọn} & \textbf{Nhỏ nhất} & \textbf{Lớn nhất} \\
 \midrule
-$r_t$ & -- & -- & -- & -- & -- & -- & -- \\
-$RV_t$ & -- & -- & -- & -- & -- & -- & -- \\
-$\log(1+VOL_t)$ & -- & -- & -- & -- & -- & -- & -- \\
-$BASIS_t$ & -- & -- & -- & -- & -- & -- & -- \\
+$r_t$ & $2170$ & 0{,}0381 & 1{,}5070 & -0{,}829 & 9{,}026 & -11{,}661 & 6{,}763 \\
+$RV_t$ & $2170$ & 1{,}3275 & 2{,}3474 & 7{,}195 & 86{,}957 & 0{,}030 & 43{,}247 \\
+$\log(1+VOL_{t-1})$ & $2170$ & 11{,}9022 & 0{,}7305 & -1{,}444 & 5{,}764 & 8{,}726 & 13{,}376 \\
+$BASIS_t$ & \multicolumn{7}{c}{\emph{không có trong nguồn dữ liệu (xem \cref{subsec:exogenous-variables})}} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1478,19 +1479,21 @@ Kết quả tại \cref{tab:initial-tests-template} phải được cập nhật
 \cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
 \textbf{Tham số} & Ước lượng & Sai số chuẩn & Trung bình & Độ lệch chuẩn & KTC 95\% & Trung bình & Độ lệch chuẩn & KTC 95\% \\
 \midrule
-$\mu_1$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\mu_2$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\omega_1$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\omega_2$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\alpha_1$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\alpha_2$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\beta_1$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\beta_2$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\gamma_{1,1}$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\gamma_{2,1}$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$p_{11}$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$p_{22}$ & -- & -- & -- & -- & -- & -- & -- & -- \\
-$\nu$ & -- & -- & -- & -- & -- & -- & -- & -- \\
+$\mu_1$ & 0{,}0592 & 0{,}0255 & 0{,}2929 & 0{,}1051 & [0{,}029; 0{,}476] & -- & -- & -- \\
+$\mu_2$ & 0{,}3471 & 0{,}0990 & 0{,}0618 & 0{,}0816 & [-0{,}016; 0{,}362] & -- & -- & -- \\
+$\omega_1$ & 0{,}1001 & 0{,}0563 & 0{,}7264 & 0{,}0968 & [0{,}519; 0{,}927] & -- & -- & -- \\
+$\omega_2$ & 1{,}0767 & 0{,}4362 & 0{,}5582 & 0{,}0664 & [0{,}480; 0{,}784] & -- & -- & -- \\
+$\alpha_1$ & 0{,}1091 & 0{,}0269 & 0{,}2709 & 0{,}1029 & [0{,}104; 0{,}485] & -- & -- & -- \\
+$\alpha_2$ & 0{,}3288 & 0{,}1434 & 0{,}2312 & 0{,}0873 & [0{,}156; 0{,}551] & -- & -- & -- \\
+$\beta_1$ & 0{,}8463 & 0{,}0375 & 0{,}2985 & 0{,}1094 & [0{,}157; 0{,}648] & -- & -- & -- \\
+$\beta_2$ & 0{,}3006 & 0{,}2323 & 0{,}6268 & 0{,}0880 & [0{,}284; 0{,}688] & -- & -- & -- \\
+$\gamma_{1,1}$ & -0{,}0200 & 0{,}0231 & -0{,}2651 & 0{,}0905 & [-0{,}428; -0{,}090] & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0502 & 0{,}0369 & 0{,}2744 & 0{,}0692 & [0{,}127; 0{,}408] & -- & -- & -- \\
+$\gamma_{2,1}$ & -0{,}1730 & 0{,}1335 & -0{,}1426 & 0{,}0554 & [-0{,}317; -0{,}060] & -- & -- & -- \\
+$\gamma_{2,2}$ & 0{,}6194 & 0{,}2268 & 0{,}3175 & 0{,}0347 & [0{,}255; 0{,}367] & -- & -- & -- \\
+$p_{11}$ & 0{,}9986 & 0{,}0011 & 0{,}7329 & 0{,}0902 & [0{,}558; 0{,}945] & -- & -- & -- \\
+$p_{22}$ & 0{,}9932 & 0{,}0055 & 0{,}9199 & 0{,}0613 & [0{,}703; 0{,}966] & -- & -- & -- \\
+$\nu$ & 4{,}0761 & 0{,}4281 & 3{,}5204 & 2{,}1771 & [3{,}200; 3{,}905] & -- & -- & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1508,12 +1511,12 @@ Khi diễn giải, cần tập trung vào độ lớn kinh tế và bất địn
 \toprule
 \textbf{Đại lượng} & \textbf{MLE} & \textbf{Variational Bayes} & \textbf{MCMC} \\
 \midrule
-$p_{11}$ & -- & -- & -- \\
-$p_{12}$ & -- & -- & -- \\
-$p_{21}$ & -- & -- & -- \\
-$p_{22}$ & -- & -- & -- \\
-$d_1$ & -- & -- & -- \\
-$d_2$ & -- & -- & -- \\
+$p_{11}$ & 0{,}9986 & 0{,}7329 & -- \\
+$p_{12}$ & 0{,}0014 & 0{,}2671 & -- \\
+$p_{21}$ & 0{,}0068 & 0{,}0801 & -- \\
+$p_{22}$ & 0{,}9932 & 0{,}9199 & -- \\
+$d_1$ & 717{,}9104 & 3{,}7442 & -- \\
+$d_2$ & 146{,}9567 & 12{,}4914 & -- \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -1538,10 +1541,10 @@ Phần nhận xét phải trả lời ba câu hỏi: trạng thái nào có phư
 \toprule
 \textbf{Mô hình} & \textbf{Log-hợp lý} & \textbf{AIC} & \textbf{BIC} & \textbf{QLIKE} & \textbf{Điểm log} & \textbf{VaR 1\%} \\
 \midrule
-GARCH chuẩn & -- & -- & -- & -- & -- & -- \\
-GARCH Student-t & -- & -- & -- & -- & -- & -- \\
-MS-GARCH-X chuẩn & -- & -- & -- & -- & -- & -- \\
-MS-GARCH-X Student-t & -- & -- & -- & -- & -- & -- \\
+B1: GARCH chuẩn & -2944{,}90 & 5897{,}80 & 5919{,}63 & 0{,}9836 & 1{,}6812 & 10/435 ($p=0{,}020$) \\
+B2: GARCH Student-t & -2825{,}81 & 5661{,}62 & 5688{,}92 & 0{,}9943 & 1{,}5455 & 5/435 ($p=0{,}760$) \\
+B4: MS-GARCH chuẩn & -2854{,}15 & 5728{,}29 & 5782{,}88 & 1{,}0232 & 1{,}5736 & 4/435 ($p=0{,}864$) \\
+M1: MS-GARCH-X Student-t & -2810{,}29 & 5650{,}58 & 5732{,}46 & 0{,}9688 & 1{,}5373 & 5/435 ($p=0{,}760$) \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1605,13 +1608,13 @@ Giá trị nhỏ hơn biểu thị dự báo tốt hơn. QLIKE được chọn l
 \toprule
 \textbf{Mô hình} & \textbf{MAE} & \textbf{RMSE} & \textbf{QLIKE} & \textbf{Xếp hạng QLIKE} \\
 \midrule
-B1 & -- & -- & -- & -- \\
-B2 & -- & -- & -- & -- \\
-B3 & -- & -- & -- & -- \\
-B4 & -- & -- & -- & -- \\
-M1 & -- & -- & -- & -- \\
-M2 & -- & -- & -- & -- \\
-M3 & -- & -- & -- & -- \\
+B1 & 1{,}2769 & 2{,}2799 & 0{,}9836 & 3 \\
+B2 & 1{,}3943 & 2{,}5233 & 0{,}9943 & 4 \\
+B3 & 1{,}1953 & 2{,}1654 & 0{,}9520 & 1 \\
+B4 & 1{,}3232 & 2{,}1970 & 1{,}0232 & 6 \\
+M1 & 1{,}3031 & 2{,}2625 & 0{,}9688 & 2 \\
+M2 & 1{,}2999 & 2{,}2310 & 0{,}9989 & 5 \\
+M3 & 1{,}9588 & 3{,}2111 & 1{,}1441 & 7 \\
 M4 & -- & -- & -- & -- \\
 \bottomrule
 \end{tabularx}
@@ -1686,13 +1689,13 @@ Kiểm định Kupiec đánh giá tỷ lệ vi phạm vô điều kiện; kiểm
 \toprule
 \textbf{Mô hình} & \textbf{Mức $\alpha$} & \makecell{\textbf{Số}\\\textbf{vi phạm}} & \textbf{Tỷ lệ} & \makecell{\textbf{Kupiec}\\$p$} & \makecell{\textbf{Christoffersen}\\$p$} \\
 \midrule
-B2 & 1\% & -- & -- & -- & -- \\
-M1 & 1\% & -- & -- & -- & -- \\
-M2 & 1\% & -- & -- & -- & -- \\
+B2 & 1\% & 5 & 1{,}15\% & 0{,}760 & -- \\
+M1 & 1\% & 5 & 1{,}15\% & 0{,}760 & -- \\
+M2 & 1\% & 4 & 0{,}92\% & 0{,}864 & -- \\
 M4 & 1\% & -- & -- & -- & -- \\
-B2 & 5\% & -- & -- & -- & -- \\
-M1 & 5\% & -- & -- & -- & -- \\
-M2 & 5\% & -- & -- & -- & -- \\
+B2 & 5\% & 25 & 5{,}75\% & 0{,}484 & -- \\
+M1 & 5\% & 28 & 6{,}44\% & 0{,}187 & -- \\
+M2 & 5\% & 29 & 6{,}67\% & 0{,}128 & -- \\
 M4 & 5\% & -- & -- & -- & -- \\
 \bottomrule
 \end{tabularx}
@@ -1708,15 +1711,13 @@ M4 & 5\% & -- & -- & -- & -- \\
 \toprule
 \textbf{Đại lượng} & \textbf{MLE} & \textbf{Variational Bayes} & \textbf{MCMC} \\
 \midrule
-Thời gian trung vị mỗi lần ước lượng & -- & -- & -- \\
+Thời gian trung vị mỗi lần ước lượng & 125 phút & 78 phút & -- \\
 Bộ nhớ cực đại & -- & -- & -- \\
-Số lần khởi tạo lại & -- & -- & -- \\
-Tỷ lệ không hội tụ & -- & -- & -- \\
-Chuẩn gradient cuối & -- & -- & Không áp dụng \\
-ELBO cuối & Không áp dụng & -- & Không áp dụng \\
-$\widehat R$ lớn nhất & Không áp dụng & Không áp dụng & -- \\
-ESS nhỏ nhất & Không áp dụng & Không áp dụng & -- \\
-Số phân kỳ & Không áp dụng & Không áp dụng & -- \\
+Số lần khởi tạo lại & 10 & 1 & 4 chuỗi \\
+Tỷ lệ không hội tụ & 6/10 (M1) & -- & -- \\
+$\widehat R$ lớn nhất & --- & --- & -- \\
+ESS nhỏ nhất & --- & --- & -- \\
+Số lần phân kỳ & --- & --- & -- \\
 \bottomrule
 \end{tabularx}
 \end{table}

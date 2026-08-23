@@ -1,0 +1,4 @@
+=== M2 | M2: MS-GARCH-X Student-t, VB mean-field ===
+Bat dau: 2026-08-19 21:25:02 | T_train = 1735
+[VB mean_field] step 0: ELBO=-2937.1128
+=== XONG M2 sau 0.6 phut -> results_mergetest\parts\m2.pt ===

@@ -17,8 +17,11 @@ import torch
 
 from msgarchx.models.ms_garch import MSGARCHXParams
 from msgarchx.transforms import (
+    ab_from_raw,
+    ab_init_center,
     nu_from_raw,
     p_from_raw,
+    raw_from_ab,
     raw_from_nu,
     raw_from_p,
 )
@@ -82,8 +85,8 @@ def unpack_raw(raw: torch.Tensor, config: ModelConfig) -> MSGARCHXParams:
     idx = param_slices(config)
     mu = raw[idx["mu"]]
     omega = torch.exp(raw[idx["log_omega"]])
-    alpha = torch.nn.functional.softplus(raw[idx["eta_alpha"]])
-    beta = torch.nn.functional.softplus(raw[idx["eta_beta"]])
+    alpha = ab_from_raw(raw[idx["eta_alpha"]])
+    beta = ab_from_raw(raw[idx["eta_beta"]])
     gamma = raw[idx["gamma"]].reshape(2, config.n_exog)
 
     p11 = p_from_raw(raw[idx["eta_p"]][0])
@@ -109,8 +112,8 @@ def pack_params(params: MSGARCHXParams, config: ModelConfig) -> torch.Tensor:
     parts = [
         params.mu,
         torch.log(params.omega),
-        torch.log(torch.expm1(params.alpha)),
-        torch.log(torch.expm1(params.beta)),
+        raw_from_ab(params.alpha),
+        raw_from_ab(params.beta),
         params.gamma.reshape(-1),
         torch.stack([raw_from_p(p11), raw_from_p(p22)]),
         eta_nu,
@@ -133,10 +136,64 @@ def init_raw(config: ModelConfig, seed: int | None = None) -> torch.Tensor:
     log_omega = torch.stack(
         [torch.log(torch.tensor(0.5)) + randn(()), torch.log(torch.tensor(2.0)) + randn(())]
     )
-    eta_alpha = randn(2, scale=0.3) - 1.5
-    eta_beta = randn(2, scale=0.3) + 1.0
+    c_alpha, c_beta = ab_init_center()
+    eta_alpha = randn(2, scale=0.3) + c_alpha
+    eta_beta = randn(2, scale=0.3) + c_beta
     gamma = randn(2 * config.n_exog, scale=0.05)
     eta_p = torch.stack([raw_from_p(torch.tensor(0.97)), raw_from_p(torch.tensor(0.95))]) + randn(2, scale=0.2)
     n_nu = 2 if config.state_specific_nu else 1
     eta_nu = raw_from_nu(torch.tensor(8.0)).expand(n_nu).clone() + randn(n_nu, scale=0.3)
     return torch.cat([mu, log_omega, eta_alpha, eta_beta, gamma, eta_p, eta_nu])
+
+
+# Bien the omega (thap, cao) va duong cheo P cho cac diem khoi tao AM.
+# Khong dat hai trang thai TRUNG KHIT nhau: ban thao canh bao rang khi do ham
+# hop ly doi xung qua phep hoan vi nhan va thuat toan gradient co the hoi tu
+# ve diem yen ngua ung voi cau hinh doi xung do (Muc 4.2).
+# (he so nhan omega, duong cheo P, quy tac dat nu tu nu cua mo hinh 1 trang thai)
+_BIEN_THE_AM = [
+    ((0.5, 2.0), (0.95, 0.95), lambda nu: nu),
+    ((0.25, 4.0), (0.98, 0.90), lambda nu: nu),
+    ((0.7, 1.5), (0.90, 0.85), lambda nu: max(nu, 6.0)),
+    ((0.4, 3.0), (0.99, 0.94), lambda nu: nu + 2.0),
+]
+
+
+def warm_starts_from_garch(garch_params, config: ModelConfig,
+                            n_variants: int = 4) -> list[torch.Tensor]:
+    """Sinh cac diem khoi tao AM cho mo hinh 2 trang thai tu nghiem MOT trang thai.
+
+    Bam theo chien luoc "khoi tao tuan tu theo thu bac mo hinh" ma ban thao yeu
+    cau (Muc 4.2): uoc luong B1 -> B2 -> B3 truoc, roi dung nghiem mot trang
+    thai do khoi tao mo hinh hai trang thai bang cach NHAN DOI bo tham so va
+    tach hai ban sao ra bang cach nhan omega len/xuong.
+
+    `garch_params` la GARCHParams (mu, omega, alpha, beta, gamma, nu vo huong).
+    """
+    from msgarchx.models.ms_garch import MSGARCHXParams
+
+    k = config.n_exog
+    if k and garch_params.gamma.numel() == k:
+        gam = garch_params.gamma.reshape(1, k).expand(2, k).clone()
+    else:
+        gam = torch.zeros(2, k)
+    nu0 = float(garch_params.nu.item()) if garch_params.nu is not None else 8.0
+    mu0 = float(garch_params.mu.item())
+    om0 = float(garch_params.omega.item())
+    al0 = max(float(garch_params.alpha.item()), 1e-3)
+    be0 = max(float(garch_params.beta.item()), 1e-3)
+
+    out = []
+    for (w_lo, w_hi), (p11, p22), nu_rule in _BIEN_THE_AM[:n_variants]:
+        nu_i = float(nu_rule(nu0))
+        params = MSGARCHXParams(
+            mu=torch.tensor([mu0, mu0]),
+            omega=torch.tensor([om0 * w_lo, om0 * w_hi]),
+            alpha=torch.tensor([al0, al0]),
+            beta=torch.tensor([be0, be0]),
+            gamma=gam,
+            P=torch.tensor([[p11, 1.0 - p11], [1.0 - p22, p22]]),
+            nu=torch.tensor(nu_i if not config.state_specific_nu else [nu_i, nu_i]),
+        )
+        out.append(pack_params(params, config))
+    return out

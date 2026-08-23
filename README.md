@@ -86,7 +86,7 @@ trong bản thảo.
 | $\bar\varepsilon_t$ | Phần dư thu gọn | $\mathbb{R}$ |
 | $\boldsymbol{\theta}$ | Vector tham số ở miền hợp lệ | $\Theta$ |
 | $\tilde{\boldsymbol{\theta}}$ | Vector tham số **không ràng buộc** | $\mathbb{R}^d$ |
-| $d$ | Số chiều của vector tham số | 13 với $k=2$ |
+| $d$ | Số chiều của vector tham số | 15 với $k=2$ |
 | $\ell_T(\boldsymbol{\theta})$ | Log-hàm hợp lý | $\mathbb{R}$ |
 | $\mathcal{I}_{t}$ | Tập thông tin đến thời điểm $t$ | — |
 | $\mathcal{D}_T$ | Toàn bộ dữ liệu quan sát | — |
@@ -430,6 +430,18 @@ $\tilde{\boldsymbol{\theta}}\in\mathbb{R}^d$. Các phép biến đổi:
 
 trong đó $\operatorname{softplus}(x)=\log(1+e^x)$.
 
+> **Hai sai lệch giữa bản thảo và cài đặt, cần sửa ở bản thảo:**
+>
+> 1. `Bài báo chính.tex` (eq:variance-coef-transform) viết $\omega_s=\operatorname{softplus}(\eta_{\omega,s})$,
+>    nhưng cài đặt dùng $\omega_s=\exp(\tilde\omega_s)$. Cả hai đều bảo đảm $\omega_s>0$, nhưng
+>    $\exp$ mới nhất quán với tiền nghiệm $\mathrm{LogNormal}$ ở Mục 7.2 (vì
+>    $\mathrm{LogNormal}$ tương đương $\log\omega_s\sim\mathcal{N}$).
+> 2. Bản thảo yêu cầu ngưỡng hội tụ $\lVert\nabla\ell_T\rVert<10^{-6}$; cài đặt dùng $<1$.
+>    Ngoài ra $\lVert\nabla\rVert$ trên thang không ràng buộc **gây hiểu nhầm khi nghiệm nằm
+>    sát biên**: Jacobian của phép biến đổi triệt tiêu ở biên nên chuẩn gradient nhỏ đi một
+>    cách giả tạo. Nên kiểm tra thêm gradient trên thang tự nhiên.
+
+
 Vector không ràng buộc được xếp theo thứ tự cố định:
 
 $$\tilde{\boldsymbol{\theta}} = \big(
@@ -442,7 +454,7 @@ $$\tilde{\boldsymbol{\theta}} = \big(
 \eta_\nu\big)^\top.$$
 
 Số chiều: $d = 8 + 2k + 2 + n_\nu$, với $n_\nu=1$ (mô hình chính) hoặc $2$ (R1).
-Với $k=2$: $d=13$.
+Với $k=2$: $d=15$.
 
 ### 6.2 Bảo đảm phương sai dương
 
@@ -493,6 +505,37 @@ Mỗi điểm khởi tạo ghi lại bốn chẩn đoán:
 
 So sánh log-hợp-lý giữa các điểm khởi tạo là cách kiểm tra tính đa đỉnh: nếu tất
 cả hội tụ về cùng một giá trị, bằng chứng nghiêng về đơn đỉnh.
+
+**Khởi tạo ấm theo thứ bậc mô hình.** Điểm khởi tạo không chỉ là nhiễu ngẫu
+nhiên. Nghiệm của mô hình một trạng thái được nhân đôi thành hai trạng thái rồi
+tách ra bằng cách nhân $\omega$ lên/xuống: B1 dùng để khởi tạo B4, B3 dùng để
+khởi tạo M1 (`param_spec.warm_starts_from_garch`). Hai trạng thái **không** được
+khởi tạo trùng khít, vì khi đó hàm hợp lý đối xứng qua phép hoán vị nhãn và
+thuật toán gradient có nguy cơ hội tụ về điểm yên ngựa ứng với cấu hình đối xứng.
+
+**Chọn nghiệm: cực đại địa phương lớn nhất thỏa điều kiện chính quy.** Hàm hợp lý
+của mô hình chuyển trạng thái có **đỉnh giả** với giá trị tùy ý cao: một trạng
+thái thoái hóa thành "bẫy bắt điểm ngoại lệ" chỉ tồn tại đúng một phiên sẽ kéo
+log-hợp-lý lên mà không mang ý nghĩa kinh tế nào. Đây là bệnh đã biết của lớp mô
+hình hỗn hợp, không phải lỗi cài đặt. Vì vậy `fit_mle(select="regular")` áp ba
+điều kiện (`mle.kiem_tra_chinh_quy`):
+
+| Mã | Điều kiện | Ý nghĩa |
+|---|---|---|
+| C1 | $\lVert
+abla\ell_TVert < 1$ | đã hội tụ |
+| C2 | $d_s = 1/(1-p_{ss}) \ge 2$ phiên | mỗi trạng thái là một **chế độ**, không phải cú sốc đơn lẻ |
+| C3 | $0{,}01 < p_{ss} < 0{,}999$ | không nằm sát biên |
+
+Cố ý **không** áp $lpha_s+eta_s<1$ cho từng trạng thái: trong MS-GARCH một
+chế độ riêng lẻ được phép nổ mà quá trình tổng thể vẫn dừng, nên đó sẽ là ràng
+buộc do người nghiên cứu tự đặt chứ không phải yêu cầu lý thuyết.
+
+Trên dữ liệu VN30F1M, quy tắc này có hiệu lực thật sự: với M1, 6/9 điểm khởi tạo
+cho log-hợp-lý **cao hơn** nghiệm được chọn nhưng đều có $d_spprox 1{,}0$ phiên;
+với B4 là 6/10. Nếu chọn theo log-hợp-lý cao nhất thì cả hai mô hình đều báo cáo
+nghiệm suy biến, và kết luận về câu hỏi RQ2 sẽ đảo ngược.
+
 
 **Tiêu chí thông tin.** Với $k_{\text{th}}$ là số tham số tự do:
 

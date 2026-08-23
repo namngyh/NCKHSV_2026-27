@@ -1,0 +1,19 @@
+=== B3 | B3: GARCH-X Student-t                    (1 trang thai, MLE) ===
+Bat dau: 2026-08-19 21:29:23 | T_train = 1735
+  [seed=0] adam 0: nll=15332.2180
+  [seed=0] adam 200: nll=2817.4346
+  [seed=0] adam 400: nll=2817.4359
+  [seed=1] adam 0: nll=212290.0632
+  [seed=1] adam 200: nll=2817.4422
+  [seed=1] adam 400: nll=2817.6712
+  [seed=2] adam 0: nll=180218.3764
+  [seed=2] adam 200: nll=2817.4347
+  [seed=2] adam 400: nll=2817.4363
+  [seed=3] adam 0: nll=214530.7592
+  [seed=3] adam 200: nll=2817.4507
+  [seed=3] adam 400: nll=2817.5087
+  [seed=4] adam 0: nll=inf
+  [seed=5] adam 0: nll=159832.1600
+  [seed=5] adam 200: nll=2817.4346
+  [seed=5] adam 400: nll=2817.4397
+=== XONG B3 sau 14.6 phut -> results_dryrun\parts\b3.pt ===
