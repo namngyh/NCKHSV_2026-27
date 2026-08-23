@@ -260,6 +260,62 @@ def bang_chi_phi(timing, mcmc) -> list:
     ]
 
 
+# ============================================================
+# Hinh: thay khung cho bang lenh includegraphics
+# ============================================================
+HINH_CAN_THAY = {
+    "fig:price-return-rv-placeholder": "gia_loi_suat_rv",
+    "fig:state-prob-placeholder": "xac_suat_trang_thai",
+    "fig:pit-placeholder": "pit",
+}
+THU_MUC_HINH = ROOT.parent / "Bài báo" / "hinh"
+
+
+def _thay_mot_hinh(tex: str, label: str, ten_tep: str):
+    r"""Thay khoi \fbox{\parbox...} bang \includegraphics trong figure co `label`."""
+    if not (THU_MUC_HINH / f"{ten_tep}.pdf").exists():
+        return tex, False
+    i = tex.index(r"\label{" + label + "}")
+    dau = tex.rindex(r"\begin{figure}", 0, i)
+    cuoi = tex.index(r"\end{figure}", i)
+    khoi = tex[dau:cuoi]
+    if r"\includegraphics" in khoi:
+        return tex, False
+    a = khoi.index(r"\fbox{")
+    b = khoi.index(r"\caption{", a)
+    chen = r"\includegraphics[width=\textwidth]{hinh/" + ten_tep + ".pdf}\n"
+    return tex[:dau] + khoi[:a] + chen + khoi[b:] + tex[cuoi:], True
+
+
+HINH_PHAN_PHOI = r"""
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{hinh/phan_phoi_loi_suat.pdf}
+\caption{Phân phối lợi suất chuẩn hóa của VN30F1M. Trái: histogram trên thang
+logarit kèm mật độ chuẩn và mật độ Student-t chuẩn hóa ước lượng từ B2. Phải:
+đồ thị Q--Q so với Student-t chuẩn hóa. Cả hai cho thấy đuôi thực nghiệm dày
+hơn hẳn phân phối chuẩn.}
+\label{fig:phan-phoi-loi-suat}
+\end{figure}"""
+
+
+def thay_hinh(tex: str) -> str:
+    for label, ten in HINH_CAN_THAY.items():
+        try:
+            tex, ok = _thay_mot_hinh(tex, label, ten)
+            print(f"  [{'da chen hinh' if ok else 'bo qua'}] {label} -> hinh/{ten}.pdf")
+        except ValueError:
+            print(f"  [LOI] khong tim thay {label}")
+    # Histogram + Q--Q chua co cho san trong ban thao -> chen sau bang thong ke mo ta
+    if (THU_MUC_HINH / "phan_phoi_loi_suat.pdf").exists() and "phan_phoi_loi_suat" not in tex:
+        j = tex.index(r"\label{tab:descriptive-template}")
+        k = tex.index(r"\end{table}", j) + len(r"\end{table}")
+        tex = tex[:k] + HINH_PHAN_PHOI + tex[k:]
+        print("  [da chen hinh] fig:phan-phoi-loi-suat (hinh moi)")
+    return tex
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -291,6 +347,7 @@ def main() -> int:
     ]
 
     tex = TEX.read_text(encoding="utf-8")
+    tex = thay_hinh(tex)
     n_sua = 0
     for label, rows in cong_viec:
         if rows is None:
