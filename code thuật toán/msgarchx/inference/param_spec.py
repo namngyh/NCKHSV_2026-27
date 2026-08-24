@@ -51,8 +51,22 @@ class PriorConfig:
     """
 
     sigma_mu: float = 1.0
+
+    # Ho tien nghiem cua omega_s:
+    #   "lognormal"   -- dac ta cua ban thao (eq:prior-omega), tuong duong
+    #                    log(omega_s) ~ N(m_omega, sigma_omega^2).
+    #   "half_cauchy" -- bien the PHAN TICH DO NHAY. LogNormal(0,1) co mat do
+    #                    tien ve 0 khi omega -> 0, nen ep manh cac gia tri nho:
+    #                    uoc luong omega_1 = 0,100 nam o phan vi 1,1% cua no.
+    #                    half-Cauchy co mat do HUU HAN DUONG tai 0 (2/(pi*s))
+    #                    nen khong ghi lai (Gelman 2006). Danh doi: duoi phai
+    #                    rat nang, P(omega>100) lon gap ~3000 lan.
+    #  LUU Y khi dung voi MCMC: nen tham so hoa lai theo kieu Stan,
+    #  omega = s*tan(pi*u/2) voi u ~ U(0,1), neu khong hinh hoc se xau di.
+    omega_prior: str = "lognormal"
     m_omega: float = 0.0
     sigma_omega: float = 1.0
+    omega_hc_scale: float = 1.0
     alpha_beta_concentration: float = 2.0
     sigma_gamma: float = 1.0
     transition_prior_stay: float = 8.0

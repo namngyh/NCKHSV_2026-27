@@ -1,0 +1,17 @@
+[2026-08-23 15:52:17] [omega_hc] bat dau -- omega_s ~ half-Cauchy(0; 1)
+[VB mean_field] step 0: ELBO=-2937.5643
+[VB mean_field] step 200: ELBO=-2893.0776
+[VB mean_field] step 400: ELBO=-2876.9856
+[VB mean_field] step 600: ELBO=-2860.4307
+[VB mean_field] step 800: ELBO=-2873.2084
+[VB mean_field] step 1000: ELBO=-2863.4929
+[VB mean_field] step 1200: ELBO=-2862.7581
+[VB mean_field] step 1400: ELBO=-2859.3392
+[VB mean_field] step 1600: ELBO=-2860.6341
+[VB mean_field] step 1800: ELBO=-2885.3932
+[VB mean_field] step 2000: ELBO=-2857.0262
+[VB mean_field] step 2200: ELBO=-2878.9303
+[VB mean_field] step 2400: ELBO=-2859.1144
+[VB mean_field] step 2600: ELBO=-2898.2725
+[VB mean_field] step 2800: ELBO=-2867.8336
+[2026-08-23 18:36:01] [omega_hc] xong sau 163.7 phut, ELBO cuoi = -2867.32

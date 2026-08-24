@@ -101,6 +101,10 @@ def _run_one_method(
         return SimulationReplicationResult(method, est, lo, hi, brier_state(out["xi_filt"].numpy(), true_state.numpy()))
 
     if method == "mcmc":
+        # verbose=True de thanh tien trinh tqdm ghi ra nhat ky: khong co no
+        # thi mot lan lap MCMC chay HANG CHUC GIO ma khong in gi, khong biet
+        # dang o dau va con bao lau.
+        kwargs.setdefault("verbose", True)
         res = fit_mcmc(r, X, config, seed=seed, **kwargs)
         mean_params = _params_from_summary_mean(res.summary, config)
         with torch.no_grad():

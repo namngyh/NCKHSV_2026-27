@@ -1,6 +1,6 @@
 ==============================================================================
 TOM TAT KET QUA UOC LUONG -- MS-GARCH-X Student-t cho VN30F1M
-Sinh luc: 2026-08-20 22:13:02
+Sinh luc: 2026-08-24 09:59:31
 Thu muc ket qua: C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results
 ==============================================================================
 
@@ -250,6 +250,130 @@ R1  MS-GARCH-X, nu_s rieng theo trang thai, VB mean-field
   => thoi gian chay: 76.2 phut
 
 ==============================================================================
+PHAN 3 -- DO NHAY VOI TIEN NGHIEM
+==============================================================================
+
+  Cau hoi: ket luan co doi khi doi ho tien nghiem khong? Chi dung VB
+  mean-field vi day la cau hoi ve DO ON DINH, khong phai ve do chinh xac
+  cua hau nghiem.
+
+    ca_hai     = half-Cauchy cho omega VA Beta(20,2) cho p_ss
+    omega_hc   = omega_s ~ half-Cauchy(0; 1)
+    p_chat     = p_ss ~ Beta(20,2)
+    goc        = dac ta ban thao (M2 trong pipeline chinh)
+
+  Tham so             ca_hai      omega_hc        p_chat           goc
+  omega_1             0.6089        0.5440        0.5967        0.7264
+  omega_2             0.8620        0.6611        0.8519        0.5582
+  alpha_1             0.1058        0.1831        0.1280        0.2709
+  alpha_2             0.2293        0.2670        0.5178        0.2312
+  beta_1              0.3963        0.4164        0.5104        0.2985
+  beta_2              0.7334        0.6635        0.7469        0.6268
+  p11                 0.9632        0.7639        0.9858        0.7329
+  p22                 0.9236        0.8963        0.8748        0.9199
+  nu                  4.1015        3.2017        3.9575        3.5204
+  ELBO cuoi         -2863.72      -2867.32      -2856.66      -2863.16
+  % doi nhan         100.0%         0.1%       100.0%         6.6%
+
+  LUU Y 1: ELBO cua cac bien the KHONG so sanh truc tiep duoc voi nhau,
+           vi chung la can duoi cua log bang chung duoi CAC MO HINH
+           XAC SUAT KHAC NHAU.
+  LUU Y 2: neu tham so thay doi nhieu qua cac tien nghiem thi du lieu
+           KHONG lan at duoc tien nghiem -- mo hinh duoc nhan dang yeu,
+           va so sanh MLE voi VB/MCMC (RQ3, RQ4) bi nhieu boi chinh lua
+           chon tien nghiem. Phai khai bao dieu nay trong bai bao.
+
+==============================================================================
+PHAN 4 -- CHAN DOAN MCMC (NUTS)
+==============================================================================
+
+  Lan 1: ma tran khoi luong DUONG CHEO, warmup 250, khoi tao tu tien nghiem
+    4 chuoi x 400 mau = 1600 mau hau nghiem
+    R-hat lon nhat = 4.0601   (yeu cau < 1,01)
+    ESS nho nhat   = 4.4
+    So lan phan ky = 14
+    KET LUAN: KHONG DAT -- mau KHONG dung duoc
+
+    R-hat theo tung tham so:
+      mu               3.3433   ESS = 4.5
+      omega            3.3918   ESS = 4.5
+      alpha            3.7634   ESS = 4.4
+      beta             3.5078   ESS = 4.5
+      gamma            3.3459   ESS = 4.5
+      p11              4.0601   ESS = 4.4
+      p22              3.4267   ESS = 4.5
+      nu               3.7612   ESS = 4.4
+
+  Lan 2: ma tran khoi luong DAC, warmup 1000, khoi tao tu nghiem MLE chinh quy
+    -> chua co ket qua (dang chay hoac chua chay)
+
+  GHI CHU: da kiem tra rieng xem R-hat lon co phai do DOI NHAN TRANG
+  THAI gay ra khong. Voi lan 1: sap xep lai nhan cho tung mau chi dua
+  R-hat tu 4,0601 xuong 4,0516 -- KHONG phai nguyen nhan. Do phan tan
+  GIUA cac chuoi lon gap 10-800 lan do phan tan TRONG tung chuoi, tuc
+  moi chuoi dung yen tai mot diem khac nhau.
+
+==============================================================================
+PHAN 5 -- NGHIEN CUU MO PHONG
+==============================================================================
+
+  CANH BAO: gia tri tham so cua 8 kich ban hien la GIA TRI VI DU, chua
+  duoc chot (tab:simulation-scenarios trong ban thao van la CanBoSung).
+  Ket qua duoi day dung ve mat tinh toan nhung cho mot thiet ke CHUA CHOT.
+
+  --- Kich ban S1 ---
+    mle              29 lan lap   Brier trung binh = 0.4851
+      tham so           bias        RMSE
+      omega1          0.2086      0.5814
+      omega2          0.6852      1.2431
+      alpha1          0.0278      0.0567
+      alpha2          0.0312      0.0959
+      beta1          -0.1376      0.1876
+      beta2          -0.1330      0.2376
+      p11            -0.0222      0.0324
+      p22            -0.0469      0.0532
+      nu             -1.3254      1.7682
+    vb_mean_field    15 lan lap   Brier trung binh = 0.5414
+      tham so           bias        RMSE    coverage
+      omega1          0.1483      0.1611       0.000
+      omega2         -0.2022      0.2130       0.133
+      alpha1          0.2818      0.2924       0.000
+      alpha2          0.2399      0.2532       0.000
+      beta1          -0.1762      0.1830       0.000
+      beta2          -0.1303      0.1421       0.000
+      p11            -0.2205      0.2293       0.000
+      p22            -0.2367      0.2496       0.000
+      nu             -4.0213      4.1406       0.000
+
+  --- Kich ban S2 ---
+    mle              29 lan lap   Brier trung binh = 0.6328
+      tham so           bias        RMSE
+      omega1          0.1062      0.3003
+      omega2          0.6099      0.9750
+      alpha1         -0.0188      0.0371
+      alpha2          0.0326      0.1292
+      beta1          -0.0572      0.1453
+      beta2          -0.1819      0.3548
+      p11            -0.0275      0.0460
+      p22            -0.1143      0.1620
+      nu              0.9200      2.0993
+    vb_mean_field    8 lan lap   Brier trung binh = 0.5391
+      tham so           bias        RMSE    coverage
+      omega1          0.3799      0.3881       0.000
+      omega2          0.3114      0.3218       0.000
+      alpha1          0.0674      0.0761       0.500
+      alpha2          0.0792      0.1016       0.375
+      beta1          -0.3892      0.3937       0.000
+      beta2          -0.3594      0.3641       0.000
+      p11            -0.2205      0.2243       0.000
+      p22            -0.2160      0.2235       0.000
+      nu             -1.0136      1.1903       0.875
+
+  Coverage chi tinh duoc cho VB va MCMC (co khoang tin cay truc tiep tu
+  hau nghiem). Gia tri ly tuong la 0,95; thap hon dang ke nghia la phuong
+  phap danh gia THAP do bat dinh.
+
+==============================================================================
 CHI PHI TINH TOAN
 ==============================================================================
 
@@ -257,6 +381,7 @@ CHI PHI TINH TOAN
   02_mle                      623.9 phut  (37436 giay)
   03_vb                       155.1 phut  (9306 giay)
   05_r1                        76.2 phut  (4573 giay)
+  06_oos                       19.8 phut  (1187 giay)
   model_b1                     13.6 phut  (816 giay)
   model_b2                     13.7 phut  (820 giay)
   model_b3                     14.6 phut  (874 giay)
@@ -265,7 +390,7 @@ CHI PHI TINH TOAN
   model_m2                     77.9 phut  (4672 giay)
   model_m3                     77.2 phut  (4634 giay)
   model_r1                     76.2 phut  (4573 giay)
-  TONG (cong don, khong ke chay song song)   1710.5 phut
+  TONG (cong don, khong ke chay song song)   1730.3 phut
 
 ==============================================================================
 CAC BUOC CHUA CHAY

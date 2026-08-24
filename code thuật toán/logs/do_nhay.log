@@ -1,0 +1,31 @@
+[2026-08-23 15:52:06] Chay 3 bien the tren toi da 3 tien trinh: ['omega_hc', 'p_chat', 'ca_hai']
+[2026-08-23 15:52:06]   bat dau omega_hc (pid 8836)
+[2026-08-23 15:52:07]   bat dau p_chat (pid 5404)
+[2026-08-23 15:52:07]   bat dau ca_hai (pid 26396)
+[2026-08-23 18:36:06]   XONG omega_hc
+[2026-08-23 18:36:51]   XONG ca_hai
+[2026-08-23 18:41:52]   XONG p_chat
+
+====================================================================================
+  DO NHAY VOI TIEN NGHIEM -- trung binh hau nghiem (da sap xep nhan trang thai)
+====================================================================================
+
+  Tham so              omega_hc           p_chat           ca_hai              goc
+  omega_1                0.5440           0.5967           0.6089           0.7264
+  omega_2                0.6611           0.8519           0.8620           0.5582
+  alpha_1                0.1831           0.1280           0.1058           0.2709
+  alpha_2                0.2670           0.5178           0.2293           0.2312
+  beta_1                 0.4164           0.5104           0.3963           0.2985
+  beta_2                 0.6635           0.7469           0.7334           0.6268
+  p11                    0.7639           0.9858           0.9632           0.7329
+  p22                    0.8963           0.8748           0.9236           0.9199
+  nu                     3.2017           3.9575           4.1015           3.5204
+
+  ELBO cuoi            -2867.32         -2856.66         -2863.72         -2863.16
+  % doi nhan              0.1%          100.0%          100.0%            6.6%
+  phut chay               163.7            169.5            164.5              nan
+
+  LUU Y: ELBO cua cac bien the KHONG so sanh truc tiep duoc voi nhau vi
+  chung la can duoi cua log bang chung duoi CAC MO HINH XAC SUAT KHAC NHAU.
+  Cai can doc la tham so uoc luong co ON DINH qua cac tien nghiem hay khong.
+

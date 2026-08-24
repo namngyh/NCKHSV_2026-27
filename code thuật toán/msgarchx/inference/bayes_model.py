@@ -32,10 +32,13 @@ def model(
     k = config.n_exog
 
     mu = pyro.sample("mu", dist.Normal(0.0, prior.sigma_mu).expand([2]).to_event(1))
-    omega = pyro.sample(
-        "omega",
-        dist.LogNormal(prior.m_omega, prior.sigma_omega).expand([2]).to_event(1),
-    )
+    if prior.omega_prior == "half_cauchy":
+        omega_dist = dist.HalfCauchy(prior.omega_hc_scale)
+    elif prior.omega_prior == "lognormal":
+        omega_dist = dist.LogNormal(prior.m_omega, prior.sigma_omega)
+    else:
+        raise ValueError(f"omega_prior khong hop le: {prior.omega_prior!r}")
+    omega = pyro.sample("omega", omega_dist.expand([2]).to_event(1))
     a = prior.alpha_beta_concentration
     alpha = pyro.sample("alpha", dist.Beta(a, a).expand([2]).to_event(1))
     beta = pyro.sample("beta", dist.Beta(a, a).expand([2]).to_event(1))

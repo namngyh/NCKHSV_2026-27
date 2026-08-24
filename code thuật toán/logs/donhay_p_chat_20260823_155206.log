@@ -1,0 +1,17 @@
+[2026-08-23 15:52:18] [p_chat] bat dau -- p_ss ~ Beta(20,2)
+[VB mean_field] step 0: ELBO=-2948.1445
+[VB mean_field] step 200: ELBO=-2876.7245
+[VB mean_field] step 400: ELBO=-2865.0294
+[VB mean_field] step 600: ELBO=-2869.0056
+[VB mean_field] step 800: ELBO=-2872.7847
+[VB mean_field] step 1000: ELBO=-2895.0271
+[VB mean_field] step 1200: ELBO=-2857.8569
+[VB mean_field] step 1400: ELBO=-2857.8135
+[VB mean_field] step 1600: ELBO=-2857.0904
+[VB mean_field] step 1800: ELBO=-2856.0564
+[VB mean_field] step 2000: ELBO=-2860.2884
+[VB mean_field] step 2200: ELBO=-2857.5127
+[VB mean_field] step 2400: ELBO=-2860.8557
+[VB mean_field] step 2600: ELBO=-2851.6877
+[VB mean_field] step 2800: ELBO=-2857.8408
+[2026-08-23 18:41:49] [p_chat] xong sau 169.5 phut, ELBO cuoi = -2856.66

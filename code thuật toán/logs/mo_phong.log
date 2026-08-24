@@ -1,3 +1,33 @@
 [2026-08-23 11:23:36] Se chay 384 lan lap tren 4 tien trinh song song
 [2026-08-23 11:23:36]   kich ban: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8']
 [2026-08-23 11:23:36]   phuong phap: ['mle', 'vb_mean_field', 'mcmc']
+[2026-08-23 11:48:56]   tien do: 5 xong, 376 con lai, ~5.1 phut/lan lap, con ~7.9 gio
+[2026-08-23 12:15:07]   tien do: 10 xong, 371 con lai, ~5.2 phut/lan lap, con ~8.0 gio
+[2026-08-23 12:50:51]   tien do: 15 xong, 366 con lai, ~5.8 phut/lan lap, con ~8.9 gio
+[2026-08-23 13:28:34]   tien do: 20 xong, 361 con lai, ~6.2 phut/lan lap, con ~9.4 gio
+[2026-08-23 14:30:27]   tien do: 25 xong, 359 con lai, ~7.5 phut/lan lap, con ~11.2 gio
+[2026-08-23 14:30:57]   LOI S1_mle_28 (ma thoat 1)
+[2026-08-23 14:30:57]   tien do: 26 xong, 358 con lai, ~7.2 phut/lan lap, con ~10.7 gio
+[2026-08-23 14:46:48]   tien do: 30 xong, 351 con lai, ~6.8 phut/lan lap, con ~9.9 gio
+[2026-08-23 16:02:17]   tien do: 35 xong, 346 con lai, ~8.0 phut/lan lap, con ~11.5 gio
+[2026-08-23 17:01:26]   tien do: 40 xong, 341 con lai, ~8.4 phut/lan lap, con ~12.0 gio
+[2026-08-23 18:11:52]   tien do: 45 xong, 336 con lai, ~9.1 phut/lan lap, con ~12.7 gio
+[2026-08-23 20:21:23]   tien do: 50 xong, 334 con lai, ~10.8 phut/lan lap, con ~15.0 gio
+[2026-08-23 23:14:56]   tien do: 55 xong, 329 con lai, ~12.9 phut/lan lap, con ~17.7 gio
+[2026-08-24 02:00:57]   tien do: 60 xong, 324 con lai, ~14.6 phut/lan lap, con ~19.7 gio
+[2026-08-24 03:35:47]   tien do: 65 xong, 319 con lai, ~15.0 phut/lan lap, con ~19.9 gio
+[2026-08-24 05:23:48]   tien do: 70 xong, 314 con lai, ~15.4 phut/lan lap, con ~20.2 gio
+[2026-08-24 06:20:28]   LOI S2_mle_28 (ma thoat 1)
+[2026-08-24 06:20:28]   tien do: 74 xong, 310 con lai, ~15.4 phut/lan lap, con ~19.8 gio
+[2026-08-24 06:31:38]   tien do: 75 xong, 309 con lai, ~15.3 phut/lan lap, con ~19.7 gio
+[2026-08-24 08:36:29]   tien do: 80 xong, 304 con lai, ~15.9 phut/lan lap, con ~20.2 gio
+Traceback (most recent call last):
+  File "C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\scripts\chay_mo_phong_song_song.py", line 255, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\scripts\chay_mo_phong_song_song.py", line 249, in main
+    rc = _spawn(tasks, args.jobs, "sim", args.preset)
+  File "C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\scripts\chay_mo_phong_song_song.py", line 179, in _spawn
+    fh = open(log_dir / f"{tag}_{name}_{stamp}.log", "w", encoding="utf-8",
+              errors="replace")
+PermissionError: [Errno 13] Permission denied: 'C:\\Users\\Admin\\Desktop\\nam\\MS GARCH X t-student\\MS-GARCH-X-t-student-with-MCMC-VB-MLE\\code thuật toán\\logs\\sim_S2_vb_mean_field_8_20260823_112336.log'

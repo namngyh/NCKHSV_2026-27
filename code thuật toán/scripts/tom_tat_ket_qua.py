@@ -25,6 +25,7 @@ sys.path.insert(0, str(ROOT))
 
 import torch
 
+from msgarchx.inference.summary import posterior_summary, relabel_posterior_samples
 from msgarchx.models.ms_garch import (
     MSGARCHXParams,
     expected_duration,
@@ -48,6 +49,17 @@ VB_LABELS = {
     "m3": "M3  MS-GARCH-X Student-t, VB full-rank",
     "r1": "R1  MS-GARCH-X, nu_s rieng theo trang thai, VB mean-field",
 }
+
+
+def f(x, nd=4):
+    """Dinh dang mot so vo huong; tra ve '--' khi thieu hoac NaN."""
+    if x is None:
+        return "--"
+    try:
+        x = float(x)
+    except (TypeError, ValueError):
+        return "--"
+    return "--" if x != x else f"{x:.{nd}f}"
 
 
 def _v(t, nd=4):
@@ -230,6 +242,142 @@ def _vb_block(name: str, res, meta: dict, r=None, X=None) -> list[str]:
     return L + [""]
 
 
+# ============================================================
+# Phan bo sung: do nhay tien nghiem, chan doan MCMC, mo phong
+# ============================================================
+def _muc_do_nhay(rd: Path) -> list:
+    """Bang so sanh trung binh hau nghiem qua cac tien nghiem khac nhau."""
+    d = rd / "parts" / "do_nhay"
+    if not d.exists():
+        return []
+    co = {}
+    for tep_bt in sorted(d.glob("*.pt")):
+        p = torch.load(tep_bt, weights_only=False)
+        co[p["bien_the"]] = p
+    if not co:
+        return []
+    # moc so sanh: M2 cua pipeline chinh (cung tien nghiem ban thao)
+    f_vb = rd / "03_vb.pt"
+    if f_vb.exists():
+        co["goc"] = {"result": torch.load(f_vb, weights_only=False)["m2"],
+                     "mo_ta": "dac ta ban thao (M2 trong pipeline chinh)",
+                     "elapsed": float("nan")}
+
+    L = [LINE, "PHAN 3 -- DO NHAY VOI TIEN NGHIEM", LINE, "",
+         "  Cau hoi: ket luan co doi khi doi ho tien nghiem khong? Chi dung VB",
+         "  mean-field vi day la cau hoi ve DO ON DINH, khong phai ve do chinh xac",
+         "  cua hau nghiem.", ""]
+    for t, v in co.items():
+        L.append(f"    {t:<10} = {v['mo_ta']}")
+    L.append("")
+
+    ten = list(co)
+    tt = {}
+    for t in ten:
+        mau, ty_le = relabel_posterior_samples(co[t]["result"].samples)
+        tt[t] = (posterior_summary(mau), ty_le)
+    L.append("  " + f"{'Tham so':<12}" + "".join(f"{t:>14}" for t in ten))
+    for h in ["omega", "alpha", "beta", "p11", "p22", "nu_minus_2"]:
+        ten_h = "nu" if h == "nu_minus_2" else h
+        sh = 2.0 if h == "nu_minus_2" else 0.0
+        m0 = tt[ten[0]][0][h]["mean"]
+        n = 1 if m0.dim() == 0 else m0.shape[0]
+        for i in range(n):
+            nhan = ten_h if n == 1 else f"{ten_h}_{i+1}"
+            o = f"  {nhan:<12}"
+            for t in ten:
+                mm = tt[t][0][h]["mean"]
+                o += f"{float(mm if mm.dim() == 0 else mm[i]) + sh:>14.4f}"
+            L.append(o)
+    L.append("  " + f"{'ELBO cuoi':<12}" + "".join(
+        f"{co[t]['result'].final_elbo:>14.2f}" for t in ten))
+    L.append("  " + f"{'% doi nhan':<12}" + "".join(f"{tt[t][1]:>13.1%}" for t in ten))
+    L += ["",
+          "  LUU Y 1: ELBO cua cac bien the KHONG so sanh truc tiep duoc voi nhau,",
+          "           vi chung la can duoi cua log bang chung duoi CAC MO HINH",
+          "           XAC SUAT KHAC NHAU.",
+          "  LUU Y 2: neu tham so thay doi nhieu qua cac tien nghiem thi du lieu",
+          "           KHONG lan at duoc tien nghiem -- mo hinh duoc nhan dang yeu,",
+          "           va so sanh MLE voi VB/MCMC (RQ3, RQ4) bi nhieu boi chinh lua",
+          "           chon tien nghiem. Phai khai bao dieu nay trong bai bao.", ""]
+    return L
+
+
+def _muc_mcmc(rd: Path) -> list:
+    """Chan doan hoi tu MCMC, ke ca cac lan chay da that bai."""
+    L = [LINE, "PHAN 4 -- CHAN DOAN MCMC (NUTS)", LINE, ""]
+    lan = [("04_mcmc_lan1_duongcheo", "Lan 1: ma tran khoi luong DUONG CHEO, "
+            "warmup 250, khoi tao tu tien nghiem"),
+           ("04_mcmc", "Lan 2: ma tran khoi luong DAC, warmup 1000, "
+            "khoi tao tu nghiem MLE chinh quy")]
+    co_gi = False
+    for ten, mo_ta in lan:
+        tep_mc = rd / f"{ten}.pt"
+        if not tep_mc.exists():
+            L += [f"  {mo_ta}", "    -> chua co ket qua (dang chay hoac chua chay)", ""]
+            continue
+        co_gi = True
+        m4 = torch.load(tep_mc, weights_only=False)["m4"]
+        nc, ns = next(iter(m4.samples_by_chain.values())).shape[:2]
+        dat = m4.max_rhat == m4.max_rhat and m4.max_rhat < 1.01
+        L += [f"  {mo_ta}",
+              f"    {nc} chuoi x {ns} mau = {nc*ns} mau hau nghiem",
+              f"    R-hat lon nhat = {f(m4.max_rhat, 4)}   (yeu cau < 1,01)",
+              f"    ESS nho nhat   = {f(m4.min_ess, 1)}",
+              f"    So lan phan ky = {m4.n_divergences}",
+              f"    KET LUAN: {'DAT' if dat else 'KHONG DAT -- mau KHONG dung duoc'}",
+              ""]
+        if not dat:
+            L.append("    R-hat theo tung tham so:")
+            for k, v in m4.rhat.items():
+                nm = "nu" if k == "nu_minus_2" else k
+                L.append(f"      {nm:<12} {f(v, 4):>10}   ESS = {f(m4.ess_bulk[k], 1)}")
+            L.append("")
+    if co_gi:
+        L += ["  GHI CHU: da kiem tra rieng xem R-hat lon co phai do DOI NHAN TRANG",
+              "  THAI gay ra khong. Voi lan 1: sap xep lai nhan cho tung mau chi dua",
+              "  R-hat tu 4,0601 xuong 4,0516 -- KHONG phai nguyen nhan. Do phan tan",
+              "  GIUA cac chuoi lon gap 10-800 lan do phan tan TRONG tung chuoi, tuc",
+              "  moi chuoi dung yen tai mot diem khac nhau.", ""]
+    return L
+
+
+def _muc_mo_phong(rd: Path) -> list:
+    """Ket qua mo phong theo tung kich ban da co."""
+    tep = sorted(rd.glob("07_simulation_*.pt"))
+    if not tep:
+        return []
+    L = [LINE, "PHAN 5 -- NGHIEN CUU MO PHONG", LINE, "",
+         "  CANH BAO: gia tri tham so cua 8 kich ban hien la GIA TRI VI DU, chua",
+         "  duoc chot (tab:simulation-scenarios trong ban thao van la CanBoSung).",
+         "  Ket qua duoi day dung ve mat tinh toan nhung cho mot thiet ke CHUA CHOT.",
+         ""]
+    for tep_mp in tep:
+        code = tep_mp.stem.replace("07_simulation_", "")
+        d = torch.load(tep_mp, weights_only=False)
+        L.append(f"  --- Kich ban {code} ---")
+        for pp, kq in d.items():
+            n = kq.get("n_replications", "?")
+            L.append(f"    {pp:<16} {n} lan lap   Brier trung binh = "
+                     f"{f(kq.get('mean_brier'), 4)}")
+            bias, rmse = kq.get("bias", {}), kq.get("rmse", {})
+            cov = kq.get("coverage", {})
+            ten_ts = [k for k in ("omega1", "omega2", "alpha1", "alpha2",
+                                  "beta1", "beta2", "p11", "p22", "nu") if k in bias]
+            if ten_ts:
+                L.append(f"      {'tham so':<10}{'bias':>12}{'RMSE':>12}"
+                         + (f"{'coverage':>12}" if cov else ""))
+                for k in ten_ts:
+                    o = f"      {k:<10}{f(bias[k], 4):>12}{f(rmse.get(k), 4):>12}"
+                    if cov:
+                        o += f"{f(cov.get(k), 3):>12}"
+                    L.append(o)
+        L.append("")
+    L += ["  Coverage chi tinh duoc cho VB va MCMC (co khoang tin cay truc tiep tu",
+          "  hau nghiem). Gia tri ly tuong la 0,95; thap hon dang ke nghia la phuong",
+          "  phap danh gia THAP do bat dinh.", ""]
+    return L
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -285,6 +433,10 @@ def main() -> int:
         for n in ["m2", "m3", "r1"]:
             if n in got:
                 L += _vb_block(n, *got[n], r=r_train, X=X_train)
+
+    L += _muc_do_nhay(rd)
+    L += _muc_mcmc(rd)
+    L += _muc_mo_phong(rd)
 
     timing_path = rd / "09_timing.pt"
     if timing_path.exists():
