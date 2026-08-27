@@ -188,6 +188,25 @@ def _ms_block(name: str, res, meta: dict) -> list[str]:
         L.append(f"    seed={d.seed}  loglik={d.loglik:12.4f}  "
                  f"hoi_tu={'co ' if d.converged else 'KHONG'}  ||grad||={d.grad_norm:10.4f}  "
                  f"gan_bien={'co' if d.near_boundary else 'khong'}")
+    # Co gan bien tinh LAI theo tieu chi HIEN TAI. Cac gia tri trong `res.runs`
+    # duoc ghi luc CHAY, khi _near_boundary con chua kiem tra bien DUOI cua
+    # alpha/beta -- nen chung co the bo lot truong hop alpha ~ 0.
+    from msgarchx.inference.mle import ZERO_FLOOR, _near_boundary
+    if _near_boundary(p):
+        ly_do = []
+        if bool((p.alpha < ZERO_FLOOR).any()):
+            ly_do.append(f"alpha={[f'{v:.2e}' for v in p.alpha.tolist()]} cham day 0")
+        if bool((p.beta < ZERO_FLOOR).any()):
+            ly_do.append(f"beta={[f'{v:.2e}' for v in p.beta.tolist()]} cham day 0")
+        pd = torch.diagonal(p.P)
+        if bool((pd > 0.995).any()):
+            ly_do.append(f"p_ss={[round(v,4) for v in pd.tolist()]} sat bien tren")
+        if bool(((p.alpha + p.beta) > 0.995).any()):
+            ly_do.append("alpha+beta > 0,995")
+        L += ["", f"  !! NGHIEM NAM GAN BIEN (tieu chi hien tai): {'; '.join(ly_do)}",
+              "     Hau qua: sai so chuan tu nghich dao Hessian KHONG con hop le,",
+              "     vi tiem can chuan cua uoc luong hop ly cuc dai gia dinh nghiem",
+              "     nam BEN TRONG khong gian tham so. Phai neu ro khi bao cao."]
     nconv = sum(1 for d in res.runs if d.converged)
     L.append(f"  => hoi tu {nconv}/{len(res.runs)} diem khoi tao")
     if meta.get("elapsed"):

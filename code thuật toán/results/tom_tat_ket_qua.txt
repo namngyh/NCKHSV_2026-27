@@ -1,6 +1,6 @@
 ==============================================================================
 TOM TAT KET QUA UOC LUONG -- MS-GARCH-X Student-t cho VN30F1M
-Sinh luc: 2026-08-26 22:42:48
+Sinh luc: 2026-08-27 15:49:19
 Thu muc ket qua: C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results
 ==============================================================================
 
@@ -101,6 +101,11 @@ B4  MS-GARCH chuan (nu co dinh lon), khong X      (2 trang thai)
     seed=7  loglik=  -2833.8595  hoi_tu=co   ||grad||=    0.0010  gan_bien=co
     seed=8  loglik=  -2833.8595  hoi_tu=co   ||grad||=    0.0003  gan_bien=co
     seed=9  loglik=  -2854.1468  hoi_tu=co   ||grad||=    0.0068  gan_bien=khong
+
+  !! NGHIEM NAM GAN BIEN (tieu chi hien tai): alpha=['1.67e-05', '1.74e-01'] cham day 0
+     Hau qua: sai so chuan tu nghich dao Hessian KHONG con hop le,
+     vi tiem can chuan cua uoc luong hop ly cuc dai gia dinh nghiem
+     nam BEN TRONG khong gian tham so. Phai neu ro khi bao cao.
   => hoi tu 10/10 diem khoi tao
   => thoi gian chay: 157.4 phut
 
@@ -139,6 +144,11 @@ M1  MS-GARCH-X Student-t                          (2 trang thai)
     seed=6  loglik=  -2800.7008  hoi_tu=KHONG  ||grad||=   34.0906  gan_bien=co
     seed=7  loglik=  -2811.6118  hoi_tu=co   ||grad||=    0.1539  gan_bien=co
     seed=9  loglik=  -2807.1343  hoi_tu=KHONG  ||grad||=  353.3613  gan_bien=co
+
+  !! NGHIEM NAM GAN BIEN (tieu chi hien tai): p_ss=[0.9986, 0.9932] sat bien tren
+     Hau qua: sai so chuan tu nghich dao Hessian KHONG con hop le,
+     vi tiem can chuan cua uoc luong hop ly cuc dai gia dinh nghiem
+     nam BEN TRONG khong gian tham so. Phai neu ro khi bao cao.
   => hoi tu 4/9 diem khoi tao
   => thoi gian chay: 424.7 phut
 

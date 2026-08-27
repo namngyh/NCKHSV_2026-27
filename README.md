@@ -523,7 +523,8 @@ hình hỗn hợp, không phải lỗi cài đặt. Vì vậy `fit_mle(select="r
 | Mã | Điều kiện | Ý nghĩa |
 |---|---|---|
 | C1 | $\lVert
-abla\ell_TVert < 1$ | đã hội tụ |
+abla\ell_T
+Vert < 1$ | đã hội tụ |
 | C2 | $d_s = 1/(1-p_{ss}) \ge 2$ phiên | mỗi trạng thái là một **chế độ**, không phải cú sốc đơn lẻ |
 | C3 | $0{,}01 < p_{ss} < 0{,}999$ | không nằm sát biên |
 
@@ -535,6 +536,56 @@ Trên dữ liệu VN30F1M, quy tắc này có hiệu lực thật sự: với M1
 cho log-hợp-lý **cao hơn** nghiệm được chọn nhưng đều có $d_spprox 1{,}0$ phiên;
 với B4 là 6/10. Nếu chọn theo log-hợp-lý cao nhất thì cả hai mô hình đều báo cáo
 nghiệm suy biến, và kết luận về câu hỏi RQ2 sẽ đảo ngược.
+
+**Nghiệm nằm gần biên: chẩn đoán và hệ quả.** `_near_boundary` đánh dấu một
+nghiệm là gần biên khi bất kỳ điều nào sau đây đúng:
+
+| Loại biên | Điều kiện |
+|---|---|
+| Trên | $p_{ss}>0{,}995$, hoặc $\alpha_s+\beta_s>0{,}995$ |
+| **Dưới** | $\alpha_s<10^{-4}$, hoặc $\beta_s<10^{-4}$, hoặc $p_{ss}<0{,}005$ |
+| Bậc tự do | $\nu<2{,}05$ |
+
+Nhóm **biên dưới** được bổ sung sau khi phát hiện B4 trên VN30F1M cho
+$\alpha_1 = 1{,}67\times10^{-5}$ — nhỏ hơn $\alpha_2$ bốn bậc độ lớn. Khi
+$\alpha_s\approx0$, trạng thái đó **không phản ứng với cú sốc lợi suất nào**;
+phương sai chỉ suy giảm theo $\beta_s$, tức mô hình thoái hóa thành AR(1) trên
+phương sai chứ không còn là GARCH. Phiên bản trước của hàm này chỉ kiểm tra
+biên trên nên bỏ lọt hoàn toàn trường hợp đó.
+
+Hệ quả quan trọng: **tại điểm biên, sai số chuẩn từ nghịch đảo Hessian không
+còn hợp lệ**, vì tiệm cận chuẩn của ước lượng hợp lý cực đại giả định nghiệm
+nằm bên trong không gian tham số. Cả B4 ($\alpha_1$ chạm đáy) lẫn M1
+($p_{11}=0{,}9986$ sát biên trên) đều bị đánh dấu, và điều này phải được nêu rõ
+khi báo cáo sai số chuẩn trong `tab:parameter-template`.
+
+**Tính tái lập.** Toàn bộ đường MLE là tất định. Ba phép kiểm chứng đã thực hiện:
+
+1. *Số luồng*: chạy với 8 luồng và 1 luồng cho log-hợp-lý, gradient, $h$,
+   $\xi_{t\mid t}$ lệch **0,000e+00**. Các tensor trong vòng lặp chỉ 2 phần tử,
+   nằm dưới ngưỡng PyTorch kích hoạt đa luồng.
+2. *Thứ tự thực thi*: chạy M1 một mình so với chạy sau B1/B2 trong cùng tiến
+   trình cho kết quả **giống từng bit**. `init_raw` dùng `torch.Generator()`
+   cục bộ; `fit_garch_mle` và `fit_vb` nạp lại seed ở đầu mỗi lần chạy.
+3. *Chạy lại toàn phần*: chạy lại điểm khởi tạo seed 0 của M1 sau một tuần cho
+   quỹ đạo Adam trùng khít ở mọi vòng được ghi.
+
+> **CẢNH BÁO ĐỌC KẾT QUẢ**: có **hai** thư mục kết quả với **hai tham số hóa
+> khác nhau**, và **không được so số giữa chúng**:
+>
+> | Thư mục | $\alpha_s,\beta_s$ | Vai trò |
+> |---|---|---|
+> | `results/` | $\operatorname{softplus}(\cdot)\in(0,\infty)$ | **kết quả chính**, đúng `eq:variance-coef-transform` |
+> | `results_sigmoid/` | $\operatorname{sigmoid}(\cdot)\in(0,1)$ | chỉ là **kiểm tra độ bền** |
+>
+> Tệp nhật ký có tiền tố `cach3_*` thuộc về `results_sigmoid/`, chạy với biến
+> môi trường `MSGARCHX_AB_LINK=sigmoid`. Biến thể sigmoid cho log-hợp-lý cao
+> hơn (−2804,09 so với −2810,29) nhưng **không được dùng làm kết quả chính**:
+> nghiệm của nó nằm **ép vào biên** với $\partial\ell/\partial\beta_2=+4{,}61$,
+> và trên thang softplus có $\lVert\nabla\rVert=2{,}87$ — không đạt ngưỡng hội
+> tụ. Vẻ hội tụ đẹp của nó là giả tạo vì Jacobian của sigmoid triệt tiêu gần
+> biên ($\beta(1-\beta)=0{,}039$ tại $\beta=0{,}96$).
+
 
 
 **Tiêu chí thông tin.** Với $k_{\text{th}}$ là số tham số tự do:

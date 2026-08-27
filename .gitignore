@@ -37,3 +37,6 @@ Bài báo/*.synctex.gz
 Bài báo/*.out
 Bài báo/*.bbl
 Bài báo/*.blg
+
+# Thu muc chi dung de kiem chung tinh tai lap (chay lai mot diem khoi tao da co)
+results_tailap/

@@ -83,13 +83,28 @@ def _neg_loglik(raw: torch.Tensor, config: ModelConfig, r: torch.Tensor, X: torc
     return -out["loglik"], out
 
 
+# Nguong coi mot he so ARCH/GARCH la "cham day" 0. Khong phai gia tri tuy y:
+# alpha_s = 0 nghia la trang thai do KHONG phan ung voi cu soc loi suat nao,
+# phuong sai chi suy giam theo beta -- ve ban chat la mot AR(1) tren phuong sai
+# chu khong con la GARCH. Day la mot DIEM BIEN cua khong gian tham so, nen sai
+# so chuan tu nghich dao Hessian KHONG con hop le tai do (tiem can chuan cua
+# uoc luong hop ly cuc dai gia dinh nghiem nam ben trong).
+# Vi du thuc te: B4 tren VN30F1M cho alpha_1 = 1,67e-05, nho hon alpha_2 bon
+# bac do lon. Phien ban truoc cua ham nay chi kiem tra bien TREN (p_ss, tong
+# alpha+beta, nu) nen bo lot truong hop nay.
+ZERO_FLOOR = 1e-4
+
+
 def _near_boundary(params: MSGARCHXParams) -> bool:
     p_diag = torch.diagonal(params.P)
     persistence = params.alpha + params.beta
     nu_min = params.nu.min() if params.nu.dim() > 0 else params.nu
     return bool(
         (p_diag > 0.995).any()
+        or (p_diag < 0.005).any()
         or (persistence > 0.995).any()
+        or (params.alpha < ZERO_FLOOR).any()      # bien DUOI cua alpha
+        or (params.beta < ZERO_FLOOR).any()       # bien DUOI cua beta
         or (nu_min < 2.05)
     )
 
