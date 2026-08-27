@@ -1,0 +1,68 @@
+[2026-08-26 12:44:31] Se chay 56 lan lap tren 4 tien trinh song song
+[2026-08-26 12:44:31]   kich ban: ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8']
+[2026-08-26 12:44:31]   phuong phap: ['mle', 'vb_mean_field']
+[2026-08-26 12:45:01]   LOI S1_mle_28 (ma thoat 1)
+[2026-08-26 12:45:01]   tien do: 1 xong, 52 con lai, ~0.5 phut/lan lap, con ~0.1 gio
+[2026-08-26 12:45:01]   LOI S2_mle_28 (ma thoat 1)
+[2026-08-26 12:45:01]   tien do: 2 xong, 52 con lai, ~0.3 phut/lan lap, con ~0.1 gio
+[2026-08-26 12:45:01]   LOI S3_mle_28 (ma thoat 1)
+[2026-08-26 12:45:01]   tien do: 3 xong, 52 con lai, ~0.2 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:45:01]   LOI S4_mle_28 (ma thoat 1)
+[2026-08-26 12:45:01]   tien do: 4 xong, 52 con lai, ~0.1 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:45:21]   LOI S5_mle_28 (ma thoat 1)
+[2026-08-26 12:45:21]   tien do: 5 xong, 48 con lai, ~0.2 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:45:31]   LOI S7_mle_6 (ma thoat 1)
+[2026-08-26 12:45:31]   tien do: 6 xong, 47 con lai, ~0.2 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:45:31]   LOI S7_mle_7 (ma thoat 1)
+[2026-08-26 12:45:31]   tien do: 7 xong, 47 con lai, ~0.1 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:45:31]   LOI S7_mle_11 (ma thoat 1)
+[2026-08-26 12:45:31]   tien do: 8 xong, 47 con lai, ~0.1 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:45:51]   LOI S7_mle_21 (ma thoat 1)
+[2026-08-26 12:45:51]   tien do: 9 xong, 44 con lai, ~0.1 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:46:01]   LOI S7_mle_25 (ma thoat 1)
+[2026-08-26 12:46:01]   tien do: 10 xong, 43 con lai, ~0.2 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:46:01]   LOI S7_mle_26 (ma thoat 1)
+[2026-08-26 12:46:01]   tien do: 11 xong, 43 con lai, ~0.1 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:46:01]   LOI S7_mle_27 (ma thoat 1)
+[2026-08-26 12:46:01]   tien do: 12 xong, 43 con lai, ~0.1 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:46:22]   LOI S7_mle_28 (ma thoat 1)
+[2026-08-26 12:46:22]   tien do: 13 xong, 40 con lai, ~0.1 phut/lan lap, con ~0.0 gio
+[2026-08-26 12:46:32]   LOI S7_mle_29 (ma thoat 1)
+[2026-08-26 12:46:32]   tien do: 14 xong, 39 con lai, ~0.1 phut/lan lap, con ~0.0 gio
+[2026-08-26 13:01:22]   tien do: 15 xong, 40 con lai, ~1.1 phut/lan lap, con ~0.2 gio
+[2026-08-26 13:28:52]   tien do: 20 xong, 34 con lai, ~2.2 phut/lan lap, con ~0.3 gio
+[2026-08-26 13:54:12]   tien do: 25 xong, 29 con lai, ~2.8 phut/lan lap, con ~0.3 gio
+[2026-08-26 14:16:52]   tien do: 30 xong, 23 con lai, ~3.1 phut/lan lap, con ~0.3 gio
+[2026-08-26 14:44:22]   tien do: 35 xong, 18 con lai, ~3.4 phut/lan lap, con ~0.3 gio
+[2026-08-26 14:54:53]   LOI S8_mle_28 (ma thoat 1)
+[2026-08-26 14:54:53]   tien do: 37 xong, 19 con lai, ~3.5 phut/lan lap, con ~0.3 gio
+[2026-08-26 15:00:13]   tien do: 40 xong, 13 con lai, ~3.4 phut/lan lap, con ~0.2 gio
+[2026-08-26 15:27:13]   tien do: 45 xong, 8 con lai, ~3.6 phut/lan lap, con ~0.1 gio
+[2026-08-26 16:04:53]   tien do: 50 xong, 3 con lai, ~4.0 phut/lan lap, con ~0.1 gio
+[2026-08-26 16:34:23]   tien do: 55 xong, 0 con lai, ~4.2 phut/lan lap, con ~0.0 gio
+[2026-08-26 16:36:13] Ket thuc sau 3.86 gio. Loi: ['S1_mle_28', 'S2_mle_28', 'S3_mle_28', 'S4_mle_28', 'S5_mle_28', 'S7_mle_6', 'S7_mle_7', 'S7_mle_11', 'S7_mle_21', 'S7_mle_25', 'S7_mle_26', 'S7_mle_27', 'S7_mle_28', 'S7_mle_29', 'S8_mle_28']
+[2026-08-26 16:36:14]   S1/mle: 29 lan lap [THIEU (29/30)] mean_brier=0.4850935786719857
+[2026-08-26 16:36:14]   S1/vb_mean_field: 15 lan lap [du] mean_brier=0.5413542198346291
+[2026-08-26 16:36:14]   S1/mcmc: 3 lan lap [du] mean_brier=0.5406367024524158
+[2026-08-26 16:36:14]   -> 07_simulation_S1.pt (47 lan lap)
+[2026-08-26 16:36:14]   S2/mle: 29 lan lap [THIEU (29/30)] mean_brier=0.6328375221563148
+[2026-08-26 16:36:14]   S2/vb_mean_field: 15 lan lap [du] mean_brier=0.5451172434604071
+[2026-08-26 16:36:14]   -> 07_simulation_S2.pt (44 lan lap)
+[2026-08-26 16:36:15]   S3/mle: 29 lan lap [THIEU (29/30)] mean_brier=0.48614865382252953
+[2026-08-26 16:36:15]   S3/vb_mean_field: 15 lan lap [du] mean_brier=0.5407919730489544
+[2026-08-26 16:36:15]   -> 07_simulation_S3.pt (44 lan lap)
+[2026-08-26 16:36:15]   S4/mle: 29 lan lap [THIEU (29/30)] mean_brier=0.5114803032574003
+[2026-08-26 16:36:15]   S4/vb_mean_field: 15 lan lap [du] mean_brier=0.5512307278697366
+[2026-08-26 16:36:15]   -> 07_simulation_S4.pt (44 lan lap)
+[2026-08-26 16:36:16]   S5/mle: 29 lan lap [THIEU (29/30)] mean_brier=0.40285998400724243
+[2026-08-26 16:36:16]   S5/vb_mean_field: 15 lan lap [du] mean_brier=0.5678716000645209
+[2026-08-26 16:36:16]   -> 07_simulation_S5.pt (44 lan lap)
+[2026-08-26 16:36:16]   S6/mle: 30 lan lap [du] mean_brier=0.6008614936460088
+[2026-08-26 16:36:16]   S6/vb_mean_field: 15 lan lap [du] mean_brier=0.5197543307133541
+[2026-08-26 16:36:16]   -> 07_simulation_S6.pt (45 lan lap)
+[2026-08-26 16:36:17]   S7/mle: 21 lan lap [THIEU (21/30)] mean_brier=0.592137715186102
+[2026-08-26 16:36:17]   S7/vb_mean_field: 15 lan lap [du] mean_brier=0.7093663937699155
+[2026-08-26 16:36:17]   -> 07_simulation_S7.pt (36 lan lap)
+[2026-08-26 16:36:17]   S8/mle: 29 lan lap [THIEU (29/30)] mean_brier=0.5345098288933398
+[2026-08-26 16:36:17]   S8/vb_mean_field: 15 lan lap [du] mean_brier=0.6733967250413613
+[2026-08-26 16:36:17]   -> 07_simulation_S8.pt (44 lan lap)

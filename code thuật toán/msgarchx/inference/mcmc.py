@@ -7,7 +7,9 @@ ESS (dung arviz, tham chieu Vehtari et al. 2021).
 """
 from __future__ import annotations
 
+import time
 from dataclasses import dataclass
+from pathlib import Path
 
 import arviz as az
 import pyro
@@ -49,6 +51,8 @@ def fit_mcmc(
     max_tree_depth: int = 8,
     full_mass: bool = False,
     initial_params: dict | None = None,
+    checkpoint_path=None,
+    checkpoint_moi: int = 25,
 ) -> MCMCResult:
     """max_tree_depth gioi han so buoc leapfrog toi da moi mau (2^depth) --
     mac dinh cua NUTS la 10 (toi 1024 buoc/mau), rat ton kem vi bo loc tien
@@ -80,12 +84,36 @@ def fit_mcmc(
             target_accept_prob=0.85,
             max_tree_depth=max_tree_depth,
         )
+        # LUU TRANG THAI DINH KY. Ly do: mot chuoi NUTS tren du lieu that mat
+        # NHIEU NGAY, va Pyro chi tra ve ket qua o CUOI. Ngay 26/08/2026,
+        # Windows tu khoi dong lai luc 00:35 (Kernel-Power 577) da xoa sach
+        # ~65% tien do cua ca 4 chuoi. Voi hook nay, lan chay sau it nhat con
+        # doc duoc buoc tich phan da thich nghi va diem tham so cuoi cung de
+        # khoi tao lai, thay vi bat dau tu con so khong.
+        hook = None
+        if checkpoint_path is not None:
+            cp = Path(checkpoint_path)
+            cp.parent.mkdir(parents=True, exist_ok=True)
+
+            def hook(kern, mau, giai_doan, i, **_):
+                if i % checkpoint_moi:
+                    return
+                try:
+                    torch.save({"giai_doan": giai_doan, "vong": i,
+                                "step_size": float(getattr(kern, "step_size", float("nan"))),
+                                "tham_so": {k: v.detach().clone()
+                                            for k, v in (mau or {}).items()},
+                                "thoi_diem": time.time()}, cp)
+                except Exception:
+                    pass          # khong bao gio de viec luu lam hong lan chay
+
         mcmc_chain = MCMC(
             kernel,
             num_samples=n_samples,
             warmup_steps=n_warmup,
             num_chains=1,
             initial_params=initial_params,
+            hook_fn=hook,
             disable_progbar=not verbose,
         )
         mcmc_chain.run(r, X, config, prior, variance_link, floor)

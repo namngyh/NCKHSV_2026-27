@@ -106,7 +106,9 @@ def phan_mo_phong() -> list[str]:
         toc_do = f"  ~{moi_lan/60:.0f} phut/lan lap, con {con} lan => ~{_hhmm(con*moi_lan/4)}"
     thanh = "#" * int(30 * tong_xong / max(tong_can, 1)) + "." * (30 - int(30 * tong_xong / max(tong_can, 1)))
     L.append(f"  [{thanh}] {tong_xong}/{tong_can} lan lap{toc_do}")
-    dang = _dong_cuoi(LOGS / "mo_phong.log") if (LOGS / "mo_phong.log").exists() else ""
+    # Doc nhat ky driver MOI NHAT (mo_phong.log, mo_phong_2.log, ...)
+    ds = sorted(LOGS.glob("mo_phong*.log"), key=lambda x: x.stat().st_mtime, reverse=True)
+    dang = _dong_cuoi(ds[0]) if ds else ""
     if dang:
         L.append(f"  moi nhat: {dang[:100]}")
     return L

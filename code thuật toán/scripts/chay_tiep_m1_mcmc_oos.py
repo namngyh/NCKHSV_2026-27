@@ -281,10 +281,21 @@ def mcmc_chain_worker(cfg, c: int) -> None:
     if init is not None:
         _log(f"[mcmc chuoi {c}] khoi tao tu nghiem MLE chinh quy"
              + (" (dung tai nghiem)" if c == 0 else " + nhieu loan"))
+    # Neu lan chay truoc bi ngat (vd. Windows tu khoi dong lai), dung buoc tich
+    # phan da thich nghi va diem tham so cuoi cung lam khoi dau -- ret ngan
+    # giai doan warmup thay vi lam lai tu dau.
+    cp = cfg.results_dir / "parts" / "mcmc_chains" / f"tiendo_chuoi{c}.pt"
+    if cp.exists():
+        tr = torch.load(cp, weights_only=False)
+        _log(f"[mcmc chuoi {c}] TIM THAY tien do cu: {tr['giai_doan']} vong {tr['vong']}, "
+             f"step_size={tr['step_size']:.3e} -- dung lam diem khoi dau")
+        if tr.get("tham_so"):
+            init = tr["tham_so"]
     res = fit_mcmc(r, X, config, n_chains=1, n_warmup=cfg.mcmc_n_warmup,
                    n_samples=cfg.mcmc_n_samples, seed=cfg.seed + c,
                    max_tree_depth=cfg.mcmc_max_tree_depth, verbose=True,
-                   full_mass=cfg.mcmc_full_mass, initial_params=init)
+                   full_mass=cfg.mcmc_full_mass, initial_params=init,
+                   checkpoint_path=cp, checkpoint_moi=25)
     torch.save({"samples_by_chain": res.samples_by_chain,
                 "n_divergences": res.n_divergences,
                 "chain": c, "elapsed": time.time() - t0}, path)
