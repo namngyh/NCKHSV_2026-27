@@ -567,8 +567,12 @@ khi báo cáo sai số chuẩn trong `tab:parameter-template`.
 2. *Thứ tự thực thi*: chạy M1 một mình so với chạy sau B1/B2 trong cùng tiến
    trình cho kết quả **giống từng bit**. `init_raw` dùng `torch.Generator()`
    cục bộ; `fit_garch_mle` và `fit_vb` nạp lại seed ở đầu mỗi lần chạy.
-3. *Chạy lại toàn phần*: chạy lại điểm khởi tạo seed 0 của M1 sau một tuần cho
-   quỹ đạo Adam trùng khít ở mọi vòng được ghi.
+3. *Chạy lại toàn phần*: chạy lại điểm khởi tạo seed 0 của M1 sau một tuần, ở
+   một tiến trình riêng, cho kết quả **giống từng bit**:
+   log-hợp-lý $-2799{,}5779395408$ ở cả hai lần, và vector tham số không ràng
+   buộc `raw` trùng khớp bitwise (`torch.equal` trả về `True`). Quỹ đạo tối ưu
+   cũng trùng ở mọi mốc được ghi, kể cả chuẩn gradient cuối chu kỳ
+   ($\lVert\nabla\rVert = 88{,}3462$).
 
 > **CẢNH BÁO ĐỌC KẾT QUẢ**: có **hai** thư mục kết quả với **hai tham số hóa
 > khác nhau**, và **không được so số giữa chúng**:
