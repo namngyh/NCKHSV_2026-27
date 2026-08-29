@@ -1377,7 +1377,40 @@ S8 & Sai đặc tả & Dữ liệu lệch hoặc xác suất chuyển biến đ�
 \end{tabularx}
 \end{table}
 
-\CanBoSung{giá trị cụ thể của $\mu_s$, $\omega_s$, $\alpha_s$, $\beta_s$, $\bm\gamma_s$, $\Pmat_0$, $T$, số lần lặp $B$ và số quan sát khởi động}.
+\Cref{tab:simulation-gia-tri} liệt kê giá trị tham số thật của tám kịch bản. Kịch bản S1 đóng vai trò cấu hình gốc; S2--S8 mỗi kịch bản thay đổi \emph{một} chiều so với S1 để cô lập ảnh hưởng của chiều đó.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Giá trị tham số thật của tám kịch bản mô phỏng}
+\label{tab:simulation-gia-tri}
+\begin{threeparttable}
+\begin{tabularx}{\textwidth}{p{0.06\textwidth} *{7}{C}}
+\toprule
+\textbf{Mã} & $\bm\omega_0$ & $\bm\alpha_0$ & $\bm\beta_0$ & $\nu_0$ & $p_{11}$ & $p_{22}$ & $T$ \\
+\midrule
+S1 & $(0{,}05;\ 0{,}40)$ & $(0{,}05;\ 0{,}10)$ & $(0{,}85;\ 0{,}80)$ & $8$ & $0{,}98$ & $0{,}95$ & $2000$ \\
+S2 & $(0{,}08;\ 0{,}14)$ & $(0{,}06;\ 0{,}08)$ & $(0{,}85;\ 0{,}83)$ & $8$ & $0{,}95$ & $0{,}90$ & $2000$ \\
+S3 & $(0{,}05;\ 0{,}40)$ & $(0{,}05;\ 0{,}10)$ & $(0{,}85;\ 0{,}80)$ & $4$ & $0{,}98$ & $0{,}95$ & $2000$ \\
+S4 & $(0{,}05;\ 0{,}40)$ & $(0{,}05;\ 0{,}10)$ & $(0{,}85;\ 0{,}80)$ & $30$ & $0{,}98$ & $0{,}95$ & $2000$ \\
+S5 & $(0{,}05;\ 0{,}40)$ & $(0{,}05;\ 0{,}10)$ & $(0{,}85;\ 0{,}80)$ & $8$ & $0{,}99$ & $0{,}85$ & $2000$ \\
+S6 & $(0{,}05;\ 0{,}40)$ & $(0{,}05;\ 0{,}10)$ & $(0{,}85;\ 0{,}80)$ & $8$ & $0{,}98$ & $0{,}95$ & $500$ \\
+S7 & $(0{,}05;\ 0{,}40)$ & $(0{,}05;\ 0{,}10)$ & $(0{,}85;\ 0{,}80)$ & $8$ & $0{,}98$ & $0{,}95$ & $5000$ \\
+S8 & $(0{,}05;\ 0{,}40)$ & $(0{,}05;\ 0{,}10)$ & $(0{,}85;\ 0{,}80)$ & $8$ & $0{,}98$ & $0{,}95$ & $2000$ \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}
+\small
+\item Mỗi cặp trong ngoặc là giá trị của trạng thái $1$ và trạng thái $2$. Mọi kịch bản dùng $\bm\mu_0=(0;\ 0)$ và $\bm\gamma_{0,s}=(0{,}05;\ 0{,}05)$ cho cả hai trạng thái, với $k=2$ biến ngoại sinh sinh từ nhiễu chuẩn độc lập. Giai đoạn khởi động là $200$ quan sát, bị loại trước khi ước lượng. Số lần lặp là $B=30$ cho MLE và $B=15$ cho Variational Bayes. Riêng S8 sinh dữ liệu theo $r_t^{\text{sai}} = r_t + \phi\, r_{t-1}$ với $\phi = 0{,}3$, trong khi mô hình ước lượng vẫn giả định không có tự tương quan trong trung bình.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\textbf{Nguyên tắc chọn giá trị.} Các giá trị này được chọn để bao phủ những tình huống \emph{khác nhau về chất}, chứ không hiệu chỉnh theo ước lượng thu được từ VN30F1M. Lựa chọn này có chủ đích: mục tiêu của nghiên cứu mô phỏng là đánh giá hành vi của ba phương pháp suy diễn trên một dải điều kiện, không phải chỉ tại một điểm tham số cụ thể. Nếu hiệu chỉnh toàn bộ kịch bản theo nghiệm ước lượng được, kết luận sẽ chỉ áp dụng cho lân cận của nghiệm đó và mất khả năng phân biệt xem một phương pháp thất bại vì bản chất của nó hay vì cấu hình dữ liệu cụ thể.
+
+Bốn chiều được thay đổi độc lập: mức tách biệt giữa hai trạng thái (S1 so với S2), độ dày đuôi (S3 và S4 so với S1), tần suất xuất hiện của trạng thái biến động cao (S5), và lượng thông tin sẵn có (S6 và S7). S8 kiểm tra độ bền khi mô hình bị đặc tả sai.
+
+\textbf{Giới hạn của lựa chọn này.} Vì không hiệu chỉnh theo dữ liệu thật, kết quả mô phỏng mô tả hành vi của phương pháp \emph{nói chung} chứ không phải hành vi tại chính bộ tham số ước lượng được cho VN30F1M. Cụ thể, nghiệm MLE của M1 cho $\hat\nu \approx 4{,}1$ và $\hat p_{11} = 0{,}9986$, tức nằm giữa S3 ($\nu_0 = 4$) và S1 ($\nu_0 = 8$) về độ dày đuôi nhưng dai dẳng hơn mọi kịch bản về xác suất duy trì trạng thái. Một nghiên cứu tiếp theo hiệu chỉnh kịch bản gốc theo nghiệm ước lượng được sẽ bổ sung thông tin về hành vi của các phương pháp tại chính điểm tham số quan tâm.
 
 \subsection{Tiêu chí đánh giá mô phỏng}\label{subsec:simulation-metrics}
 
