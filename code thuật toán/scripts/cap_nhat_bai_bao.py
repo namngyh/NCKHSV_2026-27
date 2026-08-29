@@ -316,6 +316,65 @@ def thay_hinh(tex: str) -> str:
     return tex
 
 
+def bang_so_sanh_suy_dien(mle, vb, mcmc_cd, oos) -> list:
+    """tab:inference-comparison-template -- tong hop ba phuong phap.
+
+    Cot MCMC VAN duoc dien o cac dong chan doan va chi phi, vi bao cao mot lan
+    chay THAT BAI la mot ket qua; chi cac dong ve chat luong du bao moi ghi ro
+    la khong dung duoc.
+    """
+    if oos is None or mle is None:
+        return None
+    n = oos["b1"]["n_test"]
+    hong = "\emph{khong dung duoc}".replace("khong dung duoc", "kh\u00f4ng d\u00f9ng \u0111\u01b0\u1ee3c")
+    q = lambda k, t: f(oos[k][t]) if k in oos else TRONG
+    vp = lambda k: (f"{oos[k]['n_violations_1pct']}/{n} "
+                    f"({f(100 * oos[k]['n_violations_1pct'] / n, 2)}\%)") if k in oos else TRONG
+    rhat = f(mcmc_cd["m4"].max_rhat, 4) if mcmc_cd else TRONG
+    W = "\widehat{R}"
+    return [
+        f"\u0110\u1ed9 \u1ed5n \u0111\u1ecbnh nghi\u1ec7m & 3/9 \u0111i\u1ec3m kh\u1edfi t\u1ea1o ch\u00ednh quy "
+        f"& M2 \u1ed5n \u0111\u1ecbnh, M3 ch\u01b0a h\u1ed9i t\u1ee5 & ${W}={rhat}$ \\\\",
+        f"QLIKE ngo\u00e0i m\u1eabu & {q('m1','qlike')} & {q('m2','qlike')} & {hong} \\\\",
+        f"\u0110i\u1ec3m log ngo\u00e0i m\u1eabu & {q('m1','nls')} & {q('m2','nls')} & {hong} \\\\",
+        f"T\u1ef7 l\u1ec7 vi ph\u1ea1m VaR 1\% & {vp('m1')} & {vp('m2')} & {hong} \\\\",
+        "\u0110\u1ed9 r\u1ed9ng kho\u1ea3ng d\u1ef1 b\u00e1o & \multicolumn{3}{c}"
+        "{\emph{kh\u00f4ng t\u00ednh trong nghi\u00ean c\u1ee9u n\u00e0y}} \\\\",
+        "Th\u1eddi gian m\u1ed9t l\u1ea7n \u01b0\u1edbc l\u01b0\u1ee3ng & 15 ph\u00fat (trung v\u1ecb) "
+        "& 78 ph\u00fat & 64 gi\u1edd \\\\",
+        "T\u1ef7 l\u1ec7 ch\u1ea1y kh\u00f4ng h\u1ed9i t\u1ee5 & 5/9 \u0111i\u1ec3m kh\u1edfi t\u1ea1o (M1) "
+        "& 1/2 m\u00f4 h\u00ecnh (M3) & 3/3 l\u1ea7n ch\u1ea1y \\\\",
+    ]
+
+
+def bang_chi_phi_v2(timing, mcmc_cd) -> list:
+    """tab:computation-template. Cot MCMC LUON duoc dien o cac dong chan doan:
+    bao cao mot lan chay that bai la mot KET QUA, khong phai o trong."""
+    if timing is None:
+        return None
+    import statistics as st
+    mle_t = [timing[f"model_{k}"] / 60 for k in ["b1", "b2", "b3", "b4", "m1"]
+             if f"model_{k}" in timing]
+    vb_t = [timing[f"model_{k}"] / 60 for k in ["m2", "m3"] if f"model_{k}" in timing]
+    tv = lambda v: (f"{st.median(v):.0f} ph\u00fat" if v else TRONG)
+    m4 = mcmc_cd["m4"] if mcmc_cd else None
+    return [
+        f"Th\u1eddi gian trung v\u1ecb m\u1ed7i l\u1ea7n \u01b0\u1edbc l\u01b0\u1ee3ng "
+        f"& {tv(mle_t)} & {tv(vb_t)} & 64 gi\u1edd \\\\",
+        f"Th\u1eddi gian d\u00e0i nh\u1ea5t & {max(mle_t):.0f} ph\u00fat (M1) "
+        f"& {max(vb_t):.0f} ph\u00fat (M2) & 64 gi\u1edd (4 chu\u1ed7i song song) \\\\",
+        "B\u1ed9 nh\u1edb c\u1ef1c \u0111\u1ea1i & \multicolumn{3}{c}"
+        "{\emph{kh\u00f4ng \u0111o trong nghi\u00ean c\u1ee9u n\u00e0y}} \\\\",
+        "S\u1ed1 \u0111i\u1ec3m kh\u1edfi t\u1ea1o ho\u1eb7c s\u1ed1 chu\u1ed7i "
+        "& 9 (M1); 10 (B4) & 1 & 4 chu\u1ed7i \\\\",
+        "T\u1ef7 l\u1ec7 ch\u1ea1y kh\u00f4ng h\u1ed9i t\u1ee5 & 5/9 (M1); 0/10 (B4) "
+        "& 1/2 m\u00f4 h\u00ecnh (M3) & 3/3 l\u1ea7n ch\u1ea1y \\\\",
+        f"$\widehat{{R}}$ l\u1edbn nh\u1ea5t & --- & --- & {f(m4.max_rhat, 4) if m4 else TRONG} \\\\",
+        f"ESS nh\u1ecf nh\u1ea5t & --- & --- & {f(m4.min_ess, 1) if m4 else TRONG} \\\\",
+        f"S\u1ed1 l\u1ea7n ph\u00e2n k\u1ef3 & --- & --- & {m4.n_divergences if m4 else TRONG} \\\\",
+    ]
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -324,6 +383,7 @@ def main() -> int:
 
     data, pre = _nap("00_data"), _nap("01_preliminary_tests")
     mle, vb, mcmc = _nap("02_mle"), _nap("03_vb"), _nap("04_mcmc")
+    mcmc_chan_doan = mcmc   # giu ban goc cho cac dong CHAN DOAN
     # KHONG dien so cua M4 vao bai bao khi chuoi MCMC CHUA HOI TU. R-hat lon
     # nghia la 4 chuoi khong ta cung mot hau nghiem, nen trung binh/do lech
     # chuan hau nghiem khong co y nghia thong ke. De trong con hon dien mot
@@ -336,8 +396,6 @@ def main() -> int:
             print(f"              Cot MCMC va hang M4 se de TRONG. Xem PHAN 4 cua")
             print(f"              results/tom_tat_ket_qua.txt de biet chan doan day du.")
             mcmc = None
-            if oos_bo_m4 := True:
-                pass
     oos, timing = _nap("06_oos"), _nap("09_timing")
     if oos is not None and mcmc is None and "m4" in oos:
         oos = {k: v for k, v in oos.items() if k != "m4"}
@@ -359,7 +417,9 @@ def main() -> int:
         ("tab:gaussian-t-template", bang_chuan_vs_t(mle, oos)),
         ("tab:volatility-forecast-template", bang_du_bao_bien_dong(oos)),
         ("tab:var-template", bang_var(oos)),
-        ("tab:computation-template", bang_chi_phi(timing, mcmc)),
+        ("tab:inference-comparison-template",
+         bang_so_sanh_suy_dien(mle, vb, mcmc_chan_doan, oos)),
+        ("tab:computation-template", bang_chi_phi_v2(timing, mcmc_chan_doan)),
     ]
 
     tex = TEX.read_text(encoding="utf-8")

@@ -1584,6 +1584,8 @@ $\nu$ & 4{,}0761 & 0{,}4281 & 3{,}5204 & 2{,}1771 & [3{,}200; 3{,}905] & -- & --
 \end{table}
 \end{landscape}
 
+Các ô thuộc cột MCMC trong \cref{tab:parameter-template} và \cref{tab:transition-results}, cùng hàng M4 trong \cref{tab:volatility-forecast-template} và \cref{tab:var-template}, được \emph{cố ý để trống}. Chuỗi MCMC không đạt tiêu chuẩn hội tụ ($\widehat{R} = 2{,}8379$, xem \cref{tab:computation-template}), nên bốn chuỗi không mô tả cùng một phân phối hậu nghiệm và trung bình, độ lệch chuẩn hay khoảng tin cậy hậu nghiệm tính từ chúng đều không có ý nghĩa thống kê. Nghiên cứu chọn để trống thay vì báo cáo những con số không diễn giải được; các chẩn đoán hội tụ của lần chạy này vẫn được báo cáo đầy đủ vì bản thân chúng là một kết quả (xem \cref{subsec:tra-loi-rq}).
+
 Khi diễn giải, cần tập trung vào độ lớn kinh tế và bất định, không chỉ dựa trên dấu sao ý nghĩa thống kê. Ví dụ, $\alpha_s$ lớn cho thấy phản ứng mạnh với cú sốc mới, $\beta_s$ lớn cho thấy biến động dai dẳng, còn $p_{ss}$ lớn tạo thời gian tồn tại kỳ vọng dài theo \cref{eq:expected-duration}. Đối với Bayes, một hệ số có xác suất hậu nghiệm cùng dấu cao có thể được báo cáo bằng $\Prob(\gamma_{s,j}>0\mid\Data_T)$ hoặc $\Prob(\gamma_{s,j}<0\mid\Data_T)$.
 
 \subsection{Kết quả nhận diện trạng thái}\label{subsec:state-results}
@@ -1649,13 +1651,13 @@ So sánh B3 và M1 trong \cref{tab:model-list} giúp cô lập giá trị của 
 \toprule
 \textbf{Tiêu chí} & \textbf{MLE} & \textbf{Variational Bayes} & \textbf{MCMC} \\
 \midrule
-Độ ổn định nghiệm & -- & -- & -- \\
-QLIKE ngoài mẫu & -- & -- & -- \\
-Điểm log ngoài mẫu & -- & -- & -- \\
-Tỷ lệ bao phủ VaR 1\% & -- & -- & -- \\
-Độ rộng khoảng dự báo & -- & -- & -- \\
-Thời gian một lần ước lượng & -- & -- & -- \\
-Tỷ lệ chạy không hội tụ & -- & -- & -- \\
+Độ ổn định nghiệm & 3/9 điểm khởi tạo chính quy & M2 ổn định, M3 chưa hội tụ & $\widehat{R}=2{,}8379$ \\
+QLIKE ngoài mẫu & 0{,}9688 & 0{,}9978 & \emph{không dùng được} \\
+Điểm log ngoài mẫu & 1{,}5373 & 1{,}5354 & \emph{không dùng được} \\
+Tỷ lệ vi phạm VaR 1\% & 5/435 (1{,}15\%) & 4/435 (0{,}92\%) & \emph{không dùng được} \\
+Độ rộng khoảng dự báo & \multicolumn{3}{c}{\emph{không tính trong nghiên cứu này}} \\
+Thời gian một lần ước lượng & 15 phút (trung vị) & 78 phút & 64 giờ \\
+Tỷ lệ chạy không hội tụ & 5/9 điểm khởi tạo (M1) & 1/2 mô hình (M3) & 3/3 lần chạy \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1794,13 +1796,14 @@ M4 & 5\% & -- & -- & -- & -- \\
 \toprule
 \textbf{Đại lượng} & \textbf{MLE} & \textbf{Variational Bayes} & \textbf{MCMC} \\
 \midrule
-Thời gian trung vị mỗi lần ước lượng & 125 phút & 78 phút & -- \\
-Bộ nhớ cực đại & -- & -- & -- \\
-Số lần khởi tạo lại & 10 & 1 & 4 chuỗi \\
-Tỷ lệ không hội tụ & 6/10 (M1) & -- & -- \\
-$\widehat R$ lớn nhất & --- & --- & -- \\
-ESS nhỏ nhất & --- & --- & -- \\
-Số lần phân kỳ & --- & --- & -- \\
+Thời gian trung vị mỗi lần ước lượng & 15 phút & 78 phút & 64 giờ \\
+Thời gian dài nhất & 425 phút (M1) & 78 phút (M2) & 64 giờ (4 chuỗi song song) \\
+Bộ nhớ cực đại & \multicolumn{3}{c}{\emph{không đo trong nghiên cứu này}} \\
+Số điểm khởi tạo hoặc số chuỗi & 9 (M1); 10 (B4) & 1 & 4 chuỗi \\
+Tỷ lệ chạy không hội tụ & 5/9 (M1); 0/10 (B4) & 1/2 mô hình (M3) & 3/3 lần chạy \\
+$\widehat{R}$ lớn nhất & --- & --- & 2{,}8379 \\
+ESS nhỏ nhất & --- & --- & 4{,}7 \\
+Số lần phân kỳ & --- & --- & 13 \\
 \bottomrule
 \end{tabularx}
 \end{table}
