@@ -1762,7 +1762,56 @@ Phần thảo luận phải tách kết quả thống kê khỏi ý nghĩa kinh 
 
 Đối với \RQ{6}, xác suất trong \cref{eq:tail-probability} phải được diễn giải cùng phân phối hậu nghiệm của $\nu_1-\nu_2$, độ rộng khoảng tin cậy hậu nghiệm, số quan sát thuộc từng trạng thái và kết quả dự báo ngoài mẫu. Không nên kết luận chỉ từ một xác suất điểm nếu mô hình có nhận dạng yếu.
 
-\CanBoSung{thảo luận cụ thể dựa trên kết quả thực nghiệm, nêu rõ kết quả nào ủng hộ hoặc không ủng hộ từng câu hỏi nghiên cứu}.
+\subsection{Kết quả thực nghiệm trả lời từng câu hỏi nghiên cứu}\label{subsec:tra-loi-rq}
+
+Bốn trong sáu câu hỏi nghiên cứu được trả lời dứt khoát bằng dữ liệu VN30F1M; \RQ{3} chỉ được trả lời gián tiếp qua nghiên cứu mô phỏng vì chuỗi MCMC không hội tụ; \RQ{5} được trả lời phong phú hơn dự kiến ban đầu, chính nhờ thất bại đó.
+
+\textbf{\RQ{1}: Student-t cải thiện rõ rệt so với phân phối chuẩn.} Ba bằng chứng độc lập cùng chiều. Thứ nhất, tiêu chí thông tin: AIC giảm từ $5897{,}80$ (B1) xuống $5661{,}62$ (B2), tức $236{,}18$ điểm chỉ do thay phân phối sai số. Thứ hai, dự báo mật độ: điểm log âm trung bình giảm từ $1{,}6812$ xuống $1{,}5455$. Thứ ba, và quan trọng nhất về mặt quản trị rủi ro, kiểm định Kupiec ở mức $1\%$ \textbf{bác bỏ} B1 ($10$ vi phạm trên $435$ quan sát, $p=0{,}020$) trong khi mọi mô hình Student-t đều không bị bác bỏ ($4$--$5$ vi phạm, $p=0{,}760$--$0{,}864$). Bậc tự do ước lượng $\hat\nu\approx 3{,}9$--$4{,}1$ cho thấy đuôi rất dày, gần ngưỡng tồn tại moment bậc bốn.
+
+Một sắc thái cần nêu rõ: Student-t \emph{không} cải thiện dự báo biến động điểm. QLIKE của B2 ($0{,}9943$) còn kém B1 ($0{,}9836$). Điều này nhất quán với lý thuyết: bậc tự do tác động lên hình dạng đuôi phân phối chứ không lên phương trình đệ quy của phương sai. Lợi ích của Student-t nằm ở dự báo mật độ và rủi ro đuôi, không nằm ở dự báo phương sai.
+
+\textbf{\RQ{2}: chuyển trạng thái không tạo giá trị trên dữ liệu này.} Kết quả âm, và nhất quán cả trong lẫn ngoài mẫu. So sánh cô lập B3 với M1 theo \cref{tab:model-list}: trong mẫu, B3 tốt hơn ở cả AIC ($5648{,}87$ so với $5650{,}58$) lẫn BIC ($5687{,}08$ so với $5732{,}46$); ngoài mẫu, B3 tốt hơn ở QLIKE ($0{,}9520$ so với $0{,}9688$), MAE ($1{,}1953$ so với $1{,}3031$) và RMSE ($2{,}1654$ so với $2{,}2625$). Kiểm chứng chéo trên cặp không có biến ngoại sinh cho cùng kết luận: B4 kém B2 rõ rệt (AIC $5728{,}29$ so với $5661{,}62$).
+
+M1 chỉ nhỉnh hơn B3 ở điểm log ($1{,}5373$ so với $1{,}5385$), một chênh lệch quá nhỏ để đảo ngược kết luận. Nói cách khác, hai trạng thái ước lượng được có diễn giải kinh tế hợp lý --- trạng thái biến động thấp chiếm $83\%$ thời gian và kéo dài trung bình $718$ phiên, trạng thái cao chiếm $17\%$ và kéo dài $147$ phiên, tập trung vào các giai đoạn 2018, 2020--2021 và 2025--2026 --- nhưng cấu trúc bổ sung đó không chuyển hóa thành lợi thế dự báo.
+
+\textbf{\RQ{3}: Variational Bayes đánh giá quá thấp bất định hậu nghiệm, ở mức nghiêm trọng.} Chuỗi MCMC không hội tụ nên không dùng làm chuẩn tham chiếu được (xem \RQ{5}). Nghiên cứu mô phỏng cung cấp câu trả lời trực tiếp hơn, vì ở đó tham số thật đã biết. Trên tám kịch bản, độ bao phủ trung bình của khoảng tin cậy $95\%$ do VB mean-field sinh ra chỉ đạt $0{,}236$ đến $0{,}440$, trung bình khoảng $0{,}33$. Khoảng tin cậy danh nghĩa $95\%$ trên thực tế chỉ chứa giá trị thật khoảng một phần ba số lần.
+
+Mức độ nghiêm trọng này vượt xa cảnh báo thông thường rằng mean-field có xu hướng đánh giá thấp phương sai. Vì đo trên dữ liệu sinh ra từ chính mô hình, không thể quy cho sai đặc tả. Hệ quả thực tiễn: VB mean-field có thể dùng cho dự báo điểm, nhưng \emph{không} nên dùng cho bất kỳ quyết định nào phụ thuộc vào độ rộng khoảng tin cậy của tham số.
+
+\textbf{\RQ{4}: truyền bất định tham số có ích, nhưng biên độ nhỏ.} M2 đạt điểm log âm thấp nhất toàn bảng ($1{,}5354$), tốt hơn M1 dùng ước lượng điểm ($1{,}5373$). Chiều hướng đúng như lý thuyết dự đoán, nhưng chênh lệch nhỏ. Trên kiểm định VaR, M2 cho $4$ vi phạm ở mức $1\%$ ($p=0{,}864$), sát kỳ vọng $4{,}35$ hơn so với M1 ($5$ vi phạm). Cần lưu ý rằng M3 dùng Gaussian đầy đủ lại kém hơn hẳn ở mọi tiêu chí biến động, do chưa hội tụ: ELBO cuối của M3 ($-2866{,}36$) thấp hơn của M2 ($-2863{,}16$), điều không thể xảy ra tại nghiệm tối ưu vì họ Gaussian đầy đủ chứa mean-field như trường hợp riêng.
+
+\textbf{\RQ{5}: đánh đổi giữa chất lượng và chi phí rất mạnh, và MCMC thất bại.} MLE cho một mô hình hai trạng thái mất khoảng $2{,}5$ giờ; VB mean-field mất $78$ phút và cho điểm log tốt nhất toàn bảng. MCMC được chạy ba lần với ngân sách tăng dần và \textbf{không lần nào hội tụ}:
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+& Ma trận khối lượng & Warmup & $\widehat R$ lớn nhất \\
+\midrule
+Lần 1 & đường chéo & $250$ & $4{,}06$ \\
+Lần 3 & \textbf{đặc} & $\mathbf{1000}$ & $2{,}84$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Lần thứ ba dùng ma trận khối lượng đặc, warmup $1000$ vòng theo mặc định của Stan, và khởi tạo từ nghiệm MLE đã thỏa điều kiện chính quy; chạy $64$ giờ trên bốn tiến trình song song vẫn cho $\widehat R = 2{,}84$ và ESS $=4{,}7$ trên $1600$ mẫu danh nghĩa.
+
+Chẩn đoán cho thấy hai lần thất bại có bản chất khác nhau. Ở lần 1, độ phân tán giữa các chuỗi lớn gấp $10$ đến $800$ lần độ phân tán trong từng chuỗi: các chuỗi gần như đứng yên. Ở lần 3, độ phân tán nội tại tăng $10$ đến $100$ lần và ở một chuỗi còn vượt độ phân tán giữa các chuỗi: các chuỗi \emph{có} thăm dò, nhưng thăm dò những vùng khác nhau. Ma trận khối lượng đặc đã khắc phục được vấn đề hình học cục bộ; phần còn lại là tính \textbf{đa đỉnh} của hậu nghiệm.
+
+Kết luận này được củng cố bởi bằng chứng độc lập từ phía MLE: với M1, chỉ $4$ trên $9$ điểm khởi tạo hội tụ và chúng chia thành hai nhóm nghiệm tách biệt; với B4, $6$ trên $10$ điểm khởi tạo rơi vào một nghiệm suy biến có thời gian tồn tại trạng thái bằng một phiên, và bị loại theo điều kiện chính quy. Đa đỉnh vì vậy là tính chất của hàm hợp lý MS-GARCH-X trên dữ liệu này, không phải hệ quả của cấu hình lấy mẫu chưa phù hợp.
+
+\textbf{\RQ{6}: trạng thái biến động cao có đuôi dày hơn rõ rệt.} Mô hình mở rộng R1 cho $\Prob(\nu_2<\nu_1\mid\Data_T) = 0{,}917$, với bậc tự do trung bình hậu nghiệm $\hat\nu_1 \approx 10{,}9$ ở trạng thái biến động thấp và $\hat\nu_2 \approx 3{,}7$ ở trạng thái biến động cao. Kết quả phù hợp với trực giác tài chính: giai đoạn căng thẳng vừa có phương sai cao hơn vừa có xác suất xuất hiện giá trị cực đoan lớn hơn.
+
+Hai lưu ý bắt buộc khi diễn giải con số này. Thứ nhất, xác suất được tính \emph{sau khi} sắp xếp lại nhãn trạng thái theo \cref{eq:label-identification} cho từng mẫu hậu nghiệm; tính trực tiếp trên mẫu thô cho giá trị $0{,}000$, tức ngược hoàn toàn, vì $91{,}7\%$ số mẫu nằm ở cách gán nhãn đảo. Thứ hai, độ lệch chuẩn hậu nghiệm của $\nu_2$ rất lớn, nên $0{,}917$ phản ánh một xu hướng rõ chứ không phải một khẳng định chắc chắn.
+
+\subsection{Những giới hạn ảnh hưởng đến diễn giải kết quả}\label{subsec:gioi-han-dien-giai}
+
+Ba giới hạn dưới đây không làm mất giá trị các kết luận trên nhưng phải được nêu rõ.
+
+\textbf{Nghiệm nằm gần biên.} Cả B4 lẫn M1 đều có tham số chạm biên không gian tham số: B4 có $\hat\alpha_1 = 1{,}67\times10^{-5}$, tức trạng thái 1 gần như không phản ứng với cú sốc lợi suất và phương sai chỉ suy giảm theo $\hat\beta_1$; M1 có $\hat p_{11} = 0{,}9986$, sát biên trên. Tại điểm biên, tiệm cận chuẩn của ước lượng hợp lý cực đại không còn hiệu lực, nên sai số chuẩn tính từ nghịch đảo Hessian trong \cref{tab:parameter-template} phải được diễn giải thận trọng.
+
+\textbf{Nhận dạng yếu và độ nhạy với tiên nghiệm.} Phân tích độ nhạy cho thấy ước lượng hậu nghiệm thay đổi đáng kể theo lựa chọn tiên nghiệm: $\hat p_{11}$ dao động từ $0{,}733$ với $\mathrm{Beta}(8,2)$ lên $0{,}986$ với $\mathrm{Beta}(20,2)$, gần trùng giá trị MLE $0{,}9986$. Với $T=1735$ quan sát, dữ liệu không lấn át được tiên nghiệm. Đặc biệt, tiên nghiệm $\mathrm{Beta}(2,2)$ đặt trên $\alpha_s$ và $\beta_s$ kéo $\hat\beta_1$ về khoảng $0{,}30$ đến $0{,}51$ trong khi MLE cho $0{,}846$. Do đó chênh lệch quan sát được giữa MLE và các phương pháp Bayes ở \RQ{3} và \RQ{4} phản ánh \emph{cả} sự khác biệt của phương pháp suy diễn \emph{lẫn} ảnh hưởng của tiên nghiệm, chứ không thuần túy điều thứ nhất.
+
+\textbf{Phạm vi của nghiên cứu mô phỏng.} Phần mô phỏng chỉ bao gồm MLE và Variational Bayes; thành phần MCMC không được chạy do chi phí không khả thi sau khi đã quan sát hành vi của NUTS trên dữ liệu thật. Ngoài ra, tỷ lệ hội tụ của MLE thay đổi theo kịch bản một cách đáng chú ý: $29$ đến $30$ trên $30$ lần lặp ở hầu hết các kịch bản nhưng chỉ $21$ trên $30$ ở kịch bản cỡ mẫu lớn ($T=5000$). Chuỗi dài hơn tích lũy nhiều cơ hội hơn để một trạng thái thoái hóa thành bộ bắt điểm ngoại lệ, làm tăng số đỉnh giả.
 
 % ============================================================
 \section{Hạn chế và định hướng nghiên cứu}\label{sec:han-che}
@@ -1790,9 +1839,25 @@ Các hướng phát triển gồm:
 
 Bài báo xây dựng một khung nghiên cứu thống nhất để đánh giá mô hình MS-GARCH-X Student-t trên thị trường hợp đồng tương lai VN30. Cấu trúc đề xuất kết hợp bốn thành phần: biến động có điều kiện kiểu GARCH, chuyển trạng thái Markov, biến ngoại sinh và sai số Student-t chuẩn hóa. Trên cùng cấu trúc đó, MLE, Variational Bayes và MCMC được so sánh bằng nghiên cứu mô phỏng và dự báo cuốn chiếu ngoài mẫu.
 
-Tại thời điểm hoàn thiện bản thảo phương pháp luận, chưa có cơ sở để tuyên bố phương pháp nào tốt nhất. Kết luận định lượng cuối cùng phải trả lời trực tiếp sáu câu hỏi nghiên cứu: Student-t có cải thiện so với phân phối chuẩn hay không; chuyển trạng thái có tạo giá trị ngoài mẫu hay không; Variational Bayes gần MCMC đến mức nào; bất định tham số có cải thiện độ hiệu chỉnh dự báo hay không; mức đánh đổi giữa chất lượng và thời gian tính toán là bao nhiêu; và trạng thái biến động cao có đuôi dày hơn hay không.
+Sáu câu hỏi nghiên cứu đặt ra ở \cref{subsec:cau-hoi} nay đều có câu trả lời thực nghiệm, trong đó bốn câu được trả lời dứt khoát, một câu được trả lời gián tiếp qua nghiên cứu mô phỏng, và một câu chuyển thành kết quả về giới hạn áp dụng của phương pháp.
 
-\CanBoSung{kết luận cuối cùng sau khi hoàn tất các bảng kết quả; nêu số liệu cụ thể về QLIKE, điểm log, kiểm định VaR, chênh lệch thời gian, độ rộng hậu nghiệm và xác suất $\Prob(\nu_2<\nu_1\mid\Data_T)$}.
+Kết quả thực nghiệm trên $2170$ quan sát lợi suất ngày của VN30F1M, với $1735$ quan sát huấn luyện và $435$ quan sát kiểm định, cho phép trả lời trực tiếp sáu câu hỏi nghiên cứu.
+
+Sai số Student-t là cải tiến rõ rệt nhất. So với phân phối chuẩn, nó giảm AIC $236{,}18$ điểm và giảm điểm log âm từ $1{,}6812$ xuống $1{,}5455$; quan trọng hơn, kiểm định Kupiec ở mức $1\%$ bác bỏ mô hình chuẩn ($10$ vi phạm trên $435$ quan sát, $p=0{,}020$) trong khi không bác bỏ bất kỳ mô hình Student-t nào. Bậc tự do ước lượng $\hat\nu\approx4$ xác nhận đuôi rất dày. Đáng chú ý, cải thiện này nằm ở dự báo mật độ và rủi ro đuôi chứ không ở dự báo phương sai: QLIKE của mô hình Student-t thậm chí kém hơn chút ít.
+
+Chuyển trạng thái không tạo giá trị dự báo trên dữ liệu này. Mô hình GARCH-X một trạng thái với sai số Student-t (B3) tốt hơn MS-GARCH-X (M1) ở AIC ($5648{,}87$ so với $5650{,}58$), BIC ($5687{,}08$ so với $5732{,}46$), QLIKE ($0{,}9520$ so với $0{,}9688$), MAE và RMSE. Hai trạng thái ước lượng được vẫn có ý nghĩa mô tả --- trạng thái biến động cao chiếm $17\%$ thời gian, kéo dài trung bình $147$ phiên và tập trung vào các giai đoạn 2018, 2020--2021, 2025--2026 --- nhưng không chuyển hóa thành lợi thế dự báo ngoài mẫu.
+
+Về so sánh ba phương pháp suy diễn, kết quả nổi bật nhất mang tính phủ định. MCMC bằng NUTS \textbf{không hội tụ} sau ba lần chạy với ngân sách tăng dần, kể cả khi dùng ma trận khối lượng đặc, warmup $1000$ vòng và khởi tạo từ nghiệm MLE chính quy: $\widehat R$ chỉ giảm từ $4{,}06$ xuống $2{,}84$ sau $64$ giờ tính toán trên bốn tiến trình song song. Chẩn đoán chỉ ra nguyên nhân là tính đa đỉnh của hậu nghiệm chứ không phải cấu hình lấy mẫu, và kết luận này được củng cố độc lập từ phía MLE, nơi các điểm khởi tạo khác nhau hội tụ về những nghiệm tách biệt.
+
+Vì MCMC không dùng được làm chuẩn tham chiếu, câu hỏi về chất lượng xấp xỉ của Variational Bayes được trả lời bằng nghiên cứu mô phỏng, nơi tham số thật đã biết. Kết quả rõ ràng và nghiêm trọng: trên tám kịch bản, độ bao phủ của khoảng tin cậy $95\%$ do VB mean-field sinh ra chỉ đạt $0{,}236$ đến $0{,}440$, trung bình khoảng một phần ba mức danh nghĩa. VB mean-field vì vậy phù hợp cho dự báo điểm --- nó cho điểm log tốt nhất toàn bảng, $1{,}5354$ --- nhưng không phù hợp cho quyết định phụ thuộc độ rộng khoảng tin cậy tham số.
+
+Về chi phí tính toán, chênh lệch rất lớn: MLE cho một mô hình hai trạng thái mất khoảng $2{,}5$ giờ, VB mean-field mất $78$ phút, còn MCMC tiêu tốn $64$ giờ mà vẫn không cho kết quả dùng được. Trên bài toán này, phương pháp rẻ nhất lại cho dự báo mật độ tốt nhất.
+
+Cuối cùng, mô hình cho phép bậc tự do khác nhau giữa hai trạng thái ủng hộ giả thuyết đuôi dày hơn trong giai đoạn căng thẳng: $\Prob(\nu_2<\nu_1\mid\Data_T)=0{,}917$, với $\hat\nu\approx10{,}9$ ở trạng thái biến động thấp và $\hat\nu\approx3{,}7$ ở trạng thái biến động cao.
+
+Đóng góp phương pháp luận của nghiên cứu nằm ở ba điểm. Thứ nhất, ba phương pháp suy diễn được so sánh trên \emph{cùng một} hàm hợp lý và \emph{cùng một} cơ chế thu gọn, nên chênh lệch quan sát được phản ánh sự khác biệt của phương pháp chứ không của đặc tả mô hình. Thứ hai, nghiên cứu áp dụng một quy tắc chọn nghiệm minh bạch cho hàm hợp lý đa đỉnh: báo cáo cực đại địa phương lớn nhất thỏa điều kiện chính quy thay vì giá trị lớn nhất tìm được; nếu không, cả B4 lẫn M1 đều hội tụ về nghiệm suy biến có trạng thái tồn tại đúng một phiên và kết luận về \RQ{2} sẽ đảo ngược. Thứ ba, mọi chẩn đoán hội tụ đều được báo cáo, kể cả những lần chạy thất bại; bản thân sự thất bại của NUTS là một kết quả về giới hạn áp dụng, không phải một khoảng trống.
+
+Kết quả cũng cho thấy hai hạn chế cần thận trọng khi diễn giải. Nghiệm MLE của cả B4 và M1 nằm gần biên không gian tham số, nên sai số chuẩn từ nghịch đảo Hessian không hoàn toàn hợp lệ. Và với $T=1735$ quan sát, ước lượng hậu nghiệm còn nhạy đáng kể với lựa chọn tiên nghiệm, nghĩa là mô hình được nhận dạng yếu; điều này làm nhòe ranh giới giữa ảnh hưởng của phương pháp suy diễn và ảnh hưởng của tiên nghiệm khi so sánh MLE với các phương pháp Bayes.
 
 % ============================================================
 % Tài liệu tham khảo
