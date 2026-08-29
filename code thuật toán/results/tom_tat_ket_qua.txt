@@ -1,6 +1,6 @@
 ==============================================================================
 TOM TAT KET QUA UOC LUONG -- MS-GARCH-X Student-t cho VN30F1M
-Sinh luc: 2026-08-27 15:49:19
+Sinh luc: 2026-08-29 16:38:27
 Thu muc ket qua: C:\Users\Admin\Desktop\nam\MS GARCH X t-student\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results
 ==============================================================================
 
@@ -315,7 +315,21 @@ PHAN 4 -- CHAN DOAN MCMC (NUTS)
       nu               3.7612   ESS = 4.4
 
   Lan 2: ma tran khoi luong DAC, warmup 1000, khoi tao tu nghiem MLE chinh quy
-    -> chua co ket qua (dang chay hoac chua chay)
+    4 chuoi x 400 mau = 1600 mau hau nghiem
+    R-hat lon nhat = 2.8379   (yeu cau < 1,01)
+    ESS nho nhat   = 4.7
+    So lan phan ky = 13
+    KET LUAN: KHONG DAT -- mau KHONG dung duoc
+
+    R-hat theo tung tham so:
+      mu               2.2512   ESS = 5.1
+      omega            2.6420   ESS = 4.8
+      alpha            2.4097   ESS = 5.0
+      beta             2.8379   ESS = 4.7
+      gamma            2.4622   ESS = 4.9
+      p11              1.9572   ESS = 5.6
+      p22              2.2444   ESS = 5.1
+      nu               1.4276   ESS = 8.5
 
   GHI CHU: da kiem tra rieng xem R-hat lon co phai do DOI NHAN TRANG
   THAI gay ra khong. Voi lan 1: sap xep lai nhan cho tung mau chi dua
@@ -546,7 +560,7 @@ CHI PHI TINH TOAN
   02_mle                      623.9 phut  (37436 giay)
   03_vb                       155.1 phut  (9306 giay)
   05_r1                        76.2 phut  (4573 giay)
-  06_oos                       19.8 phut  (1187 giay)
+  06_oos                       18.4 phut  (1101 giay)
   model_b1                     13.6 phut  (816 giay)
   model_b2                     13.7 phut  (820 giay)
   model_b3                     14.6 phut  (874 giay)
@@ -555,7 +569,7 @@ CHI PHI TINH TOAN
   model_m2                     77.9 phut  (4672 giay)
   model_m3                     77.2 phut  (4634 giay)
   model_r1                     76.2 phut  (4573 giay)
-  TONG (cong don, khong ke chay song song)   1730.3 phut
+  TONG (cong don, khong ke chay song song)   1728.9 phut
 
 ==============================================================================
 CAC BUOC CHUA CHAY

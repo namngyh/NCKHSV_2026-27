@@ -324,7 +324,23 @@ def main() -> int:
 
     data, pre = _nap("00_data"), _nap("01_preliminary_tests")
     mle, vb, mcmc = _nap("02_mle"), _nap("03_vb"), _nap("04_mcmc")
+    # KHONG dien so cua M4 vao bai bao khi chuoi MCMC CHUA HOI TU. R-hat lon
+    # nghia la 4 chuoi khong ta cung mot hau nghiem, nen trung binh/do lech
+    # chuan hau nghiem khong co y nghia thong ke. De trong con hon dien mot
+    # con so trong dep ma khong dung duoc.
+    NGUONG_RHAT = 1.01
+    if mcmc is not None:
+        rhat = mcmc["m4"].max_rhat
+        if not (rhat == rhat and rhat < NGUONG_RHAT):
+            print(f"  [BO QUA M4] R-hat = {rhat:.4f} > {NGUONG_RHAT} -- chuoi CHUA hoi tu.")
+            print(f"              Cot MCMC va hang M4 se de TRONG. Xem PHAN 4 cua")
+            print(f"              results/tom_tat_ket_qua.txt de biet chan doan day du.")
+            mcmc = None
+            if oos_bo_m4 := True:
+                pass
     oos, timing = _nap("06_oos"), _nap("09_timing")
+    if oos is not None and mcmc is None and "m4" in oos:
+        oos = {k: v for k, v in oos.items() if k != "m4"}
     if oos is None:
         # Lan chay 1 co M4 KHONG hop le (R-hat ~ 4), nhung ket qua cua B1-M3
         # van dung vi tham so cua chung khong doi. Dung lai phan hop le va BO
