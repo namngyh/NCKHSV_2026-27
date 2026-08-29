@@ -1254,6 +1254,38 @@ Mỗi lần chạy phải lưu:
 
 Mọi biến giải thích, phép chuẩn hóa và lựa chọn mô hình phải được tính chỉ từ quá khứ của từng cửa sổ. Đây là điều kiện cần để kết quả ngoài mẫu có ý nghĩa.
 
+\subsubsection*{Các quy tắc được áp dụng trong nghiên cứu này}
+
+Bốn quy tắc dưới đây ảnh hưởng trực tiếp đến các con số báo cáo và vì vậy được đặc tả đầy đủ để có thể tái lập.
+
+\textbf{Quy tắc 1 --- chọn nghiệm chính quy.} Hàm hợp lý của mô hình chuyển trạng thái có các \emph{đỉnh giả} với giá trị tùy ý cao: một trạng thái có thể thoái hóa thành bộ bắt điểm ngoại lệ chỉ tồn tại một phiên, kéo log-hợp-lý lên mà không mang ý nghĩa kinh tế. Nghiên cứu vì vậy báo cáo \emph{cực đại địa phương lớn nhất thỏa điều kiện chính quy}, chứ không phải giá trị lớn nhất tìm được. Một nghiệm được chấp nhận khi thỏa đồng thời:
+
+\begin{enumerate}
+  \item[(C1)] đã hội tụ: $\lVert\nabla\ell_T\rVert < 1$ trên thang tham số không ràng buộc;
+  \item[(C2)] mỗi trạng thái là một \emph{chế độ} chứ không phải một cú sốc đơn lẻ: thời gian tồn tại kỳ vọng $d_s = 1/(1-p_{ss}) \ge 2$ phiên;
+  \item[(C3)] xác suất duy trì không nằm sát biên: $0{,}01 < p_{ss} < 0{,}999$.
+\end{enumerate}
+
+Điều kiện $\alpha_s+\beta_s<1$ cho từng trạng thái \emph{không} được áp đặt: trong MS-GARCH một chế độ riêng lẻ có thể nổ mà quá trình tổng thể vẫn dừng, nên ràng buộc đó sẽ là hạn chế do người nghiên cứu tự đặt chứ không phải yêu cầu lý thuyết.
+
+Quy tắc này có hiệu lực thực sự trên dữ liệu VN30F1M. Với M1, sáu trên chín điểm khởi tạo cho log-hợp-lý \emph{cao hơn} nghiệm được chọn nhưng đều có $d_s\approx1{,}0$ phiên; với B4 là sáu trên mười. Nếu chọn theo log-hợp-lý cao nhất, cả hai mô hình đều báo cáo nghiệm suy biến và kết luận về \RQ{2} sẽ đảo ngược.
+
+\textbf{Quy tắc 2 --- chẩn đoán nghiệm gần biên.} Một nghiệm được đánh dấu là nằm gần biên khi $p_{ss}>0{,}995$, hoặc $\alpha_s+\beta_s>0{,}995$, hoặc $\nu<2{,}05$ (biên trên), hoặc $\alpha_s<10^{-4}$, hoặc $\beta_s<10^{-4}$, hoặc $p_{ss}<0{,}005$ (biên dưới). Nhóm biên dưới là cần thiết: khi $\alpha_s\to0$, trạng thái đó không phản ứng với cú sốc lợi suất và mô hình thoái hóa thành một quá trình AR(1) trên phương sai. Tại điểm biên, tiệm cận chuẩn ở \cref{eq:mle-avar} không còn hiệu lực nên sai số chuẩn tính từ nghịch đảo Hessian phải được diễn giải thận trọng.
+
+\textbf{Quy tắc 3 --- sắp xếp lại nhãn cho mẫu hậu nghiệm.} \Cref{eq:label-identification} chỉ được áp dụng tự động cho ước lượng điểm. Mẫu hậu nghiệm của Variational Bayes và MCMC phải được sắp xếp lại nhãn \emph{theo từng mẫu} trước khi tính bất kỳ đại lượng nào phụ thuộc thứ tự trạng thái. Tiêu chí sử dụng là phương sai không điều kiện hàm ý $v_s = \omega_s/(1-\alpha_s-\beta_s)$ làm đại diện cho $\E(h_t\mid S_t=s)$. Bỏ qua bước này có hậu quả nghiêm trọng: xác suất ở \cref{eq:tail-probability} tính trực tiếp trên mẫu thô cho giá trị $0{,}000$ trong khi giá trị đúng là $0{,}917$.
+
+\textbf{Quy tắc 4 --- xác minh tính tất định.} Toàn bộ đường ước lượng hợp lý cực đại được kiểm chứng là tất định qua ba phép thử: kết quả không đổi khi thay đổi số luồng tính toán (lệch $0{,}000$), không đổi khi thay đổi thứ tự thực thi các mô hình trong cùng tiến trình, và chạy lại một điểm khởi tạo sau một tuần trong tiến trình độc lập cho log-hợp-lý trùng đến chữ số thứ mười cùng vector tham số trùng khớp bitwise.
+
+\subsubsection*{Các kiểm tra độ bền đã thực hiện}
+
+Ngoài kết quả chính, ba kiểm tra độ bền được thực hiện và báo cáo trong tài liệu kỹ thuật đi kèm.
+
+Thứ nhất, \emph{tham số hóa thay thế}: ước lượng lại M1 và B4 với $\alpha_s,\beta_s = \operatorname{sigmoid}(\cdot)\in(0,1)$ thay vì $\operatorname{softplus}(\cdot)\in(0,\infty)$, nhằm khớp miền của $\alpha_s,\beta_s$ với miền của tiên nghiệm dùng trong suy diễn Bayes. Biến thể này cho log-hợp-lý cao hơn ($-2804{,}09$ so với $-2810{,}29$) nhưng nghiệm của nó nằm \emph{ép vào biên}, với $\partial\ell_T/\partial\beta_2 = +4{,}61$ và $\lVert\nabla\ell_T\rVert = 2{,}87$ trên thang tham số hóa gốc, tức không đạt điều kiện (C1). Kết quả chính vì vậy giữ nguyên tham số hóa softplus theo \cref{eq:variance-coef-transform}.
+
+Thứ hai, \emph{độ nhạy với tiên nghiệm}: chạy lại Variational Bayes mean-field dưới ba cấu hình tiên nghiệm thay thế, gồm $\omega_s\sim$ half-Cauchy$(0;1)$ và $p_{ss}\sim\mathrm{Beta}(20,2)$. Kết quả được thảo luận ở \cref{subsec:gioi-han-dien-giai}.
+
+Thứ ba, \emph{độ bền của kết luận về đuôi dày} trước các quan sát cực đoan, trình bày ở \cref{subsec:descriptive-results}.
+
 % ============================================================
 \section{Các kiểm định thống kê ban đầu}\label{sec:kiem-dinh}
 % ============================================================
