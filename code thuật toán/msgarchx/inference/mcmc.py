@@ -36,6 +36,58 @@ class MCMCResult:
     config: ModelConfig
 
 
+def _init_cho_chuoi(initial_params, c: int):
+    """Chon diem khoi tao cho chuoi thu `c`.
+
+    `initial_params` co the la:
+      - None            : de Pyro tu khoi tao (init_to_uniform)
+      - dict            : DUNG CHUNG cho moi chuoi (chi hop ly khi n_chains=1,
+                          vi 4 chuoi xuat phat cung mot diem thi R-hat mat y
+                          nghia chan doan -- ban thao yeu cau "4 chuoi khoi tao
+                          PHAN TAN")
+      - list/tuple      : phan tu thu c
+      - callable        : goi initial_params(c)
+    """
+    if initial_params is None or isinstance(initial_params, dict):
+        return initial_params
+    if isinstance(initial_params, (list, tuple)):
+        return initial_params[c]
+    return initial_params(c)
+
+
+def initial_params_from_mle(params, chain: int, base_seed: int = 5000,
+                            scale: float = 0.3) -> dict:
+    """Diem khoi tao cua chuoi `chain`: nghiem MLE cua M1, co nhieu loan.
+
+    Khoi tao tu TIEN NGHIEM khien cac chuoi bat dau o nhung vung vo ly va khong
+    bao giu gap nhau (xem chan doan lan chay dau: R-hat ~ 4, ESS ~ 4,4). O day
+    dat chung quanh nghiem MLE da thoa dieu kien chinh quy -- nhung VAN PHAN TAN
+    (moi chuoi mot nhieu loan khac nhau) de R-hat con y nghia chan doan. Chuoi 0
+    dat DUNG TAI nghiem MLE, cac chuoi con lai nhieu loan quanh no.
+
+    Tra ve dict tren MIEN HOP LE (khong phai khong gian raw); Pyro tu bien doi.
+    """
+    g = torch.Generator().manual_seed(base_seed + chain)
+    s_ = 0.0 if chain == 0 else scale
+
+    def jitter(x, s=s_):
+        return x + s * torch.randn(x.shape, generator=g)
+
+    def logit(x):
+        return torch.log(x) - torch.log1p(-x)
+
+    return {
+        "mu": jitter(params.mu, 0.05 if chain else 0.0),
+        "omega": params.omega * torch.exp(jitter(torch.zeros(2))),
+        "alpha": torch.sigmoid(jitter(logit(params.alpha.clamp(1e-4, 1 - 1e-4)))),
+        "beta": torch.sigmoid(jitter(logit(params.beta.clamp(1e-4, 1 - 1e-4)))),
+        "gamma": jitter(params.gamma, 0.05 if chain else 0.0),
+        "p11": torch.sigmoid(jitter(logit(params.P[0, 0].clamp(1e-4, 1 - 1e-4)).reshape(1))).squeeze(),
+        "p22": torch.sigmoid(jitter(logit(params.P[1, 1].clamp(1e-4, 1 - 1e-4)).reshape(1))).squeeze(),
+        "nu_minus_2": (params.nu - 2.0) * torch.exp(jitter(torch.zeros(()))),
+    }
+
+
 def fit_mcmc(
     r: torch.Tensor,
     X: torch.Tensor,
@@ -50,7 +102,7 @@ def fit_mcmc(
     verbose: bool = False,
     max_tree_depth: int = 8,
     full_mass: bool = False,
-    initial_params: dict | None = None,
+    initial_params=None,
     checkpoint_path=None,
     checkpoint_moi: int = 25,
 ) -> MCMCResult:
@@ -112,7 +164,7 @@ def fit_mcmc(
             num_samples=n_samples,
             warmup_steps=n_warmup,
             num_chains=1,
-            initial_params=initial_params,
+            initial_params=_init_cho_chuoi(initial_params, c),
             hook_fn=hook,
             disable_progbar=not verbose,
         )

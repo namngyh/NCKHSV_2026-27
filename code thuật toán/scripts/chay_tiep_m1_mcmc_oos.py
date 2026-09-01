@@ -41,6 +41,7 @@ sys.path.insert(0, str(ROOT))
 
 import torch
 
+from msgarchx.inference.mcmc import initial_params_from_mle
 from msgarchx.inference.mle import MLEResult, fit_mle, natural_scale_standard_errors
 from msgarchx.inference.param_spec import (ModelConfig, init_raw, pack_params,
                                             unpack_raw, warm_starts_from_garch)
@@ -242,25 +243,11 @@ def khoi_tao_chuoi_tu_mle(cfg, c: int) -> dict | None:
         _log("[mcmc] khong tim thay parts/m1.pt -- dung khoi tao mac dinh cua Pyro")
         return None
     pm = torch.load(path, weights_only=False)["result"].params
-    g = torch.Generator().manual_seed(5000 + c)
-    scale = 0.0 if c == 0 else 0.3
+    # Logic nhieu loan da chuyen vao msgarchx.inference.mcmc de
+    # run_full_study.py dung CHUNG mot bo khoi tao (truoc day chi script
+    # nay co, nen chay lai M4 qua run_full_study cho cau hinh KHAC).
+    return initial_params_from_mle(pm, c)
 
-    def jitter(x, s=scale):
-        return x + s * torch.randn(x.shape, generator=g)
-
-    def logit(x):
-        return torch.log(x) - torch.log1p(-x)
-
-    return {
-        "mu": jitter(pm.mu, 0.05 if c else 0.0),
-        "omega": pm.omega * torch.exp(jitter(torch.zeros(2))),
-        "alpha": torch.sigmoid(jitter(logit(pm.alpha.clamp(1e-4, 1 - 1e-4)))),
-        "beta": torch.sigmoid(jitter(logit(pm.beta.clamp(1e-4, 1 - 1e-4)))),
-        "gamma": jitter(pm.gamma, 0.05 if c else 0.0),
-        "p11": torch.sigmoid(jitter(logit(pm.P[0, 0].clamp(1e-4, 1 - 1e-4)).reshape(1))).squeeze(),
-        "p22": torch.sigmoid(jitter(logit(pm.P[1, 1].clamp(1e-4, 1 - 1e-4)).reshape(1))).squeeze(),
-        "nu_minus_2": (pm.nu - 2.0) * torch.exp(jitter(torch.zeros(()))),
-    }
 
 def mcmc_chain_worker(cfg, c: int) -> None:
     from msgarchx.inference.mcmc import fit_mcmc

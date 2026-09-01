@@ -851,14 +851,33 @@ Vì vậy, đây được báo cáo là **kết quả âm có căn cứ** cho RQ
 $\widehat R > 1{,}01$, và bỏ luôn hàng M4 khỏi các bảng ngoài mẫu. Để trống còn
 hơn điền một con số trông đẹp mà không dùng được.
 
-#### 7.4.6 Một điểm không nhất quán cần biết
+#### 7.4.6 Ghi chú về khả năng tái lập
 
-`StudyConfig` có trường `mcmc_full_mass = True`, nhưng `run_mcmc_step` trong
-`scripts/run_full_study.py` **không truyền trường này** cho `fit_mcmc`, và cũng
-không truyền `initial_params`. Hệ quả: chạy lại M4 qua `run_full_study.py --only
-mcmc` sẽ dùng ma trận khối lượng **đường chéo** và khởi tạo ngẫu nhiên, tức tái
-lập đúng cấu hình đã thất bại ở lần 1, **không phải** cấu hình đã tạo ra kết quả
-được báo cáo. Muốn tái lập kết quả M4, phải chạy qua
+Trước đây `run_mcmc_step` trong `scripts/run_full_study.py` **không truyền**
+`full_mass` (dù `StudyConfig` có sẵn trường `mcmc_full_mass`) và **không truyền**
+`initial_params`. Hệ quả: chạy lại M4 qua `run_full_study.py --only mcmc` sẽ dùng
+ma trận khối lượng đường chéo và khởi tạo từ tiền nghiệm, tức tái lập đúng cấu
+hình đã **thất bại ở lần 1**, chứ không phải cấu hình đã tạo ra kết quả được báo
+cáo. Điều này đã được sửa: cả hai tham số nay đều được truyền, và logic nhiễu
+loạn quanh nghiệm MLE đã chuyển vào `msgarchx/inference/mcmc.py` dưới tên
+`initial_params_from_mle` để hai đường chạy dùng **chung một bộ khởi tạo**. Đã
+kiểm chứng bộ khởi tạo mới cho kết quả giống bản cũ **từng bit** trên cả bốn
+chuỗi và tám nhóm tham số.
+
+Kèm theo đó, `fit_mcmc` nay nhận `initial_params` theo **từng chuỗi**: ngoài một
+`dict` dùng chung như trước, có thể truyền một danh sách hoặc một hàm
+`c -> dict`. Điều này cần thiết vì truyền một `dict` duy nhất cho bốn chuỗi sẽ
+khiến cả bốn xuất phát từ cùng một điểm, làm $\widehat R$ mất ý nghĩa chẩn đoán,
+trong khi bản thảo yêu cầu bốn chuỗi **khởi tạo phân tán**.
+
+Hai khác biệt còn lại giữa hai đường chạy, cần biết khi so sánh kết quả:
+
+- `run_full_study.py` chạy bốn chuỗi **tuần tự** trong một tiến trình, nên lâu
+  gấp bốn so với cách giao mỗi chuỗi cho một tiến trình riêng.
+- `run_full_study.py` không truyền `checkpoint_path`, nên không có lớp lưu tiến
+  độ mỗi 25 vòng; nếu bị ngắt giữa chừng thì mất trắng.
+
+Vì vậy, để tái lập kết quả M4 đúng như đã báo cáo, vẫn nên chạy qua
 `scripts/chay_tiep_m1_mcmc_oos.py`.
 
 #### 7.4.7 Kết quả được lưu lại

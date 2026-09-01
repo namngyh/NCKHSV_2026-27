@@ -49,7 +49,7 @@ from msgarchx.evaluation.var_backtests import christoffersen_test, kupiec_test
 from msgarchx.evaluation.volatility_loss import mae_vol, qlike, rmse_vol
 from msgarchx.inference.forecast import predictive_variance_path
 from msgarchx.inference.garch_mle import fit_garch_mle
-from msgarchx.inference.mcmc import fit_mcmc
+from msgarchx.inference.mcmc import fit_mcmc, initial_params_from_mle
 from msgarchx.inference.mle import fit_mle, natural_scale_standard_errors
 from msgarchx.inference.param_spec import ModelConfig, warm_starts_from_garch
 from msgarchx.inference.summary import relabel_posterior_samples
@@ -283,11 +283,38 @@ def run_vb_step(cfg: StudyConfig, r_train: torch.Tensor, X_train: torch.Tensor, 
 # ============================================================
 # Buoc 3: MCMC (M4)
 # ============================================================
-def run_mcmc_step(cfg: StudyConfig, r_train: torch.Tensor, X_train: torch.Tensor, config_m1: ModelConfig) -> dict:
+def run_mcmc_step(cfg: StudyConfig, r_train: torch.Tensor, X_train: torch.Tensor, mle_res: dict) -> dict:
+    """M4 bang NUTS.
+
+    LUU Y TAI LAP: truoc day ham nay KHONG truyen `full_mass` (du StudyConfig co
+    truong `mcmc_full_mass`) va KHONG truyen `initial_params`, nen chay lai M4 o
+    day se tai lap dung cau hinh DA THAT BAI o lan 1 (ma tran khoi luong duong
+    cheo + khoi tao tu tien nghiem: R-hat ~ 4, ESS ~ 4,4, cac chuoi dung yen),
+    chu khong phai cau hinh da tao ra ket qua duoc bao cao. Nay ca hai deu duoc
+    truyen, dung chung bo khoi tao voi scripts/chay_tiep_m1_mcmc_oos.py.
+    """
+    config_m1 = mle_res["config_m1"]
+    m1 = mle_res.get("m1")
+
+    if m1 is not None:
+        # Moi chuoi mot diem khoi tao khac nhau: chuoi 0 dat dung tai nghiem MLE,
+        # cac chuoi con lai nhieu loan quanh no. Truyen mot dict DUY NHAT se cho
+        # ca 4 chuoi xuat phat cung mot cho, lam R-hat mat y nghia chan doan.
+        init = lambda c: initial_params_from_mle(m1.params, c)
+        mo_ta_init = "nghiem MLE cua M1 (chuoi 0 dung tai nghiem, cac chuoi khac nhieu loan)"
+    else:
+        init = None
+        mo_ta_init = "mac dinh cua Pyro (init_to_uniform) -- KHONG co nghiem MLE de khoi tao"
+
     print("  -- M4: MS-GARCH-X Student-t, MCMC (NUTS) --")
+    print(f"     n_chains={cfg.mcmc_n_chains}  n_warmup={cfg.mcmc_n_warmup}  "
+          f"n_samples={cfg.mcmc_n_samples}  max_tree_depth={cfg.mcmc_max_tree_depth}  "
+          f"full_mass={cfg.mcmc_full_mass}  target_accept_prob=0.85  seed={cfg.seed}")
+    print(f"     khoi tao: {mo_ta_init}")
     m4 = fit_mcmc(r_train, X_train, config_m1, n_chains=cfg.mcmc_n_chains,
                   n_warmup=cfg.mcmc_n_warmup, n_samples=cfg.mcmc_n_samples, seed=cfg.seed,
-                  max_tree_depth=cfg.mcmc_max_tree_depth, verbose=True)
+                  max_tree_depth=cfg.mcmc_max_tree_depth, verbose=True,
+                  full_mass=cfg.mcmc_full_mass, initial_params=init)
     print(f"     R-hat lon nhat={m4.max_rhat:.4f}  ESS nho nhat={m4.min_ess:.1f}  phan ky={m4.n_divergences}")
     return {"m4": m4}
 
@@ -643,7 +670,7 @@ def main():
 
     mcmc_res = None
     if "mcmc" in stages and mle_res is not None:
-        mcmc_res = safe_checkpoint(cfg, "04_mcmc", lambda: run_mcmc_step(cfg, r_train, X_train, mle_res["config_m1"]))
+        mcmc_res = safe_checkpoint(cfg, "04_mcmc", lambda: run_mcmc_step(cfg, r_train, X_train, mle_res))
     elif mle_res is not None:
         mcmc_path = cfg.results_dir / "04_mcmc.pt"
         mcmc_res = torch.load(mcmc_path, weights_only=False) if mcmc_path.exists() else None
