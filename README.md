@@ -705,19 +705,187 @@ Khác với HMC cổ điển vốn phải chọn tay số bước, NUTS tự nh�
 — 1, 2, 4, 8, … bước — và dừng khi quỹ đạo bắt đầu quay đầu về điểm xuất phát.
 Với độ sâu cây tối đa $D$, số bước leapfrog mỗi mẫu tối đa là $2^{D}-1$.
 
-Cấu hình: `target_accept_prob` $=0{,}85$, 4 chuỗi, 250 vòng khởi động (warmup),
-400 mẫu mỗi chuỗi. Giai đoạn khởi động là lúc thuật toán thích nghi bước tích
-phân và ma trận khối lượng — **cắt ngắn giai đoạn này sẽ làm mẫu bị lệch**, khác
-hẳn với việc giảm độ sâu cây (chỉ làm giảm hiệu quả).
+#### 7.4.1 Các tham số được đặt tường minh
 
-**Chẩn đoán hội tụ.**
+Bảng dưới liệt kê **toàn bộ** tham số mà mã nguồn truyền vào. Cột "kết quả M4"
+ghi giá trị đã thực sự dùng cho lần chạy tạo ra kết quả được báo cáo, chạy qua
+`scripts/chay_tiep_m1_mcmc_oos.py`.
 
-- $\widehat R$: so sánh phương sai giữa các chuỗi với phương sai trong từng
-  chuỗi. Giá trị mong muốn nhỏ hơn $1{,}01$.
-- ESS (cỡ mẫu hiệu dụng): số mẫu độc lập tương đương. Mẫu MCMC có tự tương quan
-  nên ESS luôn nhỏ hơn số mẫu danh nghĩa.
-- Số lần phân kỳ: dấu hiệu quỹ đạo leapfrog gặp vùng cong gắt. **Phân kỳ báo hiệu
-  sai lệch thật sự**, khác với việc chạm trần độ sâu cây (chỉ là vấn đề hiệu quả).
+| Tham số | Mặc định của hàm | **Kết quả M4** | `dry-run` | Mô phỏng S1–S8 | Ý nghĩa |
+|---|---|---|---|---|---|
+| `n_chains` | 4 | **4 tiến trình song song, mỗi tiến trình 1 chuỗi** | 1 | 4 | Số chuỗi độc lập. Cần ít nhất 4 để $\widehat R$ có ý nghĩa |
+| `n_warmup` | 500 | **1000** | 5 | 100 | Số vòng khởi động để thích nghi bước tích phân và ma trận khối lượng. **Mẫu giai đoạn này bị loại bỏ** |
+| `n_samples` | 1000 | **400** | 5 | 150 | Số mẫu giữ lại mỗi chuỗi |
+| `max_tree_depth` | 8 | **7** | 4 | 6 | Trần độ sâu cây, giới hạn $2^{D}-1$ bước leapfrog mỗi vòng |
+| `full_mass` | `False` | **`True`** | `True` | `False` | Ma trận khối lượng **đặc** thay vì đường chéo. Xem giải thích bên dưới |
+| `initial_params` | `None` | **nghiệm MLE chính quy** | `None` | `None` | Chuỗi 0 xuất phát đúng tại nghiệm MLE, ba chuỗi còn lại nhiễu loạn quanh nghiệm đó |
+| `target_accept_prob` | 0,85 | **0,85** | 0,85 | 0,85 | Tỷ lệ chấp nhận mục tiêu. Cao hơn cho bước tích phân nhỏ hơn, an toàn hơn nhưng chậm hơn |
+| `seed` | 0 | **`seed + c`**, tức 0, 1, 2, 3 | 0 | `base_seed + b` | Hạt giống của chuỗi thứ $c$ |
+| `checkpoint_path` | `None` | **có** | `None` | `None` | Đường dẫn lưu tiến độ định kỳ |
+| `checkpoint_moi` | 25 | **25** | — | — | Lưu trạng thái sau mỗi 25 vòng lặp |
+| `variance_link` | `"clamp"` | **`"clamp"`** | `"clamp"` | `"clamp"` | Cách bảo đảm phương sai dương (Mục 6.2) |
+| `floor` | $10^{-8}$ | **$10^{-8}$** | $10^{-8}$ | $10^{-8}$ | Sàn của phương sai |
+| `prior` | `None` | **mặc định** | mặc định | mặc định | `None` nghĩa là dùng toàn bộ giá trị trong bảng tiền nghiệm ở Mục 7.2 |
+| `verbose` | `False` | **`True`** | `True` | `False` | Bật thanh tiến độ để cửa sổ chạy không im lặng hàng giờ |
+
+Ba tham số cần giải thích thêm.
+
+**`full_mass = True`.** Ma trận khối lượng quyết định NUTS "cân" mỗi hướng trong
+không gian tham số như thế nào. Mặc định là ma trận **đường chéo**, tức giả định
+các tham số không tương quan. Giả định đó sai nghiêm trọng ở đây: $\omega_s$,
+$\alpha_s$ và $\beta_s$ tương quan rất mạnh vì cùng xác định mức và độ dai dẳng
+của phương sai. Với ma trận đường chéo, NUTS buộc phải hạ bước tích phân xuống
+khoảng $8\times10^{-4}$ và gần như không di chuyển được. Ma trận **đặc** cho phép
+thuật toán nắm được các hướng tương quan đó.
+
+**`initial_params` lấy từ nghiệm MLE.** Thay vì khởi tạo ngẫu nhiên, chuỗi 0 xuất
+phát đúng tại nghiệm MLE chính quy, ba chuỗi còn lại xuất phát từ nghiệm đó cộng
+nhiễu loạn. Cách này rút ngắn quãng đường mà chuỗi phải đi để tới vùng xác suất
+cao, đồng thời vẫn giữ được tính phân tán giữa các chuỗi mà $\widehat R$ đòi hỏi.
+
+**`checkpoint_moi = 25`.** Thư viện chỉ trả về kết quả ở **cuối** một chuỗi, mà
+một chuỗi trên dữ liệu thật mất nhiều ngày. Ngày 26/08/2026, Windows tự khởi động
+lại lúc 00:35 và xóa sạch khoảng 65% tiến độ của cả bốn chuỗi. Từ đó, trạng thái
+được lưu sau mỗi 25 vòng lặp, để lần chạy sau còn đọc lại được bước tích phân đã
+thích nghi và điểm tham số cuối cùng.
+
+#### 7.4.2 Các tham số mặc định ngầm của thư viện
+
+Những tham số sau **không** được truyền nên nhận giá trị mặc định của Pyro 1.9.1.
+Chúng vẫn ảnh hưởng thật đến kết quả nên được ghi lại đầy đủ:
+
+| Tham số | Giá trị đang dùng | Ảnh hưởng |
+|---|---|---|
+| `step_size` | 1 | Chỉ là giá trị khởi đầu, bị thay thế ngay trong giai đoạn khởi động |
+| `adapt_step_size` | `True` | Thích nghi bước tích phân bằng thuật toán trung bình kép trong khởi động |
+| `adapt_mass_matrix` | `True` | Thích nghi ma trận khối lượng theo phương sai hậu nghiệm ước lượng được |
+| `use_multinomial_sampling` | `True` | Chọn điểm trên quỹ đạo bằng lấy mẫu đa thức thay vì lấy mẫu lát cắt |
+| `init_strategy` | `init_to_uniform` | Chỉ có tác dụng khi **không** truyền `initial_params`. Lấy đều trong bán kính 2 trên không gian không ràng buộc |
+| `transforms` | `None` | Thư viện tự suy ra phép biến đổi từ miền giá trị của từng tiền nghiệm |
+| `jit_compile` | `False` | Đã thử bật nhưng đo được là **chậm hơn** với vòng lặp tuần tự này |
+| `disable_validation` | `True` | Tắt kiểm tra hợp lệ của phân phối trong lúc lấy mẫu để chạy nhanh hơn |
+
+**Ghi chú về cách chạy nhiều chuỗi.** Bên trong `fit_mcmc`, khi truyền
+`n_chains > 1` các chuỗi chạy **tuần tự** trong một vòng lặp, mỗi vòng tạo một
+đối tượng lấy mẫu với `num_chains=1`, nhằm tránh vấn đề sinh tiến trình con trên
+Windows. Lần chạy tạo ra kết quả M4 **không** đi theo đường đó: mỗi chuỗi được
+giao cho một tiến trình riêng với `n_chains=1`, nên bốn chuỗi chạy song song thật
+và thời gian thực tế bằng thời gian của một chuỗi.
+
+#### 7.4.3 Các đại lượng suy ra từ cấu hình
+
+| Đại lượng | Cách tính | Giá trị |
+|---|---|---|
+| Số chiều lấy mẫu | $d = 8+2k+2+n_\nu$ | **13** |
+| Số vòng lặp mỗi chuỗi | $n_{\text{khởi động}}+n_{\text{mẫu}}$ | $1000+400=1.400$ |
+| Tổng số vòng lặp | $\times\,4$ chuỗi | $5.600$ |
+| Tổng số mẫu giữ lại | $4\times 400$ | $1.600$ |
+| Bước leapfrog tối đa mỗi vòng | $2^{D}-1$ | $2^{7}-1=127$ |
+| Chi phí một lần chạy bộ lọc | đo tại $T=1.735$ | 1,40 giây |
+| Chi phí mỗi vòng lặp | đo từ lần chạy thật | $\approx 165$ giây |
+| **Thời gian thực tế** | 1.400 vòng, bốn chuỗi song song | **64 giờ** |
+
+Con số 165 giây mỗi vòng lặp tương ứng khoảng 118 bước leapfrog, tức sát trần 127
+của độ sâu cây $D=7$. Nói cách khác, thuật toán **chạm trần gần như mọi vòng**:
+nó muốn đi xa hơn nhưng bị chặn lại.
+
+Mười ba chiều được lấy mẫu tương ứng tám nhóm biến ngẫu nhiên: $\mu$ (2 chiều),
+$\omega$ (2), $\alpha$ (2), $\beta$ (2), $\boldsymbol{\gamma}$ (4), $p_{11}$ (1),
+$p_{22}$ (1) và $\nu-2$ (1).
+
+#### 7.4.4 Chẩn đoán hội tụ
+
+| Chẩn đoán | Cách tính | Ngưỡng | **Kết quả M4** |
+|---|---|---|---|
+| $\widehat R$ | Phương pháp `rank`, tức $\widehat R$ chuẩn hóa theo hạng có tách đôi chuỗi | $<1{,}01$ | **2,8379** |
+| ESS | Phương pháp `bulk`, phần trung tâm phân phối | Càng lớn càng tốt | **4,7 trên 1.600 mẫu** |
+| Số lần phân kỳ | Đếm từ chẩn đoán nội bộ của thư viện | Lý tưởng bằng 0 | **13** |
+
+Ý nghĩa của từng đại lượng:
+
+- $\widehat R$ so sánh phương sai **giữa** các chuỗi với phương sai **trong** từng
+  chuỗi. Nếu các chuỗi cùng hội tụ về một phân phối, hai đại lượng bằng nhau và
+  tỷ số tiến về 1. Phiên bản chuẩn hóa theo hạng bền hơn với phân phối đuôi dày.
+- ESS đo số mẫu **độc lập tương đương**. Giá trị 4,7 nghĩa là 1.600 mẫu chỉ chứa
+  lượng thông tin tương đương chưa tới năm mẫu độc lập.
+- Phân kỳ xảy ra khi quỹ đạo leapfrog gặp vùng cong gắt và năng lượng vọt lên.
+  **Phân kỳ báo hiệu sai lệch thật sự**, khác hẳn việc chạm trần độ sâu cây vốn
+  chỉ làm giảm hiệu quả.
+
+Hai hạn chế của phần chẩn đoán hiện tại: chỉ tính ESS phần trung tâm mà thiếu ESS
+phần đuôi, và việc đếm phân kỳ được bọc trong khối bắt lỗi nên với cấu hình rất
+nhỏ như `dry-run` con số này có thể bằng 0 một cách giả tạo.
+
+#### 7.4.5 Kết quả M4: không hội tụ, và vì sao đó là một kết luận có căn cứ
+
+Ba lần chạy đã được thực hiện. Cả ba biện pháp chuẩn để xử lý hình học hậu nghiệm
+khó đều đã được áp dụng: ma trận khối lượng đặc, tăng khởi động gấp bốn lần, và
+khởi tạo từ nghiệm MLE chính quy. Sau 64 giờ, $\widehat R$ vẫn là 2,84.
+
+Điều quan trọng là **bản chất của thất bại đã thay đổi** giữa lần 1 và lần 3. Xét
+độ lệch chuẩn của $\omega_1$:
+
+| | Lần 1 | Lần 3 |
+|---|---|---|
+| Trong chuỗi 0 | 0,0004 | 0,3156 |
+| Trong chuỗi 1 | 0,0024 | 0,0858 |
+| Trong chuỗi 2 | 0,0050 | 0,0583 |
+| Trong chuỗi 3 | 0,0325 | 0,0435 |
+| **Giữa các chuỗi** | 0,3186 | 0,2648 |
+
+Ở lần 1, phân tán trong chuỗi nhỏ hơn phân tán giữa các chuỗi từ 10 đến 800 lần —
+các chuỗi **đứng yên tại chỗ**, đó là vấn đề cấu hình. Ở lần 3, phân tán trong
+chuỗi tăng 10 đến 100 lần và chuỗi 0 thậm chí có phân tán nội tại **lớn hơn**
+phân tán giữa các chuỗi — các chuỗi **đang thăm dò thật sự**, chỉ là chúng thăm
+dò những vùng khác nhau.
+
+Kết luận: vấn đề còn lại là **đa đỉnh**. Hậu nghiệm có nhiều đỉnh tách biệt mà
+NUTS không nhảy qua được. Đây là tính chất của mô hình chứ không phải lỗi cấu
+hình, và nó khớp với quan sát độc lập từ phía MLE: nghiệm M1 có 4 trên 9 điểm
+khởi tạo hội tụ về hai nhóm khác nhau, còn B4 có 6 trên 10 điểm rơi vào nghiệm
+suy biến.
+
+Vì vậy, đây được báo cáo là **kết quả âm có căn cứ** cho RQ5, chứ không phải
+"cấu hình chưa đủ tốt". Một chặn an toàn đã được cài trong
+`scripts/cap_nhat_bai_bao.py`: script từ chối điền số liệu của M4 vào bài báo khi
+$\widehat R > 1{,}01$, và bỏ luôn hàng M4 khỏi các bảng ngoài mẫu. Để trống còn
+hơn điền một con số trông đẹp mà không dùng được.
+
+#### 7.4.6 Một điểm không nhất quán cần biết
+
+`StudyConfig` có trường `mcmc_full_mass = True`, nhưng `run_mcmc_step` trong
+`scripts/run_full_study.py` **không truyền trường này** cho `fit_mcmc`, và cũng
+không truyền `initial_params`. Hệ quả: chạy lại M4 qua `run_full_study.py --only
+mcmc` sẽ dùng ma trận khối lượng **đường chéo** và khởi tạo ngẫu nhiên, tức tái
+lập đúng cấu hình đã thất bại ở lần 1, **không phải** cấu hình đã tạo ra kết quả
+được báo cáo. Muốn tái lập kết quả M4, phải chạy qua
+`scripts/chay_tiep_m1_mcmc_oos.py`.
+
+#### 7.4.7 Kết quả được lưu lại
+
+| Trường | Kích thước | Nội dung |
+|---|---|---|
+| `samples` | $(1.600,\dots)$ | Toàn bộ mẫu đã gộp bốn chuỗi |
+| `samples_by_chain` | $(4, 400,\dots)$ | Mẫu tách theo chuỗi, cần thiết để tính $\widehat R$ |
+| `summary` | — | Trung bình, độ lệch chuẩn, phân vị 2,5% và 97,5% của từng tham số |
+| `rhat`, `ess_bulk` | — | Giá trị theo từng nhóm tham số |
+| `max_rhat`, `min_ess` | vô hướng | Trường hợp xấu nhất, dùng để kết luận về hội tụ |
+| `n_divergences` | vô hướng | Tổng số lần phân kỳ trên cả bốn chuỗi |
+
+Ở bước đánh giá ngoài mẫu, chỉ **200 mẫu** trong số 1.600 được rút ngẫu nhiên để
+tính dự báo, vì mỗi mẫu đòi hỏi chạy lại bộ lọc trên toàn bộ chuỗi.
+
+#### 7.4.8 Ảnh hưởng khi thay đổi từng tham số
+
+| Thay đổi | Thời gian | ESS | Có làm sai kết quả không |
+|---|---|---|---|
+| Giảm `max_tree_depth` | Giảm gần tỷ lệ thuận | Giảm gần tỷ lệ thuận | Không, hậu nghiệm vẫn đúng |
+| Giảm `n_samples` | Giảm tỷ lệ thuận | Giảm tỷ lệ thuận | Không |
+| Tăng `target_accept_prob` | Tăng | Thường tăng | Không |
+| Chạy các chuỗi song song | Giảm bốn lần | Không đổi | Không, đây là cách tăng tốc duy nhất không mất gì |
+| Đặt `full_mass = False` | Giảm nhẹ | Giảm mạnh | Không sai về lý thuyết, nhưng thực tế chuỗi đứng yên |
+| **Giảm `n_warmup`** | Giảm | — | **Có** — thích nghi chưa xong thì mẫu bị lệch |
+| **Giảm `n_chains` xuống dưới 4** | Giảm | — | **Có** — $\widehat R$ mất ý nghĩa |
 
 ### 7.5 Điều bảo đảm ba phương pháp so sánh được với nhau
 
@@ -1035,18 +1203,17 @@ gian, thay vì dùng nguyên số liệu ở đây.
 | | MLE (M1) | MCMC (M4) |
 |---|---|---|
 | Mục tiêu | Tìm **một điểm** cực đại | Mô tả **cả phân phối** 13 chiều |
-| Số lần chạy bộ lọc | $6\times 500 = 3.000$ | $2.600\times 127 \approx 330.000$ |
-| Thời gian ước tính | ~1,4 giờ | ~128 giờ |
+| Số lần chạy bộ lọc | $6\times 500 = 3.000$ | $5.600\times 127 \approx 711.000$ |
+| Thời gian **đo được** | ~1,4 giờ | **64 giờ** (bốn chuỗi song song) |
 
-Con số $2.600$ là $4$ chuỗi $\times\,(250$ khởi động $+\ 400$ mẫu$)$. Con số $127$
-là số bước leapfrog tối đa ở độ sâu cây $D=7$, tức $2^7-1$ — đây là **giới hạn
-TRÊN** (giả định mọi mẫu đều chạm trần 127 bước, hiếm khi xảy ra thực tế; NUTS
-thường dừng sớm hơn nhờ tiêu chí U-turn). ~128 giờ tính trên máy tham chiếu ở
-13.1 (~1,4 giây/lần chạy bộ lọc); trên máy chậm hơn (vd. ~3,57 giây/lần như đo
-trong `code thuật toán/README.md`), giới hạn trên tương ứng dài hơn theo cùng
-tỷ lệ. Vì đây chỉ là cận trên lý thuyết, **cách đáng tin cậy nhất để biết thời
-gian thực tế là theo dõi trực tiếp thanh tiến trình (`s/it`) khi chạy MCMC
-thật**, không phải con số tính sẵn nào ở đây.
+Con số $5.600$ là $4$ chuỗi $\times\,(1000$ khởi động $+\ 400$ mẫu$)$. Con số $127$
+là số bước leapfrog tối đa ở độ sâu cây $D=7$, tức $2^7-1$. Lần chạy thật cho
+khoảng **165 giây mỗi vòng lặp**, tương ứng khoảng 118 bước leapfrog, tức **sát
+trần** — thuật toán chạm trần gần như mọi vòng, nên ở đây cận trên lý thuyết
+cũng gần bằng chi phí thực. Con số 64 giờ là thời gian thực tế của bốn chuỗi
+chạy song song, mỗi chuỗi 1.400 vòng; nếu chạy tuần tự trong một tiến trình thì
+lâu gấp bốn. Chi tiết chẩn đoán và lý do lần chạy này không hội tụ nằm ở
+Mục 7.4.5.
 
 Nguyên nhân sâu xa: hậu nghiệm có hình học "cứng" — NUTS thích nghi bước tích
 phân xuống khoảng $10^{-4}$ do tương quan mạnh giữa $\omega_s,\alpha_s,\beta_s$ và
@@ -1122,11 +1289,18 @@ Toàn bộ quy trình gồm tám bước, mỗi bước được lưu điểm ki
 Chi tiết lệnh chạy, cài đặt thư viện và hai tệp `.bat` cho Windows nằm ở
 [`code thuật toán/README.md`](code%20thuật%20toán/README.md).
 
-**Lưu ý quan trọng về điểm kiểm tra**: kết quả chỉ được ghi ra đĩa **sau khi một
-bước hoàn tất trọn vẹn**. Không có cơ chế lưu giữa chừng. Dừng chương trình khi
-bước 2 đang chạy sẽ mất toàn bộ kết quả của B1 đến M1; dừng khi bước 4 đang chạy
-sẽ mất cả bốn chuỗi MCMC. Thời điểm dừng an toàn là ngay sau khi nhật ký in dòng
-báo hoàn tất một bước.
+**Lưu ý quan trọng về điểm kiểm tra**: kết quả của mỗi bước chỉ được ghi ra đĩa
+**sau khi bước đó hoàn tất trọn vẹn**. Dừng chương trình khi bước 2 đang chạy sẽ
+mất toàn bộ kết quả của B1 đến M1. Thời điểm dừng an toàn là ngay sau khi nhật ký
+in dòng báo hoàn tất một bước.
+
+Riêng MCMC có thêm một lớp bảo vệ, được bổ sung sau khi Windows tự khởi động lại
+ngày 26/08/2026 và xóa mất khoảng 65% tiến độ của cả bốn chuỗi: khi truyền
+`checkpoint_path`, trạng thái được lưu sau mỗi 25 vòng lặp, gồm bước tích phân đã
+thích nghi và điểm tham số cuối cùng. Lần chạy sau đọc lại tệp này và tiếp tục từ
+đó thay vì bắt đầu lại từ đầu. Lớp bảo vệ này chỉ có tác dụng khi chạy qua
+`scripts/chay_tiep_m1_mcmc_oos.py`; đường chạy mặc định trong `run_full_study.py`
+không truyền `checkpoint_path` nên vẫn mất trắng nếu bị ngắt.
 
 ---
 
