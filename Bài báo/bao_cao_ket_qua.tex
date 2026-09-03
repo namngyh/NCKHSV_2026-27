@@ -14,6 +14,7 @@
 \usepackage{tabularx}
 \usepackage{array}
 \usepackage{threeparttable}
+\usepackage{longtable}
 \usepackage{makecell}
 \usepackage{float}
 \usepackage{caption}
@@ -367,4 +368,741 @@ Toàn bộ số liệu trong báo cáo này được trích xuất trực tiếp
 \texttt{code thuật toán/results/*.pt} và không nhập tay.}
 \end{center}
 
+\clearpage
+\appendix
+\section*{\centering PHỤ LỤC DỮ LIỆU ĐẦY ĐỦ}
+\addcontentsline{toc}{section}{Phụ lục dữ liệu đầy đủ}
+
+Phụ lục này liệt kê \emph{toàn bộ} giá trị số của nghiên cứu: cấu hình chạy,
+tiên nghiệm, giá trị khởi tạo, ước lượng của từng tham số theo từng phương pháp,
+chẩn đoán của từng điểm khởi tạo và từng chuỗi, cùng mọi thống kê kiểm định.
+Mọi con số được đọc trực tiếp từ tệp kết quả nhị phân, không nhập tay.
+
+\section{Cấu hình chạy}
+
+\begin{table}[H]\centering\footnotesize
+\caption{Tham số điều khiển toàn bộ pipeline (preset \texttt{full} trong \texttt{run\_full\_study.py})}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Nhóm} & \textbf{Tham số} & \textbf{Giá trị} \\
+\midrule
+Dữ liệu & Tổng quan sát & 2170 \\
+ & Tập huấn luyện & 1735 (tỷ lệ \texttt{train\_frac} $=0{,}8$) \\
+ & Tập kiểm định & 435 \\
+ & Số biến ngoại sinh $k$ & 2: $\log(1+VOL_{t-1})$ và $\log(RV_{t-1}+\epsilon)$ \\
+ & Hạt giống gốc \texttt{seed} & 0 \\
+\midrule
+MLE & \texttt{mle\_n\_starts} & 10 điểm khởi tạo \\
+ & \texttt{mle\_n\_adam} & 500 vòng Adam \\
+ & \texttt{mle\_n\_lbfgs} & 250 vòng L-BFGS \\
+ & \texttt{mle\_n\_cycles} & 3 chu kỳ Adam${+}$L-BFGS mỗi điểm khởi tạo \\
+ & \texttt{lr\_adam} & 0,02 \\
+ & Quy tắc chọn nghiệm & \texttt{select="regular"} với B4, M1; \texttt{"max\_loglik"} với B1--B3 \\
+ & Điều kiện chính quy & $d_s \ge 2$ phiên và $p_{ss} \in [0{,}01;\ 0{,}999]$ \\
+\midrule
+Variational Bayes & \texttt{vb\_n\_steps} & 3000 bước SVI \\
+ & \texttt{vb\_n\_draws} & 1000 mẫu hậu nghiệm \\
+ & Guide M2 & \texttt{AutoNormal} (mean-field) \\
+ & Guide M3 & \texttt{AutoMultivariateNormal} (full-rank) \\
+\midrule
+MCMC (NUTS) & \texttt{mcmc\_n\_chains} & 4 chuỗi \\
+ & \texttt{mcmc\_n\_warmup} & 1000 (lần 1: 250) \\
+ & \texttt{mcmc\_n\_samples} & 400 mỗi chuỗi \\
+ & \texttt{mcmc\_max\_tree\_depth} & 7 \\
+ & \texttt{mcmc\_full\_mass} & \texttt{True} --- ma trận đặc (lần 1: đường chéo) \\
+\midrule
+Ngoài mẫu & \texttt{oos\_n\_posterior\_draws} & 200 mẫu hậu nghiệm \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Tiên nghiệm dùng cho Variational Bayes và MCMC}
+
+Cả M2, M3, M4 và R1 dùng \emph{chung một} hàm \texttt{model()} trong
+\texttt{bayes\_model.py}, nên khác biệt kết quả giữa chúng thuần túy đến từ
+phương pháp suy diễn chứ không từ đặc tả xác suất.
+
+\begin{table}[H]\centering\footnotesize
+\caption{Tiên nghiệm (giá trị mặc định của \texttt{PriorConfig})}
+\begin{tabularx}{\textwidth}{l l X}
+\toprule
+\textbf{Tham số} & \textbf{Phân phối tiên nghiệm} & \textbf{Ghi chú} \\
+\midrule
+$\mu_s$ & $\mathcal{N}(0;\ 1^2)$, độc lập cho $s=1,2$ & \texttt{sigma\_mu} $=1{,}0$ \\
+$\omega_s$ & $\mathrm{LogNormal}(0;\ 1^2)$ & \texttt{m\_omega} $=0$, \texttt{sigma\_omega} $=1$ \\
+$\alpha_s$ & $\mathrm{Beta}(2;\ 2)$ & \texttt{alpha\_beta\_concentration} $=2{,}0$ \\
+$\beta_s$ & $\mathrm{Beta}(2;\ 2)$ & chặn cả hai trong khoảng $(0;1)$ \\
+$\gamma_{s,j}$ & $\mathcal{N}(0;\ 1^2)$ & \texttt{sigma\_gamma} $=1{,}0$, ma trận $2\times k$ \\
+$p_{11},\ p_{22}$ & $\mathrm{Beta}(8;\ 2)$ & \texttt{transition\_prior\_stay} $=8$, \texttt{switch} $=2$ \\
+$\nu-2$ & $\mathrm{Gamma}(\text{shape}=2;\ \text{rate}=0{,}2)$ & bảo đảm $\nu>2$ để phương sai tồn tại \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Tiên nghiệm $\mathrm{Beta}(2;2)$ đặt trên $\alpha_s,\beta_s$ có hệ quả quan trọng khi
+so sánh với MLE: nó \emph{chặn cứng} hai tham số này trong $(0;1)$, trong khi tham số
+hóa softplus dùng cho MLE không có chặn trên. Đây là lý do $\hat\beta_1$ của MLE
+($0{,}8463$) nằm ngoài vùng mà ba phương pháp Bayes có thể với tới.
+
+\section{Giá trị khởi tạo}
+
+\subsection*{C.1 Khởi tạo ấm cho mô hình hai trạng thái}
+Bốn điểm khởi tạo đầu tiên của B4 và M1 \emph{không} ngẫu nhiên: chúng được sinh
+từ nghiệm một trạng thái đã ước lượng xong (B1 cho B4, B3 cho M1) bằng cách nhân đôi
+bộ tham số rồi tách hai bản sao ra qua hệ số nhân $\omega$.
+
+
+\begin{table}[H]\centering\footnotesize
+\caption{Bốn biến thể khởi tạo ấm (\texttt{\_BIEN\_THE\_AM})}
+\begin{tabularx}{\textwidth}{c C C C C}
+\toprule
+\textbf{Biến thể} & \textbf{Hệ số nhân $\omega$} & \textbf{$p_{11}$ khởi tạo} & \textbf{$p_{22}$ khởi tạo} & \textbf{Quy tắc $\nu$} \\
+\midrule
+1 & $(0{,}5;\ 2{,}0)$ & 0{,}95 & 0{,}95 & $\nu_0$ \\
+2 & $(0{,}25;\ 4{,}0)$ & 0{,}98 & 0{,}90 & $\nu_0$ \\
+3 & $(0{,}7;\ 1{,}5)$ & 0{,}90 & 0{,}85 & $\max(\nu_0;\ 6)$ \\
+4 & $(0{,}4;\ 3{,}0)$ & 0{,}99 & 0{,}94 & $\nu_0+2$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\begin{table}[H]\centering\footnotesize
+\caption{Nghiệm một trạng thái được dùng làm gốc khởi tạo}
+\begin{tabularx}{\textwidth}{l C C C C C}
+\toprule
+\textbf{Nguồn} & $\mu_0$ & $\omega_0$ & $\alpha_0$ & $\beta_0$ & $\nu_0$ \\
+\midrule
+B1 $\to$ khởi tạo B4 & 0{,}0463 & 0{,}0568 & 0{,}1162 & 0{,}8635 & --- (cố định $10^6$) \\
+B3 $\to$ khởi tạo M1 & 0{,}0971 & 0{,}2028 & 0{,}1342 & 0{,}7889 & 4{,}0185 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Ví dụ cụ thể: biến thể 2 của M1 khởi tạo với
+$\omega = (0{,}0507; 0{,}8114)$,
+$\alpha = (0{,}1342; 0{,}1342)$,
+$\beta = (0{,}7889; 0{,}7889)$,
+$P_{11} = 0{,}98$, $P_{22} = 0{,}90$, $\nu = 4{,}0185$.
+
+\subsection*{C.2 Khởi tạo ngẫu nhiên cho các điểm còn lại}
+Các điểm khởi tạo từ thứ 5 trở đi sinh ngẫu nhiên trên \emph{không gian không ràng buộc},
+với hạt giống \texttt{base\_seed} $+\ i$:
+\begin{itemize}
+  \item $\mu_s \sim 0{,}05\cdot\mathcal{N}(0,1)$;
+  \item $\log\omega_s = \log(0{,}5)$ hoặc $\log(2{,}0)$, cộng $\mathcal{N}(0,1)$ --- tách sẵn hai trạng thái;
+  \item $\eta_{\alpha}, \eta_{\beta}$: tâm mặc định cộng $0{,}3\cdot\mathcal{N}(0,1)$;
+  \item $\gamma_{s,j} \sim 0{,}05\cdot\mathcal{N}(0,1)$;
+  \item $\eta_p$: khởi tạo tại $p_{11}=0{,}97$, $p_{22}=0{,}95$ cộng $0{,}2\cdot\mathcal{N}(0,1)$;
+  \item $\eta_\nu$: khởi tạo tại $\nu=8$ cộng $0{,}3\cdot\mathcal{N}(0,1)$.
+\end{itemize}
+
+\subsection*{C.3 Khởi tạo của MCMC}
+Lần 1 khởi tạo \textbf{từ tiên nghiệm} (mặc định của NUTS). Lần 2 khởi tạo
+\textbf{từ nghiệm MLE chính quy} của M1 --- tức từ chính bộ tham số trong Phụ lục D --- và
+vẫn không hội tụ, đây là bằng chứng loại trừ khả năng ``chỉ do khởi tạo xấu''.
+
+\section{Ước lượng MLE đầy đủ}
+
+\begin{table}[H]\centering\footnotesize
+\caption{Mô hình một trạng thái B1--B3: toàn bộ tham số}
+\begin{tabularx}{\textwidth}{l C C C C C C C}
+\toprule
+\textbf{Mô hình} & $\mu$ & $\omega$ & $\alpha$ & $\beta$ & $\alpha+\beta$ & $\gamma_1$ & $\gamma_2$ \\
+\midrule
+B1 & 0{,}0463 & 0{,}0568 & 0{,}1162 & 0{,}8635 & 0{,}9796 & -- & -- \\
+B2 & 0{,}0970 & 0{,}0580 & 0{,}1546 & 0{,}8405 & 0{,}9951 & -- & -- \\
+B3 & 0{,}0971 & 0{,}2028 & 0{,}1342 & 0{,}7889 & 0{,}9232 & -0{,}0536 & 0{,}1142 \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize\item $\nu$: B1 dùng phân phối chuẩn (không có $\nu$); B2 có $\nu=3{,}9250$; B3 có $\nu=4{,}0185$.
+\end{tablenotes}
+\end{table}
+
+
+\begin{table}[H]\centering\footnotesize
+\caption{Mô hình hai trạng thái B4 và M1: toàn bộ tham số theo từng trạng thái}
+\begin{tabularx}{\textwidth}{l C C C C}
+\toprule
+& \multicolumn{2}{c}{\textbf{B4: MS-GARCH chuẩn}} & \multicolumn{2}{c}{\textbf{M1: MS-GARCH-X Student-t}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+\textbf{Tham số} & Trạng thái 1 & Trạng thái 2 & Trạng thái 1 & Trạng thái 2 \\
+\midrule
+$\mu_s$ & 0{,}1386 & -0{,}4790 & 0{,}0592 & 0{,}3471 \\
+$\omega_s$ & 0{,}3717 & 5{,}4631 & 0{,}1001 & 1{,}0767 \\
+$\alpha_s$ & 0{,}0000 & 0{,}1735 & 0{,}1091 & 0{,}3288 \\
+$\beta_s$ & 0{,}3383 & 0{,}0847 & 0{,}8463 & 0{,}3006 \\
+$\alpha_s+\beta_s$ & 0{,}3383 & 0{,}2583 & 0{,}9554 & 0{,}6294 \\
+$\gamma_{s,1}$ & --- & --- & -0{,}0200 & -0{,}1730 \\
+$\gamma_{s,2}$ & --- & --- & 0{,}0502 & 0{,}6194 \\
+\midrule
+$p_{11}$ & \multicolumn{2}{c}{0{,}9604} & \multicolumn{2}{c}{0{,}9986} \\
+$p_{12}$ & \multicolumn{2}{c}{0{,}0396} & \multicolumn{2}{c}{0{,}0014} \\
+$p_{21}$ & \multicolumn{2}{c}{0{,}1328} & \multicolumn{2}{c}{0{,}0068} \\
+$p_{22}$ & \multicolumn{2}{c}{0{,}8672} & \multicolumn{2}{c}{0{,}9932} \\
+$d_s$ (phiên) & 25{,}25 & 7{,}53 & 717{,}91 & 146{,}96 \\
+$\nu$ & \multicolumn{2}{c}{cố định $10^6$} & \multicolumn{2}{c}{4{,}0761} \\
+\midrule
+Log-hợp-lý & \multicolumn{2}{c}{-2854{,}1465} & \multicolumn{2}{c}{-2810{,}2902} \\
+AIC & \multicolumn{2}{c}{5728{,}2931} & \multicolumn{2}{c}{5650{,}5804} \\
+BIC & \multicolumn{2}{c}{5782{,}8807} & \multicolumn{2}{c}{5732{,}4618} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+
+\begin{table}[H]\centering\footnotesize
+\caption{Sai số chuẩn của M1 (delta method từ Hessian quan sát)}
+\begin{tabularx}{\textwidth}{l C C C C}
+\toprule
+\textbf{Tham số} & \textbf{Ước lượng tt.1} & \textbf{SE tt.1} & \textbf{Ước lượng tt.2} & \textbf{SE tt.2} \\
+\midrule
+$\mu_s$ & 0{,}0592 & 0{,}0255 & 0{,}3471 & 0{,}0990 \\
+$\omega_s$ & 0{,}1001 & 0{,}0563 & 1{,}0767 & 0{,}4362 \\
+$\alpha_s$ & 0{,}1091 & 0{,}0269 & 0{,}3288 & 0{,}1434 \\
+$\beta_s$ & 0{,}8463 & 0{,}0375 & 0{,}3006 & 0{,}2323 \\
+$\gamma_{s,1}$ & -0{,}0200 & 0{,}0231 & -0{,}1730 & 0{,}1335 \\
+$\gamma_{s,2}$ & 0{,}0502 & 0{,}0369 & 0{,}6194 & 0{,}2268 \\
+$p_{11}$ & 0{,}9986 & 0{,}0011 & --- & --- \\
+$p_{22}$ & 0{,}9932 & 0{,}0055 & --- & --- \\
+$\nu$ & 4{,}0761 & 0{,}4281 & --- & --- \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize
+\item Vì nghiệm nằm sát biên ($p_{ss}\to1$), xấp xỉ tiệm cận chuẩn không còn hợp lệ; các sai số chuẩn này chỉ nên đọc như thước đo độ cong cục bộ của hàm hợp lý.
+\end{tablenotes}
+\end{table}
+
+\section{Chẩn đoán từng điểm khởi tạo MLE}
+
+\begin{longtable}{l c r c r c}
+\caption{Toàn bộ điểm khởi tạo của năm mô hình MLE}\\
+\toprule
+\textbf{Mô hình} & \textbf{seed} & \textbf{Log-hợp-lý} & \textbf{Hội tụ} & \textbf{$\|$gradient$\|$} & \textbf{Sát biên} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Mô hình} & \textbf{seed} & \textbf{Log-hợp-lý} & \textbf{Hội tụ} & \textbf{$\|$gradient$\|$} & \textbf{Sát biên} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+B1 & 0 & -2944{,}8978 & có & 0{,}0007 & --- \\
+B1 & 1 & -2944{,}8978 & có & 0{,}0000 & --- \\
+B1 & 2 & -2944{,}8978 & có & 0{,}0000 & --- \\
+B1 & 3 & -2944{,}8978 & có & 0{,}0000 & --- \\
+B1 & 4 & NaN & \textbf{KHÔNG} & 0{,}0000 & --- \\
+B1 & 5 & -2944{,}8978 & có & 0{,}0000 & --- \\
+\midrule
+B2 & 0 & -2825{,}8112 & có & 0{,}0022 & --- \\
+B2 & 1 & -2825{,}8112 & có & 0{,}0000 & --- \\
+B2 & 2 & -2825{,}8112 & có & 0{,}0000 & --- \\
+B2 & 3 & -2825{,}8112 & có & 0{,}0000 & --- \\
+B2 & 4 & NaN & \textbf{KHÔNG} & 0{,}0000 & --- \\
+B2 & 5 & -2825{,}8112 & có & 0{,}0000 & --- \\
+\midrule
+B3 & 0 & -2817{,}4345 & có & 0{,}0009 & --- \\
+B3 & 1 & -2817{,}4345 & có & 0{,}0009 & --- \\
+B3 & 2 & -2817{,}4345 & có & 0{,}0013 & --- \\
+B3 & 3 & -2817{,}4345 & có & 0{,}0008 & --- \\
+B3 & 4 & NaN & \textbf{KHÔNG} & 0{,}0000 & --- \\
+B3 & 5 & -2817{,}4345 & có & 0{,}0027 & --- \\
+\midrule
+B4 & 0 & -2833{,}8595 & có & 0{,}0020 & có \\
+B4 & 1 & -2833{,}8595 & có & 0{,}0006 & có \\
+B4 & 2 & -2833{,}8595 & có & 0{,}0002 & có \\
+B4 & 3 & -2833{,}8595 & có & 0{,}0004 & có \\
+B4 & 4 & -2854{,}1468 & có & 0{,}0103 & không \\
+B4 & 5 & -2854{,}1465 & có & 0{,}0347 & không \\
+B4 & 6 & -2854{,}1468 & có & 0{,}0129 & không \\
+B4 & 7 & -2833{,}8595 & có & 0{,}0010 & có \\
+B4 & 8 & -2833{,}8595 & có & 0{,}0003 & có \\
+B4 & 9 & -2854{,}1468 & có & 0{,}0068 & không \\
+\midrule
+M1 & 0 & -2799{,}5779 & có & 0{,}1764 & có \\
+M1 & 1 & -2810{,}2912 & có & 0{,}0509 & có \\
+M1 & 2 & -2801{,}8352 & \textbf{KHÔNG} & 2486{,}8102 & có \\
+M1 & 3 & -2810{,}2902 & có & 0{,}2267 & có \\
+M1 & 4 & -2799{,}6970 & \textbf{KHÔNG} & 8{,}288e+08 & có \\
+M1 & 5 & -2807{,}7183 & \textbf{KHÔNG} & 1985{,}7330 & có \\
+M1 & 6 & -2800{,}7008 & \textbf{KHÔNG} & 34{,}0906 & có \\
+M1 & 7 & -2811{,}6118 & có & 0{,}1539 & có \\
+M1 & 9 & -2807{,}1343 & \textbf{KHÔNG} & 353{,}3613 & có \\
+\midrule
+\end{longtable}
+\section{Hậu nghiệm Variational Bayes đầy đủ}
+\begin{table}[H]\centering\footnotesize
+\caption{M2 --- VB mean-field (\texttt{AutoNormal}), ELBO cuối = -2863{,}1609}
+\begin{tabularx}{\textwidth}{l C C C C | C C C C}
+\toprule
+& \multicolumn{4}{c|}{\textbf{Mẫu thô (chưa sắp nhãn)}} & \multicolumn{4}{c}{\textbf{Đã sắp nhãn}} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+\textbf{Tham số} & TB & ĐLC & 2,5\% & 97,5\% & TB & ĐLC & 2,5\% & 97,5\% \\
+\midrule
+$\mu_1$ & 0{,}3125 & 0{,}0837 & 0{,}1588 & 0{,}4826 & 0{,}2929 & 0{,}1051 & 0{,}0290 & 0{,}4760 \\
+$\mu_2$ & 0{,}0423 & 0{,}0299 & -0{,}0175 & 0{,}0985 & 0{,}0618 & 0{,}0816 & -0{,}0163 & 0{,}3623 \\
+$\omega_1$ & 0{,}7412 & 0{,}0841 & 0{,}5934 & 0{,}9318 & 0{,}7264 & 0{,}0968 & 0{,}5193 & 0{,}9266 \\
+$\omega_2$ & 0{,}5433 & 0{,}0356 & 0{,}4782 & 0{,}6152 & 0{,}5582 & 0{,}0664 & 0{,}4802 & 0{,}7842 \\
+$\alpha_1$ & 0{,}2932 & 0{,}1206 & 0{,}1036 & 0{,}5654 & 0{,}2709 & 0{,}1029 & 0{,}1036 & 0{,}4855 \\
+$\alpha_2$ & 0{,}2089 & 0{,}0299 & 0{,}1549 & 0{,}2738 & 0{,}2312 & 0{,}0873 & 0{,}1559 & 0{,}5514 \\
+$\beta_1$ & 0{,}2766 & 0{,}0633 & 0{,}1570 & 0{,}4091 & 0{,}2985 & 0{,}1094 & 0{,}1570 & 0{,}6483 \\
+$\beta_2$ & 0{,}6487 & 0{,}0201 & 0{,}6108 & 0{,}6884 & 0{,}6268 & 0{,}0880 & 0{,}2837 & 0{,}6884 \\
+$\gamma_{1,1}$ & -0{,}2745 & 0{,}0859 & -0{,}4300 & -0{,}1068 & -0{,}2651 & 0{,}0905 & -0{,}4284 & -0{,}0903 \\
+$\gamma_{1,2}$ & 0{,}2707 & 0{,}0720 & 0{,}1203 & 0{,}4103 & 0{,}2744 & 0{,}0692 & 0{,}1268 & 0{,}4083 \\
+$\gamma_{2,1}$ & -0{,}1332 & 0{,}0374 & -0{,}2070 & -0{,}0591 & -0{,}1426 & 0{,}0554 & -0{,}3167 & -0{,}0605 \\
+$\gamma_{2,2}$ & 0{,}3212 & 0{,}0216 & 0{,}2792 & 0{,}3611 & 0{,}3175 & 0{,}0347 & 0{,}2548 & 0{,}3668 \\
+$p_{11}$ & 0{,}7182 & 0{,}0741 & 0{,}5581 & 0{,}8435 & 0{,}7329 & 0{,}0902 & 0{,}5581 & 0{,}9448 \\
+$p_{22}$ & 0{,}9346 & 0{,}0217 & 0{,}8820 & 0{,}9664 & 0{,}9199 & 0{,}0613 & 0{,}7026 & 0{,}9662 \\
+$\nu$ & 3{,}5204 & 0{,}1771 & 3{,}2003 & 3{,}9054 & 3{,}5204 & 0{,}1771 & 3{,}2003 & 3{,}9054 \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize\item Tỷ lệ mẫu phải hoán vị nhãn: 6{,}60\%. ĐLC = độ lệch chuẩn hậu nghiệm.\end{tablenotes}
+\end{table}
+\begin{table}[H]\centering\footnotesize
+\caption{M3 --- VB full-rank (\texttt{AutoMultivariateNormal}), ELBO cuối = -2866{,}3628}
+\begin{tabularx}{\textwidth}{l C C C C | C C C C}
+\toprule
+& \multicolumn{4}{c|}{\textbf{Mẫu thô (chưa sắp nhãn)}} & \multicolumn{4}{c}{\textbf{Đã sắp nhãn}} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+\textbf{Tham số} & TB & ĐLC & 2,5\% & 97,5\% & TB & ĐLC & 2,5\% & 97,5\% \\
+\midrule
+$\mu_1$ & 0{,}1879 & 0{,}0516 & 0{,}0880 & 0{,}2888 & 0{,}1249 & 0{,}0656 & 0{,}0288 & 0{,}2666 \\
+$\mu_2$ & 0{,}0810 & 0{,}0334 & 0{,}0190 & 0{,}1477 & 0{,}1441 & 0{,}0707 & 0{,}0262 & 0{,}2770 \\
+$\omega_1$ & 0{,}6013 & 0{,}1222 & 0{,}3959 & 0{,}8627 & 0{,}6539 & 0{,}1036 & 0{,}4333 & 0{,}8485 \\
+$\omega_2$ & 0{,}6619 & 0{,}0808 & 0{,}5130 & 0{,}8275 & 0{,}6093 & 0{,}1076 & 0{,}4108 & 0{,}8357 \\
+$\alpha_1$ & 0{,}2943 & 0{,}1558 & 0{,}0681 & 0{,}6578 & 0{,}2721 & 0{,}1065 & 0{,}0696 & 0{,}4716 \\
+$\alpha_2$ & 0{,}3602 & 0{,}1023 & 0{,}1822 & 0{,}5755 & 0{,}3823 & 0{,}1396 & 0{,}1235 & 0{,}6661 \\
+$\beta_1$ & 0{,}7010 & 0{,}0851 & 0{,}5197 & 0{,}8468 & 0{,}5980 & 0{,}1060 & 0{,}4239 & 0{,}8157 \\
+$\beta_2$ & 0{,}5438 & 0{,}0614 & 0{,}4172 & 0{,}6638 & 0{,}6468 & 0{,}1047 & 0{,}4662 & 0{,}8383 \\
+$\gamma_{1,1}$ & -0{,}0923 & 0{,}1114 & -0{,}3054 & 0{,}1211 & -0{,}1742 & 0{,}0845 & -0{,}3001 & 0{,}0340 \\
+$\gamma_{1,2}$ & 0{,}5471 & 0{,}1028 & 0{,}3420 & 0{,}7570 & 0{,}3361 & 0{,}1486 & 0{,}1659 & 0{,}6557 \\
+$\gamma_{2,1}$ & -0{,}2014 & 0{,}0424 & -0{,}2855 & -0{,}1200 & -0{,}1195 & 0{,}1073 & -0{,}2826 & 0{,}1108 \\
+$\gamma_{2,2}$ & 0{,}2413 & 0{,}0395 & 0{,}1635 & 0{,}3193 & 0{,}4524 & 0{,}1734 & 0{,}1907 & 0{,}7457 \\
+$p_{11}$ & 0{,}8019 & 0{,}0784 & 0{,}6174 & 0{,}9189 & 0{,}8675 & 0{,}0779 & 0{,}6674 & 0{,}9571 \\
+$p_{22}$ & 0{,}9097 & 0{,}0327 & 0{,}8330 & 0{,}9594 & 0{,}8441 & 0{,}0818 & 0{,}6592 & 0{,}9529 \\
+$\nu$ & 2{,}9779 & 0{,}2004 & 2{,}6556 & 3{,}4348 & 2{,}9779 & 0{,}2004 & 2{,}6556 & 3{,}4348 \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize\item Tỷ lệ mẫu phải hoán vị nhãn: 63{,}80\%. ĐLC = độ lệch chuẩn hậu nghiệm.\end{tablenotes}
+\end{table}
+\begin{table}[H]\centering\footnotesize
+\caption{R1 --- VB mean-field với $\nu_s$ riêng theo trạng thái, ELBO cuối = -2865{,}6254}
+\begin{tabularx}{\textwidth}{l C C C C | C C C C}
+\toprule
+& \multicolumn{4}{c|}{\textbf{Mẫu thô (chưa sắp nhãn)}} & \multicolumn{4}{c}{\textbf{Đã sắp nhãn}} \\
+\cmidrule(lr){2-5}\cmidrule(lr){6-9}
+\textbf{Tham số} & TB & ĐLC & 2,5\% & 97,5\% & TB & ĐLC & 2,5\% & 97,5\% \\
+\midrule
+$\mu_1$ & 0{,}1508 & 0{,}0312 & 0{,}0886 & 0{,}2100 & -0{,}0632 & 0{,}0892 & -0{,}2038 & 0{,}1625 \\
+$\mu_2$ & -0{,}0824 & 0{,}0648 & -0{,}2081 & 0{,}0482 & 0{,}1316 & 0{,}0737 & -0{,}1265 & 0{,}2096 \\
+$\omega_1$ & 0{,}6906 & 0{,}0438 & 0{,}6073 & 0{,}7801 & 0{,}6624 & 0{,}0693 & 0{,}5306 & 0{,}8010 \\
+$\omega_2$ & 0{,}6628 & 0{,}0716 & 0{,}5294 & 0{,}8070 & 0{,}6909 & 0{,}0470 & 0{,}6030 & 0{,}7842 \\
+$\alpha_1$ & 0{,}2661 & 0{,}0455 & 0{,}1806 & 0{,}3546 & 0{,}2373 & 0{,}0650 & 0{,}1212 & 0{,}3726 \\
+$\alpha_2$ & 0{,}2468 & 0{,}0749 & 0{,}1212 & 0{,}4150 & 0{,}2756 & 0{,}0539 & 0{,}1844 & 0{,}3953 \\
+$\beta_1$ & 0{,}6100 & 0{,}0223 & 0{,}5668 & 0{,}6556 & 0{,}4893 & 0{,}0598 & 0{,}3765 & 0{,}6137 \\
+$\beta_2$ & 0{,}4839 & 0{,}0535 & 0{,}3765 & 0{,}5912 & 0{,}6046 & 0{,}0331 & 0{,}5143 & 0{,}6556 \\
+$\gamma_{1,1}$ & -0{,}1436 & 0{,}0483 & -0{,}2405 & -0{,}0474 & -0{,}2988 & 0{,}0979 & -0{,}4788 & -0{,}1077 \\
+$\gamma_{1,2}$ & 0{,}3548 & 0{,}0388 & 0{,}2818 & 0{,}4303 & 0{,}3159 & 0{,}0604 & 0{,}1970 & 0{,}4290 \\
+$\gamma_{2,1}$ & -0{,}3158 & 0{,}0878 & -0{,}4852 & -0{,}1490 & -0{,}1605 & 0{,}0757 & -0{,}3729 & -0{,}0497 \\
+$\gamma_{2,2}$ & 0{,}3109 & 0{,}0603 & 0{,}1951 & 0{,}4289 & 0{,}3498 & 0{,}0434 & 0{,}2569 & 0{,}4303 \\
+$p_{11}$ & 0{,}8927 & 0{,}0299 & 0{,}8270 & 0{,}9417 & 0{,}7343 & 0{,}0798 & 0{,}5802 & 0{,}9073 \\
+$p_{22}$ & 0{,}7206 & 0{,}0656 & 0{,}5801 & 0{,}8359 & 0{,}8790 & 0{,}0565 & 0{,}7102 & 0{,}9413 \\
+$\nu_1$ & 2{,}8828 & 0{,}1122 & 2{,}6919 & 3{,}1102 & 10{,}9457 & 6{,}1052 & 2{,}8315 & 25{,}8581 \\
+$\nu_2$ & 11{,}7391 & 5{,}8797 & 4{,}6598 & 27{,}0453 & 3{,}6761 & 3{,}1806 & 2{,}6930 & 13{,}6639 \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize\item Tỷ lệ mẫu phải hoán vị nhãn: 91{,}70\%. ĐLC = độ lệch chuẩn hậu nghiệm.\end{tablenotes}
+\end{table}
+
+Với R1, xác suất hậu nghiệm mà trạng thái biến động cao có đuôi dày hơn trạng thái
+biến động thấp là $\Pr(\nu_{\text{cao}}<\nu_{\text{thấp}}\mid \mathcal{D}_T) = 0{,}9170$.
+
+\section{Hậu nghiệm MCMC đầy đủ}
+\begin{table}[H]\centering\footnotesize
+\caption{M4 lần 1 --- ma trận khối lượng đường chéo, warmup 250, khởi tạo từ tiên nghiệm}
+\begin{tabularx}{\textwidth}{l C C C C C C}
+\toprule
+\textbf{Tham số} & \textbf{TB} & \textbf{ĐLC} & \textbf{2,5\%} & \textbf{97,5\%} & $\widehat{R}$ & \textbf{ESS} \\
+\midrule
+$\mu_1$ & -0{,}0387 & 0{,}2994 & -0{,}4571 & 0{,}3576 & 3{,}3433 & 4{,}5 \\
+$\mu_2$ & 0{,}2516 & 0{,}2005 & -0{,}0001 & 0{,}4882 & 3{,}3433 & 4{,}5 \\
+$\omega_1$ & 0{,}4383 & 0{,}2765 & 0{,}1663 & 0{,}8561 & 3{,}3918 & 4{,}5 \\
+$\omega_2$ & 2{,}0103 & 1{,}4656 & 0{,}3149 & 3{,}7871 & 3{,}3918 & 4{,}5 \\
+$\alpha_1$ & 0{,}3449 & 0{,}0831 & 0{,}2252 & 0{,}4398 & 3{,}7634 & 4{,}4 \\
+$\alpha_2$ & 0{,}4040 & 0{,}2013 & 0{,}2362 & 0{,}7384 & 3{,}7634 & 4{,}4 \\
+$\beta_1$ & 0{,}3537 & 0{,}2054 & 0{,}1639 & 0{,}6967 & 3{,}5078 & 4{,}5 \\
+$\beta_2$ & 0{,}4767 & 0{,}3070 & 0{,}1332 & 0{,}8441 & 3{,}5078 & 4{,}5 \\
+$\gamma_{1,1}$ & 0{,}6130 & 1{,}1278 & -0{,}5422 & 2{,}0802 & 3{,}3459 & 4{,}5 \\
+$\gamma_{1,2}$ & -0{,}1087 & 1{,}1388 & -1{,}5357 & 1{,}3125 & 3{,}3459 & 4{,}5 \\
+$\gamma_{2,1}$ & 0{,}2327 & 0{,}8340 & -0{,}9862 & 1{,}3935 & 3{,}3459 & 4{,}5 \\
+$\gamma_{2,2}$ & 0{,}2115 & 0{,}8274 & -0{,}7767 & 1{,}2881 & 3{,}3459 & 4{,}5 \\
+$p_{11}$ & 0{,}3303 & 0{,}2561 & 0{,}1167 & 0{,}7744 & 4{,}0601 & 4{,}4 \\
+$p_{22}$ & 0{,}6111 & 0{,}1081 & 0{,}4944 & 0{,}7635 & 3{,}4267 & 4{,}5 \\
+$\nu$ & 3{,}7959 & 1{,}6822 & 2{,}4278 & 6{,}6693 & 3{,}7612 & 4{,}4 \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize\item Tỷ lệ mẫu phải hoán vị nhãn: 25{,}00\%. $\widehat{R}$ và ESS lấy theo nhóm tham số (max/min trên các thành phần). Số lần phân kỳ: 14.\end{tablenotes}
+\end{table}
+\begin{table}[H]\centering\footnotesize
+\caption{M4 lần 2 --- ma trận khối lượng đặc, warmup 1000, khởi tạo từ nghiệm MLE}
+\begin{tabularx}{\textwidth}{l C C C C C C}
+\toprule
+\textbf{Tham số} & \textbf{TB} & \textbf{ĐLC} & \textbf{2,5\%} & \textbf{97,5\%} & $\widehat{R}$ & \textbf{ESS} \\
+\midrule
+$\mu_1$ & 0{,}2192 & 0{,}0891 & -0{,}0768 & 0{,}3426 & 2{,}2512 & 5{,}1 \\
+$\mu_2$ & -0{,}1425 & 0{,}1616 & -0{,}4146 & 0{,}2948 & 2{,}2512 & 5{,}1 \\
+$\omega_1$ & 0{,}5348 & 0{,}2839 & 0{,}2007 & 1{,}1004 & 2{,}6420 & 4{,}8 \\
+$\omega_2$ & 0{,}5565 & 0{,}2834 & 0{,}1632 & 1{,}1215 & 2{,}6420 & 4{,}8 \\
+$\alpha_1$ & 0{,}2077 & 0{,}1082 & 0{,}0611 & 0{,}4282 & 2{,}4097 & 5{,}0 \\
+$\alpha_2$ & 0{,}4056 & 0{,}1221 & 0{,}1811 & 0{,}6470 & 2{,}4097 & 5{,}0 \\
+$\beta_1$ & 0{,}4594 & 0{,}1484 & 0{,}2124 & 0{,}6878 & 2{,}8379 & 4{,}7 \\
+$\beta_2$ & 0{,}6423 & 0{,}1265 & 0{,}2318 & 0{,}8365 & 2{,}8379 & 4{,}7 \\
+$\gamma_{1,1}$ & -0{,}1146 & 0{,}0628 & -0{,}2161 & -0{,}0041 & 2{,}4622 & 4{,}9 \\
+$\gamma_{1,2}$ & 0{,}2466 & 0{,}1851 & 0{,}0314 & 0{,}6158 & 2{,}4622 & 4{,}9 \\
+$\gamma_{2,1}$ & -0{,}1530 & 0{,}1426 & -0{,}4245 & 0{,}1781 & 2{,}4622 & 4{,}9 \\
+$\gamma_{2,2}$ & 0{,}3891 & 0{,}2013 & 0{,}0693 & 0{,}7572 & 2{,}4622 & 4{,}9 \\
+$p_{11}$ & 0{,}8239 & 0{,}0963 & 0{,}6505 & 0{,}9638 & 1{,}9572 & 5{,}6 \\
+$p_{22}$ & 0{,}7614 & 0{,}0791 & 0{,}6290 & 0{,}8914 & 2{,}2444 & 5{,}1 \\
+$\nu$ & 4{,}0741 & 0{,}4187 & 3{,}4138 & 5{,}0251 & 1{,}4276 & 8{,}5 \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize\item Tỷ lệ mẫu phải hoán vị nhãn: 71{,}06\%. $\widehat{R}$ và ESS lấy theo nhóm tham số (max/min trên các thành phần). Số lần phân kỳ: 13.\end{tablenotes}
+\end{table}
+
+\textbf{Cảnh báo.} Không bảng nào trong Phụ lục G đạt chuẩn hội tụ. Chúng được in
+đầy đủ để phục vụ kiểm chứng và tái lập, không phải để trích dẫn như ước lượng.
+
+\section{Độ nhạy tiên nghiệm}
+
+\begin{table}[H]\centering\footnotesize
+\caption{Ước lượng hậu nghiệm dưới bốn lựa chọn tiên nghiệm (VB mean-field, đã sắp nhãn)}
+\begin{tabularx}{\textwidth}{l C C C C}
+\toprule
+\textbf{Tham số} & \textbf{Gốc} & \textbf{half-Cauchy} & \textbf{Beta(20;2)} & \textbf{Cả hai} \\
+\midrule
+$\omega_1$ & 0{,}7264 & 0{,}5440 & 0{,}5967 & 0{,}6089 \\
+$\omega_2$ & 0{,}5582 & 0{,}6611 & 0{,}8519 & 0{,}8620 \\
+$\alpha_1$ & 0{,}2709 & 0{,}1831 & 0{,}1280 & 0{,}1058 \\
+$\alpha_2$ & 0{,}2312 & 0{,}2670 & 0{,}5178 & 0{,}2293 \\
+$\beta_1$ & 0{,}2985 & 0{,}4164 & 0{,}5104 & 0{,}3963 \\
+$\beta_2$ & 0{,}6268 & 0{,}6635 & 0{,}7469 & 0{,}7334 \\
+$p_{11}$ & 0{,}7329 & 0{,}7639 & 0{,}9858 & 0{,}9632 \\
+$p_{22}$ & 0{,}9199 & 0{,}8963 & 0{,}8748 & 0{,}9236 \\
+$\nu$ & 3{,}5204 & 3{,}2017 & 3{,}9575 & 4{,}1015 \\
+\midrule
+ELBO cuối & -2863{,}16 & -2867{,}32 & -2856{,}66 & -2863{,}72 \\
+Tỷ lệ đổi nhãn & 6{,}6\% & 0{,}1\% & 100{,}0\% & 100{,}0\% \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize
+\item ELBO của các biến thể \emph{không} so sánh trực tiếp được với nhau vì chúng là cận dưới của log-bằng-chứng dưới các mô hình xác suất khác nhau.
+\item $p_{11}$ dao động mạnh theo lựa chọn tiên nghiệm --- dấu hiệu dữ liệu không lấn át được tiên nghiệm ở tham số này.
+\end{tablenotes}
+\end{table}
+
+\section{Kết quả ngoài mẫu đầy đủ}
+
+\begin{table}[H]\centering\footnotesize
+\caption{Toàn bộ chỉ tiêu dự báo ngoài mẫu (435 quan sát)}
+\begin{tabularx}{\textwidth}{l C C C C C}
+\toprule
+\textbf{Mô hình} & \textbf{MAE} & \textbf{RMSE} & \textbf{QLIKE} & \textbf{NLS} & \textbf{Số mẫu hậu nghiệm} \\
+\midrule
+B1 & 1{,}2769 & 2{,}2799 & 0{,}9836 & 1{,}6812 & --- \\
+B2 & 1{,}3943 & 2{,}5233 & 0{,}9943 & 1{,}5455 & --- \\
+B3 & 1{,}1953 & 2{,}1654 & 0{,}9520 & 1{,}5385 & --- \\
+B4 & 1{,}3232 & 2{,}1970 & 1{,}0232 & 1{,}5736 & --- \\
+M1 & 1{,}3031 & 2{,}2625 & 0{,}9688 & 1{,}5373 & --- \\
+M2 & 1{,}2970 & 2{,}2259 & 0{,}9978 & 1{,}5354 & 200 \\
+M3 & 1{,}9505 & 3{,}1874 & 1{,}1434 & 1{,}5392 & 200 \\
+M4 & 1{,}3172 & 2{,}4334 & 0{,}9786 & 1{,}5383 & 200 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[H]\centering\footnotesize
+\caption{Toàn bộ thống kê kiểm định VaR}
+\begin{tabularx}{\textwidth}{l c C C C C C C}
+\toprule
+\textbf{Mô hình} & $\alpha$ & \textbf{Vi phạm} & \textbf{Tỷ lệ} & $LR_{uc}$ & \textbf{Kupiec $p$} & $LR_{cc}$ & \textbf{Christ. $p_{cc}$} \\
+\midrule
+B1 & 1\% & 10 & 2{,}30\% & 5{,}4226 & 0{,}0199 & 5{,}8944 & 0{,}0525 \\
+B1 & 5\% & 19 & 4{,}37\% & 0{,}3816 & 0{,}5367 & 1{,}7115 & 0{,}4250 \\
+\addlinespace[1pt]
+B2 & 1\% & 5 & 1{,}15\% & 0{,}0936 & 0{,}7596 & 0{,}2102 & 0{,}9003 \\
+B2 & 5\% & 25 & 5{,}75\% & 0{,}4887 & 0{,}4845 & 0{,}7103 & 0{,}7011 \\
+\addlinespace[1pt]
+B3 & 1\% & 5 & 1{,}15\% & 0{,}0936 & 0{,}7596 & 0{,}2102 & 0{,}9003 \\
+B3 & 5\% & 26 & 5{,}98\% & 0{,}8250 & 0{,}3637 & 2{,}0521 & 0{,}3584 \\
+\addlinespace[1pt]
+B4 & 1\% & 4 & 0{,}92\% & 0{,}0292 & 0{,}8642 & 0{,}1037 & 0{,}9495 \\
+B4 & 5\% & 25 & 5{,}75\% & 0{,}4887 & 0{,}4845 & 0{,}7103 & 0{,}7011 \\
+\addlinespace[1pt]
+M1 & 1\% & 5 & 1{,}15\% & 0{,}0936 & 0{,}7596 & 0{,}2102 & 0{,}9003 \\
+M1 & 5\% & 28 & 6{,}44\% & 1{,}7401 & 0{,}1871 & 2{,}5107 & 0{,}2850 \\
+\addlinespace[1pt]
+M2 & 1\% & 4 & 0{,}92\% & 0{,}0292 & 0{,}8642 & 0{,}1037 & 0{,}9495 \\
+M2 & 5\% & 29 & 6{,}67\% & 2{,}3135 & 0{,}1283 & 4{,}3209 & 0{,}1153 \\
+\addlinespace[1pt]
+M3 & 1\% & 4 & 0{,}92\% & 0{,}0292 & 0{,}8642 & 0{,}1037 & 0{,}9495 \\
+M3 & 5\% & 26 & 5{,}98\% & 0{,}8250 & 0{,}3637 & 2{,}0521 & 0{,}3584 \\
+\addlinespace[1pt]
+M4 & 1\% & 4 & 0{,}92\% & 0{,}0292 & 0{,}8642 & 0{,}1037 & 0{,}9495 \\
+M4 & 5\% & 25 & 5{,}75\% & 0{,}4887 & 0{,}4845 & 1{,}9899 & 0{,}3697 \\
+\addlinespace[1pt]
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize
+\item $LR_{uc}$: thống kê tỷ số hợp lý cho độ phủ vô điều kiện (Kupiec). $LR_{cc} = LR_{uc} + LR_{ind}$: độ phủ có điều kiện (Christoffersen), gộp cả yêu cầu vi phạm không tạo cụm.
+\end{tablenotes}
+\end{table}
+
+\section{Nghiên cứu mô phỏng đầy đủ}
+
+\begin{table}[H]\centering\footnotesize
+\caption{Định nghĩa tám kịch bản: giá trị tham số THẬT dùng để sinh dữ liệu}
+\begin{tabularx}{\textwidth}{l C C C C C C C}
+\toprule
+\textbf{KB} & $\omega_{1},\omega_{2}$ & $\alpha_{1},\alpha_{2}$ & $\beta_{1},\beta_{2}$ & $\nu_0$ & $p_{11},p_{22}$ & $T$ & \textbf{Đặc điểm} \\
+\midrule
+S1 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 2000 & Mốc: hai trạng thái tách rõ \\
+S2 & 0{,}08; 0{,}14 & 0{,}06; 0{,}08 & 0{,}85; 0{,}83 & 8 & 0{,}95; 0{,}90 & 2000 & Hai trạng thái gần nhau \\
+S3 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 4 & 0{,}98; 0{,}95 & 2000 & Đuôi rất dày \\
+S4 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 30 & 0{,}98; 0{,}95 & 2000 & Gần phân phối chuẩn \\
+S5 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}99; 0{,}85 & 2000 & Trạng thái căng rất hiếm \\
+S6 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 500 & Cỡ mẫu nhỏ \\
+S7 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 5000 & Cỡ mẫu lớn \\
+S8 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 2000 & Sai đặc tả: thêm tự tương quan \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\footnotesize
+\item Mọi kịch bản dùng $\mu_s = 0$ và $\gamma_{s,j} = 0{,}05$. Giá trị burn-in mặc định 200 quan sát.
+\item \textbf{Lưu ý:} chú thích trong \texttt{scenarios.py} ghi các giá trị này là ``giá trị ví dụ'', cần xác nhận đã chốt trước khi công bố.
+\end{tablenotes}
+\end{table}
+
+\begin{table}[H]\centering\scriptsize
+\caption{Kịch bản S1: độ chệch, RMSE và coverage theo từng tham số}
+\begin{tabularx}{\textwidth}{l C C | C C C | C C C}
+\toprule
+& \multicolumn{2}{c|}{\textbf{MLE}} & \multicolumn{3}{c|}{\textbf{VB mean-field}} & \multicolumn{3}{c}{\textbf{MCMC}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+\textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
+\midrule
+$\mu_1$ & -0{,}0022 & 0{,}0446 & 0{,}0033 & 0{,}0629 & 0{,}733 & -0{,}0535 & 0{,}0633 & 1{,}000 \\
+$\mu_2$ & 0{,}0131 & 0{,}1109 & 0{,}0258 & 0{,}1142 & 0{,}667 & -0{,}0400 & 0{,}0654 & 1{,}000 \\
+$\omega_1$ & 0{,}2086 & 0{,}5814 & 0{,}1483 & 0{,}1611 & 0{,}000 & 0{,}3483 & 0{,}3635 & 0{,}000 \\
+$\omega_2$ & 0{,}6852 & 1{,}2431 & -0{,}2022 & 0{,}2130 & 0{,}133 & 0{,}7191 & 0{,}7211 & 1{,}000 \\
+$\alpha_1$ & 0{,}0278 & 0{,}0567 & 0{,}2818 & 0{,}2924 & 0{,}000 & 0{,}2799 & 0{,}2805 & 0{,}000 \\
+$\alpha_2$ & 0{,}0312 & 0{,}0959 & 0{,}2399 & 0{,}2532 & 0{,}000 & 0{,}3989 & 0{,}4020 & 0{,}000 \\
+$\beta_1$ & -0{,}1376 & 0{,}1876 & -0{,}1762 & 0{,}1830 & 0{,}000 & -0{,}2505 & 0{,}2576 & 0{,}667 \\
+$\beta_2$ & -0{,}1330 & 0{,}2376 & -0{,}1303 & 0{,}1421 & 0{,}000 & -0{,}3626 & 0{,}3687 & 0{,}333 \\
+$\gamma_{1,1}$ & 0{,}0309 & 0{,}1305 & -0{,}0117 & 0{,}0690 & 0{,}933 & 0{,}5630 & 0{,}5705 & 1{,}000 \\
+$\gamma_{1,2}$ & 0{,}0149 & 0{,}2231 & 0{,}0035 & 0{,}0864 & 0{,}867 & 0{,}5228 & 0{,}5598 & 0{,}667 \\
+$\gamma_{2,1}$ & 0{,}0061 & 0{,}1889 & -0{,}0028 & 0{,}0894 & 0{,}867 & -0{,}0623 & 0{,}1404 & 1{,}000 \\
+$\gamma_{2,2}$ & -0{,}0078 & 0{,}2110 & 0{,}0228 & 0{,}1183 & 0{,}800 & -0{,}7188 & 0{,}7505 & 1{,}000 \\
+$p_{11}$ & -0{,}0222 & 0{,}0324 & -0{,}2205 & 0{,}2293 & 0{,}000 & -0{,}5240 & 0{,}5387 & 0{,}000 \\
+$p_{22}$ & -0{,}0469 & 0{,}0532 & -0{,}2367 & 0{,}2496 & 0{,}000 & -0{,}4983 & 0{,}5015 & 0{,}000 \\
+$\nu$ & -1{,}3254 & 1{,}7682 & -4{,}0213 & 4{,}1406 & 0{,}000 & -3{,}9938 & 4{,}0562 & 0{,}000 \\
+\midrule
+Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}4851$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5414$} & \multicolumn{3}{c}{$B=3$, Brier $=0{,}5406$} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{table}[H]\centering\scriptsize
+\caption{Kịch bản S2: độ chệch, RMSE và coverage theo từng tham số}
+\begin{tabularx}{\textwidth}{l C C | C C C | C C C}
+\toprule
+& \multicolumn{2}{c|}{\textbf{MLE}} & \multicolumn{3}{c|}{\textbf{VB mean-field}} & \multicolumn{3}{c}{\textbf{MCMC}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+\textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
+\midrule
+$\mu_1$ & -0{,}0196 & 0{,}0489 & -0{,}0427 & 0{,}1346 & 0{,}667 & -- & -- & -- \\
+$\mu_2$ & 0{,}0183 & 0{,}3236 & 0{,}0601 & 0{,}1577 & 0{,}667 & -- & -- & -- \\
+$\omega_1$ & 0{,}1062 & 0{,}3003 & 0{,}3428 & 0{,}3516 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}6099 & 0{,}9750 & 0{,}2820 & 0{,}2925 & 0{,}000 & -- & -- & -- \\
+$\alpha_1$ & -0{,}0188 & 0{,}0371 & 0{,}0816 & 0{,}0891 & 0{,}267 & -- & -- & -- \\
+$\alpha_2$ & 0{,}0326 & 0{,}1292 & 0{,}0748 & 0{,}0913 & 0{,}400 & -- & -- & -- \\
+$\beta_1$ & -0{,}0572 & 0{,}1453 & -0{,}3779 & 0{,}3829 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & -0{,}1819 & 0{,}3548 & -0{,}3452 & 0{,}3513 & 0{,}000 & -- & -- & -- \\
+$\gamma_{1,1}$ & 0{,}0225 & 0{,}0591 & 0{,}0096 & 0{,}0515 & 1{,}000 & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0167 & 0{,}0639 & 0{,}0047 & 0{,}0670 & 0{,}867 & -- & -- & -- \\
+$\gamma_{2,1}$ & 0{,}0677 & 0{,}3963 & -0{,}0264 & 0{,}0610 & 0{,}933 & -- & -- & -- \\
+$\gamma_{2,2}$ & 0{,}0296 & 0{,}3701 & 0{,}0062 & 0{,}0618 & 1{,}000 & -- & -- & -- \\
+$p_{11}$ & -0{,}0275 & 0{,}0460 & -0{,}2394 & 0{,}2443 & 0{,}000 & -- & -- & -- \\
+$p_{22}$ & -0{,}1143 & 0{,}1620 & -0{,}2175 & 0{,}2230 & 0{,}000 & -- & -- & -- \\
+$\nu$ & 0{,}9200 & 2{,}0993 & -0{,}6886 & 1{,}4105 & 0{,}800 & -- & -- & -- \\
+\midrule
+Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}6328$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5451$} & \multicolumn{3}{c}{---} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{table}[H]\centering\scriptsize
+\caption{Kịch bản S3: độ chệch, RMSE và coverage theo từng tham số}
+\begin{tabularx}{\textwidth}{l C C | C C C | C C C}
+\toprule
+& \multicolumn{2}{c|}{\textbf{MLE}} & \multicolumn{3}{c|}{\textbf{VB mean-field}} & \multicolumn{3}{c}{\textbf{MCMC}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+\textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
+\midrule
+$\mu_1$ & -0{,}0079 & 0{,}0244 & -0{,}0302 & 0{,}1241 & 0{,}467 & -- & -- & -- \\
+$\mu_2$ & -0{,}0005 & 0{,}0951 & 0{,}0303 & 0{,}0974 & 0{,}400 & -- & -- & -- \\
+$\omega_1$ & 0{,}1354 & 0{,}2847 & 0{,}2338 & 0{,}2413 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}7871 & 1{,}7012 & -0{,}1070 & 0{,}1263 & 0{,}333 & -- & -- & -- \\
+$\alpha_1$ & 0{,}0176 & 0{,}0494 & 0{,}4836 & 0{,}4906 & 0{,}000 & -- & -- & -- \\
+$\alpha_2$ & 0{,}0165 & 0{,}0835 & 0{,}4269 & 0{,}4402 & 0{,}000 & -- & -- & -- \\
+$\beta_1$ & -0{,}1310 & 0{,}1696 & -0{,}1434 & 0{,}1486 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & -0{,}0795 & 0{,}2826 & -0{,}0873 & 0{,}0969 & 0{,}133 & -- & -- & -- \\
+$\gamma_{1,1}$ & 0{,}0074 & 0{,}0572 & 0{,}0365 & 0{,}0829 & 0{,}933 & -- & -- & -- \\
+$\gamma_{1,2}$ & -0{,}0152 & 0{,}1132 & 0{,}0705 & 0{,}1047 & 0{,}800 & -- & -- & -- \\
+$\gamma_{2,1}$ & 0{,}0843 & 0{,}3669 & 0{,}0326 & 0{,}0990 & 0{,}933 & -- & -- & -- \\
+$\gamma_{2,2}$ & 0{,}1607 & 0{,}3351 & 0{,}0297 & 0{,}0977 & 0{,}867 & -- & -- & -- \\
+$p_{11}$ & -0{,}0203 & 0{,}0245 & -0{,}2436 & 0{,}2480 & 0{,}000 & -- & -- & -- \\
+$p_{22}$ & -0{,}0524 & 0{,}0625 & -0{,}2271 & 0{,}2331 & 0{,}000 & -- & -- & -- \\
+$\nu$ & -0{,}0954 & 0{,}4827 & -1{,}5715 & 1{,}5791 & 0{,}000 & -- & -- & -- \\
+\midrule
+Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}4861$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5408$} & \multicolumn{3}{c}{---} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{table}[H]\centering\scriptsize
+\caption{Kịch bản S4: độ chệch, RMSE và coverage theo từng tham số}
+\begin{tabularx}{\textwidth}{l C C | C C C | C C C}
+\toprule
+& \multicolumn{2}{c|}{\textbf{MLE}} & \multicolumn{3}{c|}{\textbf{VB mean-field}} & \multicolumn{3}{c}{\textbf{MCMC}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+\textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
+\midrule
+$\mu_1$ & -0{,}0027 & 0{,}0612 & 0{,}0151 & 0{,}0519 & 0{,}933 & -- & -- & -- \\
+$\mu_2$ & -0{,}0186 & 0{,}2342 & -0{,}0219 & 0{,}0818 & 0{,}733 & -- & -- & -- \\
+$\omega_1$ & 0{,}2122 & 0{,}5677 & 0{,}1115 & 0{,}1449 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}9719 & 1{,}7668 & -0{,}2304 & 0{,}2349 & 0{,}000 & -- & -- & -- \\
+$\alpha_1$ & 0{,}0427 & 0{,}0645 & 0{,}2243 & 0{,}2334 & 0{,}000 & -- & -- & -- \\
+$\alpha_2$ & 0{,}0194 & 0{,}0937 & 0{,}1894 & 0{,}1980 & 0{,}000 & -- & -- & -- \\
+$\beta_1$ & -0{,}0843 & 0{,}1909 & -0{,}1771 & 0{,}1859 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & -0{,}1544 & 0{,}3057 & -0{,}1389 & 0{,}1460 & 0{,}000 & -- & -- & -- \\
+$\gamma_{1,1}$ & 0{,}0243 & 0{,}0450 & -0{,}0163 & 0{,}0722 & 0{,}933 & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0063 & 0{,}2025 & 0{,}0170 & 0{,}0714 & 0{,}867 & -- & -- & -- \\
+$\gamma_{2,1}$ & -0{,}1016 & 0{,}4713 & -0{,}0222 & 0{,}0803 & 0{,}867 & -- & -- & -- \\
+$\gamma_{2,2}$ & -0{,}0415 & 0{,}3838 & -0{,}0218 & 0{,}0724 & 0{,}867 & -- & -- & -- \\
+$p_{11}$ & -0{,}0278 & 0{,}0592 & -0{,}2136 & 0{,}2370 & 0{,}000 & -- & -- & -- \\
+$p_{22}$ & -0{,}0573 & 0{,}0807 & -0{,}2554 & 0{,}2742 & 0{,}000 & -- & -- & -- \\
+$\nu$ & -17{,}5508 & 18{,}0578 & -22{,}7418 & 22{,}8353 & 0{,}000 & -- & -- & -- \\
+\midrule
+Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}5115$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5512$} & \multicolumn{3}{c}{---} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{table}[H]\centering\scriptsize
+\caption{Kịch bản S5: độ chệch, RMSE và coverage theo từng tham số}
+\begin{tabularx}{\textwidth}{l C C | C C C | C C C}
+\toprule
+& \multicolumn{2}{c|}{\textbf{MLE}} & \multicolumn{3}{c|}{\textbf{VB mean-field}} & \multicolumn{3}{c}{\textbf{MCMC}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+\textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
+\midrule
+$\mu_1$ & -0{,}0003 & 0{,}0580 & -0{,}0629 & 0{,}1584 & 0{,}133 & -- & -- & -- \\
+$\mu_2$ & 0{,}0179 & 0{,}1719 & 0{,}0891 & 0{,}1636 & 0{,}133 & -- & -- & -- \\
+$\omega_1$ & 0{,}1036 & 0{,}2458 & 0{,}2599 & 0{,}2721 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}3119 & 0{,}6975 & -0{,}0856 & 0{,}1238 & 0{,}267 & -- & -- & -- \\
+$\alpha_1$ & 0{,}0295 & 0{,}0660 & 0{,}2727 & 0{,}2892 & 0{,}000 & -- & -- & -- \\
+$\alpha_2$ & 0{,}0225 & 0{,}1129 & 0{,}2357 & 0{,}2467 & 0{,}000 & -- & -- & -- \\
+$\beta_1$ & -0{,}0747 & 0{,}1429 & -0{,}3592 & 0{,}3646 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & 0{,}0098 & 0{,}2153 & -0{,}2988 & 0{,}3033 & 0{,}000 & -- & -- & -- \\
+$\gamma_{1,1}$ & -0{,}0015 & 0{,}1170 & 0{,}0238 & 0{,}0635 & 0{,}933 & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0370 & 0{,}0999 & 0{,}0038 & 0{,}0387 & 1{,}000 & -- & -- & -- \\
+$\gamma_{2,1}$ & 0{,}1439 & 0{,}3073 & 0{,}0130 & 0{,}0502 & 1{,}000 & -- & -- & -- \\
+$\gamma_{2,2}$ & 0{,}0668 & 0{,}1788 & 0{,}0321 & 0{,}0745 & 0{,}867 & -- & -- & -- \\
+$p_{11}$ & -0{,}0271 & 0{,}0438 & -0{,}2934 & 0{,}3018 & 0{,}000 & -- & -- & -- \\
+$p_{22}$ & -0{,}1130 & 0{,}1438 & -0{,}2803 & 0{,}2927 & 0{,}000 & -- & -- & -- \\
+$\nu$ & -1{,}4469 & 1{,}7024 & -4{,}6609 & 4{,}6971 & 0{,}000 & -- & -- & -- \\
+\midrule
+Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}4029$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5679$} & \multicolumn{3}{c}{---} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{table}[H]\centering\scriptsize
+\caption{Kịch bản S6: độ chệch, RMSE và coverage theo từng tham số}
+\begin{tabularx}{\textwidth}{l C C | C C C | C C C}
+\toprule
+& \multicolumn{2}{c|}{\textbf{MLE}} & \multicolumn{3}{c|}{\textbf{VB mean-field}} & \multicolumn{3}{c}{\textbf{MCMC}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+\textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
+\midrule
+$\mu_1$ & 0{,}0182 & 0{,}2734 & -0{,}0160 & 0{,}1084 & 0{,}867 & -- & -- & -- \\
+$\mu_2$ & 0{,}0354 & 0{,}2709 & -0{,}0177 & 0{,}1271 & 0{,}733 & -- & -- & -- \\
+$\omega_1$ & 0{,}3256 & 0{,}9528 & 0{,}4487 & 0{,}4676 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}3215 & 1{,}0942 & 0{,}0483 & 0{,}0999 & 0{,}933 & -- & -- & -- \\
+$\alpha_1$ & 0{,}0409 & 0{,}1099 & 0{,}4205 & 0{,}4264 & 0{,}000 & -- & -- & -- \\
+$\alpha_2$ & 0{,}0670 & 0{,}2481 & 0{,}3837 & 0{,}3913 & 0{,}000 & -- & -- & -- \\
+$\beta_1$ & -0{,}1132 & 0{,}2006 & -0{,}3331 & 0{,}3462 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & -0{,}1299 & 0{,}3370 & -0{,}2780 & 0{,}2871 & 0{,}000 & -- & -- & -- \\
+$\gamma_{1,1}$ & 0{,}0665 & 0{,}1782 & -0{,}0061 & 0{,}1153 & 1{,}000 & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0767 & 0{,}3156 & -0{,}0022 & 0{,}0504 & 1{,}000 & -- & -- & -- \\
+$\gamma_{2,1}$ & 0{,}1035 & 0{,}3356 & 0{,}0175 & 0{,}0830 & 1{,}000 & -- & -- & -- \\
+$\gamma_{2,2}$ & 0{,}0643 & 0{,}3643 & 0{,}0098 & 0{,}0979 & 1{,}000 & -- & -- & -- \\
+$p_{11}$ & -0{,}0367 & 0{,}0696 & -0{,}2093 & 0{,}2124 & 0{,}000 & -- & -- & -- \\
+$p_{22}$ & -0{,}0745 & 0{,}1151 & -0{,}2137 & 0{,}2186 & 0{,}000 & -- & -- & -- \\
+$\nu$ & -0{,}9191 & 3{,}3627 & -4{,}9151 & 4{,}9463 & 0{,}000 & -- & -- & -- \\
+\midrule
+Tổng hợp & \multicolumn{2}{c}{$B=30$, Brier $=0{,}6009$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5198$} & \multicolumn{3}{c}{---} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{table}[H]\centering\scriptsize
+\caption{Kịch bản S7: độ chệch, RMSE và coverage theo từng tham số}
+\begin{tabularx}{\textwidth}{l C C | C C C | C C C}
+\toprule
+& \multicolumn{2}{c|}{\textbf{MLE}} & \multicolumn{3}{c|}{\textbf{VB mean-field}} & \multicolumn{3}{c}{\textbf{MCMC}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+\textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
+\midrule
+$\mu_1$ & -0{,}0083 & 0{,}0408 & -0{,}0248 & 0{,}1535 & 0{,}200 & -- & -- & -- \\
+$\mu_2$ & -0{,}0100 & 0{,}0593 & 0{,}0113 & 0{,}0882 & 0{,}467 & -- & -- & -- \\
+$\omega_1$ & 0{,}1943 & 0{,}3770 & 0{,}1671 & 0{,}1990 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}0914 & 0{,}4979 & -0{,}2116 & 0{,}2290 & 0{,}067 & -- & -- & -- \\
+$\alpha_1$ & 0{,}0669 & 0{,}0811 & 0{,}2916 & 0{,}3049 & 0{,}000 & -- & -- & -- \\
+$\alpha_2$ & -0{,}0009 & 0{,}0453 & 0{,}2208 & 0{,}2370 & 0{,}000 & -- & -- & -- \\
+$\beta_1$ & -0{,}0689 & 0{,}1355 & -0{,}1883 & 0{,}1958 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & -0{,}0483 & 0{,}1598 & -0{,}1155 & 0{,}1289 & 0{,}000 & -- & -- & -- \\
+$\gamma_{1,1}$ & 0{,}0226 & 0{,}0676 & -0{,}0177 & 0{,}0901 & 0{,}733 & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0553 & 0{,}1253 & 0{,}0113 & 0{,}0730 & 0{,}733 & -- & -- & -- \\
+$\gamma_{2,1}$ & 0{,}0684 & 0{,}1199 & -0{,}0011 & 0{,}0776 & 0{,}667 & -- & -- & -- \\
+$\gamma_{2,2}$ & 0{,}0442 & 0{,}1154 & 0{,}0025 & 0{,}0612 & 0{,}667 & -- & -- & -- \\
+$p_{11}$ & -0{,}0258 & 0{,}0336 & -0{,}3546 & 0{,}3761 & 0{,}000 & -- & -- & -- \\
+$p_{22}$ & -0{,}0460 & 0{,}0523 & -0{,}2485 & 0{,}2818 & 0{,}000 & -- & -- & -- \\
+$\nu$ & -1{,}7693 & 1{,}9262 & -4{,}3719 & 4{,}4182 & 0{,}000 & -- & -- & -- \\
+\midrule
+Tổng hợp & \multicolumn{2}{c}{$B=21$, Brier $=0{,}5921$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}7094$} & \multicolumn{3}{c}{---} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+\begin{table}[H]\centering\scriptsize
+\caption{Kịch bản S8: độ chệch, RMSE và coverage theo từng tham số}
+\begin{tabularx}{\textwidth}{l C C | C C C | C C C}
+\toprule
+& \multicolumn{2}{c|}{\textbf{MLE}} & \multicolumn{3}{c|}{\textbf{VB mean-field}} & \multicolumn{3}{c}{\textbf{MCMC}} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
+\textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
+\midrule
+$\mu_1$ & 0{,}0103 & 0{,}1877 & -0{,}2959 & 0{,}4208 & 0{,}000 & -- & -- & -- \\
+$\mu_2$ & 0{,}0653 & 0{,}5488 & 0{,}2152 & 0{,}3476 & 0{,}000 & -- & -- & -- \\
+$\omega_1$ & 0{,}1728 & 0{,}5807 & 0{,}1351 & 0{,}1479 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}4183 & 1{,}1038 & -0{,}2089 & 0{,}2246 & 0{,}067 & -- & -- & -- \\
+$\alpha_1$ & 0{,}1012 & 0{,}1210 & 0{,}4380 & 0{,}4433 & 0{,}000 & -- & -- & -- \\
+$\alpha_2$ & 0{,}0557 & 0{,}0885 & 0{,}3547 & 0{,}3748 & 0{,}000 & -- & -- & -- \\
+$\beta_1$ & -0{,}1605 & 0{,}2062 & -0{,}2639 & 0{,}2706 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & -0{,}1654 & 0{,}2581 & -0{,}1996 & 0{,}2065 & 0{,}000 & -- & -- & -- \\
+$\gamma_{1,1}$ & 0{,}0415 & 0{,}1664 & -0{,}0028 & 0{,}0840 & 0{,}800 & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0338 & 0{,}1582 & 0{,}0065 & 0{,}0386 & 1{,}000 & -- & -- & -- \\
+$\gamma_{2,1}$ & 0{,}0292 & 0{,}2859 & -0{,}0229 & 0{,}0685 & 0{,}800 & -- & -- & -- \\
+$\gamma_{2,2}$ & 0{,}0564 & 0{,}2657 & 0{,}0044 & 0{,}0647 & 0{,}933 & -- & -- & -- \\
+$p_{11}$ & -0{,}0427 & 0{,}0773 & -0{,}2286 & 0{,}2334 & 0{,}000 & -- & -- & -- \\
+$p_{22}$ & -0{,}0868 & 0{,}1304 & -0{,}1840 & 0{,}1902 & 0{,}000 & -- & -- & -- \\
+$\nu$ & -0{,}9561 & 1{,}8606 & -4{,}3910 & 4{,}4528 & 0{,}000 & -- & -- & -- \\
+\midrule
+Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}5345$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}6734$} & \multicolumn{3}{c}{---} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 \end{document}
