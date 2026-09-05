@@ -1,0 +1,798 @@
+% !TeX program = xelatex
+% !TeX encoding = UTF-8
+% ==============================================================================
+% KHUNG LÝ THUYẾT MÔ HÌNH — mọi đặc tả trong tài liệu này khớp với mã nguồn
+% trong "code thuật toán/msgarchx/". Khi sửa mã, phải sửa tài liệu tương ứng.
+% ==============================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{fontspec}
+\usepackage{unicode-math}
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
+\IfFontExistsTF{Cambria Math}{\setmathfont{Cambria Math}}{\setmathfont{LibertinusMath-Regular.otf}}
+
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=2.5cm,right=2.5cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{indentfirst}
+\setlength{\parindent}{0.7cm}
+\setlength{\parskip}{0.2em}
+\emergencystretch=2em
+
+\usepackage{microtype}
+\usepackage{amsmath}
+\usepackage{amsthm}
+\numberwithin{equation}{section}
+
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{float}
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=1.5em,itemsep=0.15em,topsep=0.15em}
+\setlist[enumerate]{leftmargin=1.8em,itemsep=0.15em,topsep=0.15em}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\usepackage[hidelinks,unicode]{hyperref}
+\usepackage{cleveref}
+\crefname{section}{Mục}{Các mục}
+\Crefname{section}{Mục}{Các mục}
+\crefname{equation}{Phương trình}{Các phương trình}
+\Crefname{equation}{Phương trình}{Các phương trình}
+\crefname{table}{Bảng}{Các bảng}
+\Crefname{table}{Bảng}{Các bảng}
+
+\theoremstyle{definition}
+\newtheorem{definition}{Định nghĩa}[section]
+\newtheorem{assumption}{Giả định}[section]
+\newtheorem{lemma}{Bổ đề}[section]
+\newtheorem{remark}{Nhận xét}[section]
+
+% Ký hiệu
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\diag}{\operatorname{diag}}
+\newcommand{\softplus}{\operatorname{softplus}}
+\newcommand{\sigmoid}{\operatorname{sigmoid}}
+\newcommand{\KL}{\operatorname{KL}}
+\newcommand{\ELBO}{\operatorname{ELBO}}
+\newcommand{\AIC}{\operatorname{AIC}}
+\newcommand{\BIC}{\operatorname{BIC}}
+\newcommand{\MAE}{\operatorname{MAE}}
+\newcommand{\RMSE}{\operatorname{RMSE}}
+\newcommand{\QLIKE}{\operatorname{QLIKE}}
+\newcommand{\NLS}{\operatorname{NLS}}
+\newcommand{\VaR}{\operatorname{VaR}}
+\newcommand{\RV}{\mathrm{RV}}
+\newcommand{\Data}{\mathcal{D}}
+\newcommand{\Info}{\mathcal{F}}
+\newcommand{\Param}{\symbf{\theta}}
+\newcommand{\Xvec}{\symbf{X}}
+\newcommand{\Pmat}{\symbf{P}}
+\newcommand{\vecphi}{\symbf{\phi}}
+\newcommand{\vech}{\operatorname{vech}}
+\newcommand{\diff}{\mathrm{d}}
+
+\title{\large\bfseries KHUNG LÝ THUYẾT VÀ QUY CÁCH TOÁN HỌC\\[0.3em]
+\Large MS-GARCH-X STUDENT-T VÀ BA PHƯƠNG PHÁP SUY DIỄN:\\
+HỢP LÝ CỰC ĐẠI, BIẾN PHÂN MEAN-FIELD VÀ BIẾN PHÂN FULL-RANK}
+
+\author{\textbf{Nguyễn Hoài Nam}\thanks{Khoa Toán -- Thống kê, Trường Đại học Tôn Đức Thắng. Email: \texttt{C2300152@student.tdtu.edu.vn}} \quad
+\textbf{Nguyễn Thuận Hiếu}\footnotemark[1] \quad
+\textbf{Đặng Chí Hiếu}\footnotemark[1] \\[0.3em]
+\normalsize Giảng viên hướng dẫn: \textbf{TS. Trương Bửu Châu}\\[0.2em]
+\normalsize Đề tài Nghiên cứu Khoa học Sinh viên Niên khóa 2026--2027}
+
+\date{\normalsize Tháng 9 năm 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Tài liệu thiết lập khung toán học cho đề tài mô hình hóa biến động hợp đồng
+tương lai VN30F1M. Nội dung gồm ba phần. Phần thứ nhất đặc tả năm mô hình của dự án
+trong một khung thống nhất, xác định rõ giả định phân phối, cơ chế thu gọn Gray
+\cite{gray1996} cho lớp mô hình chuyển trạng thái, và các điều kiện chính quy được áp
+đặt. Phần thứ hai trình bày ước lượng hợp lý cực đại qua bộ lọc tiến Hamilton
+\cite{hamilton1989}, phép tham số hóa không ràng buộc và tiêu chí so sánh mô hình.
+Phần thứ ba xây dựng suy diễn biến phân: tiên nghiệm, hậu nghiệm trên không gian
+không ràng buộc có hiệu chỉnh Jacobian, hàm mục tiêu ELBO, và hai họ phân phối biến
+phân mean-field và full-rank. Mọi đặc tả trong tài liệu khớp với cài đặt thực tế
+trong mã nguồn của đề tài; những chỗ lý thuyết và cài đặt khác nhau đều được nêu rõ.
+\\[0.4em]
+\textbf{Từ khóa:} MS-GARCH-X, Student-t chuẩn hóa, thu gọn Gray, bộ lọc Hamilton,
+suy diễn biến phân, ELBO, nhận dạng nhãn trạng thái.
+\end{abstract}
+
+\vspace{0.2cm}
+
+\begin{remark}[Phạm vi tài liệu]
+Tài liệu giới hạn ở ba phương pháp suy diễn có kết quả sử dụng được: hợp lý cực đại,
+biến phân mean-field và biến phân full-rank. Đề tài có triển khai thêm MCMC bằng
+thuật toán NUTS trên cùng hàm hợp lý và cùng tiên nghiệm; chuỗi MCMC không đạt chuẩn
+hội tụ nên không được đưa vào khung so sánh ở đây. Chẩn đoán của các lần chạy đó được
+báo cáo riêng trong phần kết quả thực nghiệm.
+\end{remark}
+
+% ==============================================================================
+\section{Ký hiệu, dữ liệu và cấu trúc trạng thái}\label{sec:notation}
+% ==============================================================================
+
+\subsection{Chuỗi quan sát và tập thông tin}
+Xét thời gian rời rạc $t \in \{1,\dots,T\}$. Gọi $P_t$ là giá đóng cửa. Lợi suất
+logarit tính theo phần trăm là
+\begin{equation}
+  r_t = 100 \times \ln\!\left( P_t / P_{t-1} \right).
+  \label{eq:return}
+\end{equation}
+Vector biến ngoại sinh $\Xvec_{t-1} \in \R^{k}$ gồm $k$ biến trễ một bậc, đã chuẩn hóa
+z-score bằng trung bình và độ lệch chuẩn \emph{của riêng tập huấn luyện}. Việc chuẩn hóa
+chỉ dùng thống kê tập huấn luyện là điều kiện cần để loại bỏ rò rỉ thông tin tương lai
+trong đánh giá ngoài mẫu.
+
+Tập thông tin đến cuối phiên $t-1$ là
+$\Info_{t-1} = \sigma\!\left( \{r_\tau\}_{\tau \le t-1}, \{\Xvec_\tau\}_{\tau \le t-1} \right)$.
+Đại lượng đại diện cho biến động thực tế là $\RV_t$, đo trên thang \emph{phương sai}
+cùng đơn vị với $\sigma_t^2$; sự thống nhất đơn vị này là điều kiện để các hàm tổn thất
+ở \cref{sec:oos} có nghĩa.
+
+\subsection{Xích Markov ẩn}
+Chế độ thị trường là biến ẩn $S_t \in \{1,2\}$, tuân theo xích Markov thuần nhất bậc một
+với ma trận chuyển
+\begin{equation}
+  \Pmat = \begin{pmatrix} p_{11} & 1-p_{11} \\ 1-p_{22} & p_{22} \end{pmatrix},
+  \qquad p_{ij} = \Prob\!\left( S_t = j \mid S_{t-1} = i \right).
+  \label{eq:trans-mat}
+\end{equation}
+Khi $0 < p_{11} < 1$ và $0 < p_{22} < 1$, xích là bất khả quy và không tuần hoàn, do đó
+tồn tại duy nhất phân phối dừng $\symbf\pi = (\pi_1,\pi_2)^\top$ thỏa $\symbf\pi^\top \Pmat = \symbf\pi^\top$:
+\begin{equation}
+  \pi_1 = \frac{1-p_{22}}{2-p_{11}-p_{22}}, \qquad
+  \pi_2 = \frac{1-p_{11}}{2-p_{11}-p_{22}}.
+  \label{eq:stationary-dist}
+\end{equation}
+Thời gian tồn tại kỳ vọng của chế độ $s$ suy ra từ tính chất hình học của số phiên liên
+tiếp ở lại trạng thái đó:
+\begin{equation}
+  d_s = \E\!\left[ \text{số phiên liên tiếp ở } S = s \right] = \frac{1}{1-p_{ss}}.
+  \label{eq:expected-duration}
+\end{equation}
+
+% ==============================================================================
+\section{Đặc tả các mô hình}\label{sec:models}
+% ==============================================================================
+
+\subsection{Phân phối sai số}
+Mọi mô hình đều viết dưới dạng $r_t = \mu_{(\cdot)} + \epsilon_t$ với
+$\epsilon_t = \sigma_t z_t$ và $z_t$ độc lập cùng phân phối, chuẩn hóa sao cho
+$\E[z_t] = 0$ và $\Var(z_t) = 1$. Hai lựa chọn được dùng:
+\begin{align}
+  f_{\mathcal{N}}(z) &= \frac{1}{\sqrt{2\pi}} \exp\!\left( -\tfrac{1}{2}z^2 \right),
+  \label{eq:normal-density}\\[0.2em]
+  f_{t}(z;\nu) &= \frac{\Gamma\!\left(\frac{\nu+1}{2}\right)}
+  {\sqrt{\pi(\nu-2)}\,\Gamma\!\left(\frac{\nu}{2}\right)}
+  \left( 1 + \frac{z^2}{\nu-2} \right)^{-\frac{\nu+1}{2}}, \qquad \nu > 2.
+  \label{eq:std-t-density}
+\end{align}
+Mật độ \eqref{eq:std-t-density} là phân phối Student-t đã \emph{chuẩn hóa về phương sai
+đơn vị}: thừa số $\nu-2$ thay cho $\nu$ ở mẫu số chính là phép co giãn bảo đảm
+$\Var(z_t)=1$. Ràng buộc $\nu>2$ vì thế không phải quy ước kỹ thuật mà là điều kiện tồn
+tại của chính phép chuẩn hóa: với $\nu \le 2$ phương sai của phân phối Student-t phân kỳ
+và $\sigma_t^2$ mất ý nghĩa là phương sai có điều kiện.
+
+\subsection{Ba mô hình một chế độ}
+Ba mô hình đối chứng dùng chung một phương trình phương sai, khác nhau ở phần được
+kích hoạt:
+\begin{equation}
+  r_t = \mu + \epsilon_t, \qquad
+  \sigma_t^2 = \operatorname{Link}\!\left(
+  \omega + \alpha\,\epsilon_{t-1}^2 + \beta\,\sigma_{t-1}^2
+  + \symbf\gamma^\top \Xvec_{t-1} \right).
+  \label{eq:single-regime}
+\end{equation}
+
+\begin{table}[H]
+\centering\footnotesize
+\setlength{\tabcolsep}{5pt}
+\caption{Ba mô hình một chế độ như các trường hợp riêng của \eqref{eq:single-regime}}
+\label{tab:single-models}
+\begin{tabularx}{\textwidth}{l c c c Y}
+\toprule
+\textbf{Mã} & \textbf{Sai số} & \textbf{$\symbf\gamma$} & \textbf{Số tham số} & \textbf{Vector tham số} \\
+\midrule
+B1 & $f_{\mathcal{N}}$ & $\equiv \symbf 0$ & 4 & $(\mu,\omega,\alpha,\beta)^\top$ \\
+B2 & $f_t(\cdot\,;\nu)$ & $\equiv \symbf 0$ & 5 & $(\mu,\omega,\alpha,\beta,\nu)^\top$ \\
+B3 & $f_t(\cdot\,;\nu)$ & tự do & $5+k$ & $(\mu,\omega,\alpha,\beta,\symbf\gamma^\top,\nu)^\top$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{assumption}[Điều kiện chính quy của mô hình một chế độ]\label{as:single}
+$\omega>0$, $\alpha\ge 0$, $\beta\ge 0$. Dừng hiệp phương sai yếu khi $\alpha+\beta<1$,
+khi đó phương sai vô điều kiện là $\bar\sigma^2 = \omega/(1-\alpha-\beta)$. Với sai số
+Student-t, moment bậc bốn tồn tại khi $\nu>4$ và
+$3\alpha^2\frac{\nu-2}{\nu-4} + 2\alpha\beta + \beta^2 < 1$.
+\end{assumption}
+
+Khi $\symbf\gamma \ne \symbf 0$, tổ hợp $\symbf\gamma^\top \Xvec_{t-1}$ có thể âm và làm vế
+phải của \eqref{eq:single-regime} nhận giá trị không dương. Hàm liên kết
+$\operatorname{Link}$ bảo đảm tính dương của phương sai:
+\begin{equation}
+  \operatorname{Link}(h) = \max\{h,\ \varepsilon\}, \qquad \varepsilon = 10^{-8}.
+  \label{eq:link}
+\end{equation}
+Đây là lựa chọn được dùng trong toàn bộ kết quả của đề tài. Cài đặt còn hỗ trợ biến thể
+trơn $\operatorname{Link}(h) = \softplus(h-\varepsilon)+\varepsilon$; biến thể này không
+được kích hoạt, và mọi con số báo cáo đều ứng với \eqref{eq:link}.
+
+\begin{remark}[Hệ quả của hàm liên kết đối với tính khả vi]
+Hàm $\max\{h,\varepsilon\}$ không khả vi tại $h=\varepsilon$. Trên thực tế điểm này chỉ
+bị chạm khi phương sai bị đẩy xuống sát không, và tại nghiệm ước lượng của cả năm mô
+hình điều đó không xảy ra; do đó gradient dùng trong tối ưu hóa là hợp lệ tại lân cận
+nghiệm. Đây là một giả định cần kiểm chứng chứ không phải tính chất hiển nhiên.
+\end{remark}
+
+\subsection{Bài toán phụ thuộc đường đi và cơ chế thu gọn Gray}
+Khi thêm chế độ ẩn, phương sai tại $t$ phụ thuộc vào $\sigma^2_{t-1}$, mà đại lượng này
+lại phụ thuộc chế độ tại $t-1$. Truy hồi liên tiếp, $\sigma_t^2$ phụ thuộc toàn bộ đường
+đi $(S_1,\dots,S_{t-1})$, tức $2^{t-1}$ nhánh. Hàm hợp lý chính xác vì vậy không tính
+được trong thời gian đa thức.
+
+Gray \cite{gray1996} giải quyết bằng cách thay hai đại lượng trễ bằng mô men hỗn hợp của
+chúng theo xác suất lọc. Đặt $\xi_{t\mid t}(j) = \Prob(S_t = j \mid \Info_t)$ và
+\begin{align}
+  \tilde\mu_{t-1} &= \sum_{j=1}^{2} \xi_{t-1\mid t-1}(j)\, \mu_j,
+  \label{eq:gray-mean}\\
+  \tilde\sigma_{t-1}^2 &= \sum_{j=1}^{2} \xi_{t-1\mid t-1}(j)
+  \left[ \sigma_{t-1,j}^2 + \left( \mu_j - \tilde\mu_{t-1} \right)^2 \right].
+  \label{eq:gray-var}
+\end{align}
+
+\begin{lemma}[Dạng tương đương dùng trong cài đặt]\label{lem:gray}
+Công thức \eqref{eq:gray-var} tương đương với
+$\tilde\sigma_{t-1}^2 = \sum_{j} \xi_{t-1\mid t-1}(j)\left[\sigma_{t-1,j}^2 + \mu_j^2\right] - \tilde\mu_{t-1}^2$.
+\end{lemma}
+\begin{proof}
+Khai triển bình phương trong \eqref{eq:gray-var} và dùng
+$\sum_j \xi_{t-1\mid t-1}(j) = 1$ cùng định nghĩa \eqref{eq:gray-mean}:
+$\sum_j \xi(j)(\mu_j - \tilde\mu)^2
+= \sum_j \xi(j)\mu_j^2 - 2\tilde\mu \sum_j \xi(j)\mu_j + \tilde\mu^2
+= \sum_j \xi(j)\mu_j^2 - \tilde\mu^2$.
+\end{proof}
+
+\Cref{lem:gray} là dạng được cài đặt trong mã nguồn; nêu ra ở đây để đối chiếu giữa tài
+liệu và chương trình không cần suy luận trung gian.
+
+\begin{remark}[Vị trí chính xác của phép xấp xỉ]
+Bộ lọc Hamilton ở \cref{sec:mle} là \emph{chính xác} đối với mô hình đã thu gọn: sau khi
+thay $(\tilde\mu_{t-1}, \tilde\sigma_{t-1}^2)$ vào phương trình phương sai, quá trình trở
+thành Markov trong $(S_t, \sigma^2_{t,\cdot})$ và hàm hợp lý \eqref{eq:log-lik} là hàm
+hợp lý đúng của mô hình đó. Phép xấp xỉ nằm trọn ở bước thu gọn
+\eqref{eq:gray-mean}--\eqref{eq:gray-var}, không nằm ở bộ lọc. Do đó mọi so sánh giữa ba
+phương pháp suy diễn trong tài liệu này là so sánh trên \emph{cùng một} hàm hợp lý, và
+sai khác kết quả giữa chúng không thể quy cho khác biệt về cơ chế thu gọn.
+\end{remark}
+
+\subsection{Hai mô hình chuyển trạng thái}
+Với $k \in \{1,2\}$ chỉ chế độ, phương sai từng chế độ tại bước $t$ là
+\begin{equation}
+  \sigma_{t,k}^2 = \operatorname{Link}\!\left(
+  \omega_k + \alpha_k \left( r_{t-1} - \tilde\mu_{t-1} \right)^2
+  + \beta_k \tilde\sigma_{t-1}^2 + \symbf\gamma_k^\top \Xvec_{t-1} \right),
+  \label{eq:ms-var}
+\end{equation}
+kèm $r_t = \mu_{S_t} + \sigma_{t,S_t} z_t$. Mô hình đối chứng B4 dùng
+$f_{\mathcal{N}}$ và $\symbf\gamma_k \equiv \symbf 0$; mô hình chính M1 dùng
+$f_t(\cdot\,;\nu)$ và $\symbf\gamma_k$ tự do. Vector tham số của M1:
+\begin{equation}
+  \Param = \left( \mu_1,\mu_2,\ \omega_1,\omega_2,\ \alpha_1,\alpha_2,\ \beta_1,\beta_2,\
+  \symbf\gamma_1^\top, \symbf\gamma_2^\top,\ p_{11}, p_{22},\ \nu \right)^\top
+  \in \Theta \subset \R^{11+2k}.
+  \label{eq:param-vector}
+\end{equation}
+Với $k=2$ biến ngoại sinh, $\dim(\Param) = 15$. Bậc tự do $\nu$ dùng chung cho hai chế
+độ; biến thể cho phép $\nu_1 \ne \nu_2$ được khảo sát riêng như một mở rộng.
+
+\begin{assumption}[Điều kiện chính quy của mô hình chuyển trạng thái]\label{as:ms}
+\leavevmode
+\begin{enumerate}
+  \item[(C1)] \textbf{Ergodic:} $0 < p_{11} < 1$ và $0 < p_{22} < 1$, bảo đảm tồn tại duy
+  nhất phân phối dừng \eqref{eq:stationary-dist}.
+  \item[(C2)] \textbf{Xác định dương:} $\omega_k > 0$, $\alpha_k \ge 0$, $\beta_k \ge 0$,
+  cùng hàm liên kết \eqref{eq:link}, bảo đảm $\sigma_{t,k}^2 > 0$ với mọi $t,k$.
+  \item[(C3)] \textbf{Tồn tại phương sai có điều kiện:} $\nu > 2$.
+\end{enumerate}
+\end{assumption}
+
+\begin{remark}[Về điều kiện dừng bậc hai]
+Với lớp MS-GARCH của Haas, Mittnik và Paolella \cite{haas2004}, trong đó mỗi chế độ giữ
+một phương sai riêng không thu gọn, điều kiện dừng bậc hai có dạng đóng qua bán kính phổ
+của một ma trận sinh từ $\Pmat$ và các hệ số $(\alpha_k,\beta_k)$. Biến thể thu gọn kiểu
+Gray dùng trong đề tài \emph{không} thuộc lớp đó, nên điều kiện ấy không áp dụng trực
+tiếp và tài liệu này không phát biểu nó như một tính chất của mô hình. Điểm cần ghi nhận
+về mặt lý thuyết là: ràng buộc $\alpha_k + \beta_k < 1$ cho \emph{từng} chế độ không phải
+điều kiện cần --- một chế độ có thể bùng nổ cục bộ mà hệ thống vẫn dừng, miễn xác suất ở
+lại chế độ đó đủ nhỏ \cite{francq2001}. Vì vậy thực nghiệm áp đặt (C1)--(C3) như tiêu chí
+vận hành, và kiểm tra tính hợp lý của nghiệm qua thời gian tồn tại kỳ vọng
+\eqref{eq:expected-duration} thay vì qua một điều kiện phổ.
+\end{remark}
+
+\subsection{Nhận dạng nhãn trạng thái}
+Hàm hợp lý bất biến dưới phép hoán vị nhãn: đổi đồng thời
+$(\mu_1,\omega_1,\alpha_1,\beta_1,\symbf\gamma_1,p_{11}) \leftrightarrow
+(\mu_2,\omega_2,\alpha_2,\beta_2,\symbf\gamma_2,p_{22})$ cho giá trị hợp lý y hệt. Không
+gian tham số vì thế chứa ít nhất hai điểm cực đại đối xứng, và mọi phát biểu về ``trạng
+thái 1'' chỉ có nghĩa sau khi cố định một quy ước.
+
+\begin{definition}[Quy ước nhận dạng]\label{def:label}
+Ký hiệu phương sai vô điều kiện ngụ ý của chế độ $s$ là
+\begin{equation}
+  v_s = \frac{\omega_s}{1 - \alpha_s - \beta_s}, \qquad
+  v_s = +\infty \text{ khi } \alpha_s + \beta_s \ge 1.
+  \label{eq:implied-var}
+\end{equation}
+Trạng thái được đánh số sao cho $v_1 < v_2$; tức trạng thái 1 là chế độ biến động thấp.
+\end{definition}
+
+Quy ước này áp dụng \emph{sau} khi ước lượng, cho từng nghiệm điểm với hợp lý cực đại và
+cho \emph{từng mẫu} hậu nghiệm với các phương pháp Bayes. Tỷ lệ mẫu phải hoán vị là một
+chẩn đoán có giá trị độc lập: tỷ lệ gần $0$ hoặc gần $1$ tương ứng với một quy ước nhất
+quán toàn cục, còn tỷ lệ gần $1/2$ cho thấy hậu nghiệm không phân biệt được hai chế độ.
+
+\begin{remark}[Vì sao dùng $v_s$ chứ không dùng $\omega_s$]
+Ràng buộc $\omega_1 < \omega_2$ đơn giản hơn nhưng không đủ: hai chế độ có thể có $\omega$
+xếp theo một thứ tự trong khi phương sai vô điều kiện xếp theo thứ tự ngược lại, do
+$(\alpha_s,\beta_s)$ khác nhau. Tiêu chí \eqref{eq:implied-var} phản ánh đúng khái niệm
+``biến động cao'' mà quy ước muốn nắm bắt, và là tiêu chí được cài đặt.
+\end{remark}
+
+% ==============================================================================
+\section{Ước lượng hợp lý cực đại}\label{sec:mle}
+% ==============================================================================
+
+\subsection{Bộ lọc tiến Hamilton}
+Với mô hình chuyển trạng thái, biến ẩn $S_t$ được biên hóa bằng đệ quy tiến
+\cite{hamilton1989}. Khởi tạo $\xi_{1\mid 0}(j) = \pi_j$ theo \eqref{eq:stationary-dist}.
+Tại mỗi $t$:
+\begin{align}
+  \text{dự báo:}\quad & \xi_{t\mid t-1}(j) = \sum_{i=1}^{2} p_{ij}\, \xi_{t-1\mid t-1}(i),
+  \label{eq:predict}\\
+  \text{mật độ theo chế độ:}\quad & \eta_{t,j}
+  = \frac{1}{\sigma_{t,j}}\, f\!\left( \frac{r_t - \mu_j}{\sigma_{t,j}} \right),
+  \label{eq:eta}\\
+  \text{mật độ biên:}\quad & f\!\left( r_t \mid \Info_{t-1}; \Param \right)
+  = \sum_{j=1}^{2} \xi_{t\mid t-1}(j)\, \eta_{t,j},
+  \label{eq:marginal}\\
+  \text{cập nhật:}\quad & \xi_{t\mid t}(j)
+  = \frac{\xi_{t\mid t-1}(j)\, \eta_{t,j}}{f\!\left( r_t \mid \Info_{t-1}; \Param \right)}.
+  \label{eq:update}
+\end{align}
+Bước \eqref{eq:update} là công thức Bayes; thừa số $1/\sigma_{t,j}$ trong \eqref{eq:eta}
+là Jacobian của phép chuẩn hóa $z = (r_t-\mu_j)/\sigma_{t,j}$. Hàm log-hợp-lý quan sát:
+\begin{equation}
+  \ell_T(\Param) = \sum_{t=1}^{T}
+  \ln\!\left[ \sum_{j=1}^{2} \xi_{t\mid t-1}(j)\, \eta_{t,j} \right].
+  \label{eq:log-lik}
+\end{equation}
+Tổng trong logarit được tính bằng biến đổi log-sum-exp,
+$\ln \sum_j e^{a_j} = a_{\max} + \ln \sum_j e^{a_j - a_{\max}}$, để tránh tràn số dưới khi
+các $\eta_{t,j}$ rất nhỏ. Xác suất làm trơn, khi cần mô tả lịch sử chế độ, tính bằng
+đệ quy lùi Kim \cite{kim1994}:
+\begin{equation}
+  \xi_{t\mid T}(j) = \xi_{t\mid t}(j) \sum_{k=1}^{2}
+  \frac{p_{jk}\, \xi_{t+1\mid T}(k)}{\xi_{t+1\mid t}(k)}.
+  \label{eq:kim-smoother}
+\end{equation}
+Xác suất làm trơn sử dụng thông tin sau thời điểm $t$ nên chỉ dùng để mô tả, không dùng
+làm tín hiệu thời gian thực.
+
+\subsection{Tham số hóa không ràng buộc}
+Bài toán $\max_{\Param \in \Theta} \ell_T(\Param)$ có ràng buộc. Ta chuyển sang biến
+không ràng buộc $\vecphi \in \R^{d}$ qua song ánh trơn $\Param = g(\vecphi)$, thành phần
+theo thành phần:
+\begin{equation}
+  \mu_s = \phi_{\mu,s}, \quad
+  \symbf\gamma_s = \symbf\phi_{\gamma,s}, \quad
+  \omega_s = e^{\phi_{\omega,s}}, \quad
+  \alpha_s = \softplus(\phi_{\alpha,s}), \quad
+  \beta_s = \softplus(\phi_{\beta,s}),
+  \label{eq:transforms-1}
+\end{equation}
+\begin{equation}
+  p_{ss} = \sigmoid(\phi_{p,s}), \qquad
+  \nu = 2 + \softplus(\phi_\nu),
+  \label{eq:transforms-2}
+\end{equation}
+với $\softplus(x) = \ln(1+e^{x})$ và $\sigmoid(x) = (1+e^{-x})^{-1}$. Ba nhận xét về
+tính chặt chẽ của phép chọn này. Thứ nhất, ảnh của $\softplus$ là $(0,\infty)$ nên
+$\alpha_s,\beta_s > 0$ chứ không chỉ $\ge 0$; ràng buộc (C2) được thỏa theo nghĩa nghiêm
+ngặt. Thứ hai, $\nu = 2+\softplus(\phi_\nu) > 2$ thỏa (C3) theo cấu trúc, không cần kiểm
+tra hậu nghiệm. Thứ ba, $\omega_s = e^{\phi}$ được chọn để tương thích với tiên nghiệm
+log-chuẩn ở \cref{sec:vb}, bảo đảm hai phương pháp làm việc trên cùng một tham số hóa.
+
+\subsection{Thuật toán tối ưu và tiêu chí dừng}
+Hàm hợp lý của mô hình chuyển trạng thái đa cực trị, nên nghiệm phụ thuộc điểm khởi tạo.
+Quy trình gồm ba thành phần.
+
+\emph{Đa điểm khởi tạo.} Mỗi mô hình hai chế độ được tối ưu từ $10$ điểm khởi tạo độc
+lập. Bốn điểm đầu là \emph{khởi tạo ấm} sinh từ nghiệm một chế độ đã ước lượng trước
+(B1 cho B4, B3 cho M1) bằng cách nhân đôi bộ tham số rồi tách hai bản sao qua hệ số nhân
+$\omega$. Các điểm còn lại sinh ngẫu nhiên trên không gian không ràng buộc với hạt giống
+xác định, bảo đảm tái lập.
+
+\emph{Tối ưu hai giai đoạn.} Mỗi điểm khởi tạo chạy $3$ chu kỳ, mỗi chu kỳ gồm $500$ vòng
+Adam (thoát vùng phẳng) rồi $250$ vòng L-BFGS (hội tụ chính xác), dùng vi phân tự động.
+Gradient được cắt chuẩn tại $50$ để tránh bước nhảy do vùng có độ cong lớn.
+
+\emph{Tiêu chí dừng.} Một lần chạy được ghi nhận là hội tụ khi giá trị hợp lý hữu hạn và
+\begin{equation}
+  \left\| \nabla_{\vecphi}\, \ell_T\!\left( g(\vecphi) \right) \right\|_2 < 1.
+  \label{eq:stop-crit}
+\end{equation}
+
+\begin{remark}[Ngưỡng \eqref{eq:stop-crit} và ý nghĩa của nó]
+Ngưỡng $1$ là ngưỡng \emph{thực tế} trên thang gradient của tổng log-hợp-lý qua hơn một
+nghìn quan sát, không phải ngưỡng tiệm cận lý thuyết. Nó cần được hiểu đúng: đây là tiêu
+chí sàng lọc các lần chạy còn ở xa điểm dừng, chứ không phải chứng cứ đạt cực trị địa
+phương với độ chính xác cao. Kết luận về chất lượng nghiệm vì vậy phải dựa thêm vào độ
+tán của giá trị hợp lý giữa các điểm khởi tạo và vào điều kiện chính quy dưới đây, chứ
+không dựa vào riêng \eqref{eq:stop-crit}.
+\end{remark}
+
+\emph{Quy tắc chọn nghiệm.} Với hai mô hình chuyển trạng thái, nghiệm báo cáo \emph{không}
+phải nghiệm có hợp lý cao nhất, mà là nghiệm có hợp lý cao nhất trong số các nghiệm vừa
+hội tụ vừa thỏa điều kiện chính quy vận hành
+\begin{equation}
+  d_s \ge 2 \ \text{phiên} \quad\text{và}\quad p_{ss} \in [0{,}01;\ 0{,}999],
+  \qquad s = 1,2.
+  \label{eq:regular}
+\end{equation}
+Lý do là hàm hợp lý MS-GARCH có các cực đại giả với giá trị tùy ý lớn, ứng với một chế độ
+tồn tại đúng một phiên và hấp thụ trọn một quan sát cực đoan. Những điểm này tối ưu về
+mặt số học nhưng vô nghĩa về mặt kinh tế; \eqref{eq:regular} loại bỏ chúng. Khi không có
+nghiệm nào thỏa \eqref{eq:regular}, quy trình lùi về tập các nghiệm hội tụ và điều này
+phải được nêu rõ khi báo cáo, vì nó vô hiệu hóa cơ sở của suy diễn tiệm cận.
+
+\subsection{Sai số chuẩn}
+Gọi $\hat{\vecphi}$ là nghiệm trên không gian không ràng buộc và
+$\symbf H(\hat{\vecphi}) = \nabla^2_{\vecphi}\, \ell_T(g(\vecphi))\big|_{\hat{\vecphi}}$ là
+Hessian quan sát. Khi $\symbf H(\hat{\vecphi})$ xác định âm, ma trận hiệp phương sai tiệm
+cận trên không gian không ràng buộc là
+$\widehat{\symbf V}(\hat{\vecphi}) = \left[ -\symbf H(\hat{\vecphi}) \right]^{-1}$,
+và sai số chuẩn của tham số gốc suy ra bằng phương pháp delta:
+\begin{equation}
+  \widehat{\Cov}\!\left( \hat{\Param} \right)
+  = \symbf J_g(\hat{\vecphi})\, \widehat{\symbf V}(\hat{\vecphi})\, \symbf J_g(\hat{\vecphi})^\top,
+  \qquad
+  \symbf J_g(\vecphi) = \frac{\partial g(\vecphi)}{\partial \vecphi^\top}.
+  \label{eq:delta-se}
+\end{equation}
+Vì $g$ tác động theo từng thành phần, $\symbf J_g$ là ma trận đường chéo và
+\eqref{eq:delta-se} rút gọn thành phép nhân theo tọa độ.
+
+\begin{remark}[Điều kiện hiệu lực của \eqref{eq:delta-se}]
+Tính chuẩn tiệm cận của ước lượng hợp lý cực đại giả định nghiệm nằm \emph{bên trong}
+không gian tham số. Khi nghiệm chạm hoặc gần chạm biên --- cụ thể khi $p_{ss}$ tiến sát
+$1$ --- giả định này bị vi phạm và \eqref{eq:delta-se} không còn là sai số chuẩn hợp lệ;
+đại lượng thu được chỉ đo độ cong cục bộ của hàm hợp lý. Trường hợp đó phải được công bố
+kèm kết quả. Một phương án thay thế là ước lượng vững kiểu sandwich
+$\symbf H^{-1} \symbf J \symbf H^{-1}$ với $\symbf J$ là tích ngoài của gradient theo
+từng quan sát; phương án này \emph{không} được dùng trong đề tài, và mọi sai số chuẩn báo
+cáo đều theo \eqref{eq:delta-se}.
+\end{remark}
+
+\subsection{Tiêu chí so sánh mô hình}
+Gọi $d = \dim(\Param)$ và $T$ là cỡ mẫu huấn luyện:
+\begin{equation}
+  \AIC = 2d - 2\ell_T, \qquad \BIC = d \ln T - 2\ell_T.
+  \label{eq:ic}
+\end{equation}
+Cả hai phạt độ phức tạp, nhưng $\BIC$ phạt nặng hơn khi $T > e^2 \approx 7{,}4$; với
+$T$ hàng nghìn, khoảng cách giữa hai tiêu chí đủ lớn để chúng có thể xếp hạng khác nhau,
+và khi đó $\BIC$ nghiêng về mô hình tiết kiệm tham số hơn.
+
+\begin{remark}[Vì sao không dùng kiểm định tỷ số hợp lý]
+So sánh mô hình một chế độ với mô hình hai chế độ không thể thực hiện bằng kiểm định tỷ
+số hợp lý. Dưới giả thuyết không ``chỉ có một chế độ'', các tham số $p_{11}, p_{22}$ và
+bộ tham số của chế độ thứ hai \emph{không được nhận dạng}: hàm hợp lý không phụ thuộc vào
+chúng. Điều kiện chính quy của định lý Wilks bị vi phạm và thống kê tỷ số hợp lý không
+có phân phối tiệm cận $\chi^2$ \cite{davies1987,hansen1992}. Việc xếp hạng mô hình vì
+vậy dựa vào $\AIC$, $\BIC$ và năng lực dự báo ngoài mẫu.
+\end{remark}
+
+% ==============================================================================
+\section{Suy diễn biến phân}\label{sec:vb}
+% ==============================================================================
+
+\subsection{Tiên nghiệm}
+Giả định độc lập tiên nghiệm giữa các khối tham số, $p(\Param) = \prod_i p(\Param_i)$, với
+\begin{equation}
+\begin{aligned}
+  \mu_s &\sim \mathcal{N}(0,\ \sigma_\mu^2), &
+  \ln \omega_s &\sim \mathcal{N}(m_\omega,\ \sigma_\omega^2), \\
+  \alpha_s &\sim \operatorname{Beta}(a,\ a), &
+  \beta_s &\sim \operatorname{Beta}(a,\ a), \\
+  \symbf\gamma_s &\sim \mathcal{N}(\symbf 0,\ \sigma_\gamma^2 \symbf I_k), &
+  p_{ss} &\sim \operatorname{Beta}(a_p,\ b_p), \\
+  \nu - 2 &\sim \operatorname{Gamma}(a_\nu,\ b_\nu). & &
+\end{aligned}
+\label{eq:priors}
+\end{equation}
+Siêu tham số được dùng trong toàn bộ kết quả:
+\begin{equation}
+  \sigma_\mu = 1, \quad m_\omega = 0, \quad \sigma_\omega = 1, \quad a = 2, \quad
+  \sigma_\gamma = 1, \quad a_p = 8, \quad b_p = 2, \quad a_\nu = 2, \quad b_\nu = 0{,}2.
+  \label{eq:hyper}
+\end{equation}
+
+Ba lựa chọn cần được lý giải. Tiên nghiệm $\operatorname{Beta}(8,2)$ trên $p_{ss}$ có
+trung bình $0{,}8$ và đặt phần lớn khối lượng ở vùng $p_{ss}$ lớn, phản ánh nhận định
+tiên nghiệm rằng các chế độ biến động có tính dai dẳng. Tiên nghiệm
+$\operatorname{Gamma}(2;\ 0{,}2)$ cho $\nu-2$ có trung bình $10$, tức $\E[\nu] = 12$,
+đủ rộng để dữ liệu kéo $\nu$ về vùng đuôi dày nếu bằng chứng ủng hộ. Tiên nghiệm
+$\operatorname{Beta}(2,2)$ trên $\alpha_s$ và $\beta_s$ là tiên nghiệm yếu, đối xứng
+quanh $1/2$.
+
+\begin{remark}[Hệ quả của $\operatorname{Beta}(2,2)$ đối với việc so sánh phương pháp]
+Tiên nghiệm này \emph{chặn cứng} $\alpha_s, \beta_s$ trong khoảng $(0,1)$, trong khi tham
+số hóa softplus của hợp lý cực đại \eqref{eq:transforms-1} không có chặn trên. Hai
+phương pháp vì vậy làm việc trên hai miền tham số khác nhau, và chênh lệch ước lượng
+$\beta_s$ giữa chúng không thể quy hoàn toàn cho khác biệt về nguyên lý suy diễn. Đây là
+một giới hạn cấu trúc của thiết kế so sánh, cần nêu khi diễn giải kết quả.
+\end{remark}
+
+\subsection{Hậu nghiệm trên không gian không ràng buộc}
+Theo định lý Bayes, trên không gian gốc
+$p(\Param \mid \Data_T) \propto p(\Param)\, \mathcal{L}(\Param; \Data_T)$ với
+$\mathcal{L}(\Param;\Data_T) = \exp \ell_T(\Param)$ theo \eqref{eq:log-lik}. Suy diễn
+được thực hiện trên $\vecphi$ với cùng phép biến đổi
+\eqref{eq:transforms-1}--\eqref{eq:transforms-2}. Theo công thức đổi biến,
+\begin{equation}
+  p(\vecphi \mid \Data_T) \propto
+  p\!\left( g(\vecphi) \right) \cdot \mathcal{L}\!\left( g(\vecphi); \Data_T \right)
+  \cdot \left| \det \symbf J_g(\vecphi) \right|.
+  \label{eq:posterior-unconstrained}
+\end{equation}
+Vì $g$ tác động theo từng tọa độ, $\symbf J_g$ đường chéo và
+\begin{equation}
+  \ln \left| \det \symbf J_g(\vecphi) \right|
+  = \sum_{i=1}^{d} \ln \left| \frac{\partial g_i(\phi_i)}{\partial \phi_i} \right|.
+  \label{eq:log-det-jac}
+\end{equation}
+Các đạo hàm tương ứng với \eqref{eq:transforms-1}--\eqref{eq:transforms-2}:
+\begin{equation}
+  \frac{\partial \omega_s}{\partial \phi_{\omega,s}} = \omega_s, \qquad
+  \frac{\partial \alpha_s}{\partial \phi_{\alpha,s}} = \sigmoid(\phi_{\alpha,s}), \qquad
+  \frac{\partial p_{ss}}{\partial \phi_{p,s}} = p_{ss}(1-p_{ss}), \qquad
+  \frac{\partial \nu}{\partial \phi_\nu} = \sigmoid(\phi_\nu),
+  \label{eq:jacobian-terms}
+\end{equation}
+và bằng $1$ đối với $\mu_s, \symbf\gamma_s$, đóng góp $0$ vào \eqref{eq:log-det-jac}. Bỏ
+sót số hạng \eqref{eq:log-det-jac} sẽ làm hậu nghiệm bị lệch một cách hệ thống; đây là
+lỗi thường gặp khi tự cài đặt và là lý do phép biến đổi được khai báo tường minh cho thư
+viện xác suất thay vì thực hiện thủ công.
+
+\subsection{Cận dưới bằng chứng}
+Tích phân chuẩn hóa $p(\Data_T) = \int p(\vecphi) \mathcal{L}\, \diff\vecphi$ không có dạng
+đóng. Suy diễn biến phân chọn một họ phân phối $\mathcal{Q}$ và tìm phần tử gần hậu
+nghiệm nhất theo phân kỳ Kullback--Leibler \cite{blei2017}. Với mọi
+$q \in \mathcal{Q}$ ta có phân rã đồng nhất
+\begin{equation}
+  \ln p(\Data_T) = \ELBO(q) + \KL\!\left( q(\vecphi) \,\|\, p(\vecphi \mid \Data_T) \right).
+  \label{eq:decomposition}
+\end{equation}
+Vì $\ln p(\Data_T)$ không phụ thuộc $q$ và $\KL \ge 0$, cực tiểu hóa $\KL$ tương đương
+cực đại hóa $\ELBO$, và $\ELBO(q) \le \ln p(\Data_T)$ với dấu bằng khi và chỉ khi
+$q$ trùng hậu nghiệm. Dạng tường minh của cận dưới:
+\begin{equation}
+  \ELBO(q) = \E_{q}\!\left[
+  \ell_T\!\left( g(\vecphi) \right)
+  + \ln p\!\left( g(\vecphi) \right)
+  + \ln \left| \det \symbf J_g(\vecphi) \right|
+  \right] + \mathcal{H}(q),
+  \label{eq:elbo}
+\end{equation}
+với $\mathcal{H}(q) = -\E_q[\ln q(\vecphi)]$ là entropy vi phân.
+
+\begin{remark}[Vì sao $\ELBO$ không so sánh được giữa các đặc tả khác nhau]
+$\ELBO$ là cận dưới của $\ln p(\Data_T)$ \emph{dưới một mô hình xác suất cụ thể}. Khi
+đổi tiên nghiệm, đại lượng $\ln p(\Data_T)$ được cận dưới cũng đổi theo. Do đó giá trị
+$\ELBO$ của hai biến thể tiên nghiệm khác nhau không so sánh trực tiếp được, và không
+thể dùng để chọn tiên nghiệm. Trong cùng một đặc tả, $\ELBO$ so sánh được giữa mean-field
+và full-rank, vì khi đó chỉ họ $\mathcal{Q}$ thay đổi.
+\end{remark}
+
+\subsection{Hai họ phân phối biến phân}
+
+\begin{definition}[Mean-field]\label{def:mf}
+Họ Gauss thừa số hóa theo tọa độ:
+\begin{equation}
+  q_{\mathrm{MF}}(\vecphi) = \prod_{i=1}^{d} \mathcal{N}\!\left( \phi_i \mid m_i, s_i^2 \right)
+  = \mathcal{N}\!\left( \vecphi \mid \symbf m,\ \diag(\symbf s^2) \right),
+  \qquad s_i = \softplus(\rho_i) > 0,
+  \label{eq:mf-q}
+\end{equation}
+với tham số biến phân $(\symbf m, \symbf\rho) \in \R^{2d}$. Entropy có dạng đóng
+$\mathcal{H}(q_{\mathrm{MF}}) = \frac{d}{2}\left( 1 + \ln 2\pi \right) + \sum_{i=1}^{d} \ln s_i$.
+Gradient của \eqref{eq:elbo} ước lượng không chệch qua phép tái tham số hóa
+\cite{kingma2014}: $\phi_i = m_i + s_i \varepsilon_i$ với
+$\varepsilon_i \sim \mathcal{N}(0,1)$ độc lập.
+\end{definition}
+
+\begin{definition}[Full-rank]\label{def:fr}
+Họ Gauss đa biến với hiệp phương sai đầy đủ qua thừa số Cholesky:
+\begin{equation}
+  q_{\mathrm{FR}}(\vecphi) = \mathcal{N}\!\left( \vecphi \mid \symbf m,\ \symbf\Sigma \right),
+  \qquad \symbf\Sigma = \symbf L \symbf L^\top,
+  \label{eq:fr-q}
+\end{equation}
+trong đó $\symbf L$ tam giác dưới với $L_{ii} = \softplus(\rho_i) > 0$ và
+$L_{ij} \in \R$ khi $i > j$. Tham số biến phân
+$(\symbf m, \vech(\symbf L)) \in \R^{d + d(d+1)/2}$. Entropy
+$\mathcal{H}(q_{\mathrm{FR}}) = \frac{d}{2}\left( 1 + \ln 2\pi \right) + \sum_{i=1}^{d} \ln L_{ii}$,
+và tái tham số hóa $\vecphi = \symbf m + \symbf L \symbf\varepsilon$ với
+$\symbf\varepsilon \sim \mathcal{N}(\symbf 0, \symbf I_d)$.
+\end{definition}
+
+Phân rã $\symbf\Sigma = \symbf L \symbf L^\top$ với $L_{ii} > 0$ bảo đảm
+$\symbf\Sigma$ xác định dương theo cấu trúc, và là duy nhất --- đây là lý do tối ưu hóa
+được thực hiện trên $\symbf L$ chứ không trực tiếp trên $\symbf\Sigma$.
+
+\begin{remark}[Đánh đổi giữa hai họ]
+Với $d = 15$, mean-field tối ưu $30$ tham số còn full-rank tối ưu $135$. Mean-field áp đặt
+$\Cov_q(\phi_i,\phi_j) = 0$, triệt tiêu tương quan hậu nghiệm --- đáng kể nhất là tương
+quan âm giữa $\alpha_s$ và $\beta_s$ --- và do dạng của $\KL(q \| p)$, xu hướng hệ thống
+là \emph{đánh giá thấp} phương sai hậu nghiệm. Full-rank không có hạn chế đó và về lý
+thuyết cho cận dưới khít hơn, nhưng bài toán tối ưu khó hơn nhiều theo cấp $\mathcal{O}(d^2)$.
+Vì cả hai chỉ cho \emph{cận dưới}, một họ giàu hơn không bảo đảm nghiệm tốt hơn trên thực
+tế: nếu bài toán tối ưu không được giải tốt, full-rank có thể cho $\ELBO$ thấp hơn
+mean-field. Đây là một khả năng cần kiểm tra bằng thực nghiệm chứ không loại trừ được
+bằng lý thuyết.
+\end{remark}
+
+\subsection{Cấu hình tối ưu hóa}
+Cả hai họ được tối ưu bằng thuật toán biến phân ngẫu nhiên với gradient tái tham số hóa,
+chạy $3000$ bước với số bước \emph{cố định trước}, sau đó lấy $1000$ mẫu từ $q$ đã tối ưu.
+Giá trị $\ELBO$ báo cáo là trung bình $50$ bước cuối, nhằm giảm nhiễu của ước lượng ngẫu
+nhiên. Đề tài không áp dụng tiêu chí dừng thích ứng; tính ổn định của $\ELBO$ được kiểm
+tra bằng đồ thị đường hội tụ thay vì bằng một quy tắc dừng tự động.
+
+% ==============================================================================
+\section{Đánh giá ngoài mẫu}\label{sec:oos}
+% ==============================================================================
+
+Mẫu được chia theo thời gian: $T$ quan sát đầu để huấn luyện, $N$ quan sát cuối để kiểm
+định. Không có tham số nào được ước lượng lại bằng dữ liệu kiểm định.
+
+\subsection{Dự báo phương sai}
+Với $\hat h_t$ là phương sai dự báo một bước và $\RV_t$ là đại lượng đại diện, cả hai trên
+thang phương sai:
+\begin{equation}
+  \MAE = \frac{1}{N} \sum_{t} \left| \RV_t - \hat h_t \right|, \qquad
+  \RMSE = \sqrt{ \frac{1}{N} \sum_{t} \left( \RV_t - \hat h_t \right)^2 }, \qquad
+  \QLIKE = \frac{1}{N} \sum_{t} \left[ \ln \hat h_t + \frac{\RV_t}{\hat h_t} \right].
+  \label{eq:vol-loss}
+\end{equation}
+
+\begin{remark}[Về dạng của $\QLIKE$ và tính vững của nó]
+$\QLIKE$ thường được viết dưới dạng $\frac{\RV_t}{\hat h_t} - \ln\frac{\RV_t}{\hat h_t} - 1$.
+Hai dạng chênh nhau đúng số hạng $\ln \RV_t + 1$, không phụ thuộc mô hình, nên chúng cho
+\emph{cùng thứ hạng} giữa các mô hình nhưng \emph{khác giá trị tuyệt đối}. Công thức
+\eqref{eq:vol-loss} là dạng được cài đặt và mọi giá trị $\QLIKE$ báo cáo trong đề tài ứng
+với dạng này. Tính chất then chốt của $\QLIKE$, theo Patton \cite{patton2011}, là nó
+\emph{vững} đối với nhiễu của đại lượng đại diện: thứ hạng mô hình theo $\QLIKE$ kỳ vọng
+không đổi khi thay phương sai thật bằng một đại lượng đại diện không chệch. $\MAE$ và
+$\RMSE$ không có tính chất này, nên được báo cáo bổ sung chứ không dùng làm tiêu chí chính.
+\end{remark}
+
+\subsection{Dự báo mật độ}
+Dự báo mật độ đánh giá toàn bộ phân phối dự báo $\hat f_t$, không chỉ mô men bậc hai:
+\begin{equation}
+  \NLS = -\frac{1}{N} \sum_{t} \ln \hat f_t(r_t).
+  \label{eq:nls}
+\end{equation}
+$\NLS$ là một quy tắc chấm điểm chặt (proper scoring rule): kỳ vọng của nó đạt cực tiểu
+khi và chỉ khi phân phối báo cáo trùng phân phối sinh dữ liệu. Đây là căn cứ để dùng
+$\NLS$ so sánh các mô hình khác nhau về hình dạng đuôi.
+
+Cơ chế sinh $\hat f_t$ khác nhau giữa hai khung suy diễn. Hợp lý cực đại dùng ước lượng
+cắm vào, $\hat f_t(\cdot) = f(\cdot \mid \Info_{t-1}; \hat{\Param})$, bỏ qua bất định tham
+số. Các phương pháp Bayes tích phân trên hậu nghiệm:
+\begin{equation}
+  \hat f_t(\cdot)
+  = \int_\Theta f\!\left( \cdot \mid \Info_{t-1}; \Param \right) p(\Param \mid \Data_T)\, \diff\Param
+  \approx \frac{1}{S} \sum_{s=1}^{S} f\!\left( \cdot \mid \Info_{t-1}; g(\vecphi^{(s)}) \right),
+  \qquad \vecphi^{(s)} \sim q.
+  \label{eq:post-pred}
+\end{equation}
+Phân phối dự báo \eqref{eq:post-pred} là hỗn hợp của $S$ mật độ nên có đuôi dày hơn từng
+thành phần; đây là cơ chế qua đó bất định tham số được đưa vào dự báo, và là lý do các
+phương pháp Bayes có lợi thế tiềm năng ở tiêu chí $\NLS$ ngay cả khi không có lợi thế ở
+$\QLIKE$.
+
+\subsection{Kiểm định giá trị chịu rủi ro}
+Gọi $\widehat{\VaR}_t(\alpha)$ là phân vị mức $\alpha$ của $\hat f_t$ và
+$I_t = \symbf 1\{ r_t < \widehat{\VaR}_t(\alpha) \}$ là chỉ báo vi phạm. Mô hình đúng đòi
+hỏi hai tính chất: tỷ lệ vi phạm bằng $\alpha$, và các vi phạm độc lập theo thời gian.
+\begin{itemize}
+  \item \textbf{Kupiec} \cite{kupiec1995} kiểm định độ phủ vô điều kiện
+  $H_0\!: \E[I_t] = \alpha$, thống kê $LR_{uc} \overset{d}{\to} \chi^2(1)$.
+  \item \textbf{Christoffersen} \cite{christoffersen1998} bổ sung kiểm định tính độc lập
+  $LR_{ind} \overset{d}{\to} \chi^2(1)$ đối với chuỗi $\{I_t\}$ qua mô hình Markov hai
+  trạng thái. Thống kê độ phủ có điều kiện là tổng $LR_{cc} = LR_{uc} + LR_{ind}$, với
+  $LR_{cc} \overset{d}{\to} \chi^2(2)$.
+\end{itemize}
+Việc tách hai thành phần có ý nghĩa thực chất: một mô hình có đúng số vi phạm nhưng dồn
+toàn bộ vào một giai đoạn căng thẳng sẽ vượt qua Kupiec nhưng bị $LR_{ind}$ bác bỏ, và đó
+đúng là kiểu sai hỏng nguy hiểm nhất trong quản trị rủi ro.
+
+So sánh cặp mô hình theo hàm tổn thất được thực hiện bằng kiểm định Diebold--Mariano
+\cite{diebold1995} với hiệu chỉnh tự tương quan; khi số cặp so sánh lớn, kết luận cần
+tính đến vấn đề kiểm định bội.
+
+% ==============================================================================
+\section{Tổng hợp so sánh ba phương pháp}\label{sec:comparison}
+% ==============================================================================
+
+\begin{table}[H]
+\centering\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Đối chiếu ba phương pháp suy diễn trên mô hình MS-GARCH-X Student-t}
+\label{tab:comparison}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash\bfseries}p{2.6cm} Y Y Y}
+\toprule
+\textbf{Tiêu chí} & \textbf{Hợp lý cực đại} & \textbf{Biến phân mean-field} & \textbf{Biến phân full-rank} \\
+\midrule
+Đối tượng tối ưu & $\ell_T(\Param)$ theo \eqref{eq:log-lik} & $\ELBO(q)$ theo \eqref{eq:elbo} & $\ELBO(q)$ theo \eqref{eq:elbo} \\
+\addlinespace[0.2em]
+Kết quả suy diễn & Một điểm $\hat{\Param}$ & Phân phối $q_{\mathrm{MF}}$ & Phân phối $q_{\mathrm{FR}}$ \\
+\addlinespace[0.2em]
+Vai trò tiên nghiệm & Không có & \eqref{eq:priors} kèm Jacobian \eqref{eq:log-det-jac} & \eqref{eq:priors} kèm Jacobian \eqref{eq:log-det-jac} \\
+\addlinespace[0.2em]
+Hiệp phương sai & Tiệm cận qua $[-\symbf H]^{-1}$, hiệu lực có điều kiện & Đường chéo theo giả định & Đầy đủ qua $\symbf L \symbf L^\top$ \\
+\addlinespace[0.2em]
+Số tham số tối ưu & $d$ & $2d$ & $d + d(d+1)/2$ \\
+\addlinespace[0.2em]
+Chi phí mỗi bước & $\mathcal{O}(d)$ gradient, L-BFGS bậc hai & $\mathcal{O}(d)$ & $\mathcal{O}(d^2)$ \\
+\addlinespace[0.2em]
+Dự báo mật độ & Cắm vào $\hat{\Param}$ & Tích phân theo \eqref{eq:post-pred} & Tích phân theo \eqref{eq:post-pred} \\
+\addlinespace[0.2em]
+Hạn chế chính & Suy diễn tiệm cận mất hiệu lực khi nghiệm sát biên & Bỏ tương quan; có xu hướng đánh giá thấp bất định & Bài toán tối ưu khó, không bảo đảm đạt cận tốt hơn \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{remark}[Điều kiện để so sánh có hiệu lực]
+Ba phương pháp chỉ so sánh được với nhau khi dùng chung hàm hợp lý, chung cơ chế thu gọn
+và chung quy ước nhận dạng nhãn. Đề tài bảo đảm điều kiện thứ nhất và thứ hai bằng cách
+để cả ba gọi cùng một hàm bộ lọc, và bảo đảm điều kiện thứ ba bằng
+\cref{def:label} áp dụng nhất quán. Điểm không đối xứng còn lại --- hợp lý cực đại không
+có tiên nghiệm trong khi hai phương pháp Bayes có --- là khác biệt bản chất giữa hai khung
+suy diễn, không thể loại bỏ, và phải được tính đến khi diễn giải mọi chênh lệch ước lượng.
+\end{remark}
+
+% ==============================================================================
+\begin{thebibliography}{99}
+\bibitem{berkowitz2001} Berkowitz, J. (2001). Testing density forecasts, with applications to risk management. \emph{Journal of Business \& Economic Statistics}, 19(4), 465--474.
+\bibitem{blei2017} Blei, D. M., Kucukelbir, A., \& McAuliffe, J. D. (2017). Variational inference: A review for statisticians. \emph{Journal of the American Statistical Association}, 112(518), 859--877.
+\bibitem{bollerslev1986} Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. \emph{Journal of Econometrics}, 31(3), 307--327.
+\bibitem{christoffersen1998} Christoffersen, P. F. (1998). Evaluating interval forecasts. \emph{International Economic Review}, 39(4), 841--862.
+\bibitem{davies1987} Davies, R. B. (1987). Hypothesis testing when a nuisance parameter is present only under the alternative. \emph{Biometrika}, 74(1), 33--43.
+\bibitem{diebold1995} Diebold, F. X., \& Mariano, R. S. (1995). Comparing predictive accuracy. \emph{Journal of Business \& Economic Statistics}, 13(3), 253--263.
+\bibitem{francq2001} Francq, C., \& Zakoïan, J. M. (2001). Stationarity of multivariate Markov-switching ARMA models. \emph{Journal of Econometrics}, 102(2), 339--364.
+\bibitem{gray1996} Gray, S. F. (1996). Modeling the conditional distribution of interest rates as a regime-switching process. \emph{Journal of Financial Economics}, 42(1), 27--62.
+\bibitem{haas2004} Haas, M., Mittnik, S., \& Paolella, M. S. (2004). A new approach to Markov-switching GARCH models. \emph{Journal of Financial Econometrics}, 2(4), 493--530.
+\bibitem{hamilton1989} Hamilton, J. D. (1989). A new approach to the economic analysis of nonstationary time series and the business cycle. \emph{Econometrica}, 57(2), 357--384.
+\bibitem{hansen1992} Hansen, B. E. (1992). The likelihood ratio test under nonstandard conditions: Testing the Markov switching model of GNP. \emph{Journal of Applied Econometrics}, 7(S1), S61--S82.
+\bibitem{kim1994} Kim, C. J. (1994). Dynamic linear models with Markov-switching. \emph{Journal of Econometrics}, 60(1--2), 1--22.
+\bibitem{kingma2014} Kingma, D. P., \& Welling, M. (2014). Auto-encoding variational Bayes. \emph{International Conference on Learning Representations}.
+\bibitem{kupiec1995} Kupiec, P. H. (1995). Techniques for verifying the accuracy of risk measurement models. \emph{The Journal of Derivatives}, 3(2), 73--84.
+\bibitem{nelson1990} Nelson, D. B. (1990). Stationarity and persistence in GARCH(1,1) models. \emph{Econometric Theory}, 6(3), 318--334.
+\bibitem{patton2011} Patton, A. J. (2011). Volatility forecast comparison using imperfect volatility proxies. \emph{Journal of Econometrics}, 160(1), 246--256.
+\end{thebibliography}
+
+\end{document}
