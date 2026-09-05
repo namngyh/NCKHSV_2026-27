@@ -123,17 +123,16 @@ SO SÁNH MÔ HÌNH VÀ SO SÁNH PHƯƠNG PHÁP SUY DIỄN}
 \begin{abstract}
 \noindent Tài liệu thiết lập khung toán học cho đề tài mô hình hóa biến động hợp đồng
 tương lai VN30F1M và giữ vai trò tài liệu quy chiếu về dữ liệu, ký hiệu, đặc tả và tiêu
-chí đánh giá cho toàn bộ nghiên cứu. Nghiên cứu được tổ chức thành hai phần độc lập về
-mục tiêu nhưng dùng chung một khung đánh giá. Phần thứ nhất so sánh \emph{các mô hình}
-trong họ GARCH bằng cùng một phương pháp ước lượng hợp lý cực đại, nhằm xác định giá trị
-gia tăng của từng thành phần cấu trúc: đuôi dày, biến ngoại sinh và cơ chế chuyển trạng
-thái. Phần thứ hai cố định mô hình chính MS-GARCH-X Student-t và so sánh \emph{các phương
-pháp suy diễn}: hợp lý cực đại, biến phân mean-field và biến phân full-rank. Tài liệu mô
-tả bộ dữ liệu và các đặc điểm thực nghiệm dẫn tới lựa chọn mô hình, đặc tả tường minh hàm
-hợp lý qua bộ lọc tiến Hamilton \cite{hamilton1989} kèm cơ chế thu gọn moment kiểu Gray
-\cite{gray1996}, viết rõ dạng giải tích của phân phối tiên nghiệm, phân phối hậu nghiệm
-trên không gian không ràng buộc có hiệu chỉnh Jacobian và hàm mục tiêu ELBO, cùng hệ tiêu
-chí đánh giá ngoài mẫu dùng chung cho cả hai phần.
+chí đánh giá cho toàn bộ nghiên cứu. Nghiên cứu gồm hai phần dùng chung một khung đánh
+giá. Phần thứ nhất so sánh \emph{các mô hình} trong họ GARCH bằng cùng một phương pháp
+ước lượng hợp lý cực đại, nhằm tách riêng giá trị gia tăng của từng thành phần cấu trúc:
+đuôi dày, biến ngoại sinh và cơ chế chuyển trạng thái. Phần thứ hai cố định mô hình chính
+MS-GARCH-X Student-t và so sánh \emph{các phương pháp suy diễn}: hợp lý cực đại, biến
+phân mean-field và biến phân full-rank. Tài liệu mô tả bộ dữ liệu và các đặc điểm thực
+nghiệm dẫn tới lựa chọn mô hình, đặc tả tường minh hàm likelihood qua bộ lọc tiến Hamilton
+\cite{hamilton1989} kèm cơ chế thu gọn moment kiểu Gray \cite{gray1996}, viết rõ dạng
+giải tích của phân phối tiên nghiệm, phân phối hậu nghiệm trên không gian không ràng buộc
+có hiệu chỉnh Jacobian và hàm mục tiêu ELBO, cùng hệ tiêu chí đánh giá ngoài mẫu.
 \\[0.4em]
 \textbf{Từ khóa:} MS-GARCH-X; Student-t chuẩn hóa; thu gọn moment Gray; bộ lọc Hamilton;
 suy diễn biến phân; ELBO; nhận dạng nhãn trạng thái.
@@ -179,10 +178,12 @@ $\Param$ & Vector toàn bộ tham số liên tục của mô hình. \\
 $\vecphi$ & Ảnh của $\Param$ trên không gian không ràng buộc $\R^{d}$. \\
 $\Info_{t-1}$ & Tập thông tin đến cuối phiên $t-1$. \\
 $\Data_T$ & Toàn bộ dữ liệu dùng cho suy diễn đến $T$. \\
-$\ell_T(\Param)$ & Log-hợp-lý quan sát trên mẫu huấn luyện. \\
-$\mathcal{L}(\Param;\Data_T)$ & Hàm hợp lý, $\mathcal{L}=\exp\ell_T$. \\
+$\mathcal{L}(\Param;\Data_T)$ & Hàm likelihood của mẫu huấn luyện. \\
+$\ell_T(\Param)$ & Hàm log-likelihood, $\ell_T=\ln\mathcal{L}$. \\
 $p(\Param),\ p(\Param\mid\Data_T)$ & Mật độ tiên nghiệm và hậu nghiệm. \\
 $q(\vecphi)$ & Phân phối xấp xỉ hậu nghiệm trong suy diễn biến phân. \\
+$\diag(\cdot)$ & Ma trận đường chéo tạo từ các phần tử trong ngoặc. \\
+$\vech(\cdot)$ & Vector hóa phần tam giác dưới của một ma trận. \\
 $RV_t$ & Biến động thực tế, đo trên thang phương sai. \\
 $\VaR_{t,\alpha}$ & Giá trị chịu rủi ro tại mức xác suất đuôi $\alpha$. \\
 \end{longtable}
@@ -193,21 +194,116 @@ $\VaR_{t,\alpha}$ & Giá trị chịu rủi ro tại mức xác suất đuôi $\
 \section{Giới thiệu}\label{sec:intro}
 % ==============================================================================
 
-\subsection{Thiết kế nghiên cứu}\label{subsec:design}
+\subsection{Bối cảnh và động lực nghiên cứu}\label{subsec:motivation}
+Biến động là đại lượng trung tâm của kinh tế lượng tài chính vì nó chi phối trực tiếp mức
+ký quỹ, giới hạn rủi ro danh mục, định giá quyền chọn và các quyết định phòng hộ. Khác
+với giả định phương sai không đổi của hồi quy tuyến tính cổ điển, chuỗi lợi suất tài chính
+biểu hiện ba đặc điểm ổn định qua nhiều thị trường và nhiều giai đoạn: phương sai thay
+đổi theo thời gian và tập trung theo cụm, phân phối có đuôi dày hơn phân phối chuẩn, và
+mức độ phản ứng với thông tin mới thay đổi giữa giai đoạn bình thường và giai đoạn căng
+thẳng. Ba đặc điểm này định hình toàn bộ hướng phát triển của họ mô hình GARCH và cũng là
+điểm xuất phát của nghiên cứu.
 
+Thị trường phái sinh Việt Nam đặt bài toán này trong một bối cảnh riêng. Hợp đồng tương
+lai chỉ số VN30 (VN30F1M) bắt đầu giao dịch từ tháng $8$ năm $2017$ và nhanh chóng trở
+thành công cụ phòng hộ và đầu cơ chủ yếu trên thị trường chứng khoán phái sinh trong
+nước. Đặc điểm vi cấu trúc của thị trường này --- tỷ trọng nhà đầu tư cá nhân cao, biên độ
+dao động giá theo quy định, và lịch sử giao dịch còn ngắn --- khiến các kết luận rút ra từ
+thị trường phát triển không đương nhiên chuyển giao được. Việc kiểm chứng lại những lựa
+chọn mô hình đã thành chuẩn mực quốc tế trên dữ liệu VN30F1M vì vậy là một câu hỏi thực
+nghiệm có giá trị độc lập.
 
-\subsubsection{Phần 1. So sánh các mô hình MS-GARCH-X Student-t với các mô hình họ GARCH bằng phương pháp MLE} 
-Cố định phương pháp ước lượng là hợp lý cực
-đại, thay đổi đặc tả mô hình theo một thứ bậc lồng nhau: từ GARCH với sai số chuẩn, thêm
-đuôi dày Student-t, thêm biến ngoại sinh, rồi thêm cơ chế chuyển trạng thái. Vì các đặc
-tả chỉ khác nhau ở một thành phần cấu trúc mỗi bước, chênh lệch kết quả giữa hai mô hình
-liền kề đo được giá trị gia tăng của riêng thành phần vừa thêm.
+\subsection{Sự phát triển của họ mô hình GARCH}\label{subsec:garch-development}
+Kể từ mô hình ARCH của Engle \cite{engle1982} và mở rộng GARCH của Bollerslev
+\cite{bollerslev1986}, họ mô hình phương sai có điều kiện đã phát triển theo bốn hướng
+tương đối tách biệt. Việc định vị nghiên cứu trong bốn hướng này giúp làm rõ phạm vi và
+đóng góp của đề tài.
 
-\subsubsection{Phần 2. Cùng một mô hình MS-GARCH-X Student-t, so sánh các phương pháp suy diễn khác nhau} 
-Cố định đặc tả là mô hình chính
+\textbf{Hướng thứ nhất: phân phối sai số.} Giả định sai số chuẩn nhanh chóng bị bác bỏ
+trên dữ liệu thực. Bollerslev \cite{bollerslev1987} thay bằng phân phối Student-t chuẩn
+hóa, cho phép tham số bậc tự do điều chỉnh trực tiếp độ dày của đuôi. Các mở rộng sau đó
+bổ sung tính bất đối xứng của phân phối sai số. Hướng này giải quyết vấn đề \emph{hình
+dạng} phân phối có điều kiện.
+
+\textbf{Hướng thứ hai: dạng hàm của phương trình phương sai.} Nelson \cite{nelson1991} đề
+xuất EGARCH mô hình hóa logarit phương sai, vừa loại bỏ ràng buộc dấu vừa cho phép phản
+ứng bất đối xứng với cú sốc âm và dương. Glosten, Jagannathan và Runkle
+\cite{glosten1993} đạt mục tiêu tương tự bằng một số hạng ngưỡng. Ding, Granger và Engle
+\cite{ding1993} tổng quát hóa thành APARCH với số mũ tự do. Hướng này giải quyết vấn đề
+\emph{hiệu ứng đòn bẩy}.
+
+\textbf{Hướng thứ ba: cấu trúc bộ nhớ.} Baillie, Bollerslev và Mikkelsen
+\cite{baillie1996} đưa ra FIGARCH với bậc tích phân phân số để mô tả bộ nhớ dài. Engle và
+Lee \cite{engle1999} tách phương sai thành thành phần dài hạn và thành phần ngắn hạn.
+Engle, Ghysels và Sohn \cite{engle2013} phát triển GARCH-MIDAS, trong đó thành phần dài
+hạn được điều khiển trực tiếp bởi biến kinh tế vĩ mô ở tần suất thấp. Hướng này giải
+quyết vấn đề \emph{độ bền} của biến động.
+
+\textbf{Hướng thứ tư: thay đổi chế độ.} Hamilton \cite{hamilton1989} đưa xích Markov ẩn
+vào kinh tế lượng chuỗi thời gian; Hamilton và Susmel \cite{hamilton1994} kết hợp với
+ARCH. Việc ghép xích Markov với GARCH gặp trở ngại kỹ thuật nghiêm trọng là phụ thuộc
+đường đi, khiến hàm likelihood chính xác không tính được trong thời gian đa thức. Gray
+\cite{gray1996} giải quyết bằng cơ chế thu gọn moment; Klaassen \cite{klaassen2002} cải
+tiến bằng cách dùng tập thông tin rộng hơn; Haas, Mittnik và Paolella \cite{haas2004} đề
+xuất một cấu trúc thay thế trong đó mỗi chế độ giữ phương sai riêng, nhờ đó thu được điều
+kiện dừng dạng đóng. Bauwens, Preminger và Rombouts \cite{bauwens2010} khảo sát lý thuyết
+và suy diễn cho lớp mô hình này. Hướng này giải quyết vấn đề \emph{tính không thuần nhất
+theo thời gian} của tham số.
+
+Song song với bốn hướng trên, phương pháp suy diễn cũng phát triển. Ước lượng hợp lý cực
+đại vẫn là chuẩn mực nhờ tính chất tiệm cận đã biết, nhưng bộc lộ hạn chế khi hàm
+likelihood đa cực trị hoặc nghiệm nằm sát biên không gian tham số --- hai tình huống đều
+xuất hiện trong mô hình chuyển trạng thái. Khung Bayes khắc phục được bằng cách mô tả
+toàn bộ phân phối hậu nghiệm thay vì một điểm, song chi phí tính toán của phương pháp lấy
+mẫu là rào cản đáng kể. Suy diễn biến phân \cite{blei2017} thay bài toán lấy mẫu bằng bài
+toán tối ưu, với hai bước tiến quan trọng là gradient tái tham số hóa
+\cite{kingma2014} và các thuật toán biến phân tự động \cite{kucukelbir2017}, giúp phương
+pháp này áp dụng được cho những mô hình có hàm likelihood phức tạp như MS-GARCH.
+
+\subsection{Khoảng trống nghiên cứu và mục tiêu}\label{subsec:objectives}
+Từ bức tranh trên, đề tài xác định hai khoảng trống.
+
+\emph{Thứ nhất}, trên dữ liệu VN30F1M, chưa rõ thành phần cấu trúc nào thực sự mang lại
+cải thiện. Các mô hình phức tạp hơn luôn cho log-likelihood cao hơn theo định nghĩa, nhưng
+điều đó không đồng nghĩa với dự báo tốt hơn ngoài mẫu. Câu hỏi cần trả lời là: giữa đuôi
+dày, biến ngoại sinh và cơ chế chuyển trạng thái, thành phần nào đáng chi phí tham số của
+nó?
+
+\emph{Thứ hai}, phần lớn nghiên cứu thực nghiệm về MS-GARCH sử dụng một phương pháp suy
+diễn duy nhất và mặc nhiên coi kết quả là đặc trưng của mô hình. Nếu các phương pháp suy
+diễn khác nhau cho kết luận khác nhau trên cùng một mô hình và cùng một bộ dữ liệu, thì
+bản thân sự khác biệt đó là thông tin quan trọng về mức độ tin cậy của kết luận --- nhưng
+nó chỉ lộ ra khi ta cố tình so sánh.
+
+Mục tiêu của nghiên cứu vì vậy được tách thành hai phần độc lập, mỗi phần cố định một
+chiều so sánh và thay đổi chiều còn lại, nhằm bảo đảm mỗi kết luận quy được về đúng một
+nguyên nhân.
+
+\textbf{Phần thứ nhất --- so sánh mô hình.} Cố định phương pháp ước lượng là hợp lý cực
+đại, thay đổi đặc tả theo một thứ bậc lồng nhau: từ GARCH với sai số chuẩn, thêm đuôi dày
+Student-t, thêm biến ngoại sinh, rồi thêm cơ chế chuyển trạng thái. Vì hai đặc tả liền kề
+chỉ khác nhau ở một thành phần, chênh lệch kết quả giữa chúng đo được giá trị gia tăng
+của riêng thành phần vừa thêm.
+
+\textbf{Phần thứ hai --- so sánh phương pháp suy diễn.} Cố định đặc tả là mô hình chính
 MS-GARCH-X Student-t, thay đổi phương pháp suy diễn: hợp lý cực đại, biến phân mean-field
-và biến phân full-rank. Vì cả ba làm việc trên cùng một hàm hợp lý và cùng một cơ chế thu
-gọn moment, chênh lệch kết quả phản ánh khác biệt của bản thân phương pháp suy diễn.
+và biến phân full-rank. Vì cả ba làm việc trên cùng một hàm likelihood và cùng một cơ chế
+thu gọn moment, chênh lệch kết quả phản ánh khác biệt của bản thân phương pháp suy diễn.
+
+\subsection{Phạm vi và cấu trúc tài liệu}\label{subsec:scope}
+Tài liệu đặc tả cơ sở toán học: bộ dữ liệu, cấu trúc mô hình, hàm likelihood, khung suy
+diễn và tiêu chí đánh giá. Tài liệu không trình bày chi tiết cài đặt tính toán --- lựa
+chọn thuật toán tối ưu, siêu tham số điều khiển, cấu trúc chương trình --- vì những nội
+dung đó thuộc phần thực nghiệm và không ảnh hưởng đến định nghĩa của các đại lượng được
+ước lượng. Khi một lựa chọn tính toán \emph{có} hệ quả đối với cách diễn giải kết quả, hệ
+quả đó được nêu thành nhận xét riêng.
+
+Phần còn lại được tổ chức như sau. \Cref{sec:data} mô tả dữ liệu và các đặc điểm thực
+nghiệm dẫn tới lựa chọn mô hình. \Cref{sec:models} đặc tả năm mô hình.
+\Cref{sec:mle} trình bày ước lượng hợp lý cực đại, phục vụ Phần thứ nhất.
+\Cref{sec:vb} xây dựng khung Bayes biến phân, phục vụ Phần thứ hai.
+\Cref{sec:oos} thiết lập khung đánh giá ngoài mẫu dùng chung.
+\Cref{sec:design-summary} tổng hợp thiết kế thực nghiệm.
 
 % ==============================================================================
 \section{Dữ liệu}\label{sec:data}
@@ -247,9 +343,9 @@ huấn luyện}; dùng thống kê toàn mẫu sẽ đưa thông tin của giai 
 đoạn huấn luyện và làm mọi kết quả ngoài mẫu mất hiệu lực.
 
 \subsection{Phân chia mẫu}\label{subsec:split}
-Mẫu được chia theo thời gian: $1735$ quan sát đầu (đến $16/10/2024$) dùng
-để ước lượng, $435$ quan sát cuối dùng để đánh giá ngoài mẫu. Không tham số nào được ước
-lượng lại bằng dữ liệu kiểm định.
+Mẫu được chia theo thời gian: $1735$ quan sát đầu (đến $16/10/2024$) dùng để ước lượng,
+$435$ quan sát cuối dùng để đánh giá ngoài mẫu. Không tham số nào được ước lượng lại bằng
+dữ liệu kiểm định.
 
 \subsection{Thống kê mô tả}\label{subsec:descriptive}
 
@@ -260,7 +356,7 @@ lượng lại bằng dữ liệu kiểm định.
 \label{tab:descriptive}
 \begin{tabularx}{\textwidth}{l C C C C C C C}
 \toprule
-\textbf{Chuỗi} & \textbf{Số quan sát} & \textbf{Trung bình} & \textbf{Độ lệch chuẩn} & \textbf{Bias} & \textbf{Độ nhọn} & \textbf{Nhỏ nhất} & \textbf{Lớn nhất} \\
+\textbf{Chuỗi} & \textbf{Số quan sát} & \textbf{Trung bình} & \textbf{Độ lệch chuẩn} & \textbf{Hệ số bất đối xứng} & \textbf{Độ nhọn} & \textbf{Nhỏ nhất} & \textbf{Lớn nhất} \\
 \midrule
 $r_t$ (toàn mẫu) & 2170 & 0{,}0381 & 1{,}5070 & $-0{,}829$ & 9{,}026 & $-11{,}6612$ & 6{,}7631 \\
 $r_t$ (huấn luyện) & 1735 & 0{,}0272 & 1{,}5402 & $-0{,}821$ & 8{,}744 & $-11{,}6612$ & 6{,}7631 \\
@@ -273,35 +369,34 @@ $X_2$: $RV$ trễ & 2170 & $-0{,}0170$ & 0{,}9666 & 0{,}484 & 3{,}180 & $-2{,}94
 \bottomrule
 \end{tabularx}
 \medskip\raggedright\footnotesize
-\textit{Ghi chú:} Lợi suất tính theo phần trăm. Độ lệch chuẩn dùng ước lượng mẫu với bậc tự do $n-1$; độ lệch và độ nhọn chuẩn hóa theo cùng độ lệch chuẩn đó. Hai biến ngoại sinh đã chuẩn hóa z-score theo thống kê tập huấn luyện, nên trung bình của chúng trên toàn mẫu không bằng đúng không.
+\textit{Ghi chú:} Lợi suất tính theo phần trăm. Độ lệch chuẩn dùng ước lượng mẫu với bậc
+tự do $n-1$; hệ số bất đối xứng và độ nhọn chuẩn hóa theo cùng độ lệch chuẩn đó. Hai biến
+ngoại sinh đã chuẩn hóa z-score theo thống kê tập huấn luyện, nên trung bình của chúng
+trên toàn mẫu không bằng đúng không.
 \end{table}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{hinh_ly_thuyet/fig_gia_loi_suat.pdf}
-\caption{Diễn biến giá và lợi suất VN30F1M trên toàn bộ giai đoạn nghiên cứu 2017--2026.}
+\caption{Giá và lợi suất VN30F1M, 2017--2026. Đường đứt nét: ranh giới huấn luyện và kiểm
+định.}
 \label{fig:gia-loi-suat}
 \end{figure}
-
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{hinh_ly_thuyet/fig_phan_phoi.pdf}
-\caption{Phân phối lợi suất chuẩn hóa và đồ thị
-Q-Q so với Student-t chuẩn hóa.}
+\caption{Phân phối lợi suất chuẩn hóa (thang logarit) và đồ thị Q--Q so với Student-t
+chuẩn hóa.}
 \label{fig:phan-phoi}
 \end{figure}
-
-\subsection{Cấu trúc tự tương quan}\label{subsec:acf}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=\textwidth]{hinh_ly_thuyet/fig_acf.pdf}
-\caption{Tự tương quan mẫu của lợi suất và của bình phương lợi suất.}
+\caption{Tự tương quan mẫu của $r_t$ và $r_t^{2}$, kèm khoảng tin cậy $95\%$.}
 \label{fig:acf}
 \end{figure}
-
-\subsection{Biến động thực tế và biến ngoại sinh}\label{subsec:exog-data}
 
 \begin{figure}[H]
 \centering
@@ -310,17 +405,107 @@ Q-Q so với Student-t chuẩn hóa.}
 \label{fig:rv-exog}
 \end{figure}
 
-Hai biến ngoại sinh được chọn theo tiêu chí khả dụng và có cơ sở kinh tế. Khối lượng giao
-dịch phản ánh cường độ hoạt động của thị trường và mức độ bất đồng giữa các bên tham gia.
-Biến động thực tế trễ mang thông tin về mức biến động vừa xảy ra, đo trực tiếp từ dữ liệu
-trong ngày nên chi tiết hơn thông tin chứa trong một quan sát lợi suất ngày duy nhất.
-Việc đưa hai đại lượng này vào phương trình phương sai tạo thành cấu trúc GARCH-X, trong
-đó phương sai có điều kiện phụ thuộc không chỉ vào quá khứ của chính nó mà còn vào một
-tập thông tin bên ngoài đã biết trước thời điểm dự báo.
+\subsection{Đặc điểm thực nghiệm và hàm ý mô hình hóa}\label{subsec:stylized-facts}
+Bốn đặc điểm dưới đây, đọc từ \cref{tab:descriptive} và các hình trên, dẫn trực tiếp tới
+những lựa chọn đặc tả ở \cref{sec:models}.
+
+\textbf{Phương sai thay đổi theo thời gian và tập trung theo cụm.} Khung dưới của
+\cref{fig:gia-loi-suat} cho thấy các phiên biến động mạnh xuất hiện thành từng đợt, tập
+trung vào 2018, 2020--2021 và 2025--2026. Đây là căn cứ để dùng mô hình phương sai có
+điều kiện thay vì giả định phương sai không đổi.
+
+\textbf{Đuôi phân phối dày hơn phân phối chuẩn.} Độ nhọn của lợi suất là $9{,}026$, vượt
+xa giá trị $3$ của phân phối chuẩn. Số phiên có lợi suất chuẩn hóa vượt ba độ lệch chuẩn
+là $40$, chiếm $1{,}84\%$ tổng số quan sát, trong khi phân phối chuẩn chỉ dự đoán
+$0{,}27\%$ --- nhiều hơn gần bảy lần. Khớp trực tiếp một phân phối Student-t chuẩn hóa
+với chuỗi lợi suất chuẩn hóa cho $\hat\nu=3{,}04$, rất gần ngưỡng $\nu>2$ cần cho sự tồn
+tại của phương sai. \Cref{fig:phan-phoi} thể hiện trực quan khoảng cách này. Hệ quả không
+chỉ là mô tả kém chính xác: giả định sai số chuẩn làm xác suất của các khoản lỗ lớn bị
+đánh giá thấp một cách hệ thống, và đây là căn cứ chọn phân phối Student-t chuẩn hóa.
+
+\textbf{Dấu và độ lớn của lợi suất có tính chất khác nhau.} Tự tương quan bậc một của
+$r_t$ là $-0{,}060$, nhỏ và gần ngưỡng ý nghĩa, trong khi của $r_t^{2}$ là $0{,}243$ và
+duy trì trên khoảng tin cậy qua nhiều độ trễ (\cref{fig:acf}). Nói cách khác, hướng biến
+động gần như không dự báo được từ quá khứ còn độ lớn thì có. Đây chính là cấu trúc mà họ
+GARCH được thiết kế để nắm bắt: giữ phương trình trung bình đơn giản, đưa toàn bộ động
+học vào phương trình phương sai.
+
+\textbf{Thông tin ngoại sinh đồng biến với biến động.} \Cref{fig:rv-exog} cho thấy $RV_t$
+và hai biến ngoại sinh cùng biến động mạnh trong các giai đoạn thị trường căng thẳng.
+Khối lượng giao dịch phản ánh cường độ hoạt động và mức độ bất đồng giữa các bên tham
+gia; biến động thực tế trễ đo trực tiếp từ dữ liệu trong ngày nên chi tiết hơn thông tin
+chứa trong một quan sát lợi suất ngày duy nhất. Việc đưa hai đại lượng này vào phương
+trình phương sai tạo thành cấu trúc GARCH-X.
 
 % ==============================================================================
 \section{Đặc tả mô hình}\label{sec:models}
 % ==============================================================================
+
+\subsection{Phân phối sai số}\label{subsec:errors}
+Mọi mô hình viết dưới dạng $r_t=\mu_{(\cdot)}+\varepsilon_t$ với
+$\varepsilon_t=\sqrt{h_{t,(\cdot)}}\,z_t$ và $z_t$ độc lập cùng phân phối, chuẩn hóa sao
+cho $\E[z_t]=0$, $\Var(z_t)=1$. Hai lựa chọn:
+\begin{align}
+  f_{\mathcal{N}}(z) &= \frac{1}{\sqrt{2\pi}}\exp\!\left(-\tfrac{1}{2}z^{2}\right),
+  \label{eq:normal-density}\\[0.2em]
+  f_{t^{*}}(z;\nu) &= \frac{\Gamma\!\left(\frac{\nu+1}{2}\right)}
+  {\sqrt{\pi(\nu-2)}\,\Gamma\!\left(\frac{\nu}{2}\right)}
+  \left(1+\frac{z^{2}}{\nu-2}\right)^{-\frac{\nu+1}{2}},\qquad \nu>2.
+  \label{eq:std-t-density}
+\end{align}
+Mật độ \eqref{eq:std-t-density} là phân phối Student-t đã chuẩn hóa về phương sai đơn vị,
+ký hiệu $t^{*}_{\nu}$. Thừa số $\nu-2$ thay cho $\nu$ dưới dấu căn chính là phép co giãn
+bảo đảm $\Var(z_t)=1$; nhờ đó $h_{t,s}$ giữ đúng ý nghĩa phương sai có điều kiện và so
+sánh trực tiếp được với trường hợp sai số chuẩn. Ràng buộc $\nu>2$ vì vậy không phải quy
+ước kỹ thuật mà là điều kiện tồn tại của chính phép chuẩn hóa.
+
+\subsection{Họ mô hình một trạng thái}\label{subsec:single-regime}
+Ba mô hình đối chứng là các trường hợp riêng của một đặc tả chung:
+\begin{equation}
+  r_t=\mu+\varepsilon_t,\qquad
+  h_t=\omega+\alpha\varepsilon_{t-1}^{2}+\beta h_{t-1}+\bmgamma^{\top}\Xvec_{t-1}.
+  \label{eq:garchx}
+\end{equation}
+Trong \eqref{eq:garchx}, $\omega$ là mức phương sai nền, $\alpha$ đo phản ứng của phương
+sai với cú sốc mới, $\beta$ đo mức độ dai dẳng của biến động, và $\bmgamma$ đo ảnh hưởng
+của thông tin ngoại sinh.
+
+\begin{table}[H]
+\centering\footnotesize
+\setlength{\tabcolsep}{5pt}
+\caption{Ba mô hình một trạng thái như trường hợp riêng của \eqref{eq:garchx}}
+\label{tab:single-models}
+\begin{tabularx}{\textwidth}{l c c c Y}
+\toprule
+\textbf{Mô hình} & \textbf{Phân phối $z_t$} & \textbf{$\bmgamma$} & \textbf{Số tham số} & \textbf{Thành phần cấu trúc được thêm} \\
+\midrule
+GARCH chuẩn & $\mathcal{N}(0,1)$ & $\equiv\symbf 0$ & $4$ & Mốc so sánh \\
+GARCH Student-t & $t^{*}_{\nu}$ & $\equiv\symbf 0$ & $5$ & Đuôi dày \\
+GARCH-X Student-t & $t^{*}_{\nu}$ & tự do & $5+k$ & Đuôi dày và biến ngoại sinh \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{assumption}[Điều kiện chính quy của mô hình một trạng thái]\label{as:single}
+$\omega>0$, $\alpha\ge 0$, $\beta\ge 0$. Dừng hiệp phương sai yếu khi $\alpha+\beta<1$,
+khi đó phương sai vô điều kiện là
+\begin{equation}
+  \bar h=\frac{\omega}{1-\alpha-\beta}.
+  \label{eq:garch-unconditional-var}
+\end{equation}
+Với sai số $t^{*}_{\nu}$, moment bậc bốn tồn tại khi $\nu>4$ và
+$3\alpha^{2}\frac{\nu-2}{\nu-4}+2\alpha\beta+\beta^{2}<1$.
+\end{assumption}
+
+\begin{remark}[Tính dương của phương sai khi có biến ngoại sinh]\label{rem:positivity}
+Trong \eqref{eq:garchx}, tổ hợp $\bmgamma^{\top}\Xvec_{t-1}$ có thể nhận giá trị âm, nên
+ràng buộc dấu của $(\omega,\alpha,\beta)$ \emph{không còn đủ} để bảo đảm $h_t>0$. Đây là
+khác biệt bản chất giữa GARCH-X và GARCH cổ điển. Tính dương phải được xử lý bằng một cơ
+chế tường minh, hoặc bằng ràng buộc miền giá trị, hoặc bằng hàm liên kết bảo toàn dấu.
+Trong nghiên cứu này, tính dương được kiểm tra hậu nghiệm: tại nghiệm ước lượng của mọi
+mô hình, vế phải của \eqref{eq:garchx} dương tại mọi thời điểm trong mẫu, nên đặc tả cộng
+tính giữ nguyên hiệu lực.
+\end{remark}
 
 \subsection{Trạng thái ẩn và xích Markov}\label{subsec:markov}
 Chế độ thị trường là biến ẩn $S_t\in\{1,2\}$ tuân theo xích Markov thuần nhất bậc một:
@@ -345,72 +530,6 @@ công $1-p_{ss}$, nên thời gian tồn tại kỳ vọng là
 Đại lượng \eqref{eq:expected-duration} là cầu nối giữa tham số thống kê $p_{ss}$ và một
 phát biểu kinh tế kiểm chứng được về độ bền của chế độ biến động.
 
-\subsection{Phân phối sai số Student-t}\label{subsec:errors}
-Mọi mô hình viết dưới dạng $r_t=\mu_{(\cdot)}+\varepsilon_t$ với
-$\varepsilon_t=\sqrt{h_{t,(\cdot)}}\,z_t$ và $z_t$ độc lập cùng phân phối, chuẩn hóa sao
-cho $\E[z_t]=0$, $\Var(z_t)=1$. Hai lựa chọn:
-\begin{align}
-  f_{\mathcal{N}}(z) &= \frac{1}{\sqrt{2\pi}}\exp\!\left(-\tfrac{1}{2}z^{2}\right),
-  \label{eq:normal-density}\\[0.2em]
-  f_{t^{*}}(z;\nu) &= \frac{\Gamma\!\left(\frac{\nu+1}{2}\right)}
-  {\sqrt{\pi(\nu-2)}\,\Gamma\!\left(\frac{\nu}{2}\right)}
-  \left(1+\frac{z^{2}}{\nu-2}\right)^{-\frac{\nu+1}{2}},\qquad \nu>2.
-  \label{eq:std-t-density}
-\end{align}
-Mật độ \eqref{eq:std-t-density} là phân phối Student-t đã chuẩn hóa về phương sai đơn vị,
-ký hiệu $t^{*}_{\nu}$. Thừa số $\nu-2$ thay cho $\nu$ dưới dấu căn chính là phép co giãn
-bảo đảm $\Var(z_t)=1$; nhờ đó $h_{t,s}$ giữ đúng ý nghĩa phương sai có điều kiện và so
-sánh trực tiếp được với trường hợp sai số chuẩn. Ràng buộc $\nu>2$ vì vậy không phải quy
-ước kỹ thuật mà là điều kiện tồn tại của chính phép chuẩn hóa.
-
-\subsection{Họ mô hình GARCH một trạng thái}\label{subsec:single-regime}
-Ba mô hình đối chứng là các trường hợp riêng của một đặc tả chung:
-\begin{equation}
-  r_t=\mu+\varepsilon_t,\qquad
-  h_t=\omega+\alpha\varepsilon_{t-1}^{2}+\beta h_{t-1}+\bmgamma^{\top}\Xvec_{t-1}.
-  \label{eq:garchx}
-\end{equation}
-Trong \eqref{eq:garchx}, $\omega$ là mức phương sai nền, $\alpha$ đo phản ứng của phương
-sai với cú sốc mới, $\beta$ đo mức độ dai dẳng của biến động, và $\bmgamma$ đo ảnh hưởng
-của thông tin ngoại sinh.
-
-\begin{table}[H]
-\centering\footnotesize
-\setlength{\tabcolsep}{5pt}
-\caption{Ba mô hình một trạng thái như trường hợp riêng của \eqref{eq:garchx}}
-\label{tab:single-models}
-\begin{tabularx}{\textwidth}{l c c c Y}
-\toprule
-\textbf{Mô hình} & \textbf{Phân phối $z_t$} & \textbf{$\bmgamma$} & \textbf{Số tham số} & \textbf{Thành phần cấu trúc được thêm} \\
-\midrule
-GARCH chuẩn & $\mathcal{N}(0,1)$ & $0$ & $4$ & Mốc so sánh \\
-GARCH Student-t & $t^{*}_{\nu}$ & $0$ & $5$ & Đuôi dày \\
-GARCH-X Student-t & $t^{*}_{\nu}$ & Tự do & $5+k$ & Đuôi dày và biến ngoại sinh \\
-\bottomrule
-\end{tabularx}
-\end{table}
-
-\begin{assumption}[Điều kiện chính quy của mô hình một trạng thái]\label{as:single}
-$\omega>0$, $\alpha\ge 0$, $\beta\ge 0$. Dừng hiệp phương sai yếu khi $\alpha+\beta<1$,
-khi đó phương sai vô điều kiện là
-\begin{equation}
-  \bar h=\frac{\omega}{1-\alpha-\beta}.
-  \label{eq:garch-unconditional-var}
-\end{equation}
-Với sai số $t^{*}_{\nu}$, moment bậc bốn tồn tại khi $\nu>4$ và
-$3\alpha^{2}\frac{\nu-2}{\nu-4}+2\alpha\beta+\beta^{2}<1$.
-\end{assumption}
-
-\begin{remark}[Tính dương của phương sai khi có biến ngoại sinh]\label{rem:positivity}
-Trong \eqref{eq:garchx}, tổ hợp $\bmgamma^{\top}\Xvec_{t-1}$ có thể nhận giá trị âm, nên
-ràng buộc dấu của $(\omega,\alpha,\beta)$ \emph{không còn đủ} để bảo đảm $h_t>0$. Đây là
-khác biệt bản chất giữa GARCH-X và GARCH cổ điển. Tính dương phải được xử lý bằng một cơ
-chế tường minh, hoặc bằng ràng buộc miền giá trị, hoặc bằng một hàm liên kết bảo toàn
-dấu. Trong nghiên cứu này, tính dương được kiểm tra hậu nghiệm: tại nghiệm ước lượng của
-mọi mô hình, vế phải của \eqref{eq:garchx} dương tại mọi thời điểm trong mẫu, nên đặc tả
-cộng tính giữ nguyên hiệu lực.
-\end{remark}
-
 \subsection{Phụ thuộc đường đi và thu gọn moment}\label{subsec:collapsing}
 Khi thêm trạng thái ẩn, phương sai trở thành hàm của toàn bộ đường đi
 $\symbf S_t=(S_1,\dots,S_t)$:
@@ -419,9 +538,9 @@ $\symbf S_t=(S_1,\dots,S_t)$:
   +\beta_{S_t}h_{t-1}(\symbf S_{t-1}).
   \label{eq:path-dependent-msgarch}
 \end{equation}
-Số nhánh tăng theo $2^{t}$, nên hàm hợp lý chính xác không tính được trong thời gian đa
-thức. Gray \cite{gray1996} thay hai đại lượng trễ bằng moment hỗn hợp theo xác suất lọc
-$\xi_{t-1\mid t-1}(i)$:
+Số nhánh tăng theo $2^{t}$, nên hàm likelihood chính xác không tính được trong thời gian
+đa thức. Gray \cite{gray1996} thay hai đại lượng trễ bằng moment hỗn hợp theo xác suất
+lọc $\xi_{t-1\mid t-1}(i)$:
 \begin{align}
   \bar\mu_{t-1} &= \sum_{i=1}^{2}\xi_{t-1\mid t-1}(i)\,\mu_i,
   \label{eq:collapsed-mean}\\
@@ -456,14 +575,14 @@ bình quanh trung bình hỗn hợp.
 \begin{remark}[Vị trí của phép xấp xỉ]\label{rem:approx-location}
 Sau khi thay $\bar\mu_{t-1}$ và $\bar h_{t-1}$ vào phương trình phương sai, quá trình trở
 thành Markov và bộ lọc tiến ở \cref{subsec:filter} là \emph{chính xác} đối với mô hình đã
-thu gọn: \eqref{eq:loglikelihood} là hàm hợp lý đúng của mô hình đó, không phải một xấp
-xỉ của nó. Toàn bộ phép xấp xỉ nằm ở bước thu gọn
+thu gọn: \eqref{eq:loglikelihood} là hàm log-likelihood đúng của mô hình đó, không phải
+một xấp xỉ của nó. Toàn bộ phép xấp xỉ nằm ở bước thu gọn
 \eqref{eq:collapsed-mean}--\eqref{eq:collapsed-variance}. Hệ quả có tính phương pháp luận
-và là điều kiện nền của Phần thứ hai: vì ba phương pháp suy diễn dùng chung một hàm hợp
-lý, chênh lệch kết quả giữa chúng không quy cho khác biệt về cơ chế thu gọn được.
+và là điều kiện nền của Phần thứ hai: vì ba phương pháp suy diễn dùng chung một hàm
+likelihood, chênh lệch kết quả giữa chúng không quy cho khác biệt về cơ chế thu gọn được.
 \end{remark}
 
-\subsection{Họ mô hình GARCH chuyển trạng thái và mô hình chính}\label{subsec:main-model}
+\subsection{Mô hình chuyển trạng thái và mô hình chính}\label{subsec:main-model}
 Mô hình chính của nghiên cứu, MS-GARCH-X Student-t, được xác định bởi hệ
 \begin{align}
   r_t &= \mu_{S_t}+\varepsilon_t,
@@ -512,11 +631,11 @@ trạng thái có thể bùng nổ cục bộ mà hệ thống vẫn dừng, mi�
 \end{remark}
 
 \subsection{Nhận dạng nhãn trạng thái}\label{subsec:label}
-Hàm hợp lý bất biến dưới phép hoán vị nhãn: đổi đồng thời
+Hàm likelihood bất biến dưới phép hoán vị nhãn: đổi đồng thời
 $(\mu_1,\omega_1,\alpha_1,\beta_1,\bmgamma_1,p_{11})\leftrightarrow
-(\mu_2,\omega_2,\alpha_2,\beta_2,\bmgamma_2,p_{22})$ cho giá trị hợp lý y hệt. Không gian
-tham số vì thế chứa ít nhất hai điểm cực đại đối xứng, và mọi phát biểu về ``trạng thái
-1'' chỉ có nghĩa sau khi cố định một quy ước.
+(\mu_2,\omega_2,\alpha_2,\beta_2,\bmgamma_2,p_{22})$ cho giá trị y hệt. Không gian tham
+số vì thế chứa ít nhất hai điểm cực đại đối xứng, và mọi phát biểu về ``trạng thái 1''
+chỉ có nghĩa sau khi cố định một quy ước.
 
 \begin{definition}[Quy ước nhận dạng]\label{def:label}
 Trạng thái được đánh số sao cho
@@ -541,13 +660,16 @@ mọi đại lượng theo trạng thái mất ý nghĩa, kể cả khi các ch�
 \end{remark}
 
 % ==============================================================================
-\section{Phần thứ nhất: So sánh mô hình bằng hợp lý cực đại}\label{sec:mle}
+\section{Ước lượng hợp lý cực đại}\label{sec:mle}
 % ==============================================================================
 
+Mục này trình bày phương pháp ước lượng dùng cho Phần thứ nhất, đồng thời là một trong ba
+phương pháp được so sánh ở Phần thứ hai.
+
 \subsection{Bộ lọc tiến Hamilton}\label{subsec:filter}
-Với mô hình một trạng thái, log-hợp-lý tính trực tiếp từ mật độ có điều kiện. Với mô hình
-chuyển trạng thái, biến ẩn $S_t$ phải được biên hóa. Bộ lọc tiến \cite{hamilton1989} thực
-hiện việc này bằng bốn bước lặp, khởi tạo $\xi_{1\mid 0}(s)=\pi_s$ theo
+Với mô hình một trạng thái, log-likelihood tính trực tiếp từ mật độ có điều kiện. Với mô
+hình chuyển trạng thái, biến ẩn $S_t$ phải được biên hóa. Bộ lọc tiến \cite{hamilton1989}
+thực hiện việc này bằng bốn bước lặp, khởi tạo $\xi_{1\mid 0}(s)=\pi_s$ theo
 \eqref{eq:stationary-markov}.
 
 \emph{Bước 1 --- dự báo trạng thái.} Từ xác suất lọc của phiên trước, xác suất trạng thái
@@ -585,9 +707,9 @@ cho
   \label{eq:filtered-state-prob}
 \end{equation}
 
-\subsection{Hàm hợp lý}\label{subsec:likelihood}
+\subsection{Hàm likelihood}\label{subsec:likelihood}
 Nhân các mật độ biên \eqref{eq:mixture-density} qua toàn bộ mẫu huấn luyện thu được hàm
-hợp lý:
+likelihood:
 \begin{equation}
   \mathcal{L}(\Param;\Data_T)
   =\prod_{t=1}^{T}
@@ -599,7 +721,7 @@ hợp lý:
   \Bigg].
   \label{eq:likelihood}
 \end{equation}
-Lấy logarit để chuyển tích thành tổng, thu được Log-Likelihood quan sát --- hàm mục tiêu của
+Lấy logarit để chuyển tích thành tổng, thu được hàm log-likelihood --- hàm mục tiêu của
 Phần thứ nhất:
 \begin{equation}
   \ell_T(\Param)=\ln\mathcal{L}(\Param;\Data_T)
@@ -608,11 +730,11 @@ Phần thứ nhất:
 \end{equation}
 Ba điểm cần lưu ý về \eqref{eq:likelihood}. Thứ nhất, mọi tham số đều tham gia: $\Pmat$
 qua trọng số, các hệ số phương sai qua $h_{t,j}$, và $\nu$ qua dạng của $f$. Thứ hai, hàm
-hợp lý \emph{không} tách được thành tích các thừa số độc lập theo tham số, vì $h_{t,j}$
-phụ thuộc đệ quy vào toàn bộ quá khứ qua \eqref{eq:collapsed-variance}. Thứ ba, với mô
-hình một trạng thái, tổng bên trong chỉ còn một số hạng và \eqref{eq:likelihood} rút gọn
-về hàm hợp lý GARCH thông thường --- đây là lý do năm mô hình so sánh được với nhau trên
-cùng một thang đo.
+likelihood \emph{không} tách được thành tích các thừa số độc lập theo tham số, vì
+$h_{t,j}$ phụ thuộc đệ quy vào toàn bộ quá khứ qua \eqref{eq:collapsed-variance}. Thứ ba,
+với mô hình một trạng thái, tổng bên trong chỉ còn một số hạng và \eqref{eq:likelihood}
+rút gọn về hàm likelihood GARCH thông thường --- đây là lý do năm mô hình so sánh được
+với nhau trên cùng một thang đo.
 
 Khi cần mô tả lịch sử trạng thái, xác suất làm trơn tính bằng đệ quy lùi Kim
 \cite{kim1994}:
@@ -644,24 +766,22 @@ tọa độ:
 với $\softplus(x)=\ln(1+e^{x})$ có ảnh $(0,\infty)$ và $\sigmoid(x)=(1+e^{-x})^{-1}$ có
 ảnh $(0,1)$. Phép biến đổi này bảo đảm (C1)--(C3) \emph{theo cấu trúc} chứ không bằng
 kiểm tra hậu nghiệm: $\alpha_s,\beta_s>0$, $p_{ss}\in(0,1)$ và $\nu>2$ với mọi
-$\vecphi\in\R^{d}$. 
-
-Lựa chọn $\omega_s=e^{\phi}$ tương thích với tiên nghiệm log-chuẩn ở
+$\vecphi\in\R^{d}$. Lựa chọn $\omega_s=e^{\phi}$ tương thích với tiên nghiệm log-chuẩn ở
 \cref{subsec:priors}, bảo đảm hai khung suy diễn của Phần thứ hai làm việc trên cùng một
 tham số hóa.
 
 \subsection{Tính đa cực trị và nguyên tắc chọn nghiệm}\label{subsec:multimodality}
-Hàm hợp lý của mô hình chuyển trạng thái đa cực trị. Đây không phải khiếm khuyết của
+Hàm likelihood của mô hình chuyển trạng thái đa cực trị. Đây không phải khiếm khuyết của
 thuật toán mà là tính chất của chính hàm mục tiêu, bắt nguồn từ hai nguồn: đối xứng hoán
 vị nhãn ở \cref{subsec:label}, và sự tồn tại của các cực đại giả.
 
 \begin{remark}[Cực đại giả và điều kiện chính quy vận hành]\label{rem:spurious}
-Hàm hợp lý MS-GARCH có các cực đại với giá trị tùy ý lớn, ứng với một trạng thái tồn tại
-đúng một phiên và hấp thụ trọn một quan sát cực đoan: phương sai của trạng thái đó co về
-gần không và mật độ tại điểm quan sát phân kỳ. Những điểm này tối ưu về mặt số học nhưng
-vô nghĩa về mặt kinh tế, và một quy trình chọn nghiệm thuần túy theo giá trị hợp lý sẽ
-chọn đúng chúng. Nghiên cứu vì vậy chọn nghiệm có hợp lý cao nhất \emph{trong số các
-nghiệm thỏa điều kiện chính quy vận hành}
+Hàm likelihood MS-GARCH có các cực đại với giá trị tùy ý lớn, ứng với một trạng thái tồn
+tại đúng một phiên và hấp thụ trọn một quan sát cực đoan: phương sai của trạng thái đó co
+về gần không và mật độ tại điểm quan sát phân kỳ. Những điểm này tối ưu về mặt số học
+nhưng vô nghĩa về mặt kinh tế, và một quy trình chọn nghiệm thuần túy theo giá trị
+likelihood sẽ chọn đúng chúng. Nghiên cứu vì vậy chọn nghiệm có likelihood cao nhất
+\emph{trong số các nghiệm thỏa điều kiện chính quy vận hành}
 \begin{equation}
   d_s\ge 2\ \text{phiên}\quad\text{và}\quad p_{ss}\in[0{,}01;\ 0{,}999],
   \qquad s=1,2,
@@ -669,14 +789,15 @@ nghiệm thỏa điều kiện chính quy vận hành}
 \end{equation}
 tức loại bỏ các nghiệm mô tả một chế độ không tồn tại đủ lâu để mang ý nghĩa chế độ, hoặc
 một chế độ gần như hấp thụ. Quy tắc này phải được công bố cùng kết quả, vì nó có thể loại
-bỏ những nghiệm có log-hợp-lý cao hơn nghiệm được báo cáo.
+bỏ những nghiệm có log-likelihood cao hơn nghiệm được báo cáo.
 \end{remark}
 
-Vì hàm hợp lý đa cực trị, ước lượng được thực hiện từ nhiều điểm khởi tạo độc lập, trong
-đó một phần sinh từ nghiệm của mô hình lồng nhau đơn giản hơn theo thứ bậc GARCH chuẩn
-$\to$ MS-GARCH chuẩn và GARCH-X Student-t $\to$ MS-GARCH-X Student-t. Độ tán của giá trị
-hợp lý giữa các điểm khởi tạo là một chẩn đoán độc lập: độ tán nhỏ củng cố tin cậy vào
-nghiệm, độ tán lớn cho thấy bề mặt hợp lý nhiều đỉnh và kết luận cần thận trọng tương ứng.
+Vì hàm likelihood đa cực trị, ước lượng được thực hiện từ nhiều điểm khởi tạo độc lập,
+trong đó một phần sinh từ nghiệm của mô hình lồng nhau đơn giản hơn theo thứ bậc GARCH
+chuẩn $\to$ MS-GARCH chuẩn và GARCH-X Student-t $\to$ MS-GARCH-X Student-t. Độ tán của
+giá trị likelihood giữa các điểm khởi tạo là một chẩn đoán độc lập: độ tán nhỏ củng cố
+tin cậy vào nghiệm, độ tán lớn cho thấy bề mặt likelihood nhiều đỉnh và kết luận cần thận
+trọng tương ứng.
 
 \subsection{Sai số chuẩn và điều kiện hiệu lực}\label{subsec:se}
 Gọi $\hat{\vecphi}$ là nghiệm và
@@ -697,9 +818,9 @@ tham số gốc suy ra bằng phương pháp delta:
 Tính chuẩn tiệm cận của ước lượng hợp lý cực đại giả định nghiệm nằm \emph{bên trong}
 không gian tham số. Khi nghiệm chạm hoặc gần chạm biên --- cụ thể khi $p_{ss}$ tiến sát
 $1$, tức chế độ gần như hấp thụ --- giả định bị vi phạm và \eqref{eq:delta-method} không
-còn là sai số chuẩn hợp lệ; đại lượng thu được chỉ đo độ cong cục bộ của hàm hợp lý. Khi
-điều này xảy ra, kết quả phải được báo cáo kèm cảnh báo và các phát biểu về ý nghĩa thống
-kê của tham số tương ứng phải được rút lại.
+còn là sai số chuẩn hợp lệ; đại lượng thu được chỉ đo độ cong cục bộ của hàm likelihood.
+Khi điều này xảy ra, kết quả phải được báo cáo kèm cảnh báo và các phát biểu về ý nghĩa
+thống kê của tham số tương ứng phải được rút lại.
 \end{remark}
 
 \subsection{Tiêu chí so sánh mô hình}\label{subsec:ic}
@@ -715,29 +836,28 @@ nghiêng về mô hình tiết kiệm tham số hơn. Trong thiết kế lồng 
 chênh lệch $\AIC$ và $\BIC$ giữa hai mô hình liền kề là thước đo trực tiếp giá trị gia
 tăng của thành phần cấu trúc vừa thêm, sau khi đã trừ chi phí tham số.
 
-\begin{remark}[Vì sao không dùng kiểm định tỷ số hợp lý]\label{rem:lr-test}
+\begin{remark}[Vì sao không dùng kiểm định tỷ số likelihood]\label{rem:lr-test}
 So sánh mô hình một trạng thái với mô hình hai trạng thái không thực hiện được bằng kiểm
-định tỷ số hợp lý. Dưới giả thuyết không ``chỉ có một trạng thái'', các tham số
-$p_{11},p_{22}$ và bộ tham số của trạng thái thứ hai \emph{không được nhận dạng}: hàm hợp
-lý không phụ thuộc vào chúng. Điều kiện chính quy của định lý Wilks bị vi phạm và thống
-kê tỷ số hợp lý không có phân phối tiệm cận $\chi^{2}$ \cite{davies1987,hansen1992}. Đây
-là lý do thứ bậc mô hình được xếp bằng \eqref{eq:information-criteria} và bằng năng lực
-dự báo ngoài mẫu, chứ không bằng kiểm định giả thuyết.
+định tỷ số likelihood. Dưới giả thuyết không ``chỉ có một trạng thái'', các tham số
+$p_{11},p_{22}$ và bộ tham số của trạng thái thứ hai \emph{không được nhận dạng}: hàm
+likelihood không phụ thuộc vào chúng. Điều kiện chính quy của định lý Wilks bị vi phạm và
+thống kê tỷ số likelihood không có phân phối tiệm cận $\chi^{2}$
+\cite{davies1987,hansen1992}. Đây là lý do thứ bậc mô hình được xếp bằng
+\eqref{eq:information-criteria} và bằng năng lực dự báo ngoài mẫu, chứ không bằng kiểm
+định giả thuyết.
 \end{remark}
 
 % ==============================================================================
-\section{Phần thứ hai: So sánh phương pháp suy diễn}\label{sec:vb}
+\section{Suy diễn Bayes biến phân}\label{sec:vb}
 % ==============================================================================
 
-Phần này cố định đặc tả là mô hình chính MS-GARCH-X Student-t và so sánh ba phương pháp
-suy diễn. Hợp lý cực đại đã trình bày ở \cref{sec:mle}; mục này xây dựng khung Bayes biến
-phân trên đúng hàm hợp lý \eqref{eq:likelihood}.
+Mục này xây dựng hai phương pháp còn lại của Phần thứ hai, trên đúng hàm likelihood
+\eqref{eq:likelihood} đã dùng ở \cref{sec:mle}.
 
 \subsection{Phân phối tiên nghiệm}\label{subsec:priors}
-Giả định độc lập tiên nghiệm giữa các khối tham số:
-$$p(\Param)=p(\symbf\mu)\,p(\symbf\omega)\,p(\symbf\alpha)\,p(\symbf\beta)\,p(\bmgamma)\,p(p_{11})\,p(p_{22})\,p(\nu)$$
-
-Với dạng giải tích của từng thành phần như sau.
+Giả định độc lập tiên nghiệm giữa các khối tham số,
+$p(\Param)=p(\symbf\mu)\,p(\symbf\omega)\,p(\symbf\alpha)\,p(\symbf\beta)\,p(\bmgamma)\,p(p_{11})\,p(p_{22})\,p(\nu)$,
+với dạng giải tích của từng thành phần như sau.
 
 \emph{Trung bình.} Tiên nghiệm chuẩn, không thông tin về dấu:
 \begin{equation}
@@ -800,7 +920,7 @@ với $\E[\nu]=2+a_\nu/b_\nu$. Cách đặt này bảo đảm $\nu>2$ theo cấu
 Theo định lý Bayes, mật độ hậu nghiệm trên không gian tham số gốc là
 \begin{equation}
   p\!\left(\Param\mid\Data_T\right)
-  =\frac{\overbrace{p(\Param)}^{\text{Tiên nghiệm}}\ \overbrace{\mathcal{L}(\Param;\Data_T)}^{\text{Hàm hợp lý }\eqref{eq:likelihood}}}
+  =\frac{\overbrace{p(\Param)}^{\text{tiên nghiệm}}\ \overbrace{\mathcal{L}(\Param;\Data_T)}^{\text{likelihood }\eqref{eq:likelihood}}}
   {\underbrace{\displaystyle\int_{\Theta}p(\Param')\,\mathcal{L}(\Param';\Data_T)\,\diff\Param'}_{\text{bằng chứng }p(\Data_T),\ \text{không có dạng đóng}}}
   \ \propto\ p(\Param)\,\mathcal{L}(\Param;\Data_T).
   \label{eq:posterior}
@@ -815,7 +935,7 @@ mật độ xác suất,
   p\!\left(\vecphi\mid\Data_T\right)\ \propto\
   \underbrace{p\!\left(g(\vecphi)\right)}_{\text{tiên nghiệm tại }\Param=g(\vecphi)}
   \cdot
-  \underbrace{\mathcal{L}\!\left(g(\vecphi);\Data_T\right)}_{\text{hợp lý}}
+  \underbrace{\mathcal{L}\!\left(g(\vecphi);\Data_T\right)}_{\text{likelihood}}
   \cdot
   \underbrace{\left|\det\symbf J_g(\vecphi)\right|}_{\text{hiệu chỉnh Jacobian}}.
   \label{eq:posterior-unconstrained}
@@ -840,7 +960,7 @@ và bằng $1$ đối với $\mu_s,\bmgamma_s$, đóng góp $0$ vào \eqref{eq:l
 $\vecphi$ không còn là ảnh đúng của hậu nghiệm trên $\Theta$, và mọi moment tính từ đó
 đều lệch một cách hệ thống.
 
-\subsection{ELBO}\label{subsec:elbo}
+\subsection{Cận dưới bằng chứng}\label{subsec:elbo}
 Suy diễn biến phân chọn một họ phân phối $\mathcal{Q}$ và tìm phần tử gần hậu nghiệm nhất
 theo phân kỳ Kullback--Leibler \cite{blei2017}:
 \begin{equation}
@@ -862,7 +982,7 @@ $\ELBO$; đồng thời $\ELBO(q)\le\ln p(\Data_T)$ với mọi $q$, dấu bằn
 khi $q$ trùng hậu nghiệm. Dạng tường minh của cận dưới:
 \begin{equation}
   \ELBO(q)=\E_{q(\vecphi)}\!\Big[
-  \underbrace{\ell_T\!\left(g(\vecphi)\right)}_{\text{log-hợp-lý}}
+  \underbrace{\ell_T\!\left(g(\vecphi)\right)}_{\text{log-likelihood}}
   +\underbrace{\ln p\!\left(g(\vecphi)\right)}_{\text{log-tiên nghiệm}}
   +\underbrace{\ln\left|\det\symbf J_g(\vecphi)\right|}_{\text{hiệu chỉnh Jacobian}}
   \Big]
@@ -876,7 +996,7 @@ quyết định độ rộng của $q$.
 \subsection{Hai họ phân phối biến phân}\label{subsec:families}
 
 \begin{definition}[Mean-field]\label{def:mf}
-Phân phối biến phân có dạng:
+Phân phối biến phân có dạng tích các mật độ chuẩn một chiều:
 \begin{equation}
   q_{\mathrm{MF}}(\vecphi)
   =\prod_{i=1}^{d}\frac{1}{\sqrt{2\pi}\,s_i}
@@ -895,7 +1015,8 @@ $\phi_i=m_i+s_i\varepsilon_i$ với $\varepsilon_i\sim\mathcal{N}(0,1)$ độc l
 \end{definition}
 
 \begin{definition}[Full-rank]\label{def:fr}
-Họ Gauss đa biến với hiệp phương sai đầy đủ, phân phối biến phân có dạng:
+Phân phối biến phân là phân phối chuẩn nhiều chiều với hiệp phương sai đầy đủ, tham số
+hóa qua thừa số Cholesky:
 \begin{equation}
   q_{\mathrm{FR}}(\vecphi)
   =\frac{1}{(2\pi)^{d/2}\left|\symbf\Sigma\right|^{1/2}}
@@ -940,7 +1061,7 @@ cùng một đặc tả, $\ELBO$ so sánh được giữa mean-field và full-ra
 $\mathcal{Q}$ thay đổi --- và đây chính là cơ sở để đối chiếu hai phương pháp biến phân.
 \end{remark}
 
-\subsection{Đối chiếu ba phương pháp}\label{subsec:comparison}
+\subsection{Đối chiếu ba phương pháp suy diễn}\label{subsec:comparison}
 
 \begin{table}[H]
 \centering\footnotesize
@@ -969,8 +1090,8 @@ Hạn chế chính & Suy diễn tiệm cận mất hiệu lực khi nghiệm sá
 \end{table}
 
 \begin{remark}[Điều kiện để so sánh có hiệu lực]\label{rem:comparability}
-Ba phương pháp chỉ so sánh được khi dùng chung hàm hợp lý, chung cơ chế thu gọn và chung
-quy ước nhận dạng nhãn. Hai điều kiện đầu được bảo đảm vì cả ba cùng dựa trên
+Ba phương pháp chỉ so sánh được khi dùng chung hàm likelihood, chung cơ chế thu gọn và
+chung quy ước nhận dạng nhãn. Hai điều kiện đầu được bảo đảm vì cả ba cùng dựa trên
 \eqref{eq:likelihood} với cùng bước thu gọn
 \eqref{eq:collapsed-mean}--\eqref{eq:collapsed-variance} (\cref{rem:approx-location});
 điều kiện thứ ba được bảo đảm bằng \cref{def:label} áp dụng nhất quán. Điểm bất đối xứng
@@ -1052,8 +1173,8 @@ thời gian.
 Việc tách hai thành phần có ý nghĩa thực chất: một mô hình có đúng số vi phạm nhưng dồn
 toàn bộ vào một giai đoạn căng thẳng sẽ vượt qua Kupiec nhưng bị $LR_{ind}$ bác bỏ, và đó
 đúng là kiểu sai hỏng nguy hiểm nhất trong quản trị rủi ro. Kiểm định VaR vì vậy là nơi
-giả định đuôi dày --- được thúc đẩy bởi bằng chứng thực nghiệm ở \cref{subsec:descriptive} ---
-được kiểm chứng trực tiếp chứ không chỉ được biện luận.
+giả định đuôi dày --- được thúc đẩy bởi bằng chứng thực nghiệm ở
+\cref{subsec:stylized-facts} --- được kiểm chứng trực tiếp chứ không chỉ được biện luận.
 
 So sánh cặp mô hình theo hàm tổn thất được thực hiện bằng kiểm định Diebold--Mariano
 \cite{diebold1995} với hiệu chỉnh tự tương quan; khi số cặp so sánh lớn, kết luận cần
@@ -1082,7 +1203,7 @@ Tiêu chí trong mẫu & $\AIC$, $\BIC$ theo \eqref{eq:information-criteria} & $
 \addlinespace[0.2em]
 Tiêu chí ngoài mẫu & $\QLIKE$, $\NLS$, kiểm định VaR & $\QLIKE$, $\NLS$, kiểm định VaR, độ rộng khoảng dự báo \\
 \addlinespace[0.2em]
-Điều kiện hiệu lực & Cùng dữ liệu, cùng phân chia mẫu, cùng quy ước nhãn & Cùng hàm hợp lý, cùng cơ chế thu gọn, cùng quy ước nhãn \\
+Điều kiện hiệu lực & Cùng dữ liệu, cùng phân chia mẫu, cùng quy ước nhãn & Cùng hàm likelihood, cùng cơ chế thu gọn, cùng quy ước nhãn \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -1094,21 +1215,31 @@ thuộc vào phương pháp ước lượng được chọn.
 
 % ==============================================================================
 \begin{thebibliography}{99}
+\bibitem{baillie1996} Baillie, R. T., Bollerslev, T., \& Mikkelsen, H. O. (1996). Fractionally integrated generalized autoregressive conditional heteroskedasticity. \emph{Journal of Econometrics}, 74(1), 3--30.
+\bibitem{bauwens2010} Bauwens, L., Preminger, A., \& Rombouts, J. V. K. (2010). Theory and inference for a Markov switching GARCH model. \emph{Econometrics Journal}, 13(2), 218--244.
 \bibitem{blei2017} Blei, D. M., Kucukelbir, A., \& McAuliffe, J. D. (2017). Variational inference: A review for statisticians. \emph{Journal of the American Statistical Association}, 112(518), 859--877.
 \bibitem{bollerslev1986} Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. \emph{Journal of Econometrics}, 31(3), 307--327.
+\bibitem{bollerslev1987} Bollerslev, T. (1987). A conditionally heteroskedastic time series model for speculative prices and rates of return. \emph{The Review of Economics and Statistics}, 69(3), 542--547.
 \bibitem{christoffersen1998} Christoffersen, P. F. (1998). Evaluating interval forecasts. \emph{International Economic Review}, 39(4), 841--862.
 \bibitem{davies1987} Davies, R. B. (1987). Hypothesis testing when a nuisance parameter is present only under the alternative. \emph{Biometrika}, 74(1), 33--43.
 \bibitem{diebold1995} Diebold, F. X., \& Mariano, R. S. (1995). Comparing predictive accuracy. \emph{Journal of Business \& Economic Statistics}, 13(3), 253--263.
+\bibitem{ding1993} Ding, Z., Granger, C. W. J., \& Engle, R. F. (1993). A long memory property of stock market returns and a new model. \emph{Journal of Empirical Finance}, 1(1), 83--106.
+\bibitem{engle1982} Engle, R. F. (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation. \emph{Econometrica}, 50(4), 987--1007.
+\bibitem{engle1999} Engle, R. F., \& Lee, G. G. J. (1999). A permanent and transitory component model of stock return volatility. In R. F. Engle \& H. White (Eds.), \emph{Cointegration, Causality, and Forecasting} (pp. 475--497). Oxford University Press.
+\bibitem{engle2013} Engle, R. F., Ghysels, E., \& Sohn, B. (2013). Stock market volatility and macroeconomic fundamentals. \emph{The Review of Economics and Statistics}, 95(3), 776--797.
 \bibitem{francq2001} Francq, C., \& Zakoïan, J. M. (2001). Stationarity of multivariate Markov-switching ARMA models. \emph{Journal of Econometrics}, 102(2), 339--364.
+\bibitem{glosten1993} Glosten, L. R., Jagannathan, R., \& Runkle, D. E. (1993). On the relation between the expected value and the volatility of the nominal excess return on stocks. \emph{The Journal of Finance}, 48(5), 1779--1801.
 \bibitem{gray1996} Gray, S. F. (1996). Modeling the conditional distribution of interest rates as a regime-switching process. \emph{Journal of Financial Economics}, 42(1), 27--62.
 \bibitem{haas2004} Haas, M., Mittnik, S., \& Paolella, M. S. (2004). A new approach to Markov-switching GARCH models. \emph{Journal of Financial Econometrics}, 2(4), 493--530.
 \bibitem{hamilton1989} Hamilton, J. D. (1989). A new approach to the economic analysis of nonstationary time series and the business cycle. \emph{Econometrica}, 57(2), 357--384.
+\bibitem{hamilton1994} Hamilton, J. D., \& Susmel, R. (1994). Autoregressive conditional heteroskedasticity and changes in regime. \emph{Journal of Econometrics}, 64(1--2), 307--333.
 \bibitem{hansen1992} Hansen, B. E. (1992). The likelihood ratio test under nonstandard conditions: Testing the Markov switching model of GNP. \emph{Journal of Applied Econometrics}, 7(S1), S61--S82.
 \bibitem{kim1994} Kim, C. J. (1994). Dynamic linear models with Markov-switching. \emph{Journal of Econometrics}, 60(1--2), 1--22.
 \bibitem{kingma2014} Kingma, D. P., \& Welling, M. (2014). Auto-encoding variational Bayes. \emph{International Conference on Learning Representations}.
 \bibitem{klaassen2002} Klaassen, F. (2002). Improving GARCH volatility forecasts with regime-switching GARCH. \emph{Empirical Economics}, 27(2), 363--394.
+\bibitem{kucukelbir2017} Kucukelbir, A., Tran, D., Ranganath, R., Gelman, A., \& Blei, D. M. (2017). Automatic differentiation variational inference. \emph{Journal of Machine Learning Research}, 18(14), 1--45.
 \bibitem{kupiec1995} Kupiec, P. H. (1995). Techniques for verifying the accuracy of risk measurement models. \emph{The Journal of Derivatives}, 3(2), 73--84.
-\bibitem{nelson1990} Nelson, D. B. (1990). Stationarity and persistence in GARCH(1,1) models. \emph{Econometric Theory}, 6(3), 318--334.
+\bibitem{nelson1991} Nelson, D. B. (1991). Conditional heteroskedasticity in asset returns: A new approach. \emph{Econometrica}, 59(2), 347--370.
 \bibitem{patton2011} Patton, A. J. (2011). Volatility forecast comparison using imperfect volatility proxies. \emph{Journal of Econometrics}, 160(1), 246--256.
 \end{thebibliography}
 
