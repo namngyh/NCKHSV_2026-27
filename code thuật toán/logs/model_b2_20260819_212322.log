@@ -1,4 +1,0 @@
-=== B2 | B2: GARCH(1,1) Student-t, khong X        (1 trang thai, MLE) ===
-Bat dau: 2026-08-19 21:25:51 | T_train = 1735
-  [seed=0] adam 0: nll=15430.5450
-=== XONG B2 sau 0.1 phut -> results_mergetest\parts\b2.pt ===

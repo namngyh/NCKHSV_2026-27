@@ -1,3 +1,0 @@
-[2026-08-23 11:23:41] [S1/mle/2] bat dau (T=2000, seed=2)
-[seed=4] L-BFGS that bai (IndexError: list index out of range); giu nghiem cua giai doan Adam.
-[2026-08-23 11:30:43] [S1/mle/2] xong sau 7.0 phut (brier=0.3197)

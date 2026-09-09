@@ -1,4 +1,0 @@
-=== B4 | B4: MS-GARCH chuan (nu co dinh), khong X (2 trang thai, MLE) ===
-Bat dau: 2026-08-19 21:23:27 | T_train = 1735
-[seed=0] adam iter 0: nll=273915.4596
-=== XONG B4 sau 0.8 phut -> results_mergetest\parts\b4.pt ===

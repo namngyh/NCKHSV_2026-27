@@ -1,8 +1,0 @@
-[2026-08-20 07:47:47] [m1 start 0] khoi tao: am tu B3 (bien the 0)
-[seed=0] adam iter 0: nll=2826.2362
-[seed=0] adam iter 100: nll=2816.2293
-[seed=0] adam iter 200: nll=2812.3831
-[seed=0] adam iter 300: nll=2812.0572
-[seed=0] adam iter 400: nll=2811.5741
-[seed=0] het chu ky 0: nll=2810.8591 ||grad||=0.1684
-[2026-08-20 08:05:45] [m1 start 0] xong sau 18.0 phut: loglik=-2810.8591 ||grad||=0.1684 hoi_tu=co

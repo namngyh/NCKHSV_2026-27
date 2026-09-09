@@ -1,6 +1,0 @@
-=== M1 | M1: MS-GARCH-X Student-t + sai so chuan  (2 trang thai, MLE) ===
-Bat dau: 2026-08-19 21:23:27 | T_train = 1735
-[seed=0] adam iter 0: nll=276705.9288
-     Tinh sai so chuan (delta method tu Hessian) cho M1 ...
-     Hessian khong xac dinh duong tai nghiem MLE cua M1 -- bo qua SE.
-=== XONG M1 sau 1.5 phut -> results_mergetest\parts\m1.pt ===
