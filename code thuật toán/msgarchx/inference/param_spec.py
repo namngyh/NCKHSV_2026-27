@@ -74,6 +74,12 @@ class PriorConfig:
     nu_shape: float = 2.0
     nu_rate: float = 0.2
 
+    # Prior cua he so don bay theta trong EGARCH (eq:egarchx). Dat Normal DOI
+    # XUNG quanh 0 la co y: prior khong gia dinh truoc dau cua hieu ung don
+    # bay, nen cau hoi "du lieu co ung ho don bay khong" van la mot cau hoi
+    # thuc su chu khong phai ket luan da cai san vao prior.
+    sigma_theta: float = 1.0
+
 
 def param_slices(config: ModelConfig) -> dict:
     k = config.n_exog

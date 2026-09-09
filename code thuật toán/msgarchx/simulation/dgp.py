@@ -36,6 +36,71 @@ def generate_exogenous(total_T: int, n_exog: int, ar_coef: float = 0.0, scale: f
     return X
 
 
+@dataclass
+class SimulatedSingle:
+    """Du lieu mo phong tu mo hinh MOT trang thai (khong co bien trang thai)."""
+    r: torch.Tensor       # (T,)
+    h: torch.Tensor       # (T,) phuong sai co dieu kien that
+    X: torch.Tensor       # (T, k)
+
+
+def simulate_egarch(
+    params,
+    T: int,
+    dist: str = "student_t",
+    n_exog: int | None = None,
+    X: torch.Tensor | None = None,
+    burn_in: int = 200,
+    seed: int | None = None,
+) -> SimulatedSingle:
+    """Sinh du lieu tu EGARCH-X mot trang thai theo dung eq:egarchx.
+
+    Khac simulate_ms_garch_x o ba diem: khong co xich trang thai, phuong trinh
+    viet cho log h, va z_{t-1} dung THANG mau da rut (khi mo phong ta biet z
+    that, khong can tinh lai tu eps/sqrt(h) -- hai cach tuong duong nhau).
+
+    Dieu kien dau lay trung binh vo dieu kien cua log-phuong sai,
+    log h_0 = omega / (1 - beta), tuc eq:egarch-unconditional-logvar khi
+    E[X] = 0.
+    """
+    from msgarchx.models.egarch import LOG_H_MAX, LOG_H_MIN, expected_abs_z
+
+    if seed is not None:
+        torch.manual_seed(seed)
+
+    total_T = T + burn_in
+    if X is None:
+        if n_exog is None:
+            n_exog = params.gamma.shape[0]
+        X = generate_exogenous(total_T, n_exog)
+
+    if dist == "normal":
+        z_all = torch.randn(total_T)
+    else:
+        z_all = std_t_sample(params.nu.expand(total_T))
+    e_abs_z = expected_abs_z(None if dist == "normal" else params.nu)
+
+    log_h0 = params.omega / (1.0 - params.beta)
+    h_list = [torch.exp(torch.clamp(log_h0, LOG_H_MIN, LOG_H_MAX))]
+    r_list = [params.mu + torch.sqrt(h_list[0]) * z_all[0]]
+
+    for t in range(1, total_T):
+        z_prev = z_all[t - 1]
+        log_h = (
+            params.omega
+            + params.alpha * (torch.abs(z_prev) - e_abs_z)
+            + params.theta * z_prev
+            + params.beta * torch.log(h_list[t - 1])
+            + (params.gamma * X[t]).sum()
+        )
+        h_t = torch.exp(torch.clamp(log_h, LOG_H_MIN, LOG_H_MAX))
+        h_list.append(h_t)
+        r_list.append(params.mu + torch.sqrt(h_t) * z_all[t])
+
+    r, h = torch.stack(r_list), torch.stack(h_list)
+    return SimulatedSingle(r=r[burn_in:], h=h[burn_in:], X=X[burn_in:])
+
+
 def simulate_ms_garch_x(
     params: MSGARCHXParams,
     P0: torch.Tensor,

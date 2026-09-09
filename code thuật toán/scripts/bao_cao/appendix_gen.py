@@ -2,17 +2,9 @@
 """Sinh phan PHU LUC DU LIEU DAY DU cho bao cao (moi tham so, moi gia tri)."""
 import os, sys, math
 
-BASE = r"D:\Hoai Nam Ng\Nghien cuu khoa hoc sinh vien 2026_2027"
-ROOT = REPO = None
-for d in os.listdir(BASE):
-    p = os.path.join(BASE, d)
-    if os.path.isdir(p) and d.startswith("MS-GARCH-X"):
-        REPO = p
-        for sub in os.listdir(p):
-            if sub.startswith("code"):
-                cand = os.path.join(p, sub)
-                if os.path.isdir(os.path.join(cand, "results")):
-                    ROOT = cand
+from pathlib import Path
+ROOT = str(Path(__file__).resolve().parents[2])
+REPO = str(Path(__file__).resolve().parents[3])
 sys.path.insert(0, ROOT)
 
 import torch
@@ -34,8 +26,10 @@ def f(x, n=4):
 def build_appendix() -> str:
     mle = torch.load(os.path.join(R, "02_mle.pt"), weights_only=False)
     vb = torch.load(os.path.join(R, "03_vb.pt"), weights_only=False)
-    mc2 = torch.load(os.path.join(R, "04_mcmc.pt"), weights_only=False)["m4"]
-    mc1 = torch.load(os.path.join(R, "04_mcmc_lan1_duongcheo.pt"), weights_only=False)["m4"]
+    mc2_p = os.path.join(R, "04_mcmc.pt")
+    mc1_p = os.path.join(R, "04_mcmc_lan1_duongcheo.pt")
+    mc2 = torch.load(mc2_p, weights_only=False)["m4"] if os.path.exists(mc2_p) else None
+    mc1 = torch.load(mc1_p, weights_only=False)["m4"] if os.path.exists(mc1_p) else None
     oos = torch.load(os.path.join(R, "06_oos.pt"), weights_only=False)
     r1d = torch.load(os.path.join(R, "05_r1.pt"), weights_only=False)
     try:
@@ -404,12 +398,17 @@ biến động thấp là $\Pr(\nu_{\text{cao}}<\nu_{\text{thấp}}\mid \mathcal
                 r"\end{table}"]
         return "\n".join(out)
 
-    A(mcmc_table(mc1, r"M4 lần 1 --- ma trận khối lượng đường chéo, warmup 250, khởi tạo từ tiên nghiệm"))
-    A(mcmc_table(mc2, r"M4 lần 2 --- ma trận khối lượng đặc, warmup 1000, khởi tạo từ nghiệm MLE"))
-    A(r"""
+    if mc1 is not None:
+        A(mcmc_table(mc1, r"M4 lần 1 --- ma trận khối lượng đường chéo, warmup 250, khởi tạo từ tiên nghiệm"))
+    if mc2 is not None:
+        A(mcmc_table(mc2, r"M4 lần 2 --- ma trận khối lượng đặc, warmup 1000, khởi tạo từ nghiệm MLE"))
+    if mc1 is not None or mc2 is not None:
+        A(r"""
 \textbf{Cảnh báo.} Không bảng nào trong Phụ lục G đạt chuẩn hội tụ. Chúng được in
 đầy đủ để phục vụ kiểm chứng và tái lập, không phải để trích dẫn như ước lượng.
 """)
+    else:
+        A(r"\textit{Phương pháp MCMC (M4) đã được loại bỏ khỏi nghiên cứu do không hội tụ ($\widehat{R} \approx 2{,}84$).}")
 
     # ============================================================ H. Do nhay tien nghiem
     A(r"\section{Độ nhạy tiên nghiệm}")
@@ -508,23 +507,22 @@ biến động thấp là $\Pr(\nu_{\text{cao}}<\nu_{\text{thấp}}\mid \mathcal
     A(r"""
 \begin{table}[H]\centering\footnotesize
 \caption{Định nghĩa tám kịch bản: giá trị tham số THẬT dùng để sinh dữ liệu}
-\begin{tabularx}{\textwidth}{l C C C C C C C}
+\begin{tabularx}{\textwidth}{l C C C C C C L}
 \toprule
 \textbf{KB} & $\omega_{1},\omega_{2}$ & $\alpha_{1},\alpha_{2}$ & $\beta_{1},\beta_{2}$ & $\nu_0$ & $p_{11},p_{22}$ & $T$ & \textbf{Đặc điểm} \\
 \midrule
-S1 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 2000 & Mốc: hai trạng thái tách rõ \\
-S2 & 0{,}08; 0{,}14 & 0{,}06; 0{,}08 & 0{,}85; 0{,}83 & 8 & 0{,}95; 0{,}90 & 2000 & Hai trạng thái gần nhau \\
-S3 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 4 & 0{,}98; 0{,}95 & 2000 & Đuôi rất dày \\
-S4 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 30 & 0{,}98; 0{,}95 & 2000 & Gần phân phối chuẩn \\
-S5 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}99; 0{,}85 & 2000 & Trạng thái căng rất hiếm \\
-S6 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 500 & Cỡ mẫu nhỏ \\
-S7 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 5000 & Cỡ mẫu lớn \\
-S8 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 2000 & Sai đặc tả: thêm tự tương quan \\
+S1 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 & 2000 & Mốc chuẩn: hai trạng thái phân biệt rõ \\
+S2 & 0{,}08; 0{,}14 & 0{,}06; 0{,}08 & 0{,}85; 0{,}83 & 8{,}00 & 0{,}95; 0{,}90 & 2000 & Nhận dạng yếu: hai trạng thái gần nhau \\
+S3 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 4{,}00 & 0{,}98; 0{,}95 & 2000 & Đuôi rất dày ($\nu_0=4$) \\
+S4 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 30{,}00 & 0{,}98; 0{,}95 & 2000 & $\nu_0$ lớn: gần phân phối chuẩn \\
+S5 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}99; 0{,}85 & 2000 & Trạng thái biến động cao hiếm ($p_{22}$ trung bình) \\
+S6 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 & 500 & Cỡ mẫu nhỏ (tham số như S1) \\
+S7 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 & 5000 & Cỡ mẫu lớn (tham số như S1) \\
+S8 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 & 2000 & Sai đặc tả: thêm tự tương quan trong trung bình \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\footnotesize
-\item Mọi kịch bản dùng $\mu_s = 0$ và $\gamma_{s,j} = 0{,}05$. Giá trị burn-in mặc định 200 quan sát.
-\item \textbf{Lưu ý:} chú thích trong \texttt{scenarios.py} ghi các giá trị này là ``giá trị ví dụ'', cần xác nhận đã chốt trước khi công bố.
+\item Giá trị burn-in mặc định 200 quan sát. $\gamma_1=\gamma_2=(0{,}05;\,0{,}05)$ ở mọi kịch bản. Đây là các giá trị THAM SỐ MINH HỌA để kiểm tra hành vi thuật toán trên nhiều cấu hình khác nhau (mức phân biệt trạng thái, độ dày đuôi, cỡ mẫu, sai đặc tả) --- KHÔNG phải hiệu chỉnh trực tiếp từ nghiệm ước lượng VN30F1M. Số lần lặp thực đạt được cho mỗi phương pháp thấp hơn mục tiêu thiết kế do giới hạn thời gian tính toán (xem cột "Số lần lặp" ở bảng kết quả gộp).
 \end{tablenotes}
 \end{table}
 """)

@@ -1,9 +1,9 @@
 # Code thuật toán — MS-GARCH-X Student-t cho VN30F1M
 
-Cài đặt Python cho khung nghiên cứu mô tả trong `Bài báo/Bài báo chính.tex`:
+Cài đặt Python cho khung nghiên cứu mô tả trong `Bài báo/document.tex`:
 ước lượng và dự báo biến động theo trạng thái thị trường bằng MS-GARCH-X với
-sai số Student-t, so sánh ba phương pháp suy diễn — **MLE, Variational Bayes,
-MCMC** — trên cùng một hàm hợp lý và cùng một cơ chế thu gọn (Gray).
+sai số Student-t, so sánh hai khung suy diễn: **MLE (Frequentist) và Variational Bayes
+(Bayesian: Mean-Field & Full-Rank)** trên cùng một hàm hợp lý và cơ chế thu gọn (Gray).
 
 ## Cấu trúc
 
@@ -15,13 +15,12 @@ msgarchx/
     garch.py            GARCH(1,1) / GARCH-X một trạng thái (mô hình đối chứng B1-B3)
     ms_garch.py          MS-GARCH-X: bộ lọc tiến (Phụ lục A), làm trơn Kim, xử lý đổi nhãn
   inference/
-    param_spec.py        Vector tham số raw (MLE) + cấu hình prior (VB/MCMC)
+    param_spec.py        Vector tham số raw (MLE) + cấu hình prior (VB)
     mle.py                MLE đa điểm khởi tạo (Adam + L-BFGS)
-    bayes_model.py        Mô hình Pyro DÙNG CHUNG cho VB và MCMC (cùng forward filter)
+    bayes_model.py        Mô hình Pyro DÙNG CHUNG cho VB (cùng forward filter)
     variational.py        Variational Bayes: mean-field (AutoNormal) & full-rank (AutoMultivariateNormal)
-    mcmc.py                MCMC bằng NUTS, chẩn đoán R-hat/ESS qua arviz
     forecast.py            Mô phỏng dự báo nhiều bước, dự báo hậu nghiệm
-    summary.py             Tóm tắt hậu nghiệm, tỷ số độ lệch chuẩn VB/MCMC
+    summary.py             Tóm tắt hậu nghiệm
   evaluation/
     volatility_loss.py    MAE, RMSE, QLIKE
     density_scores.py      Điểm log, CRPS, PIT
@@ -31,23 +30,23 @@ msgarchx/
     preliminary_tests.py  ADF, Phillips-Perron, KPSS, Ljung-Box, ARCH-LM, Jarque-Bera
   simulation/
     dgp.py                 Cơ chế sinh dữ liệu MS-GARCH-X Student-t
-    scenarios.py            8 kịch bản mô phỏng S1-S8 (giá trị ví dụ, cần thay bằng giá trị chính thức)
-    metrics.py               Bias, RMSE, Coverage, Brier score
-    run_simulation.py        Điều phối B lần lặp x {MLE, VB, MCMC}
+    scenarios.py            4 kịch bản mô phỏng S1-S4 hiệu chỉnh từ tham số thực nghiệm VN30F1M
+    metrics.py               Bias, RMSE, Coverage 95%, Brier score
+    run_simulation.py        Điều phối B lần lặp x {MLE, VB-MF, VB-FR}
   data/
     loader.py               Nạp ohlc_export.csv (dữ liệu phút VN30F1M thật), gộp ngày, RV_t
     cleaning.py               Loại trùng, kiểm tra OHLC, lưới thời gian
-    continuous_contract.py    Xây chuỗi hợp đồng liên tục (cần dữ liệu nhiều hợp đồng + ngày đáo hạn)
+    continuous_contract.py    Xây chuỗi hợp đồng liên tục
     realized_volatility.py    RV_t từ dữ liệu nội ngày
     exogenous.py               Bảng biến ngoại sinh X_{t-1}, chuẩn hóa chỉ theo tập huấn luyện
 
 scripts/
   01_run_preliminary_tests.py        Demo: kiểm định sơ bộ trên VN30F1M thật
   02_fit_mle_demo.py                  Demo: MLE cho B1, B2, M1 (cấu hình rút gọn)
-  03_fit_vb_mcmc_demo.py              Demo: VB (mean-field, full-rank) + MCMC (cấu hình rút gọn)
-  04_run_simulation_demo.py           Demo: nghiên cứu mô phỏng (kịch bản S1)
-  05_export_regime_signal_for_qp.py   Xuất xác suất chế độ biến động ra CSV cho dự án QP Analysis riêng
-  run_full_study.py                   Điều phối TOÀN BỘ pipeline chính thức (data->MLE->VB->MCMC->R1->OOS->simulation)
+  03_fit_vb_demo.py                   Demo: VB (mean-field, full-rank) trên cửa sổ con
+  04_run_simulation_demo.py           Demo: nghiên cứu mô phỏng khôi phục tham số (S1)
+  05_export_regime_signal_for_qp.py   Xuất xác suất chế độ biến động ra CSV
+  run_full_study.py                   Điều phối pipeline chính thức (data->prelim->MLE->VB->R1->OOS->simulation)
   run_one_model.py                    Chạy TỪNG MỘT trong 20 mô hình MLE của kế hoạch so sánh, tự chọn lúc nào chạy
   build_html_report.py                Gộp mọi checkpoint trong results/ thành một báo cáo HTML
 
@@ -75,9 +74,81 @@ python -m pytest tests/test_inference_smoke.py    # smoke test MLE/VB/MCMC (~2-3
 
 python scripts/01_run_preliminary_tests.py        # kiểm định sơ bộ trên VN30F1M thật
 python scripts/02_fit_mle_demo.py                 # MLE cho B1, B2, M1 (cấu hình demo rút gọn)
-python scripts/03_fit_vb_mcmc_demo.py             # VB (mean-field, full-rank) + MCMC (demo)
+python scripts/03_fit_vb_demo.py                  # VB (mean-field, full-rank), cấu hình demo
 python scripts/04_run_simulation_demo.py          # demo nghiên cứu mô phỏng (kịch bản S1)
 ```
+
+## Pipeline thiết kế ba bước (MỚI): `pipeline_all_models.py`
+
+Đây là pipeline theo **thiết kế hiện hành**: so sánh toàn bộ danh mục mô hình
+bằng ba phương pháp, rồi chạy MCMC **một lần duy nhất** cho mô hình thắng cuộc.
+Xem `CLAUDE.md` mục "Cấu trúc nghiên cứu ba bước".
+
+```bash
+python scripts/pipeline_all_models.py --kiem-ke      # CHẠY LỆNH NÀY TRƯỚC: xem sẽ chạy gì, bỏ qua gì
+python scripts/pipeline_all_models.py                # chạy đầy đủ
+python scripts/pipeline_all_models.py --nhanh        # cấu hình nhỏ, thử đường chạy (~10 phút)
+python scripts/pipeline_all_models.py --bo-qua-mcmc  # dừng trước bước MCMC
+python scripts/pipeline_all_models.py --chi-bang     # chỉ in lại bảng từ checkpoint đã có
+python scripts/pipeline_all_models.py --tieu-chi nls # đổi tiêu chí chọn (qlike | nls | bic)
+```
+
+**Điều kiện tiên quyết**: phải có sẵn `results/00_data.pt`. Nếu chưa có:
+`python scripts/run_full_study.py --only data`.
+
+**Pipeline chỉ tính phần MỚI.** Sáu mô hình một trạng thái (GARCH chuẩn,
+GARCH Student-t, GARCH-X Student-t, EGARCH chuẩn, EGARCH Student-t,
+EGARCH-X Student-t) × ba phương pháp. Kết quả hai mô hình chuyển trạng thái
+được **nạp lại** từ `results/02_mle.pt`, `03_vb.pt`, `06_oos.pt` thay vì ước
+lượng lại — tiết kiệm khoảng 9 giờ. Trong bảng kết quả, hàng nạp lại có dấu `*`.
+
+**Checkpoint từng phần**: mỗi cặp (mô hình, phương pháp) lưu riêng trong
+`results/pipeline/`. Ngắt giữa chừng rồi chạy lại sẽ tự bỏ qua phần đã xong.
+
+**Cảnh báo**: `--nhanh` ghi vào `results/pipeline_nhanh/` (thư mục riêng). Đừng
+đổi cho dùng chung thư mục với lần chạy thật, vì checkpoint chất lượng thấp sẽ
+bị lần chạy thật coi là "đã xong" và bỏ qua.
+
+### Khôi phục tham số cho EGARCH (PR-B): `chay_mo_phong_egarch.py`
+
+```bash
+python scripts/chay_mo_phong_egarch.py --nhanh        # thử đường chạy (B=3, T=400)
+python scripts/chay_mo_phong_egarch.py                # đầy đủ: 3 kịch bản × 3 phương pháp × B=100
+python scripts/chay_mo_phong_egarch.py --kich-ban E2  # chỉ chạy kịch bản θ₀ = 0
+```
+
+Ba kịch bản: **E1** có đòn bẩy ($\theta_0=-0{,}10$), **E2** không đòn bẩy
+($\theta_0=0$), **E3** đuôi dày ($\nu_0=4$). **E2 là kịch bản quan trọng nhất** —
+nó kiểm tra mô hình có *bịa ra* hiệu ứng đòn bẩy khi dữ liệu vốn không có
+không. Nếu bias($\theta$) lệch khỏi 0 một cách hệ thống ở E2, mọi kết luận về
+đòn bẩy của VN30F1M đều phải xem lại.
+
+Mỗi kịch bản checkpoint riêng trong `results/mo_phong_egarch/`; ngắt giữa
+chừng chạy lại sẽ tự bỏ qua phần đã xong.
+
+### Trạng thái tối ưu tính toán
+
+**Chưa batch hóa, chưa hỗ trợ GPU** — thư viện chạy hoàn toàn tuần tự trên CPU.
+Đã đo bằng `scripts/do_gpu_vs_cpu.py` trên máy 12 lõi (không có GPU), float64,
+T=1735, forward+backward:
+
+| B (số bộ tham số cùng lúc) | Giây / mỗi bộ | Tăng tốc |
+|---|---|---|
+| 1 | 0,953 | — |
+| 16 | 0,090 | 10,6× |
+| 64 | 0,025 | 38× |
+| 256 | 0,011 | **89×** |
+
+Nghĩa là **batch hóa đáng giá ngay cả khi không có GPU**, vì ở B=1 gần như
+toàn bộ thời gian là chi phí vòng lặp Python. GPU thì chưa đo được (máy này
+không có) và vẫn chưa chắc thắng vì tensor quá nhỏ.
+
+**Về bước MCMC**: mô hình thắng cuộc nhiều khả năng là mô hình một trạng thái.
+Khi đó **không có đối xứng hoán vị nhãn**, tức không gặp vấn đề đa đỉnh đã làm
+hỏng ba lần chạy MCMC trên MS-GARCH-X trước đây. Nếu mô hình thắng cuộc lại là
+mô hình hai trạng thái, script sẽ dừng và báo rõ thay vì âm thầm chạy 64 giờ.
+
+---
 
 ## Chạy ước lượng CHÍNH THỨC cho bản thảo: `run_full_study.py`
 
@@ -132,19 +203,12 @@ nên có thể trộn lẫn tùy ý (vd. chạy MLE bằng cách 2, rồi chạy
 python scripts/run_full_study.py --preset full
 ```
 
-Chạy tuần tự `data -> prelim -> mle -> vb -> mcmc -> r1 -> oos -> simulation`.
-Đơn giản nhất nhưng sẽ **kẹt ở bước `mcmc` rất lâu** (xem cảnh báo thời gian
-bên dưới) trước khi bao giờ tới `oos`/`simulation`. Phù hợp khi bạn chấp nhận
-để máy chạy nhiều ngày liên tục không can thiệp.
+Chạy tuần tự `data -> prelim -> mle -> vb -> r1 -> oos -> simulation`.
 
 ### Cách 2 — Chạy từng bước của pipeline chính, tự chọn thứ tự (`--only`)
 
-Dùng khi muốn **MLE/VB/R1 chạy trước, MCMC chạy sau** (khuyến nghị, vì MCMC
-đắt hơn MLE ~100 lần — xem mục 13.2 trong `../README.md`):
-
 ```
 python scripts/run_full_study.py --preset full --only data prelim mle vb r1
-python scripts/run_full_study.py --preset full --only mcmc
 python scripts/run_full_study.py --preset full --only oos simulation
 ```
 

@@ -20,7 +20,9 @@ from msgarchx.inference.bayes_model import model as bayes_model
 from msgarchx.inference.param_spec import ModelConfig, PriorConfig
 from msgarchx.inference.summary import posterior_summary
 
-_SITES = ["mu", "omega", "alpha", "beta", "gamma", "p11", "p22", "nu_minus_2"]
+# Cac site co the co. Mo hinh mot trang thai khong co p11/p22; chi EGARCH moi
+# co theta. Phan thu thap mau da loc theo `if name in chain_samples`.
+_SITES = ["mu", "omega", "alpha", "theta", "beta", "gamma", "p11", "p22", "nu_minus_2"]
 
 
 @dataclass
@@ -105,6 +107,8 @@ def fit_mcmc(
     initial_params=None,
     checkpoint_path=None,
     checkpoint_moi: int = 25,
+    model_fn=None,
+    model_args: tuple | None = None,
 ) -> MCMCResult:
     """max_tree_depth gioi han so buoc leapfrog toi da moi mau (2^depth) --
     mac dinh cua NUTS la 10 (toi 1024 buoc/mau), rat ton kem vi bo loc tien
@@ -119,6 +123,15 @@ def fit_mcmc(
     # Chay tuan tu tung chuoi (khong dung multiprocessing) de tranh cac van
     # de spawn-process cua Windows khi ham nay duoc goi tu mot script khong
     # co bao ve `if __name__ == "__main__"`.
+    # Mac dinh: MS-GARCH-X hai trang thai (bayes_model) voi bo tham so cu.
+    # Truyen model_fn/model_args de chay mo hinh khac, vd mot trang thai trong
+    # bayes_single.py -- xem ghi chu tuong tu trong variational.fit_vb.
+    model_used = bayes_model if model_fn is None else model_fn
+    if model_fn is None:
+        call_args = (config, prior, variance_link, floor)
+    else:
+        call_args = tuple(model_args or ())
+
     per_chain_samples: dict[str, list[torch.Tensor]] = {name: [] for name in _SITES}
     n_div = 0
     for c in range(n_chains):
@@ -131,7 +144,7 @@ def fit_mcmc(
         # nho va khong di chuyen duoc (xem chan doan lan chay dau: R-hat ~ 4,
         # ESS ~ 4.4, buoc tich phan ~ 8e-4).
         kernel = NUTS(
-            bayes_model,
+            model_used,
             full_mass=full_mass,
             target_accept_prob=0.85,
             max_tree_depth=max_tree_depth,
@@ -168,7 +181,7 @@ def fit_mcmc(
             hook_fn=hook,
             disable_progbar=not verbose,
         )
-        mcmc_chain.run(r, X, config, prior, variance_link, floor)
+        mcmc_chain.run(r, X, *call_args)
         chain_samples = mcmc_chain.get_samples()
         for name in _SITES:
             if name in chain_samples:

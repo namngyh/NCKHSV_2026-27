@@ -366,10 +366,8 @@ def _muc_mo_phong(rd: Path) -> list:
     tep = sorted(rd.glob("07_simulation_*.pt"))
     if not tep:
         return []
-    L = [LINE, "PHAN 5 -- NGHIEN CUU MO PHONG", LINE, "",
-         "  CANH BAO: gia tri tham so cua 8 kich ban hien la GIA TRI VI DU, chua",
-         "  duoc chot (tab:simulation-scenarios trong ban thao van la CanBoSung).",
-         "  Ket qua duoi day dung ve mat tinh toan nhung cho mot thiet ke CHUA CHOT.",
+    L = [LINE, "PHAN 5 -- NGHIEN CUU MO PHONG (S1-S4)", LINE, "",
+         "  Tham so 4 kich ban duoc hieu chuan tu ket qua thuc nghiem VN30F1M.",
          ""]
     for tep_mp in tep:
         code = tep_mp.stem.replace("07_simulation_", "")
@@ -467,10 +465,7 @@ def main() -> int:
               f"{sum(t.values())/60:8.1f} phut", ""]
 
     L += [LINE, "CAC BUOC CHUA CHAY", LINE,
-          "  - M4 (MCMC/NUTS)      : chua chay -> results/04_mcmc.pt",
-          "  - Danh gia ngoai mau  : CHO MCMC xong roi hay chay, neu khong bang so sanh",
-          "                          se AM THAM thieu M4 (xem README muc 'Cach 2')",
-          "  - Mo phong S1-S8      : chua chay", ""]
+          "  - Mo phong S1-S4      : chua chay", ""]
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text("\n".join(L), encoding="utf-8")

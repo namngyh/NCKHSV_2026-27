@@ -8,20 +8,15 @@ luc nao ma khong mat tien do):
   1. MLE: B1 (GARCH chuan), B2 (GARCH Student-t), B3 (GARCH-X Student-t),
      B4 (MS-GARCH chuan, nu co dinh lon), M1 (MS-GARCH-X Student-t).
   2. Variational Bayes: M2 (mean-field), M3 (full-rank).
-  3. MCMC: M4 (NUTS, nhieu chuoi).
-  4. R1: MS-GARCH-X voi nu_s theo trang thai (VB mean-field) + xac suat hau
+  3. R1: MS-GARCH-X voi nu_s theo trang thai (VB mean-field) + xac suat hau
      nghiem P(nu_2 < nu_1 | Data) (eq:tail-probability).
-  5. Danh gia ngoai mau (QLIKE/MAE/RMSE, diem log, VaR Kupiec/Christoffersen)
-     cho tat ca cac mo hinh o buoc 1-4, dung THAM SO CO DINH tu tap huan
+  4. Danh gia ngoai mau (QLIKE/MAE/RMSE, diem log, VaR Kupiec/Christoffersen)
+     cho tat ca cac mo hinh o buoc 1-3, dung THAM SO CO DINH tu tap huan
      luyen + chi cap nhat bo loc tren tap kiem dinh (nhu da chot voi nguoi
      dung).
-  6. Nghien cuu mo phong 8 kich ban (S1-S8): MLE (B lon), VB (B vua), MCMC
-     (B nho, chi mang tinh doi chieu xu huong).
+  5. Nghien cuu mo phong 8 kich ban (S1-S8): MLE (B lon), VB (B vua).
 
-CANH BAO THOI GIAN: cau hinh mac dinh (--preset full) co the mat 1.5-2 NGAY
-tren laptop thong thuong (xem README.md, phan "Luu y hieu nang"). Dung
-`--preset dry-run` de kiem tra toan bo pipeline chay dung trong vai phut
-truoc khi chay that.
+Pham vi nghien cuu: MLE + VB mean-field + VB full-rank (khong co MCMC).
 
 Chay: python scripts/run_full_study.py --preset full
       python scripts/run_full_study.py --preset dry-run
@@ -49,7 +44,8 @@ from msgarchx.evaluation.var_backtests import christoffersen_test, kupiec_test
 from msgarchx.evaluation.volatility_loss import mae_vol, qlike, rmse_vol
 from msgarchx.inference.forecast import predictive_variance_path
 from msgarchx.inference.garch_mle import fit_garch_mle
-from msgarchx.inference.mcmc import fit_mcmc, initial_params_from_mle
+# MCMC da duoc loai khoi pham vi nghien cuu (chi con MLE + VB).
+# Module msgarchx.inference.mcmc van ton tai de tham khao/tai su dung.
 from msgarchx.inference.mle import fit_mle, natural_scale_standard_errors
 from msgarchx.inference.param_spec import ModelConfig, warm_starts_from_garch
 from msgarchx.inference.summary import relabel_posterior_samples
@@ -79,13 +75,7 @@ class StudyConfig:
     vb_n_steps: int = 3000
     vb_n_draws: int = 1000
 
-    mcmc_n_chains: int = 4
-    # warmup 250 la QUA IT de thich nghi ma tran khoi luong DAC; Stan mac dinh
-    # 1000. Lan chay dau (250 vong, ma tran duong cheo) cho R-hat ~ 4, ESS ~ 4.4.
-    mcmc_n_warmup: int = 1000
-    mcmc_n_samples: int = 400
-    mcmc_max_tree_depth: int = 7
-    mcmc_full_mass: bool = True
+    # MCMC da duoc loai khoi pham vi nghien cuu.
 
     oos_n_posterior_draws: int = 200
 
@@ -93,7 +83,6 @@ class StudyConfig:
     sim_burn_in: int = 200
     sim_B_mle: int = 30
     sim_B_vb: int = 15
-    sim_B_mcmc: int = 3
     sim_n_exog: int = 2
     sim_mle_n_starts: int = 3
     sim_mle_n_adam: int = 200
@@ -103,10 +92,6 @@ class StudyConfig:
     # trung binh/do lech chuan/khoang 2.5-97.5% de tinh bias, RMSE va coverage,
     # 500 mau la du va tiet kiem hon mot nua chi phi cua buoc nay.
     sim_vb_n_draws: int = 500
-    sim_mcmc_n_chains: int = 4
-    sim_mcmc_n_warmup: int = 100
-    sim_mcmc_n_samples: int = 150
-    sim_mcmc_max_tree_depth: int = 6
 
 
 PRESETS = {
@@ -116,13 +101,10 @@ PRESETS = {
         results_dir=ROOT / "results_dryrun",
         mle_n_starts=1, mle_n_adam=20, mle_n_lbfgs=10, mle_n_cycles=1,
         vb_n_steps=20, vb_n_draws=20,
-        mcmc_n_chains=1, mcmc_n_warmup=5, mcmc_n_samples=5, mcmc_max_tree_depth=4,
-        mcmc_full_mass=True,
         oos_n_posterior_draws=5,
-        sim_T=80, sim_burn_in=20, sim_B_mle=2, sim_B_vb=2, sim_B_mcmc=1,
+        sim_T=80, sim_burn_in=20, sim_B_mle=2, sim_B_vb=2,
         sim_mle_n_starts=1, sim_mle_n_adam=15, sim_mle_n_lbfgs=5,
-        sim_vb_n_steps=10, sim_mcmc_n_chains=1, sim_mcmc_n_warmup=3, sim_mcmc_n_samples=3,
-        sim_mcmc_max_tree_depth=3,
+        sim_vb_n_steps=10,
     ),
 }
 
@@ -281,42 +263,8 @@ def run_vb_step(cfg: StudyConfig, r_train: torch.Tensor, X_train: torch.Tensor, 
 
 
 # ============================================================
-# Buoc 3: MCMC (M4)
+# (MCMC da duoc loai khoi pham vi nghien cuu)
 # ============================================================
-def run_mcmc_step(cfg: StudyConfig, r_train: torch.Tensor, X_train: torch.Tensor, mle_res: dict) -> dict:
-    """M4 bang NUTS.
-
-    LUU Y TAI LAP: truoc day ham nay KHONG truyen `full_mass` (du StudyConfig co
-    truong `mcmc_full_mass`) va KHONG truyen `initial_params`, nen chay lai M4 o
-    day se tai lap dung cau hinh DA THAT BAI o lan 1 (ma tran khoi luong duong
-    cheo + khoi tao tu tien nghiem: R-hat ~ 4, ESS ~ 4,4, cac chuoi dung yen),
-    chu khong phai cau hinh da tao ra ket qua duoc bao cao. Nay ca hai deu duoc
-    truyen, dung chung bo khoi tao voi scripts/chay_tiep_m1_mcmc_oos.py.
-    """
-    config_m1 = mle_res["config_m1"]
-    m1 = mle_res.get("m1")
-
-    if m1 is not None:
-        # Moi chuoi mot diem khoi tao khac nhau: chuoi 0 dat dung tai nghiem MLE,
-        # cac chuoi con lai nhieu loan quanh no. Truyen mot dict DUY NHAT se cho
-        # ca 4 chuoi xuat phat cung mot cho, lam R-hat mat y nghia chan doan.
-        init = lambda c: initial_params_from_mle(m1.params, c)
-        mo_ta_init = "nghiem MLE cua M1 (chuoi 0 dung tai nghiem, cac chuoi khac nhieu loan)"
-    else:
-        init = None
-        mo_ta_init = "mac dinh cua Pyro (init_to_uniform) -- KHONG co nghiem MLE de khoi tao"
-
-    print("  -- M4: MS-GARCH-X Student-t, MCMC (NUTS) --")
-    print(f"     n_chains={cfg.mcmc_n_chains}  n_warmup={cfg.mcmc_n_warmup}  "
-          f"n_samples={cfg.mcmc_n_samples}  max_tree_depth={cfg.mcmc_max_tree_depth}  "
-          f"full_mass={cfg.mcmc_full_mass}  target_accept_prob=0.85  seed={cfg.seed}")
-    print(f"     khoi tao: {mo_ta_init}")
-    m4 = fit_mcmc(r_train, X_train, config_m1, n_chains=cfg.mcmc_n_chains,
-                  n_warmup=cfg.mcmc_n_warmup, n_samples=cfg.mcmc_n_samples, seed=cfg.seed,
-                  max_tree_depth=cfg.mcmc_max_tree_depth, verbose=True,
-                  full_mass=cfg.mcmc_full_mass, initial_params=init)
-    print(f"     R-hat lon nhat={m4.max_rhat:.4f}  ESS nho nhat={m4.min_ess:.1f}  phan ky={m4.n_divergences}")
-    return {"m4": m4}
 
 
 # ============================================================
@@ -485,7 +433,7 @@ def _eval_msgarchx_posterior(samples: dict, config: ModelConfig, r_all, X_all, r
     return result
 
 
-def run_oos_step(cfg: StudyConfig, data: dict, mle_res: dict, vb_res: dict | None, mcmc_res: dict | None) -> dict:
+def run_oos_step(cfg: StudyConfig, data: dict, mle_res: dict, vb_res: dict | None) -> dict:
     r_all, X_all, rv_all, n_train = data["r_all"], data["X_all"], data["rv_all"], data["n_train"]
     results = {}
 
@@ -506,9 +454,7 @@ def run_oos_step(cfg: StudyConfig, data: dict, mle_res: dict, vb_res: dict | Non
         print("  -- OOS: M3 (VB full-rank) --")
         results["m3"] = _eval_msgarchx_posterior(vb_res["m3"].samples, mle_res["config_m1"], r_all, X_all, rv_all, n_train, cfg.oos_n_posterior_draws)
 
-    if mcmc_res is not None:
-        print("  -- OOS: M4 (MCMC) --")
-        results["m4"] = _eval_msgarchx_posterior(mcmc_res["m4"].samples, mle_res["config_m1"], r_all, X_all, rv_all, n_train, cfg.oos_n_posterior_draws)
+
 
     for name, res in results.items():
         print(f"     {name}: QLIKE={res['qlike']:.4f} MAE={res['mae']:.4f} RMSE={res['rmse']:.4f} NLS={res['nls']:.4f}")
@@ -546,18 +492,15 @@ def run_one_scenario(cfg: StudyConfig, code: str, scenario, config: ModelConfig)
     scenario_result["vb_mean_field"] = run_scenario(
         vb_scn, config, methods=("vb_mean_field",), base_seed=cfg.seed, method_kwargs=vb_kwargs
     )["vb_mean_field"]
-    print(f"     VB (B={cfg.sim_B_vb}): {time.time()-t0:.1f}s, mean_brier={scenario_result['vb_mean_field']['mean_brier']}")
+    print(f"     VB-MF (B={cfg.sim_B_vb}): {time.time()-t0:.1f}s, mean_brier={scenario_result['vb_mean_field']['mean_brier']}")
 
-    mcmc_scn = replace(scenario, B=cfg.sim_B_mcmc, burn_in=cfg.sim_burn_in)
     t0 = time.time()
-    mcmc_kwargs = {"mcmc": {
-        "n_chains": cfg.sim_mcmc_n_chains, "n_warmup": cfg.sim_mcmc_n_warmup,
-        "n_samples": cfg.sim_mcmc_n_samples, "max_tree_depth": cfg.sim_mcmc_max_tree_depth,
-    }}
-    scenario_result["mcmc"] = run_scenario(
-        mcmc_scn, config, methods=("mcmc",), base_seed=cfg.seed, method_kwargs=mcmc_kwargs
-    )["mcmc"]
-    print(f"     MCMC (B={cfg.sim_B_mcmc}): {time.time()-t0:.1f}s, mean_brier={scenario_result['mcmc']['mean_brier']}")
+    vb_fr_kwargs = {"vb_full_rank": {"n_steps": cfg.sim_vb_n_steps,
+                                      "n_posterior_draws": cfg.sim_vb_n_draws}}
+    scenario_result["vb_full_rank"] = run_scenario(
+        vb_scn, config, methods=("vb_full_rank",), base_seed=cfg.seed, method_kwargs=vb_fr_kwargs
+    )["vb_full_rank"]
+    print(f"     VB-FR (B={cfg.sim_B_vb}): {time.time()-t0:.1f}s, mean_brier={scenario_result['vb_full_rank']['mean_brier']}")
 
     return scenario_result
 
@@ -583,7 +526,7 @@ def run_simulation_all_scenarios(cfg: StudyConfig) -> dict:
 # ============================================================
 # Main
 # ============================================================
-STAGE_ORDER = ["data", "prelim", "mle", "vb", "mcmc", "r1", "oos", "simulation"]
+STAGE_ORDER = ["data", "prelim", "mle", "vb", "r1", "oos", "simulation"]
 
 
 class _Tee:
@@ -668,18 +611,11 @@ def main():
         vb_path = cfg.results_dir / "03_vb.pt"
         vb_res = torch.load(vb_path, weights_only=False) if vb_path.exists() else None
 
-    mcmc_res = None
-    if "mcmc" in stages and mle_res is not None:
-        mcmc_res = safe_checkpoint(cfg, "04_mcmc", lambda: run_mcmc_step(cfg, r_train, X_train, mle_res))
-    elif mle_res is not None:
-        mcmc_path = cfg.results_dir / "04_mcmc.pt"
-        mcmc_res = torch.load(mcmc_path, weights_only=False) if mcmc_path.exists() else None
-
     if "r1" in stages:
         safe_checkpoint(cfg, "05_r1", lambda: run_r1_step(cfg, r_train, X_train))
 
     if "oos" in stages and mle_res is not None:
-        safe_checkpoint(cfg, "06_oos", lambda: run_oos_step(cfg, data, mle_res, vb_res, mcmc_res))
+        safe_checkpoint(cfg, "06_oos", lambda: run_oos_step(cfg, data, mle_res, vb_res))
 
     if "simulation" in stages:
         # Checkpoint theo tung kich ban duoc xu ly BEN TRONG ham nay (xem

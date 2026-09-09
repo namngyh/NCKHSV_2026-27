@@ -30,14 +30,12 @@ echo ============================================================
 echo  MS-GARCH-X VN30F1M -- Chon cach chay
 echo ============================================================
 echo.
-echo   1. Chay TOAN BO pipeline chinh (data/prelim/MLE/VB/MCMC/R1/OOS/
-echo      Simulation) mot luot, trong CUA SO RIENG.
-echo      -- Co the mat 1.5-2+ NGAY (chu yeu do MCMC). Dung khi muon
-echo         "bam mot lan roi de may chay qua dem/nhieu ngay".
+echo   1. Chay TOAN BO pipeline chinh (data/prelim/MLE/VB/R1/OOS/
+echo      Simulation S1-S4) mot luot, trong CUA SO RIENG.
+echo      -- Uoc tinh 3-5 gio (tap trung vao MLE va Variational Bayes).
 echo.
-echo   2. Chay MOT BUOC cua pipeline chinh (vd: chi "mle" truoc, "mcmc"
-echo      chay rieng sau khi ban san sang cho lau).
-echo      Cac buoc hop le: data prelim mle vb mcmc r1 oos simulation
+echo   2. Chay MOT BUOC cua pipeline chinh (vd: chi "mle", "vb", "simulation").
+echo      Cac buoc hop le: data prelim mle vb r1 oos simulation
 echo.
 echo   3. Chay MOT MO HINH rieng le trong ke hoach so sanh 20 mo hinh
 echo      (01-07, 12-14 dang san sang -- xem --list de biet chi tiet).
@@ -73,7 +71,7 @@ call :tim_python
 if "%PYEXE%"=="" pause
 if "%PYEXE%"=="" goto :menu
 echo.
-echo Cac buoc hop le: data prelim mle vb mcmc r1 oos simulation
+echo Cac buoc hop le: data prelim mle vb r1 oos simulation
 echo (co the go nhieu buoc cach nhau boi dau cach, vd: mle vb r1)
 set /p "STAGE=Nhap TEN BUOC muon chay: "
 if "%STAGE%"=="" goto :menu

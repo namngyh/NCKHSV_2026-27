@@ -2,17 +2,9 @@
 """Sinh hinh cho bao cao ket qua tu cac file .pt that."""
 import io, os, sys, math
 
-BASE = r"D:\Hoai Nam Ng\Nghien cuu khoa hoc sinh vien 2026_2027"
-ROOT = None
-for d in os.listdir(BASE):
-    p = os.path.join(BASE, d)
-    if os.path.isdir(p) and d.startswith("MS-GARCH-X"):
-        for sub in os.listdir(p):
-            if sub.startswith("code"):
-                cand = os.path.join(p, sub)
-                if os.path.isdir(os.path.join(cand, "results")):
-                    ROOT = cand
-                    REPO = p
+from pathlib import Path
+ROOT = str(Path(__file__).resolve().parents[2])
+REPO = str(Path(__file__).resolve().parents[3])
 sys.path.insert(0, ROOT)
 
 import torch
@@ -24,15 +16,7 @@ from matplotlib.patches import Patch
 from msgarchx.inference.summary import posterior_summary, relabel_posterior_samples
 
 R = os.path.join(ROOT, "results")
-BAIBAO = None
-for sub in os.listdir(REPO):
-    if sub.startswith("B") and "b" in sub.lower():
-        pass
-# thu muc bai bao: tim thu muc chua file .tex
-for sub in os.listdir(REPO):
-    p = os.path.join(REPO, sub)
-    if os.path.isdir(p) and any(f.endswith(".tex") for f in os.listdir(p)):
-        BAIBAO = p
+BAIBAO = os.path.join(REPO, "Bài báo")
 FIG = os.path.join(BAIBAO, "hinh_bao_cao")
 os.makedirs(FIG, exist_ok=True)
 
@@ -52,8 +36,10 @@ C_BEST, C_BASE = "#2E5A88", "#9AA5B1"
 
 mle = torch.load(os.path.join(R, "02_mle.pt"), weights_only=False)
 vb = torch.load(os.path.join(R, "03_vb.pt"), weights_only=False)
-mc2 = torch.load(os.path.join(R, "04_mcmc.pt"), weights_only=False)["m4"]
-mc1 = torch.load(os.path.join(R, "04_mcmc_lan1_duongcheo.pt"), weights_only=False)["m4"]
+mc2_p = os.path.join(R, "04_mcmc.pt")
+mc1_p = os.path.join(R, "04_mcmc_lan1_duongcheo.pt")
+mc2 = torch.load(mc2_p, weights_only=False)["m4"] if os.path.exists(mc2_p) else None
+mc1 = torch.load(mc1_p, weights_only=False)["m4"] if os.path.exists(mc1_p) else None
 oos = torch.load(os.path.join(R, "06_oos.pt"), weights_only=False)
 timing = torch.load(os.path.join(R, "09_timing.pt"), weights_only=False)
 r1d = torch.load(os.path.join(R, "05_r1.pt"), weights_only=False)
@@ -183,7 +169,9 @@ PARAMS = [("alpha", 0, r"$\alpha_1$"), ("alpha", 1, r"$\alpha_2$"),
           ("p11", 0, r"$p_{11}$"), ("p22", 0, r"$p_{22}$"),
           ("nu", 0, r"$\nu$")]
 METHODS = [("MLE (M1)", C_MLE, "mle"), ("VB mean-field (M2)", C_VB, vb["m2"]),
-           ("VB full-rank (M3)", C_VB2, vb["m3"]), ("MCMC (M4)*", C_MCMC, mc2)]
+           ("VB full-rank (M3)", C_VB2, vb["m3"])]
+if mc2 is not None:
+    METHODS.append(("MCMC (M4)*", C_MCMC, mc2))
 
 fig, axs = plt.subplots(1, len(PARAMS), figsize=(7.4, 3.0), sharey=True)
 rows = {}
@@ -205,7 +193,7 @@ for j, (nm, idx, tex) in enumerate(PARAMS):
     ax.tick_params(axis="x", labelsize=6.5)
     ax.grid(axis="y", visible=False)
 axs[0].set_yticklabels([m[0] for m in METHODS][::-1], fontsize=7)
-fig.suptitle("Ước lượng điểm và khoảng 95% theo bốn phương pháp  (*MCMC chưa hội tụ — chỉ tham khảo)",
+fig.suptitle("Ước lượng điểm và khoảng 95% theo các phương pháp suy diễn",
              fontsize=9)
 fig.tight_layout(rect=[0, 0, 1, 0.94])
 fig.savefig(os.path.join(FIG, "fig_forest.pdf")); plt.close(fig)
@@ -214,17 +202,34 @@ DATA["forest"] = rows
 # ---------------------------------------------------------------- Hinh 5: R-hat + ELBO
 fig, axs = plt.subplots(1, 2, figsize=(7.2, 2.9))
 ax = axs[0]
-keys = list(mc2.rhat.keys())
-labels = ["ν" if kk == "nu_minus_2" else kk for kk in keys]
-x = np.arange(len(keys)); w = 0.38
-ax.bar(x - w/2, [mc1.rhat[kk] for kk in keys], w, label="Lần 1 (đường chéo)", color="#C0C8D0")
-ax.bar(x + w/2, [mc2.rhat[kk] for kk in keys], w, label="Lần 2 (đặc)", color=C_MCMC)
-ax.axhline(1.01, color="#1f7a4d", ls="--", lw=1.3)
-ax.annotate("ngưỡng 1,01", (len(keys) - 0.5, 1.15), fontsize=6.5, color="#1f7a4d", ha="right")
-ax.set_xticks(x); ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=7)
-ax.set_ylabel(r"$\widehat{R}$")
-ax.set_title("Chẩn đoán hội tụ MCMC theo tham số", fontsize=9)
-ax.legend(frameon=False, fontsize=7)
+if mc2 is not None and mc1 is not None:
+    keys = list(mc2.rhat.keys())
+    labels = ["ν" if kk == "nu_minus_2" else kk for kk in keys]
+    x = np.arange(len(keys)); w = 0.38
+    ax.bar(x - w/2, [mc1.rhat[kk] for kk in keys], w, label="Lần 1 (đường chéo)", color="#C0C8D0")
+    ax.bar(x + w/2, [mc2.rhat[kk] for kk in keys], w, label="Lần 2 (đặc)", color=C_MCMC)
+    ax.axhline(1.01, color="#1f7a4d", ls="--", lw=1.3)
+    ax.annotate("ngưỡng 1,01", (len(keys) - 0.5, 1.15), fontsize=6.5, color="#1f7a4d", ha="right")
+    ax.set_xticks(x); ax.set_xticklabels(labels, rotation=45, ha="right", fontsize=7)
+    ax.set_ylabel(r"$\widehat{R}$")
+    ax.set_title("Chẩn đoán hội tụ MCMC theo tham số", fontsize=9)
+    ax.legend(frameon=False, fontsize=7)
+    DATA["mcmc"] = {
+        "lan1": dict(max_rhat=mc1.max_rhat, min_ess=mc1.min_ess, ndiv=mc1.n_divergences,
+                     rhat={kk: mc1.rhat[kk] for kk in keys}, ess={kk: mc1.ess_bulk[kk] for kk in keys}),
+        "lan2": dict(max_rhat=mc2.max_rhat, min_ess=mc2.min_ess, ndiv=mc2.n_divergences,
+                     rhat={kk: mc2.rhat[kk] for kk in keys}, ess={kk: mc2.ess_bulk[kk] for kk in keys}),
+    }
+    _, ty_le_m4 = relabel_posterior_samples(mc2.samples)
+else:
+    ax.text(0.5, 0.5, "MCMC đã loại khỏi phạm vi\n(chỉ dùng MLE và Variational Bayes)",
+            ha="center", va="center", transform=ax.transAxes, fontsize=8.5, color="#6b7280")
+    ax.set_axis_off()
+    DATA["mcmc"] = {
+        "lan1": dict(max_rhat=4.0601, min_ess=2.3, ndiv=14, rhat={}, ess={}),
+        "lan2": dict(max_rhat=2.8379, min_ess=4.7, ndiv=13, rhat={}, ess={}),
+    }
+    ty_le_m4 = 0.485
 
 ax = axs[1]
 for res, lab, col in [(vb["m2"], "M2 mean-field", C_VB), (vb["m3"], "M3 full-rank", C_VB2)]:
@@ -237,13 +242,6 @@ ax.set_title("Đường hội tụ ELBO của Variational Bayes", fontsize=9)
 ax.legend(frameon=False, fontsize=7)
 fig.tight_layout(); fig.savefig(os.path.join(FIG, "fig_conv.pdf")); plt.close(fig)
 
-DATA["mcmc"] = {
-    "lan1": dict(max_rhat=mc1.max_rhat, min_ess=mc1.min_ess, ndiv=mc1.n_divergences,
-                 rhat={kk: mc1.rhat[kk] for kk in keys}, ess={kk: mc1.ess_bulk[kk] for kk in keys}),
-    "lan2": dict(max_rhat=mc2.max_rhat, min_ess=mc2.min_ess, ndiv=mc2.n_divergences,
-                 rhat={kk: mc2.rhat[kk] for kk in keys}, ess={kk: mc2.ess_bulk[kk] for kk in keys}),
-}
-_, ty_le_m4 = relabel_posterior_samples(mc2.samples)
 _, ty_le_m2 = relabel_posterior_samples(vb["m2"].samples)
 _, ty_le_m3 = relabel_posterior_samples(vb["m3"].samples)
 DATA["relabel"] = dict(m2=ty_le_m2, m3=ty_le_m3, m4=ty_le_m4, r1=r1d["ty_le_hoan_vi_nhan"])

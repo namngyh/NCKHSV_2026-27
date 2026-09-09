@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 
 import torch
 
+from msgarchx.models.egarch import EGARCHParams, egarch_loglik
 from msgarchx.models.garch import GARCHParams, garch_loglik
 
 
@@ -23,7 +24,7 @@ class GARCHMLERunDiagnostics:
 
 @dataclass
 class GARCHMLEResult:
-    params: GARCHParams
+    params: GARCHParams | EGARCHParams
     loglik: float
     aic: float
     bic: float
@@ -31,7 +32,8 @@ class GARCHMLEResult:
     runs: list[GARCHMLERunDiagnostics] = field(default_factory=list)
 
 
-def _unpack(vars_: dict, dist: str) -> GARCHParams:
+def _unpack_garch(vars_: dict, dist: str) -> GARCHParams:
+    """GARCH: omega > 0 qua exp, alpha/beta >= 0 qua softplus (eq:garchx)."""
     nu = 2.0 + torch.nn.functional.softplus(vars_["eta_nu"]) if dist == "student_t" else None
     return GARCHParams(
         mu=vars_["mu"],
@@ -43,25 +45,85 @@ def _unpack(vars_: dict, dist: str) -> GARCHParams:
     )
 
 
-def _single_start(seed, r, X, dist, h0, n_adam, n_lbfgs, lr_adam, verbose):
-    torch.manual_seed(seed)
-    k = X.shape[1]
-    raw = {
-        "mu": torch.zeros(()),
-        "log_omega": torch.log(h0 * 0.1) + 0.1 * torch.randn(()),
-        "eta_alpha": torch.tensor(-1.5) + 0.2 * torch.randn(()),
-        "eta_beta": torch.tensor(1.0) + 0.2 * torch.randn(()),
-        "gamma": 0.01 * torch.randn(k),
-    }
+def _unpack_egarch(vars_: dict, dist: str) -> EGARCHParams:
+    """EGARCH: omega/alpha/theta TU DO, beta bi rang buoc vao (0, 1) qua sigmoid.
+
+    Khac han GARCH: vi phuong trinh viet cho log h nen khong he so nao can
+    duong ca (as:egarch).
+
+    VI SAO (0,1) CHU KHONG PHAI (-1,1): dieu kien dung ve ly thuyet chi doi
+    hoi |beta| < 1. Nhung tien nghiem Bayes cua beta trong bayes_single.py la
+    Beta(a,a) tren (0,1), nen neu MLE tim tren (-1,1) thi BA PHUONG PHAP SE
+    TIM TREN HAI KHONG GIAN THAM SO KHAC NHAU -- dung cai ma nguyen tac "cung
+    mot ham hop ly" cua bai bao cam. Do dai dang AM cua log-phuong sai cung
+    khong co y nghia kinh te. Nen ca ba phuong phap cung dung (0,1).
+    """
+    nu = 2.0 + torch.nn.functional.softplus(vars_["eta_nu"]) if dist == "student_t" else None
+    return EGARCHParams(
+        mu=vars_["mu"],
+        omega=vars_["omega"],
+        alpha=vars_["alpha"],
+        theta=vars_["theta"],
+        beta=torch.sigmoid(vars_["eta_beta"]),
+        gamma=vars_["gamma"],
+        nu=nu,
+    )
+
+
+def _unpack(vars_: dict, dist: str, family: str):
+    if family == "garch":
+        return _unpack_garch(vars_, dist)
+    if family == "egarch":
+        return _unpack_egarch(vars_, dist)
+    raise ValueError(f"family khong hop le: {family!r} (chi nhan 'garch' hoac 'egarch')")
+
+
+def _loglik(params, r, X, h0, family: str) -> torch.Tensor:
+    if family == "garch":
+        return garch_loglik(params, r, X, h0=h0)
+    return egarch_loglik(params, r, X, h0=h0)
+
+
+def _init_raw(dist: str, family: str, k: int, h0: torch.Tensor) -> dict:
+    """Diem khoi tao ngau nhien tren khong gian KHONG rang buoc cua tung ho."""
+    if family == "garch":
+        raw = {
+            "mu": torch.zeros(()),
+            "log_omega": torch.log(h0 * 0.1) + 0.1 * torch.randn(()),
+            "eta_alpha": torch.tensor(-1.5) + 0.2 * torch.randn(()),
+            "eta_beta": torch.tensor(1.0) + 0.2 * torch.randn(()),
+            "gamma": 0.01 * torch.randn(k),
+        }
+    else:
+        # Khoi tao EGARCH: nham vao trang thai dung log h ~ log(h0). Voi
+        # beta ~ 0.9 thi omega ~ (1 - beta) * log(h0) de muc nen khop du lieu.
+        # eta_beta khoi tao tai logit(0.9) vi beta = sigmoid(eta_beta).
+        beta0 = 0.9
+        logit_beta0 = torch.log(torch.tensor(beta0 / (1.0 - beta0)))
+        raw = {
+            "mu": torch.zeros(()),
+            "omega": (1.0 - beta0) * torch.log(h0) + 0.05 * torch.randn(()),
+            "alpha": torch.tensor(0.10) + 0.02 * torch.randn(()),
+            "theta": torch.tensor(0.0) + 0.02 * torch.randn(()),   # khong gia dinh dau don bay
+            "eta_beta": logit_beta0 + 0.1 * torch.randn(()),
+            "gamma": 0.01 * torch.randn(k),
+        }
     if dist == "student_t":
         raw["eta_nu"] = torch.tensor(1.5) + 0.2 * torch.randn(())
+    return raw
+
+
+def _single_start(seed, r, X, dist, family, h0, n_adam, n_lbfgs, lr_adam, verbose):
+    torch.manual_seed(seed)
+    k = X.shape[1]
+    raw = _init_raw(dist, family, k, h0)
     vars_ = {name: v.clone().requires_grad_(True) for name, v in raw.items()}
     params_list = list(vars_.values())
 
     opt = torch.optim.Adam(params_list, lr=lr_adam)
     for it in range(n_adam):
         opt.zero_grad()
-        loss = -garch_loglik(_unpack(vars_, dist), r, X, h0=h0)
+        loss = -_loglik(_unpack(vars_, dist, family), r, X, h0, family)
         if torch.isnan(loss):
             break
         loss.backward()
@@ -74,7 +136,7 @@ def _single_start(seed, r, X, dist, h0, n_adam, n_lbfgs, lr_adam, verbose):
 
     def closure():
         lbfgs.zero_grad()
-        loss = -garch_loglik(_unpack(vars_, dist), r, X, h0=h0)
+        loss = -_loglik(_unpack(vars_, dist, family), r, X, h0, family)
         if torch.isnan(loss):
             return loss
         loss.backward()
@@ -96,17 +158,17 @@ def _single_start(seed, r, X, dist, h0, n_adam, n_lbfgs, lr_adam, verbose):
             for k_, v in vars_.items():
                 v.copy_(before_lbfgs[k_])
                 v.grad = None
-        recomputed = -garch_loglik(_unpack(vars_, dist), r, X, h0=h0)
+        recomputed = -_loglik(_unpack(vars_, dist, family), r, X, h0, family)
         if torch.isfinite(recomputed):
             recomputed.backward()
 
     with torch.no_grad():
-        final_loss = -garch_loglik(_unpack(vars_, dist), r, X, h0=h0)
+        final_loss = -_loglik(_unpack(vars_, dist, family), r, X, h0, family)
     grad_norm = float(
         sum((v.grad.norm() ** 2 for v in params_list if v.grad is not None), torch.tensor(0.0)).sqrt()
     )
     converged = bool(torch.isfinite(final_loss)) and grad_norm < 1.0
-    params = _unpack({k_: v.detach() for k_, v in vars_.items()}, dist)
+    params = _unpack({k_: v.detach() for k_, v in vars_.items()}, dist, family)
     diag = GARCHMLERunDiagnostics(seed=seed, loglik=float(-final_loss.item()), converged=converged, grad_norm=grad_norm)
     return params, float(-final_loss.item()), diag
 
@@ -115,6 +177,7 @@ def fit_garch_mle(
     r: torch.Tensor,
     X: torch.Tensor,
     dist: str = "student_t",
+    family: str = "garch",
     n_starts: int = 5,
     base_seed: int = 0,
     n_adam: int = 400,
@@ -123,12 +186,19 @@ def fit_garch_mle(
     h0: torch.Tensor | None = None,
     verbose: bool = False,
 ) -> GARCHMLEResult:
+    """MLE cho mo hinh MOT trang thai, ho `family` ("garch" hoac "egarch").
+
+    Mo hinh khong dung bien ngoai sinh thi truyen X co 0 cot: khi do gamma la
+    vector rong va so hang ngoai sinh bang 0.
+    """
     if h0 is None:
         h0 = torch.var(r).detach()
     best = None
     runs = []
     for i in range(n_starts):
-        params, loglik, diag = _single_start(base_seed + i, r, X, dist, h0, n_adam, n_lbfgs, lr_adam, verbose)
+        params, loglik, diag = _single_start(
+            base_seed + i, r, X, dist, family, h0, n_adam, n_lbfgs, lr_adam, verbose
+        )
         runs.append(diag)
         # `loglik > best[1]` luon False khi loglik la NaN, nen neu diem khoi
         # tao DAU TIEN cho NaN thi `best` se ket lai o NaN vinh vien. Kiem tra
@@ -139,7 +209,13 @@ def fit_garch_mle(
     if best is None:
         raise RuntimeError("Tat ca cac diem khoi tao MLE deu that bai (NaN/Inf).")
     params, loglik = best
-    n_params = 4 + X.shape[1] + (1 if dist == "student_t" else 0)  # mu, omega, alpha, beta + gamma + (nu)
+    # mu, omega, alpha, beta (+ theta neu EGARCH) + gamma + (nu)
+    n_params = (
+        4
+        + (1 if family == "egarch" else 0)
+        + X.shape[1]
+        + (1 if dist == "student_t" else 0)
+    )
     aic = -2.0 * loglik + 2.0 * n_params
     bic = -2.0 * loglik + n_params * torch.log(torch.tensor(float(r.shape[0]))).item()
     return GARCHMLEResult(params=params, loglik=loglik, aic=aic, bic=bic, n_params=n_params, runs=runs)

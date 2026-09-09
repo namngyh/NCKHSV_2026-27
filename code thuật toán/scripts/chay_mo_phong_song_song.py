@@ -1,31 +1,16 @@
-"""Chay nghien cuu mo phong S1-S8 SONG SONG theo tung LAN LAP.
+"""Chay nghien cuu mo phong S1-S4 SONG SONG theo tung LAN LAP.
 
-VI SAO: `run_full_study.py --only simulation` chay tuan tu -- vong lap
-`for b in range(scenario.B)` ben trong `run_scenario`, mot tien trinh duy nhat.
-Voi cau hinh `full` (8 kich ban x (30 MLE + 15 VB + 3 MCMC) lan lap tai
-T=2000) do la khoang 15-37 NGAY. Cac lan lap doc lap hoan toan: lan lap `b`
-dung seed `base_seed + b` de sinh du lieu VA de uoc luong, khong chia se trang
-thai nao. Nen chay chung tren nhieu tien trinh cho ket quả Y HET ma nhanh gap
-~8 lan tren may 8 nhan.
+VI SAO: `run_full_study.py --only simulation` chay tuan tu tung kich ban va lan lap.
+Voi 4 kich ban hieu chinh VN30F1M (S1-S4) x cac phuong phap (MLE, VB-MF, VB-FR),
+chay song song tren nhieu tien trinh giup tan dung toi da CPU da nhan.
 
 MOI LAN LAP MOT CHECKPOINT (`results/parts/sim/<kich_ban>_<phuong_phap>_<b>.pt`)
 nen dung giua chung khong mat gi, va co the chay bo sung tung phan.
-
-CHI PHI RAT KHONG DEU giua ba phuong phap (do tren may nay, T=2000):
-    mle             ~24 phut/lan lap  x 30 lan = ~12 gio/kich ban
-    vb_mean_field   ~30 phut/lan lap  x 15 lan = ~7.5 gio/kich ban
-    mcmc            ~6-26 gio/lan lap x  3 lan = ~19-79 gio/kich ban
-MCMC chiem 45-77% tong chi phi nhung chi co 3 lan lap -- qua it de uoc luong
-coverage/Brier co y nghia thong ke. Dung `--methods` de thu hep pham vi mot
-cach co y thuc, va KHAI BAO ro trong bai bao neu lam vay.
-
-DO TRUOC KHI CHAY DAI: `--do-thu` chay 1 lan lap MCMC cua mot kich ban va bao
-`s/it` thuc te -- dang tin hon moi con so uoc tinh san.
+Sau khi hoan tat, dung `--combine` de gop thanh `results/07_simulation_S*.pt`.
 
 Chay:
-    python scripts/chay_mo_phong_song_song.py --do-thu S1
-    python scripts/chay_mo_phong_song_song.py --methods mle,vb_mean_field
-    python scripts/chay_mo_phong_song_song.py --scenarios S1,S2 --methods mcmc
+    python scripts/chay_mo_phong_song_song.py --methods mle,vb_mean_field,vb_full_rank
+    python scripts/chay_mo_phong_song_song.py --scenarios S1 --jobs 4
     python scripts/chay_mo_phong_song_song.py --combine
 """
 from __future__ import annotations
@@ -55,7 +40,7 @@ from msgarchx.simulation.run_simulation import (
 from msgarchx.simulation.scenarios import default_scenarios
 from scripts.run_full_study import PRESETS
 
-METHODS = ("mle", "vb_mean_field", "mcmc")
+METHODS = ("mle", "vb_mean_field", "vb_full_rank")
 
 
 def _log(msg: str) -> None:
@@ -68,18 +53,16 @@ def _scenarios(cfg):
 
 def _n_reps(cfg, method: str) -> int:
     return {"mle": cfg.sim_B_mle, "vb_mean_field": cfg.sim_B_vb,
-            "mcmc": cfg.sim_B_mcmc}[method]
+            "vb_full_rank": cfg.sim_B_vb}[method]
 
 
 def _method_kwargs(cfg, method: str) -> dict:
     if method == "mle":
         return {"n_starts": cfg.sim_mle_n_starts, "n_adam": cfg.sim_mle_n_adam,
                 "n_lbfgs": cfg.sim_mle_n_lbfgs}
-    if method == "vb_mean_field":
+    if method in ("vb_mean_field", "vb_full_rank"):
         return {"n_steps": cfg.sim_vb_n_steps, "n_posterior_draws": cfg.sim_vb_n_draws}
-    return {"n_chains": cfg.sim_mcmc_n_chains, "n_warmup": cfg.sim_mcmc_n_warmup,
-            "n_samples": cfg.sim_mcmc_n_samples,
-            "max_tree_depth": cfg.sim_mcmc_max_tree_depth}
+    raise ValueError(f"Phuong phap khong hop le: {method}")
 
 
 def _sim_dir(cfg) -> Path:
@@ -149,17 +132,10 @@ def combine(cfg, codes: list[str]) -> None:
 # ============================================================
 def do_thu(cfg, code: str) -> None:
     _log("=" * 70)
-    _log(f"DO THU: mot lan lap MCMC cua kich ban {code}")
-    _log("Theo doi `s/it` cua thanh tien trinh -- do la uoc tinh dang tin nhat")
-    _log("cho chinh may nay, dang tin hon moi con so tinh san.")
+    _log(f"DO THU: mot lan lap cua kich ban {code}")
     _log("=" * 70)
-    scenario = _scenarios(cfg)[code]
-    _log(f"  T={scenario.T}, {cfg.sim_mcmc_n_chains} chuoi x "
-         f"({cfg.sim_mcmc_n_warmup} khoi dong + {cfg.sim_mcmc_n_samples} mau) "
-         f"= {cfg.sim_mcmc_n_chains*(cfg.sim_mcmc_n_warmup+cfg.sim_mcmc_n_samples)} vong lap, "
-         f"max_tree_depth={cfg.sim_mcmc_max_tree_depth} (toi da "
-         f"{2**cfg.sim_mcmc_max_tree_depth - 1} buoc leapfrog/mau)")
-    worker(cfg, code, "mcmc", 0)
+    for m in METHODS:
+        worker(cfg, code, m, 0)
 
 
 # ============================================================
@@ -207,9 +183,9 @@ def _spawn(tasks: list[list[str]], jobs: int, tag: str, preset: str) -> int:
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--scenarios", default="S1,S2,S3,S4,S5,S6,S7,S8")
+    ap.add_argument("--scenarios", default="S1,S2,S3,S4")
     ap.add_argument("--methods", default=",".join(METHODS),
-                    help="mle,vb_mean_field,mcmc -- bo bot de thu hep pham vi")
+                    help="mle,vb_mean_field,vb_full_rank")
     ap.add_argument("--jobs", type=int, default=8)
     ap.add_argument("--combine", action="store_true")
     ap.add_argument("--do-thu", dest="do_thu", metavar="KICH_BAN")

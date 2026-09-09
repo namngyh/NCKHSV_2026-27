@@ -5,17 +5,9 @@ import io, os, sys, json, math
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA = json.load(io.open(os.path.join(HERE, "report_data.json"), encoding="utf-8"))
 
-BASE = r"D:\Hoai Nam Ng\Nghien cuu khoa hoc sinh vien 2026_2027"
-REPO = None
-for d in os.listdir(BASE):
-    p = os.path.join(BASE, d)
-    if os.path.isdir(p) and d.startswith("MS-GARCH-X"):
-        REPO = p
-BAIBAO = None
-for sub in os.listdir(REPO):
-    p = os.path.join(REPO, sub)
-    if os.path.isdir(p) and any(f.endswith(".tex") for f in os.listdir(p)):
-        BAIBAO = p
+from pathlib import Path
+REPO = Path(__file__).resolve().parents[3]
+BAIBAO = REPO / "Bài báo"
 OUT = os.path.join(BAIBAO, "bao_cao_ket_qua.tex")
 
 
@@ -258,12 +250,15 @@ Mục này trả lời câu hỏi trung tâm: bốn phương pháp suy diễn ch
 \textbf{Tham số} & \textbf{MLE (M1)} & \textbf{VB mean-field (M2)} & \textbf{VB full-rank (M3)} & \textbf{MCMC (M4)$^{*}$} \\
 \midrule""")
 ORDER = [r"$\alpha_1$", r"$\alpha_2$", r"$\beta_1$", r"$\beta_2$", r"$p_{11}$", r"$p_{22}$", r"$\nu$"]
-MK = ["MLE (M1)", "VB mean-field (M2)", "VB full-rank (M3)", "MCMC (M4)*"]
+MK = [m for m in ["MLE (M1)", "VB mean-field (M2)", "VB full-rank (M3)", "MCMC (M4)*"] if m in FOR.get(ORDER[0], {})]
 for pname in ORDER:
     cells = []
     for mk in MK:
-        e, lo, hi = FOR[pname][mk]
-        cells.append(rf"\makecell{{{f(e)}\\\scriptsize[{f(lo,3)}; {f(hi,3)}]}}")
+        if mk in FOR.get(pname, {}):
+            e, lo, hi = FOR[pname][mk]
+            cells.append(rf"\makecell{{{f(e)}\\\scriptsize[{f(lo,3)}; {f(hi,3)}]}}")
+        else:
+            cells.append(r"\makecell{--}")
     A(rf"{pname} & " + " & ".join(cells) + r" \\")
 A(r"""\bottomrule
 \end{tabularx}
@@ -281,12 +276,19 @@ A(r"""\bottomrule
 \end{figure}
 """)
 
-d1_mle = 1 / (1 - FOR[r"$p_{11}$"]["MLE (M1)"][0])
-d2_mle = 1 / (1 - FOR[r"$p_{22}$"]["MLE (M1)"][0])
-d1_vb = 1 / (1 - FOR[r"$p_{11}$"]["VB mean-field (M2)"][0])
-d2_vb = 1 / (1 - FOR[r"$p_{22}$"]["VB mean-field (M2)"][0])
-d1_mc = 1 / (1 - FOR[r"$p_{11}$"]["MCMC (M4)*"][0])
-d2_mc = 1 / (1 - FOR[r"$p_{22}$"]["MCMC (M4)*"][0])
+p11_mle = FOR.get(r"$p_{11}$", {}).get("MLE (M1)", (0.5,))[0]
+p22_mle = FOR.get(r"$p_{22}$", {}).get("MLE (M1)", (0.5,))[0]
+p11_vb = FOR.get(r"$p_{11}$", {}).get("VB mean-field (M2)", (0.5,))[0]
+p22_vb = FOR.get(r"$p_{22}$", {}).get("VB mean-field (M2)", (0.5,))[0]
+p11_mc = FOR.get(r"$p_{11}$", {}).get("MCMC (M4)*", (None,))[0]
+p22_mc = FOR.get(r"$p_{22}$", {}).get("MCMC (M4)*", (None,))[0]
+
+d1_mle = 1 / (1 - p11_mle) if p11_mle is not None and p11_mle < 1 else None
+d2_mle = 1 / (1 - p22_mle) if p22_mle is not None and p22_mle < 1 else None
+d1_vb = 1 / (1 - p11_vb) if p11_vb is not None and p11_vb < 1 else None
+d2_vb = 1 / (1 - p22_vb) if p22_vb is not None and p22_vb < 1 else None
+d1_mc = 1 / (1 - p11_mc) if p11_mc is not None and p11_mc < 1 else None
+d2_mc = 1 / (1 - p22_mc) if p22_mc is not None and p22_mc < 1 else None
 
 A(r"""
 \begin{table}[H]\centering
@@ -325,12 +327,15 @@ KEYS = ["mu", "omega", "alpha", "beta", "gamma", "p11", "p22", "nu_minus_2"]
 TEXN = {"mu": r"$\mu$", "omega": r"$\omega$", "alpha": r"$\alpha$", "beta": r"$\beta$",
         "gamma": r"$\gamma$", "p11": r"$p_{11}$", "p22": r"$p_{22}$", "nu_minus_2": r"$\nu$"}
 for kk in KEYS:
-    A(rf"{TEXN[kk]} & {f(MC['lan1']['rhat'][kk],4)} & {f(MC['lan1']['ess'][kk],1)} & "
-      rf"{f(MC['lan2']['rhat'][kk],4)} & {f(MC['lan2']['ess'][kk],1)} \\")
+    r1 = MC['lan1']['rhat'].get(kk) if MC and 'lan1' in MC and 'rhat' in MC['lan1'] else None
+    e1 = MC['lan1']['ess'].get(kk) if MC and 'lan1' in MC and 'ess' in MC['lan1'] else None
+    r2 = MC['lan2']['rhat'].get(kk) if MC and 'lan2' in MC and 'rhat' in MC['lan2'] else None
+    e2 = MC['lan2']['ess'].get(kk) if MC and 'lan2' in MC and 'ess' in MC['lan2'] else None
+    A(rf"{TEXN[kk]} & {f(r1,4)} & {f(e1,1)} & {f(r2,4)} & {f(e2,1)} \\")
 A(r"\midrule")
-A(rf"\textbf{{Xấu nhất}} & \textcolor{{Warn}}{{{f(MC['lan1']['max_rhat'],4)}}} & {f(MC['lan1']['min_ess'],1)} & "
-  rf"\textcolor{{Warn}}{{{f(MC['lan2']['max_rhat'],4)}}} & {f(MC['lan2']['min_ess'],1)} \\")
-A(rf"Số lần phân kỳ & \multicolumn{{2}}{{c}}{{{MC['lan1']['ndiv']}}} & \multicolumn{{2}}{{c}}{{{MC['lan2']['ndiv']}}} \\")
+A(rf"\textbf{{Xấu nhất}} & \textcolor{{Warn}}{{{f(MC['lan1']['max_rhat'] if MC else None,4)}}} & {f(MC['lan1']['min_ess'] if MC else None,1)} & "
+  rf"\textcolor{{Warn}}{{{f(MC['lan2']['max_rhat'] if MC else None,4)}}} & {f(MC['lan2']['min_ess'] if MC else None,1)} \\")
+A(rf"Số lần phân kỳ & \multicolumn{{2}}{{c}}{{{MC['lan1']['ndiv'] if MC else '--'}}} & \multicolumn{{2}}{{c}}{{{MC['lan2']['ndiv'] if MC else '--'}}} \\")
 A(r"""\bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
@@ -408,7 +413,8 @@ Trên dữ liệu thật không biết tham số đúng, nên chất lượng ư
 for nm in ["MLE", "VB mean-field", "MCMC"]:
     s = SIM[nm]
     cov = "--" if (s["cov"] is None or (isinstance(s["cov"], float) and math.isnan(s["cov"]))) else f(s["cov"], 3)
-    A(rf"{nm} & {s['nrep']} & {f(s['bias'],4)} & {f(s['rmse'],4)} & {cov} & {f(s['brier'],4)} \\")
+    nrep_txt = f(s['nrep'], 1) + (rf" ({s['nrep_min']}--{s['nrep_max']})" if s.get("nrep_min") != s.get("nrep_max") else "")
+    A(rf"{nm} & {nrep_txt} & {f(s['bias'],4)} & {f(s['rmse'],4)} & {cov} & {f(s['brier'],4)} \\")
 A(r"""\bottomrule
 \end{tabularx}
 \begin{tablenotes}\small

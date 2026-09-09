@@ -783,7 +783,7 @@ def section_simulation(sim) -> str:
     summary_tbl = _table(
         ["Kich ban", "Phuong phap", "|Bias| trung binh", "RMSE trung binh",
          "Coverage 95% trung binh", "Brier score"],
-        rows, caption="Bang 6.x -- Nghien cuu mo phong S1-S8: Bias/RMSE/Coverage/Brier",
+        rows, caption="Bang 6.x -- Nghien cuu mo phong S1-S4: Bias/RMSE/Coverage/Brier",
     )
     caveat = ('<p class="note">Cot trung binh gop cac tham so co THANG DO khac nhau (vd. omega so voi '
               "p11 so voi nu) nen chi dung de so sanh tho giua cac phuong phap; hay mo phan chi tiet "
@@ -859,7 +859,7 @@ def build_report(results_dir: Path, fragment: bool = False) -> str:
         ("r1", "Mo hinh mo rong nu theo trang thai (R1)", section_r1, (r1, mle, data)),
         ("oos", "Danh gia ngoai mau", section_oos, (oos,)),
         ("dm", "Kiem dinh Diebold-Mariano", section_dm_tests, (oos, data)),
-        ("sim", "Nghien cuu mo phong (S1-S8)", section_simulation, (sim,)),
+        ("sim", "Nghien cuu mo phong (S1-S4)", section_simulation, (sim,)),
         ("cost", "Chi phi tinh toan", section_computation, (timing,)),
     ]
     sections = [(sid, title, _safe(title, fn, *args)) for sid, title, fn, args in specs]

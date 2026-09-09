@@ -84,9 +84,9 @@ def phan_mo_phong() -> list[str]:
     sdir = RESULTS / "parts" / "sim"
     if not sdir.exists():
         return []
-    can = {"mle": 30, "vb_mean_field": 15, "mcmc": 3}
-    codes = [f"S{i}" for i in range(1, 9)]
-    L = [f"  {'':<4}{'MLE':>12}{'VB':>12}{'MCMC':>10}"]
+    can = {"mle": 100, "vb_mean_field": 100, "vb_full_rank": 100}
+    codes = [f"S{i}" for i in range(1, 5)]
+    L = [f"  {'':<4}{'MLE':>12}{'VB-MF':>12}{'VB-FR':>12}"]
     tong_xong = tong_can = 0
     for code in codes:
         o = []
@@ -95,7 +95,7 @@ def phan_mo_phong() -> list[str]:
             tong_xong += n
             tong_can += k
             o.append(f"{n}/{k}")
-        L.append(f"  {code:<4}{o[0]:>12}{o[1]:>12}{o[2]:>10}")
+        L.append(f"  {code:<4}{o[0]:>12}{o[1]:>12}{o[2]:>12}")
     # toc do tu cac tep da xong
     tep = sorted(sdir.glob("*.pt"), key=lambda p: p.stat().st_mtime)
     toc_do = ""
@@ -117,7 +117,7 @@ def phan_mo_phong() -> list[str]:
 def phan_checkpoint() -> list[str]:
     muc = [("00_data", "Du lieu"), ("01_preliminary_tests", "Kiem dinh so bo"),
            ("02_mle", "MLE B1-B4, M1"), ("03_vb", "VB M2, M3"),
-           ("04_mcmc", "MCMC M4"), ("05_r1", "R1 nu theo trang thai"),
+           ("05_r1", "R1 nu theo trang thai"),
            ("06_oos", "Danh gia ngoai mau")]
     L = []
     for ten, mo_ta in muc:
@@ -126,7 +126,7 @@ def phan_checkpoint() -> list[str]:
         kt = f"  {p.stat().st_size/1024:.0f} KB" if p.exists() else ""
         L.append(f"  {dau} {mo_ta:<26}{kt}")
     n = len(list(RESULTS.glob("07_simulation_*.pt")))
-    L.append(f"  {'[x]' if n == 8 else '[ ]'} {'Mo phong S1-S8':<26}  {n}/8 kich ban")
+    L.append(f"  {'[x]' if n == 4 else '[ ]'} {'Mo phong S1-S4':<26}  {n}/4 kich ban")
     return L
 
 
@@ -135,14 +135,9 @@ def ve() -> str:
     K.append("=" * 78)
     K.append(f"  TIEN DO  --  {datetime.now():%d/%m/%Y %H:%M:%S}")
     K.append("=" * 78)
-    mc = phan_mcmc()
-    if mc:
-        K.append("\nMCMC (NUTS) -- 4 chuoi song song")
-        K.append("-" * 78)
-        K += mc
     mp = phan_mo_phong()
     if mp:
-        K.append("\nMO PHONG S1-S8")
+        K.append("\nMO PHONG S1-S4")
         K.append("-" * 78)
         K += mp
     K.append("\nCHECKPOINT")

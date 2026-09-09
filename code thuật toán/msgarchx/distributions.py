@@ -36,6 +36,39 @@ def normal_logpdf(z: torch.Tensor) -> torch.Tensor:
     return -0.5 * (z * z) - 0.5 * math.log(2.0 * math.pi)
 
 
+def expected_abs_normal() -> float:
+    """E|z| khi z ~ N(0,1), bang sqrt(2/pi) ~ 0.7979.
+
+    Dung lam hang so chuan hoa cua so hang do lon trong EGARCH (eq:eabsz-normal):
+    alpha * (|z| - E|z|) co trung binh khong.
+    """
+    return math.sqrt(2.0 / math.pi)
+
+
+def expected_abs_std_t(nu: torch.Tensor) -> torch.Tensor:
+    """E|z| khi z ~ t*_nu (da chuan hoa ve phuong sai 1), theo eq:eabsz-t.
+
+        E|z| = 2 sqrt(nu-2) Gamma((nu+1)/2) / [ (nu-1) sqrt(pi) Gamma(nu/2) ]
+
+    Dan xuat: voi T ~ t_nu chuan (chua chuan hoa) thi
+    E|T| = 2 sqrt(nu) Gamma((nu+1)/2) / [(nu-1) sqrt(pi) Gamma(nu/2)]. Sai so
+    chuan hoa la z = T sqrt((nu-2)/nu), nen E|z| = sqrt((nu-2)/nu) * E|T|, rut
+    gon lai duoc bieu thuc tren.
+
+    Tinh qua lgamma de tranh tran so khi nu lon. Khi nu -> vo cung, gia tri hoi
+    tu ve sqrt(2/pi) -- day la phep kiem tra bat buoc trong tests.
+    """
+    log_ratio = torch.lgamma((nu + 1.0) / 2.0) - torch.lgamma(nu / 2.0)
+    log_val = (
+        math.log(2.0)
+        + 0.5 * torch.log(nu - 2.0)
+        + log_ratio
+        - torch.log(nu - 1.0)
+        - 0.5 * _LOG_PI
+    )
+    return torch.exp(log_val)
+
+
 def std_t_sample(nu: torch.Tensor) -> torch.Tensor:
     """Sinh mot mau z ~ t*_nu (phuong sai bang 1) cho MOI phan tu cua `nu`.
 

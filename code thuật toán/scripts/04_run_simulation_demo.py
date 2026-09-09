@@ -19,15 +19,16 @@ from msgarchx.simulation.scenarios import default_scenarios
 
 
 def main():
-    scenarios = default_scenarios(T_default=300, B_default=5)
+    scenarios = default_scenarios(T_default=150, B_default=2)
     scenario = scenarios["S1"]
     config = ModelConfig(n_exog=2, state_specific_nu=False)
 
     print(f"Kich ban {scenario.code}: {scenario.description}")
-    print(f"T={scenario.T}, B={scenario.B} (GIA TRI DEMO, nho hon nhieu so voi nghien cuu chinh thuc)")
+    print(f"T={scenario.T}, B={scenario.B} (GIA TRI DEMO nhanh)")
 
     t0 = time.time()
-    results = run_scenario(scenario, config, methods=("mle",), base_seed=0)
+    method_kwargs = {"mle": {"n_starts": 1, "n_adam": 40, "n_lbfgs": 15}}
+    results = run_scenario(scenario, config, methods=("mle",), base_seed=0, method_kwargs=method_kwargs)
     print(f"(thoi gian: {time.time()-t0:.1f}s)")
 
     mle_res = results["mle"]

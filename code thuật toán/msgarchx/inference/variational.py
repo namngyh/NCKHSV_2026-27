@@ -20,7 +20,10 @@ from msgarchx.inference.bayes_model import model as bayes_model
 from msgarchx.inference.param_spec import ModelConfig, PriorConfig
 from msgarchx.inference.summary import posterior_summary
 
-_GUIDE_SITES = ["mu", "omega", "alpha", "beta", "gamma", "p11", "p22", "nu_minus_2"]
+# Danh sach site co the xuat hien. Khong phai mo hinh nao cung co du: mo hinh
+# mot trang thai khong co p11/p22, chi EGARCH moi co theta. Phan trich xuat o
+# duoi da loc theo `if name in trace` nen thua ten o day la vo hai.
+_GUIDE_SITES = ["mu", "omega", "alpha", "theta", "beta", "gamma", "p11", "p22", "nu_minus_2"]
 
 
 @dataclass
@@ -48,29 +51,47 @@ def fit_vb(
     variance_link: str = "clamp",
     floor: float = 1e-8,
     verbose: bool = False,
+    model_fn=None,
+    model_args: tuple | None = None,
 ) -> VBResult:
+    """Bayes bien phan cho mot mo hinh Pyro.
+
+    Mac dinh chay MS-GARCH-X hai trang thai (bayes_model.model) voi bo tham so
+    (config, prior, variance_link, floor) -- giu nguyen hanh vi cu.
+
+    De chay mo hinh KHAC (vi du mot trang thai trong bayes_single.py), truyen:
+        model_fn   = ham model cua mo hinh do
+        model_args = bo tham so truyen sau (r, X), vi du (spec, prior)
+    Khi do config chi duoc mang theo trong ket qua, khong dung de goi model.
+    """
     pyro.set_rng_seed(seed)
     pyro.clear_param_store()
 
+    model_used = bayes_model if model_fn is None else model_fn
+    if model_fn is None:
+        call_args = (config, prior, variance_link, floor)
+    else:
+        call_args = tuple(model_args or ())
+
     if guide_type == "mean_field":
-        guide = AutoNormal(bayes_model)
+        guide = AutoNormal(model_used)
     elif guide_type == "full_rank":
-        guide = AutoMultivariateNormal(bayes_model)
+        guide = AutoMultivariateNormal(model_used)
     else:
         raise ValueError(f"guide_type khong hop le: {guide_type!r}")
 
     optim = pyro.optim.Adam({"lr": lr})
-    svi = SVI(bayes_model, guide, optim, loss=Trace_ELBO(num_particles=num_particles))
+    svi = SVI(model_used, guide, optim, loss=Trace_ELBO(num_particles=num_particles))
 
     elbo_trace = []
     for step in range(n_steps):
-        loss = svi.step(r, X, config, prior, variance_link, floor)
+        loss = svi.step(r, X, *call_args)
         elbo_trace.append(-loss)
         if verbose and step % 200 == 0:
             print(f"[VB {guide_type}] step {step}: ELBO={-loss:.4f}")
 
-    predictive = Predictive(bayes_model, guide=guide, num_samples=n_posterior_draws)
-    trace = predictive(r, X, config, prior, variance_link, floor)
+    predictive = Predictive(model_used, guide=guide, num_samples=n_posterior_draws)
+    trace = predictive(r, X, *call_args)
     samples = {name: trace[name].detach() for name in _GUIDE_SITES if name in trace}
 
     summary = posterior_summary(samples)

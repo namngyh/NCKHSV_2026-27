@@ -77,11 +77,12 @@ if not exist "ohlc_export.csv" (
 )
 
 echo.
-echo [2/2] Bat dau chay uoc luong FULL.
+echo [2/2] Bat dau chay uoc luong FULL (MLE, Variational Bayes, Simulation S1-S4).
 echo.
-echo   CANH BAO THOI GIAN: cau hinh "full" co the mat 1.5-2+ NGAY (dac biet la
-echo   MCMC tren du lieu that, xem "Luu y hieu nang" trong README.md). May tinh
-echo   can duoc bat va KHONG ngu (sleep) lien tuc trong qua trinh nay.
+echo   THOI GIAN UOC TINH: pipeline chinh tap trung vao MLE va Variational Bayes
+echo   (da loai bo MCMC do khong hoi tu), thoi gian chay uoc tinh khoang 3-5 gio.
+echo   Ket qua da duoc ghi checkpoint san trong thu muc results\ nen se bo qua
+echo   cac buoc da hoan thanh.
 echo.
 echo   Ket qua duoc ghi checkpoint LIEN TUC vao thu muc results\ -- neu tat may
 echo   hoac dong cua so nay giua chung, chay lai file .bat nay se TU DONG bo

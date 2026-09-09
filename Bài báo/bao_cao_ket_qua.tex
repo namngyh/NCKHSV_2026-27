@@ -56,7 +56,7 @@
 \begin{enumerate}[leftmargin=1.6em,itemsep=0.25em,topsep=0.3em]
   \item \textbf{Mô hình một chế độ thắng cả trong mẫu lẫn ngoài mẫu.} B3 (GARCH-X Student-t) đạt AIC thấp nhất (5648{,}87), BIC thấp nhất (5687{,}08) và QLIKE ngoài mẫu tốt nhất (0{,}9520), vượt M1 (MS-GARCH-X) ở cả ba tiêu chí dù M1 có log-hợp-lý cao hơn.
   \item \textbf{Variational Bayes cho dự báo mật độ tốt nhất với chi phí thấp.} M2 đạt điểm log âm nhỏ nhất (1{,}5354) trong 77{,}9 phút, so với 424{,}7 phút của M1.
-  \item \textbf{MCMC thất bại.} Sau hai lần chạy được lưu, $\widehat{R}$ tốt nhất chỉ đạt 2{,}8379 (yêu cầu $<1{,}01$) và ESS nhỏ nhất 4{,}7; 71{,}06\% mẫu hậu nghiệm phải đổi nhãn trạng thái, tức danh tính trạng thái không ổn định ngay trong một lần chạy.
+  \item \textbf{MCMC thất bại.} Sau hai lần chạy được lưu, $\widehat{R}$ tốt nhất chỉ đạt 2{,}8379 (yêu cầu $<1{,}01$) và ESS nhỏ nhất 4{,}7; 48{,}50\% mẫu hậu nghiệm phải đổi nhãn trạng thái, tức danh tính trạng thái không ổn định ngay trong một lần chạy.
   \item \textbf{Cấu trúc chuyển trạng thái không được dữ liệu nhận dạng.} Bốn phương pháp cho $p_{11}$ trải từ 0{,}7329 đến 0{,}9986, tương ứng thời gian tồn tại trạng thái chênh nhau hai bậc độ lớn.
 \end{enumerate}
 }
@@ -188,13 +188,13 @@ Mục này trả lời câu hỏi trung tâm: bốn phương pháp suy diễn ch
 \toprule
 \textbf{Tham số} & \textbf{MLE (M1)} & \textbf{VB mean-field (M2)} & \textbf{VB full-rank (M3)} & \textbf{MCMC (M4)$^{*}$} \\
 \midrule
-$\alpha_1$ & \makecell{0{,}1091\\\scriptsize[0{,}056; 0{,}162]} & \makecell{0{,}2709\\\scriptsize[0{,}104; 0{,}485]} & \makecell{0{,}2721\\\scriptsize[0{,}070; 0{,}472]} & \makecell{0{,}2077\\\scriptsize[0{,}061; 0{,}428]} \\
-$\alpha_2$ & \makecell{0{,}3288\\\scriptsize[0{,}048; 0{,}610]} & \makecell{0{,}2312\\\scriptsize[0{,}156; 0{,}551]} & \makecell{0{,}3823\\\scriptsize[0{,}123; 0{,}666]} & \makecell{0{,}4056\\\scriptsize[0{,}181; 0{,}647]} \\
-$\beta_1$ & \makecell{0{,}8463\\\scriptsize[0{,}773; 0{,}920]} & \makecell{0{,}2985\\\scriptsize[0{,}157; 0{,}648]} & \makecell{0{,}5980\\\scriptsize[0{,}424; 0{,}816]} & \makecell{0{,}4594\\\scriptsize[0{,}212; 0{,}688]} \\
-$\beta_2$ & \makecell{0{,}3006\\\scriptsize[-0{,}155; 0{,}756]} & \makecell{0{,}6268\\\scriptsize[0{,}284; 0{,}688]} & \makecell{0{,}6468\\\scriptsize[0{,}466; 0{,}838]} & \makecell{0{,}6423\\\scriptsize[0{,}232; 0{,}836]} \\
-$p_{11}$ & \makecell{0{,}9986\\\scriptsize[0{,}996; 1{,}001]} & \makecell{0{,}7329\\\scriptsize[0{,}558; 0{,}945]} & \makecell{0{,}8675\\\scriptsize[0{,}667; 0{,}957]} & \makecell{0{,}8239\\\scriptsize[0{,}651; 0{,}964]} \\
-$p_{22}$ & \makecell{0{,}9932\\\scriptsize[0{,}982; 1{,}004]} & \makecell{0{,}9199\\\scriptsize[0{,}703; 0{,}966]} & \makecell{0{,}8441\\\scriptsize[0{,}659; 0{,}953]} & \makecell{0{,}7614\\\scriptsize[0{,}629; 0{,}891]} \\
-$\nu$ & \makecell{4{,}0761\\\scriptsize[3{,}237; 4{,}915]} & \makecell{3{,}5204\\\scriptsize[3{,}200; 3{,}905]} & \makecell{2{,}9779\\\scriptsize[2{,}656; 3{,}435]} & \makecell{4{,}0741\\\scriptsize[3{,}414; 5{,}025]} \\
+$\alpha_1$ & \makecell{0{,}1091\\\scriptsize[0{,}056; 0{,}162]} & \makecell{0{,}2709\\\scriptsize[0{,}104; 0{,}485]} & \makecell{0{,}2721\\\scriptsize[0{,}070; 0{,}472]} \\
+$\alpha_2$ & \makecell{0{,}3288\\\scriptsize[0{,}048; 0{,}610]} & \makecell{0{,}2312\\\scriptsize[0{,}156; 0{,}551]} & \makecell{0{,}3823\\\scriptsize[0{,}123; 0{,}666]} \\
+$\beta_1$ & \makecell{0{,}8463\\\scriptsize[0{,}773; 0{,}920]} & \makecell{0{,}2985\\\scriptsize[0{,}157; 0{,}648]} & \makecell{0{,}5980\\\scriptsize[0{,}424; 0{,}816]} \\
+$\beta_2$ & \makecell{0{,}3006\\\scriptsize[-0{,}155; 0{,}756]} & \makecell{0{,}6268\\\scriptsize[0{,}284; 0{,}688]} & \makecell{0{,}6468\\\scriptsize[0{,}466; 0{,}838]} \\
+$p_{11}$ & \makecell{0{,}9986\\\scriptsize[0{,}996; 1{,}001]} & \makecell{0{,}7329\\\scriptsize[0{,}558; 0{,}945]} & \makecell{0{,}8675\\\scriptsize[0{,}667; 0{,}957]} \\
+$p_{22}$ & \makecell{0{,}9932\\\scriptsize[0{,}982; 1{,}004]} & \makecell{0{,}9199\\\scriptsize[0{,}703; 0{,}966]} & \makecell{0{,}8441\\\scriptsize[0{,}659; 0{,}953]} \\
+$\nu$ & \makecell{4{,}0761\\\scriptsize[3{,}237; 4{,}915]} & \makecell{3{,}5204\\\scriptsize[3{,}200; 3{,}905]} & \makecell{2{,}9779\\\scriptsize[2{,}656; 3{,}435]} \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
@@ -218,8 +218,8 @@ $\nu$ & \makecell{4{,}0761\\\scriptsize[3{,}237; 4{,}915]} & \makecell{3{,}5204\
 \toprule
 \textbf{Đại lượng} & \textbf{MLE (M1)} & \textbf{VB mean-field (M2)} & \textbf{MCMC (M4)$^{*}$} \\
 \midrule
-$d_1$ (trạng thái biến động thấp) & 717{,}9 phiên & 3{,}7 phiên & 5{,}7 phiên \\
-$d_2$ (trạng thái biến động cao) & 147{,}0 phiên & 12{,}5 phiên & 4{,}2 phiên \\
+$d_1$ (trạng thái biến động thấp) & 717{,}9 phiên & 3{,}7 phiên & -- phiên \\
+$d_2$ (trạng thái biến động cao) & 147{,}0 phiên & 12{,}5 phiên & -- phiên \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
@@ -268,7 +268,7 @@ Số lần phân kỳ & \multicolumn{2}{c}{14} & \multicolumn{2}{c}{13} \\
 \midrule
 M2: VB mean-field & 6{,}60\% & Ổn định: hầu hết mẫu đã đúng quy ước \\
 M3: VB full-rank & 63{,}80\% & Bất ổn: gần một phép hoán vị toàn cục \\
-M4: MCMC & 71{,}06\% & Bất ổn nặng: gần mức ngẫu nhiên $50\%$ \\
+M4: MCMC & 48{,}50\% & Bất ổn nặng: gần mức ngẫu nhiên $50\%$ \\
 R1: VB, $\nu_s$ riêng & 91{,}70\% & Bất ổn: chủ yếu là hoán vị toàn cục \\
 \bottomrule
 \end{tabularx}
@@ -323,9 +323,9 @@ Trên dữ liệu thật không biết tham số đúng, nên chất lượng ư
 \toprule
 \textbf{Phương pháp} & \textbf{Số lần lặp} & \textbf{$|$Độ chệch$|$ TB} & \textbf{RMSE TB} & \textbf{Coverage $95\%$} & \textbf{Brier} \\
 \midrule
-MLE & 225 & 0{,}2965 & 0{,}4983 & -- & 0{,}5307 \\
-VB mean-field & 120 & 0{,}5347 & 0{,}5784 & 0{,}331 & 0{,}5811 \\
-MCMC & 3 & 0{,}6224 & 0{,}6427 & 0{,}511 & 0{,}5406 \\
+MLE & 28{,}1 (21--30) & 0{,}2965 & 0{,}4983 & -- & 0{,}5307 \\
+VB mean-field & 15{,}0 & 0{,}5347 & 0{,}5784 & 0{,}331 & 0{,}5811 \\
+MCMC & 3{,}0 & 0{,}6224 & 0{,}6427 & 0{,}511 & 0{,}5406 \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
@@ -861,23 +861,22 @@ M4 & 5\% & 25 & 5{,}75\% & 0{,}4887 & 0{,}4845 & 1{,}9899 & 0{,}3697 \\
 
 \begin{table}[H]\centering\footnotesize
 \caption{Định nghĩa tám kịch bản: giá trị tham số THẬT dùng để sinh dữ liệu}
-\begin{tabularx}{\textwidth}{l C C C C C C C}
+\begin{tabularx}{\textwidth}{l C C C C C C L}
 \toprule
 \textbf{KB} & $\omega_{1},\omega_{2}$ & $\alpha_{1},\alpha_{2}$ & $\beta_{1},\beta_{2}$ & $\nu_0$ & $p_{11},p_{22}$ & $T$ & \textbf{Đặc điểm} \\
 \midrule
-S1 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 2000 & Mốc: hai trạng thái tách rõ \\
-S2 & 0{,}08; 0{,}14 & 0{,}06; 0{,}08 & 0{,}85; 0{,}83 & 8 & 0{,}95; 0{,}90 & 2000 & Hai trạng thái gần nhau \\
-S3 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 4 & 0{,}98; 0{,}95 & 2000 & Đuôi rất dày \\
-S4 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 30 & 0{,}98; 0{,}95 & 2000 & Gần phân phối chuẩn \\
-S5 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}99; 0{,}85 & 2000 & Trạng thái căng rất hiếm \\
-S6 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 500 & Cỡ mẫu nhỏ \\
-S7 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 5000 & Cỡ mẫu lớn \\
-S8 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8 & 0{,}98; 0{,}95 & 2000 & Sai đặc tả: thêm tự tương quan \\
+S1 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 & 2000 & Mốc chuẩn: hai trạng thái phân biệt rõ \\
+S2 & 0{,}08; 0{,}14 & 0{,}06; 0{,}08 & 0{,}85; 0{,}83 & 8{,}00 & 0{,}95; 0{,}90 & 2000 & Nhận dạng yếu: hai trạng thái gần nhau \\
+S3 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 4{,}00 & 0{,}98; 0{,}95 & 2000 & Đuôi rất dày ($\nu_0=4$) \\
+S4 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 30{,}00 & 0{,}98; 0{,}95 & 2000 & $\nu_0$ lớn: gần phân phối chuẩn \\
+S5 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}99; 0{,}85 & 2000 & Trạng thái biến động cao hiếm ($p_{22}$ trung bình) \\
+S6 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 & 500 & Cỡ mẫu nhỏ (tham số như S1) \\
+S7 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 & 5000 & Cỡ mẫu lớn (tham số như S1) \\
+S8 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 & 2000 & Sai đặc tả: thêm tự tương quan trong trung bình \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\footnotesize
-\item Mọi kịch bản dùng $\mu_s = 0$ và $\gamma_{s,j} = 0{,}05$. Giá trị burn-in mặc định 200 quan sát.
-\item \textbf{Lưu ý:} chú thích trong \texttt{scenarios.py} ghi các giá trị này là ``giá trị ví dụ'', cần xác nhận đã chốt trước khi công bố.
+\item Giá trị burn-in mặc định 200 quan sát. $\gamma_1=\gamma_2=(0{,}05;\,0{,}05)$ ở mọi kịch bản. Đây là các giá trị THAM SỐ MINH HỌA để kiểm tra hành vi thuật toán trên nhiều cấu hình khác nhau (mức phân biệt trạng thái, độ dày đuôi, cỡ mẫu, sai đặc tả) --- KHÔNG phải hiệu chỉnh trực tiếp từ nghiệm ước lượng VN30F1M. Số lần lặp thực đạt được cho mỗi phương pháp thấp hơn mục tiêu thiết kế do giới hạn thời gian tính toán (xem cột "Số lần lặp" ở bảng kết quả gộp).
 \end{tablenotes}
 \end{table}
 
@@ -1105,4 +1104,20 @@ Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}5345$} & \multicolumn{3}{c
 \bottomrule
 \end{tabularx}
 \end{table}
+
+\begin{table}[H]\centering\footnotesize
+\caption{Thống kê mô tả của dữ liệu đầu vào}
+\begin{tabularx}{\textwidth}{l C C C C}
+\toprule
+\textbf{Đại lượng} & \textbf{Toàn mẫu} & \textbf{Tập huấn luyện} & \textbf{Tập kiểm định} & \textbf{Đơn vị} \\
+\midrule
+Số quan sát & 2170 & 1735 & 435 & phiên \\
+Trung bình & 0{,}0381 & 0{,}0272 & 0{,}0814 & \% \\
+Độ lệch chuẩn & 1{,}5070 & 1{,}5402 & 1{,}3672 & \% \\
+Nhỏ nhất & -11{,}6612 & -11{,}6612 & -7{,}2561 & \% \\
+Lớn nhất & 6{,}7631 & 6{,}7631 & 6{,}7611 & \% \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
 \end{document}

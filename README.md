@@ -709,7 +709,7 @@ Với độ sâu cây tối đa $D$, số bước leapfrog mỗi mẫu tối đa
 
 Bảng dưới liệt kê **toàn bộ** tham số mà mã nguồn truyền vào. Cột "kết quả M4"
 ghi giá trị đã thực sự dùng cho lần chạy tạo ra kết quả được báo cáo, chạy qua
-`scripts/chay_tiep_m1_mcmc_oos.py`.
+`scripts/run_full_study.py --only mcmc` (script `chay_tiep_m1_mcmc_oos.py` đã được gỡ bỏ; phần khởi tạo chuỗi của nó đã chuyển vào `msgarchx/inference/mcmc.py::initial_params_from_mle` để hai đường chạy dùng chung, xem commit d90071c).
 
 | Tham số | Mặc định của hàm | **Kết quả M4** | `dry-run` | Mô phỏng S1–S8 | Ý nghĩa |
 |---|---|---|---|---|---|
@@ -878,7 +878,7 @@ Hai khác biệt còn lại giữa hai đường chạy, cần biết khi so sá
   độ mỗi 25 vòng; nếu bị ngắt giữa chừng thì mất trắng.
 
 Vì vậy, để tái lập kết quả M4 đúng như đã báo cáo, vẫn nên chạy qua
-`scripts/chay_tiep_m1_mcmc_oos.py`.
+`run_full_study.py --only mcmc`.
 
 #### 7.4.7 Kết quả được lưu lại
 
@@ -1120,21 +1120,16 @@ nghiên cứu mô phỏng đo được.
 Giá trị khởi tạo $h_0=\omega_s/\max(1-\alpha_s-\beta_s,\,0{,}05)$ là phương sai
 không điều kiện của trạng thái.
 
-### 11.2 Tám kịch bản
+### 11.2 Bốn kịch bản hiệu chuẩn theo VN30F1M
 
-| Mã | Đặc điểm | Mục đích |
-|---|---|---|
-| S1 | Hai trạng thái phân biệt rõ, $\nu_0=8$, $p_{ss}$ cao | Trường hợp thuận lợi, làm chuẩn đối chiếu |
-| S2 | Hai trạng thái gần nhau | Kiểm tra khi nhận dạng trạng thái yếu |
-| S3 | $\nu_0=4$ (đuôi rất dày) | Kiểm tra khả năng ước lượng bậc tự do nhỏ |
-| S4 | $\nu_0=30$ (gần phân phối chuẩn) | Kiểm tra khi Student-t gần như thừa |
-| S5 | Trạng thái biến động cao hiếm | Kiểm tra khi một trạng thái ít quan sát |
-| S6 | Cỡ mẫu nhỏ ($T=500$) | Ảnh hưởng của cỡ mẫu |
-| S7 | Cỡ mẫu lớn ($T=5000$) | Kiểm tra tính nhất quán |
-| S8 | Sai đặc tả (thêm tự tương quan trong trung bình) | Độ bền khi mô hình sai |
+Các kịch bản mô phỏng được xây dựng theo nguyên tắc **hiệu chuẩn theo thực nghiệm (Empirical Calibration)**: Kịch bản chuẩn S1 lấy chính các tham số ước lượng được từ dữ liệu thực tế VN30F1M ($\nu_0 = 4{,}08$, $\omega = [0{,}10, 1{,}08]$, $\alpha = [0{,}11, 0{,}33]$, $\beta = [0{,}85, 0{,}30]$). Các kịch bản S2–S4 thử tải phương pháp dưới các điều kiện thị trường đặc thù:
 
-Ở S8, dữ liệu được sinh với $r_t^{\text{sai}} = r_t + \phi r_{t-1}$, $\phi=0{,}3$,
-trong khi mô hình ước lượng vẫn giả định không có tự tương quan trong trung bình.
+| Mã | Tên kịch bản | Đặc điểm tham số | Mục đích kinh tế lượng |
+|---|---|---|---|
+| S1 | Baseline VN30F1M | Calibrated từ VN30F1M: $\nu_0=4{,}1$, $\omega=[0{,}10, 1{,}08]$, $T=2000$ | Khôi phục tham số trên cấu hình thực tế của phái sinh VN |
+| S2 | Nhận dạng yếu | Hai trạng thái gần nhau: $\omega=[0{,}15, 0{,}25]$, $\alpha+\beta \approx 0{,}92$ | Kiểm tra khi bề mặt likelihood phẳng và đa cực trị |
+| S3 | Mẫu ngắn | Tham số như S1, nhưng $T=500$ quan sát | Đánh giá độ chệch mẫu nhỏ và tính ổn định của tiên nghiệm Bayes |
+| S4 | Chế độ hoảng loạn hiếm | $p_{11}=0{,}99, p_{22}=0{,}80$ (trạng thái 2 kéo dài trung bình 5 phiên) | Kiểm tra khả năng nhận dạng trạng thái hiếm và đột ngột |
 
 ### 11.3 Tiêu chí đánh giá
 
@@ -1318,7 +1313,7 @@ ngày 26/08/2026 và xóa mất khoảng 65% tiến độ của cả bốn chu�
 `checkpoint_path`, trạng thái được lưu sau mỗi 25 vòng lặp, gồm bước tích phân đã
 thích nghi và điểm tham số cuối cùng. Lần chạy sau đọc lại tệp này và tiếp tục từ
 đó thay vì bắt đầu lại từ đầu. Lớp bảo vệ này chỉ có tác dụng khi chạy qua
-`scripts/chay_tiep_m1_mcmc_oos.py`; đường chạy mặc định trong `run_full_study.py`
+`run_full_study.py --only mcmc`; đường chạy mặc định trong `run_full_study.py`
 không truyền `checkpoint_path` nên vẫn mất trắng nếu bị ngắt.
 
 ---
