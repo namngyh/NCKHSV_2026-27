@@ -31,17 +31,112 @@ dẫn: TS. Châu.
 | `code thuật toán/msgarchx/simulation/run_simulation.py` | Runner mô phỏng, hỗ trợ methods `mle`, `vb_mean_field`, `vb_full_rank`, `mcmc` | `vb_full_rank` có code nhưng **chưa từng được gọi** trong lần chạy 8 kịch bản đã có — không có trong `results/07_simulation_S*.pt` |
 | `code thuật toán/results/*.pt` | Nguồn sự thật duy nhất cho mọi số liệu | Đọc bằng `torch.load(path, weights_only=False)`; cần `sys.path.insert(0, ".../code thuật toán")` trước khi load vì pickle tham chiếu class trong `msgarchx` |
 
-## Cảnh báo quan trọng: `document.tex` không có trong git
+## ~~Cảnh báo: `document.tex` không có trong git~~ — ĐÃ XỬ LÝ (09/2026)
 
-`git ls-files` xác nhận file này **chưa từng được add/commit**. Lịch sử
-restructuring (bỏ MCMC, viết lại theo "hai phần", đổi ký hiệu...) nằm ở các
-commit của một file cũ tên `khung_ly_thuyet_mo_hinh.tex` — file đó hiện đang
-bị đánh dấu xóa (`D`) trong git status nhưng **chưa commit việc xóa**.
-Nói cách khác: toàn bộ nội dung `document.tex` hiện tại chỉ tồn tại trên đĩa,
-không có bản sao lưu nào trong git. Nếu người dùng đồng ý, nên `git add` và
-commit file này (và xử lý gọn file cũ) sớm nhất có thể — đừng tự ý commit nếu
-chưa được yêu cầu, nhưng nên chủ động nhắc lại nếu thấy file này bị sửa nhiều
-mà vẫn chưa có git history.
+File này nay **đã được track** cùng `Bài báo chính.tex`, `bao_cao_ket_qua.tex`
+và toàn bộ `hinh*/`. Cảnh báo cũ không còn hiệu lực; giữ lại tiêu đề để ai đọc
+tài liệu cũ biết vấn đề đã được giải quyết chứ không phải bị bỏ quên.
+
+## TRẠNG THÁI BƯỚC 2 — MÔ PHỎNG KHÔI PHỤC THAM SỐ (cập nhật 11/09/2026)
+
+Đây là mục mới nhất; nếu mâu thuẫn với mô tả cũ bên dưới thì **mục này đúng**.
+
+**PR-A (MS-GARCH-X, S1/S2/S3, B=100, n=2000, 3 phương pháp): ĐÃ XONG.**
+897/900 lần lặp, chạy 10/09 09:18 → 11/09 19:19 = **34,0 giờ** trên 12 tiến
+trình. Kết quả đã gộp vào `results/07_simulation_S1..S3.pt`. Bản sao kết quả
+**bước thăm dò cũ** (8 kịch bản, B=30/15, *có khối MCMC 3 lần lặp*) nằm ở
+`results/07_simulation_thamdo/` — **đừng xóa**, vì `combine()` chỉ ghi ba khóa
+`mle/vb_mean_field/vb_full_rank` nên nó đã ghi đè và làm mất khối `mcmc` trong
+`07_simulation_S1.pt`.
+
+**PR-B (EGARCH-X, E1/E2/E3, B=100, n=2000): ĐANG CHẠY**, khởi động 11/09
+19:19:53. Nhịp đo được: MLE **22,4 phút/lần lặp** → cận trên khoảng 28 giờ.
+
+### BẪY LỚN NHẤT của đợt này: nhãn trạng thái không được sắp trước khi gộp
+
+`run_simulation.py` tính Bias/RMSE/Coverage bằng cách so `omega1` ước lượng với
+`omega1` thật, nhưng **không** sắp nhãn — trong khi mô hình chuyển trạng thái có
+đối xứng hoán vị nhãn nên bộ ước lượng trả nhãn theo thứ tự tùy ý. Đo được:
+**VB đảo nhãn 47–54% số lần lặp** (đúng bằng tung đồng xu), MLE 23–29%. Hậu quả
+là hai trạng thái bị trộn vào nhau: VB-FR ở S1 cho cả $\omega_1$ lẫn $\omega_2$
+xấp xỉ 0,198 trong khi giá trị thật là 0,05 và 0,40.
+
+**Đã sửa**: thêm `sap_nhan_trang_thai()` trong
+`msgarchx/simulation/run_simulation.py` (tiêu chí: phương sai vô điều kiện
+$\omega_s/(1-\alpha_s-\beta_s)$, trạng thái 1 = biến động thấp), gọi ở **cả hai**
+đường gộp, kèm 5 test. Sau khi sửa, VB-FR ở S1 cho $\omega_1=0{,}224$ và
+$\omega_2=0{,}542$ — tách được hai trạng thái.
+
+Ba dấu hiệu nhận ra lỗi này nếu nó tái xuất ở chỗ khác: (1) ước lượng hai trạng
+thái gần trùng khít dù DGP đặt chúng xa nhau; (2) chỉ những tham số **giống nhau
+ở cả hai trạng thái** mới có coverage lành lặn (ở đây là $\mu$ và
+$\boldsymbol{\gamma}$, vì cả ba kịch bản đặt $\mu_1=\mu_2=0$ và
+$\boldsymbol{\gamma}_1=\boldsymbol{\gamma}_2$); (3) Brier **tệ hơn đoán ngẫu
+nhiên** (0,5).
+
+### Brier hiện vẫn SAI, và không sửa được từ dữ liệu đã có
+
+Brier được tính trong từng lần lặp từ $\xi_t$ **trước** khi sắp nhãn, mà
+checkpoint chỉ lưu con số vô hướng chứ không lưu $\xi_t$. Giá trị hiện tại
+0,51–0,68 (riêng VB-FR 0,63–0,68, tệ hơn ngẫu nhiên). Muốn đúng phải chạy lại
+**bộ lọc tiến** một lượt với tham số đã lưu — **không cần ước lượng lại**,
+khoảng 25 phút. Chưa làm.
+
+### Coverage thấp là do CHỆCH, và chệch phần lớn do TIÊN NGHIỆM
+
+Sắp nhãn xong coverage gần như không đổi (S1: 0,317 → 0,321 với VB-MF). Lý do:
+nó đã bằng 0 từ trước vì độ chệch quá lớn. Tiên nghiệm $p_{ss}\sim$ Beta(8; 2)
+có trung bình **0,800**, trong khi giá trị thật của S1 là $p_{11}=0{,}98$. VB-MF
+cho **0,790** — gần đúng bằng trung bình tiên nghiệm; VB-FR cho 0,886; MLE
+(không có tiên nghiệm) cho **0,963**. Vì vậy coverage của $p_{11},p_{22}$ bằng
+**0,00 ở mọi kịch bản và mọi phương pháp Bayes**. Điều này khớp với phân tích độ
+nhạy đã có (đổi sang Beta(20; 2) thì $p_{11}$ trên dữ liệu thật nhảy từ 0,733
+lên 0,986). **Khi viết bài, không được nói "VB-MF đánh giá thấp bất định" như
+thể đó là tính chất thuần túy của mean-field.**
+
+### ĐỪNG nâng `sim_vb_n_steps` từ 800 lên 3000
+
+Đã kiểm chứng bằng `scripts/kiem_tra_hoi_tu_vb.py` (một lần lặp S1, 3000 bước,
+đọc thẳng tham số thang đo của guide): thang đo **đi lang quang cả hai chiều**,
+tỷ lệ scale(3000)/scale(800) trải từ 0,55× đến 1,52×. Tức **chưa hội tụ ở cả 800
+lẫn 3000** — nâng số bước không mua được gì mà đắt gấp 3,75×. Nguyên nhân nằm ở
+`Trace_ELBO(num_particles=1)` cộng Adam `lr=0,01` cố định; muốn sửa đúng hướng
+thì tăng `num_particles` hoặc cho tốc độ học giảm dần. Cột ELBO của script đó
+**không dùng được** (ghi một mẫu đơn lẻ chứ không phải trung bình trượt).
+
+### b=28 hỏng ở CẢ BA kịch bản, và tái lập được
+
+Chỉ số `b` quyết định **đồng thời** dữ liệu (`torch.manual_seed(b)`) và ba điểm
+khởi tạo MLE (`base_seed+i`, tức seed 28/29/30), nên không tách được hai nguyên
+nhân chỉ bằng dữ liệu hiện có. Lần lặp thất bại **không sinh checkpoint** nên mỗi
+lần chạy lại đều thử lại rồi hỏng lại (~20 giây). Nên báo cáo thành **tỷ lệ không
+hội tụ của MLE** thay vì giấu đi.
+
+### Công cụ mới của đợt này
+
+| File | Vai trò |
+|---|---|
+| `chay_mo_phong.bat` | Menu: [1] chạy PR-A rồi **tự động sang PR-B**, [4] tiến độ, [5] gộp cả hai, [6] chạy thử, [7] đổi số tiến trình |
+| `scripts/tien_do_mo_phong.py` | Bảng tiến độ; chỉ đọc đĩa nên chạy lúc nào cũng được, bao nhiêu cửa sổ cũng được |
+| `scripts/tom_tat_mo_phong.py` | Sinh `results/tom_tat_mo_phong.txt`; đọc giá trị tham số thật thẳng từ `scenarios.py` |
+| `scripts/kiem_tra_hoi_tu_vb.py` | Chẩn đoán hội tụ VB qua tham số thang đo của guide |
+
+Thay đổi đáng kể khác: `chay_mo_phong_song_song.py` có thêm cờ `--B`; `_spawn`
+được tổng quát hoá (thêm `script`, `args_chung`) để **PR-B dùng chung một bản
+điều phối** thay vì viết bản thứ hai; `chay_mo_phong_egarch.py` viết lại thành
+checkpoint **theo từng lần lặp** và chạy song song (trước đó tuần tự một luồng,
+ước tính ~145 giờ); cả hai driver nay ghi checkpoint **nguyên tử** (`.tmp` rồi
+`os.replace`) để mất điện giữa chừng không sinh ra file `.pt` cụt đôi.
+
+### Số đo thời gian trên máy hiện tại (12 tiến trình song song)
+
+| | Phút / lần lặp |
+|---|---|
+| MS-GARCH-X, MLE | 23–26 |
+| MS-GARCH-X, VB-MF | 30–39 |
+| MS-GARCH-X, VB-FR | 31–40 |
+| MS-GARCH-X, MCMC | **2.466** (khoảng 41 giờ — lý do MCMC đứng ngoài mô phỏng) |
+| EGARCH-X, MLE | 22,4 |
 
 ## Bẫy đã gặp (đọc kỹ trước khi kết luận "chưa chạy" / "không tồn tại")
 
@@ -63,8 +158,12 @@ mà vẫn chưa có git history.
    inspect`). Dùng scratchpad với tên file không trùng tên thư viện.
 5. **In tiếng Việt ra console cần `PYTHONIOENCODING=utf-8`**, nếu không sẽ
    lỗi `UnicodeEncodeError` với `cp1252`.
-6. **`python` chạy được (3.11.9, có torch 2.13 CPU); `python3` thì không**
-   (bị Windows App Execution Alias chặn).
+6. **`python` chạy được; `python3` thì không** (bị Windows App Execution
+   Alias chặn). *Máy hiện tại (09/2026) khác hẳn máy mô tả trong các mục cũ
+   bên dưới*: **AMD Ryzen 7 5700X3D, 8 nhân / 16 luồng, NVIDIA RTX 4060,
+   Python 3.13.14, torch 2.13.0+cu130 (`torch.cuda.is_available()` là `True`),
+   pyro 1.9.1.** Mọi chỗ trong file này nói "12 lõi logic" hay "máy này không
+   có GPU" là nói về một máy CŨ — đừng dùng để lập kế hoạch.
 7. **`appendix_gen.py` từng có bug cột `Y` chưa định nghĩa** trong
    `bao_cao_ket_qua.tex` (chỉ có `C`/`R`/`L`, không có `Y` như bên
    `document.tex`) — khiến file chưa từng biên dịch thành công trước đây. Đã
@@ -293,8 +392,8 @@ là "đã tối ưu GPU".
 chứa một bản `filter_batched` tham chiếu. Nó **chỉ để đo**, không được thư
 viện dùng.
 
-**Số đo thật trên máy này (12 lõi, không có GPU, float64, T=1735,
-forward+backward):**
+**Số đo trên MÁY CŨ (12 lõi, không có GPU, float64, T=1735,
+forward+backward) — chưa đo lại trên máy hiện tại có RTX 4060:**
 
 | B (số bộ tham số) | Tổng (giây) | **Giây / mỗi bộ** | Tăng tốc so với B=1 |
 |---|---|---|---|

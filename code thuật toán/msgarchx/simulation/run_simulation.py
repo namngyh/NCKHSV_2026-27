@@ -176,7 +176,62 @@ def run_scenario(
                                  method_kwargs=method_kwargs.get(method))
             )
 
-    return {method: _summarize_method(reps, true_named) for method, reps in results.items()}
+    # Sap nhan truoc khi gop, giong het duong chay song song (combine() trong
+    # scripts/chay_mo_phong_song_song.py) -- hai duong phai cho cung ket qua.
+    return {method: _summarize_method([sap_nhan_trang_thai(r) for r in reps], true_named)
+            for method, reps in results.items()}
+
+
+def phuong_sai_vo_dieu_kien(est: dict[str, float], s: int) -> float:
+    """h_s = omega_s / (1 - alpha_s - beta_s), phuong sai vo dieu kien cua trang thai s.
+
+    Dung lam tieu chi sap nhan. Mau duoc chan duoi vi nghiem uoc luong co the
+    cho alpha+beta >= 1 (khong dung), khi do ty so mat nghia; chan lai van giu
+    dung THU TU giua hai trang thai, la thu duy nhat ta can o day.
+    """
+    return est[f"omega{s}"] / max(1.0 - est[f"alpha{s}"] - est[f"beta{s}"], 0.05)
+
+
+def _hoan_vi(d: dict[str, float] | None) -> dict[str, float] | None:
+    """Doi cho hai trang thai trong mot dict ten -> gia tri."""
+    if d is None:
+        return None
+    ra = dict(d)
+    for goc in ("mu", "omega", "alpha", "beta", "nu"):
+        a, b = f"{goc}1", f"{goc}2"
+        if a in d and b in d:
+            ra[a], ra[b] = d[b], d[a]
+    if "p11" in d and "p22" in d:
+        ra["p11"], ra["p22"] = d["p22"], d["p11"]
+    for ten in d:
+        if ten.startswith("gamma1_"):
+            doi = "gamma2_" + ten.split("_", 1)[1]
+            if doi in d:
+                ra[ten], ra[doi] = d[doi], d[ten]
+    return ra
+
+
+def sap_nhan_trang_thai(rep: SimulationReplicationResult) -> SimulationReplicationResult:
+    """Dua mot lan lap ve quy uoc "trang thai 1 = bien dong THAP".
+
+    VI SAO BAT BUOC. Mo hinh chuyen trang thai co doi xung hoan vi nhan: doi
+    cho hai trang thai cho ra dung mot ham likelihood. Bo uoc luong vi the tra
+    ve nhan theo thu tu TUY Y. Gop 100 lan lap ma khong sap nhan truoc thi
+    omega_1 va omega_2 bi tron vao nhau, va moi Bias/RMSE/Coverage cua tham so
+    theo trang thai deu vo nghia -- do chinh la loi da xay ra: VB dao nhan o
+    khoang mot nua so lan lap, tuc dung bang tung dong xu.
+
+    Khong ap dung cho mo hinh MOT trang thai (EGARCH): khong co khoa "omega1"
+    thi ham tra ve nguyen ven.
+    """
+    est = rep.point_estimate
+    if "omega1" not in est or "omega2" not in est:
+        return rep
+    if phuong_sai_vo_dieu_kien(est, 1) <= phuong_sai_vo_dieu_kien(est, 2):
+        return rep
+    return SimulationReplicationResult(
+        rep.method, _hoan_vi(est), _hoan_vi(rep.ci_lower), _hoan_vi(rep.ci_upper), rep.brier,
+    )
 
 
 def _summarize_method(reps: list[SimulationReplicationResult], true_named: dict[str, float]) -> dict:

@@ -59,3 +59,59 @@ def test_metrics_basic_formulas():
     xi_hat = np.array([[0.9, 0.1], [0.2, 0.8]])
     true_state = np.array([0, 1])
     assert brier_state(xi_hat, true_state) < 0.05
+
+
+# ---------------------------------------------------------------------------
+# Sap nhan trang thai truoc khi gop (doi xung hoan vi nhan)
+# ---------------------------------------------------------------------------
+def _rep_mau(omega1, omega2, method="vb_mean_field"):
+    from msgarchx.simulation.run_simulation import SimulationReplicationResult
+    est = {"mu1": 0.1, "mu2": 0.2, "omega1": omega1, "omega2": omega2,
+           "alpha1": 0.05, "alpha2": 0.10, "beta1": 0.85, "beta2": 0.80,
+           "p11": 0.98, "p22": 0.95, "gamma1_0": 1.0, "gamma1_1": 2.0,
+           "gamma2_0": 3.0, "gamma2_1": 4.0, "nu": 8.0}
+    lo = {k: v - 1.0 for k, v in est.items()}
+    hi = {k: v + 1.0 for k, v in est.items()}
+    return SimulationReplicationResult(method, est, lo, hi, 0.3)
+
+
+def test_sap_nhan_giu_nguyen_khi_dung_thu_tu():
+    """Trang thai 1 da la bien dong thap -> khong duoc dong vao."""
+    from msgarchx.simulation.run_simulation import sap_nhan_trang_thai
+    rep = _rep_mau(0.05, 0.40)
+    assert sap_nhan_trang_thai(rep).point_estimate == rep.point_estimate
+
+
+def test_sap_nhan_hoan_vi_khi_dao_thu_tu():
+    """Trang thai 1 dang la bien dong CAO -> phai doi cho ca diem lan khoang."""
+    from msgarchx.simulation.run_simulation import sap_nhan_trang_thai
+    ra = sap_nhan_trang_thai(_rep_mau(0.40, 0.05)).point_estimate
+    assert ra["omega1"] == 0.05 and ra["omega2"] == 0.40
+    assert ra["alpha1"] == 0.10 and ra["beta1"] == 0.80      # di kem trang thai
+    assert ra["p11"] == 0.95 and ra["p22"] == 0.98           # p_ss doi cho nhau
+    assert ra["gamma1_0"] == 3.0 and ra["gamma2_0"] == 1.0   # ca hang gamma
+    assert ra["nu"] == 8.0                                    # vo huong, khong doi
+
+
+def test_sap_nhan_hoan_vi_ca_khoang_tin_cay():
+    """Coverage doc tu ci_lower/ci_upper nen chung phai duoc hoan vi CUNG NHAU."""
+    from msgarchx.simulation.run_simulation import sap_nhan_trang_thai
+    ra = sap_nhan_trang_thai(_rep_mau(0.40, 0.05))
+    assert ra.ci_lower["omega1"] == 0.05 - 1.0
+    assert ra.ci_upper["omega1"] == 0.05 + 1.0
+
+
+def test_sap_nhan_bo_qua_mo_hinh_mot_trang_thai():
+    """EGARCH mot trang thai khong co khoa omega1/omega2 -> tra ve nguyen ven."""
+    from msgarchx.simulation.run_simulation import (
+        SimulationReplicationResult, sap_nhan_trang_thai)
+    rep = SimulationReplicationResult("mle", {"omega": 0.04, "theta": -0.1}, None, None, None)
+    assert sap_nhan_trang_thai(rep) is rep
+
+
+def test_sap_nhan_luy_dang():
+    """Sap nhan hai lan phai bang sap nhan mot lan (idempotent)."""
+    from msgarchx.simulation.run_simulation import sap_nhan_trang_thai
+    mot = sap_nhan_trang_thai(_rep_mau(0.40, 0.05))
+    hai = sap_nhan_trang_thai(mot)
+    assert mot.point_estimate == hai.point_estimate

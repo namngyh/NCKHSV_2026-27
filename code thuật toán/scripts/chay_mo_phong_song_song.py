@@ -36,6 +36,7 @@ from msgarchx.simulation.run_simulation import (
     _named_params,
     _run_one_method,
     _summarize_method,
+    sap_nhan_trang_thai,
 )
 from msgarchx.simulation.scenarios import default_scenarios
 from scripts.run_full_study import PRESETS
@@ -93,8 +94,15 @@ def worker(cfg, code: str, method: str, b: int) -> None:
     _log(f"[{code}/{method}/{b}] bat dau (T={scn.T}, seed={seed})")
     rep = _run_one_method(method, r, sim.X, config, sim.state, seed=seed,
                           method_kwargs=_method_kwargs(cfg, method))
+    # Ghi ra file tam roi doi ten, thay vi ghi thang vao `path`. Neu may mat
+    # dien dung luc dang ghi, ta chi co mot file .tmp thua -- vo hai vi `combine`
+    # chi quet dung duoi .pt. Ghi thang thi co the sinh ra mot file .pt CUT DOI:
+    # lan chay sau thay no "da ton tai" nen bo qua vinh vien, con `combine` thi
+    # khong doc noi. Do la kieu hong am tham, dat nhat de phat hien.
+    tmp = path.with_suffix(".pt.tmp")
     torch.save({"rep": rep, "code": code, "method": method, "b": b,
-                "elapsed": time.time() - t0}, path)
+                "elapsed": time.time() - t0}, tmp)
+    os.replace(tmp, path)
     br = f"brier={rep.brier:.4f}" if rep.brier is not None else "brier=--"
     _log(f"[{code}/{method}/{b}] xong sau {(time.time()-t0)/60:.1f} phut ({br})")
 
@@ -112,13 +120,20 @@ def combine(cfg, codes: list[str]) -> None:
             files = sorted(sdir.glob(f"{code}_{method}_*.pt"))
             if not files:
                 continue
-            reps = [torch.load(f, weights_only=False)["rep"] for f in files]
+            tho = [torch.load(f, weights_only=False)["rep"] for f in files]
+            # SAP NHAN TRUOC KHI GOP. Bo uoc luong tra ve nhan trang thai theo
+            # thu tu tuy y (doi xung hoan vi nhan), nen gop truc tiep se tron
+            # omega_1 voi omega_2. Xem sap_nhan_trang_thai() de biet chi tiet.
+            reps = [sap_nhan_trang_thai(r) for r in tho]
+            n_dao = sum(1 for a, b in zip(tho, reps) if a is not b)
             out[method] = _summarize_method(reps, true_named)
             out[method]["n_replications"] = len(reps)
+            out[method]["n_dao_nhan"] = n_dao
             tong += len(reps)
             can = _n_reps(cfg, method)
             trang_thai = "du" if len(reps) >= can else f"THIEU ({len(reps)}/{can})"
             _log(f"  {code}/{method}: {len(reps)} lan lap [{trang_thai}] "
+                 f"dao nhan {n_dao}/{len(reps)} "
                  f"mean_brier={out[method]['mean_brier']}")
         if not out:
             _log(f"  {code}: chua co lan lap nao")
@@ -139,7 +154,17 @@ def do_thu(cfg, code: str) -> None:
 
 
 # ============================================================
-def _spawn(tasks: list[list[str]], jobs: int, tag: str, preset: str) -> int:
+def _spawn(tasks: list[list[str]], jobs: int, tag: str,
+           script: Path | None = None, args_chung: list[str] | None = None) -> int:
+    """Chay `tasks` tren toi da `jobs` tien trinh con, moi tac vu mot tien trinh.
+
+    `script` mac dinh la chinh file nay. Truyen file khac de driver KHAC dung
+    lai dung vong dieu phoi nay (PR-B dung chung) -- mot ban dieu phoi thay vi
+    hai ban phai sua song song moi khi doi gi.
+    `args_chung` la cac tham so dat truoc moi tac vu, vd. ["--preset", "full"].
+    """
+    script = Path(__file__).resolve() if script is None else Path(script).resolve()
+    args_chung = list(args_chung or [])
     log_dir = ROOT / "logs"
     log_dir.mkdir(exist_ok=True)
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -155,7 +180,7 @@ def _spawn(tasks: list[list[str]], jobs: int, tag: str, preset: str) -> int:
             fh = open(log_dir / f"{tag}_{name}_{stamp}.log", "w", encoding="utf-8",
                       errors="replace")
             proc = subprocess.Popen(
-                [sys.executable, str(Path(__file__).resolve()), "--preset", preset] + extra,
+                [sys.executable, str(script)] + args_chung + extra,
                 stdout=fh, stderr=subprocess.STDOUT, env=env, cwd=str(ROOT))
             running.append((name, proc, fh))
         time.sleep(10)
@@ -191,8 +216,16 @@ def main() -> int:
     ap.add_argument("--do-thu", dest="do_thu", metavar="KICH_BAN")
     ap.add_argument("--worker", nargs=3, metavar=("KICH_BAN", "PHUONG_PHAP", "B"))
     ap.add_argument("--preset", default="full")
+    ap.add_argument("--B", type=int, default=None,
+                    help="ghi de so lan lap Monte Carlo cho MOI phuong phap "
+                         "(mac dinh lay tu preset: 30 cho MLE, 15 cho VB)")
     args = ap.parse_args()
     cfg = PRESETS[args.preset]
+    # Buoc xac nhan cua thiet ke ba buoc dung B=100 cho CA BA phuong phap, thay
+    # vi 30/15 cua buoc tham do. Ghi de o day (thay vi sua PRESETS) de mot lenh
+    # duy nhat chon duoc ngan sach, va de `combine` biet dung nguong "du/thieu".
+    if args.B is not None:
+        cfg = replace(cfg, sim_B_mle=args.B, sim_B_vb=args.B)
     codes = [c.strip() for c in args.scenarios.split(",") if c.strip()]
     methods = [m.strip() for m in args.methods.split(",") if m.strip()]
     if any(m not in METHODS for m in methods):
@@ -222,7 +255,7 @@ def main() -> int:
     _log(f"Se chay {len(tasks)} lan lap tren {args.jobs} tien trinh song song")
     _log(f"  kich ban: {codes}")
     _log(f"  phuong phap: {methods}")
-    rc = _spawn(tasks, args.jobs, "sim", args.preset)
+    rc = _spawn(tasks, args.jobs, "sim", args_chung=["--preset", args.preset])
     combine(cfg, codes)
     return rc
 

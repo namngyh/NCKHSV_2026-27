@@ -1,0 +1,141 @@
+==============================================================================
+TOM TAT NGHIEN CUU KHOI PHUC THAM SO (PARAMETER RECOVERY)
+MS-GARCH-X Student-t va EGARCH-X Student-t cho VN30F1M
+==============================================================================
+Sinh luc: 2026-09-11 19:48:59
+Thu muc:  C:\Users\Admin\Desktop\nam\NCKH\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results
+
+Da SAP NHAN TRANG THAI truoc khi gop (tieu chi: phuong sai vo dieu kien
+omega_s/(1-alpha_s-beta_s), trang thai 1 = bien dong thap).
+
+==============================================================================
+PHAN 1 -- PR-A: MS-GARCH-X Student-t, hai trang thai (15 tham so)
+==============================================================================
+  Thiet ke: 3 kich ban x 3 phuong phap x B=100 lan lap, n = 2000 quan sat
+            burn-in 200, k = 2 bien ngoai sinh
+
+  SO LAN LAP HOAN TAT  (B=100 la muc tieu; thieu = MLE phan ky NaN)
+    kich ban         MLE     VB-MF     VB-FR                  dao nhan
+    S1                99       100       100      MLE:23  VB-MF:48  VB-FR:49
+    S2                99       100       100      MLE:29  VB-MF:52  VB-FR:47
+    S3                99       100       100      MLE:27  VB-MF:48  VB-FR:53
+
+    'dao nhan' = so lan lap bo uoc luong tra ve nhan trang thai NGUOC quy uoc,
+    da duoc hoan vi truoc khi gop. VB dao gan 50% -- tuc khong nhan dang nhan.
+
+  COVERAGE TRUNG BINH CUA KHOANG TIN CAY 95%  (ly tuong 0,95)
+    kich ban       VB-MF     VB-FR   mo ta
+    S1             0.321     0.427   Moc nen -- hai trang thai phan biet ro
+    S2             0.453     0.505   Nhan dang yeu -- hai trang thai gan nhau
+    S3             0.339     0.423   Duoi rat day -- nu_0 = 4, sat bien ton tai phuong sai
+
+    MLE khong co cot nay: quy trinh nay khong sinh khoang tin cay cho MLE.
+
+  COVERAGE THEO TUNG THAM SO
+    tham so        S1 MF    S1 FR    S2 MF    S2 FR    S3 MF    S3 FR
+    mu1             0.64     0.86     0.81     0.89     0.64     0.93
+    mu2             0.59     0.75     0.81     0.75     0.60     0.82
+    omega1          0.00     0.01     0.00     0.00     0.00     0.00
+    omega2          0.16     0.50     0.00     0.00     0.45     0.51
+    alpha1          0.00     0.01     0.17     0.45     0.00     0.03
+    alpha2          0.00     0.18     0.43     0.69     0.00     0.19
+    beta1           0.00     0.00     0.00     0.00     0.00     0.01
+    beta2           0.00     0.33     0.00     0.01     0.11     0.30
+    p11             0.00     0.00     0.00     0.00     0.00     0.00
+    p22             0.00     0.00     0.00     0.00     0.00     0.00
+    gamma1_0        0.90     0.91     0.98     1.00     0.81     0.86
+    gamma1_1        0.79     0.92     0.95     0.94     0.72     0.84
+    gamma2_0        0.87     0.95     0.96     0.96     0.87     0.92
+    gamma2_1        0.86     0.91     0.93     0.94     0.89     0.89
+    nu              0.00     0.08     0.75     0.94     0.00     0.04
+
+  UOC LUONG TRUNG BINH -- S1: Moc nen -- hai trang thai phan biet ro
+    tham so     gia tri that        MLE      VB-MF      VB-FR
+    omega1             0.050      0.085      0.186      0.224
+    omega2             0.400      1.074      0.232      0.542
+    alpha1             0.050      0.084      0.344      0.290
+    alpha2             0.100      0.143      0.365      0.374
+    beta1              0.850      0.720      0.673      0.575
+    beta2              0.800      0.730      0.655      0.605
+    p11                0.980      0.963      0.790      0.886
+    p22                0.950      0.896      0.674      0.713
+    nu                 8.000      6.402      3.739      4.483
+
+  UOC LUONG TRUNG BINH -- S2: Nhan dang yeu -- hai trang thai gan nhau
+    tham so     gia tri that        MLE      VB-MF      VB-FR
+    omega1             0.080      0.109      0.388      0.397
+    omega2             0.140      0.650      0.415      0.618
+    alpha1             0.060      0.051      0.144      0.131
+    alpha2             0.080      0.086      0.154      0.210
+    beta1              0.850      0.803      0.499      0.462
+    beta2              0.830      0.752      0.510      0.464
+    p11                0.950      0.909      0.741      0.835
+    p22                0.900      0.777      0.667      0.614
+    nu                 8.000      8.687      7.218      7.704
+
+  UOC LUONG TRUNG BINH -- S3: Duoi rat day -- nu_0 = 4, sat bien ton tai phuong sai
+    tham so     gia tri that        MLE      VB-MF      VB-FR
+    omega1             0.050      0.090      0.273      0.281
+    omega2             0.400      1.092      0.335      0.673
+    alpha1             0.050      0.071      0.541      0.361
+    alpha2             0.100      0.135      0.541      0.431
+    beta1              0.850      0.682      0.716      0.565
+    beta2              0.800      0.775      0.691      0.613
+    p11                0.980      0.959      0.779      0.883
+    p22                0.950      0.894      0.681      0.729
+    nu                 4.000      3.937      2.404      2.795
+
+==============================================================================
+PHAN 2 -- PR-B: EGARCH-X Student-t, mot trang thai (8 tham so)
+==============================================================================
+  Thiet ke: 3 kich ban x 3 phuong phap x B=100 lan lap, n = 2000 quan sat
+
+  Tien do: 12/900 lan lap co checkpoint
+
+    E1   chua xong    Don bay ro -- theta_0 = -0,10
+    E2   chua xong    KHONG don bay -- theta_0 = 0  (kich ban quan trong nhat)
+    E3   chua xong    Duoi day -- nu_0 = 4, co don bay
+  (chua kich ban nao hoan tat -- chay lai script nay sau khi xong)
+
+  DOC KET QUA: voi E2 (theta_0 = 0), bias(theta) gan 0 nghia la mo hinh KHONG
+  bia ra don bay gia. Neu bias lech khoi 0 mot cach he thong thi moi ket luan
+  've hieu ung don bay cua VN30F1M' deu phai xem lai.
+
+==============================================================================
+PHAN 3 -- NHUNG DIEU PHAI NEU RO KHI BAO CAO
+==============================================================================
+
+  1. BRIER HIEN CHUA DUNG DUOC.
+     Brier duoc tinh trong tung lan lap tu xac suat loc xi_t, TRUOC khi sap
+     nhan trang thai, va checkpoint chi luu lai con so vo huong chu khong luu
+     xi_t. Vi vay khong sua lai duoc tu du lieu da co. Bang chung cho thay no
+     that su bi hong: Brier cua VB-FR la 0,63-0,68, TE HON ca doan ngau nhien
+     (0,50) -- dieu chi xay ra khi gan nhan sai he thong. Muon co Brier dung
+     phai chay lai bo loc tien mot luot voi tham so da luu (~25 phut), khong
+     can uoc luong lai.
+
+  2. THIEU 3 LAN LAP: b=28 cua MLE o CA BA kich ban.
+     Ca ba diem khoi tao deu phan ky ve NaN. Do la loi TAI LAP duoc, khong
+     phai ngau nhien: chi so b quyet dinh dong thoi du lieu (manual_seed(b))
+     va ba diem khoi tao (base_seed+i). Lan lap that bai khong sinh
+     checkpoint nen moi lan chay lai deu thu lai va hong lai (~20 giay).
+     Nen bao cao thanh TY LE KHONG HOI TU cua MLE thay vi giau di.
+
+  3. UOC LUONG VB CUA p_ss BI TIEN NGHIEM KEO.
+     Tien nghiem p_ss ~ Beta(8; 2), trung binh 0,800. Gia tri that cua S1 la
+     p11 = 0,98. VB-MF cho 0,790 -- gan nhu dung bang trung binh tien nghiem;
+     VB-FR cho 0,886; MLE (khong co tien nghiem) cho 0,963. Coverage cua
+     p11/p22 bang 0,00 o MOI kich ban va MOI phuong phap Bayes la HE QUA CUA
+     DO CHECH nay, khong phai do khoang tin cay qua hep. Ket qua nay khop voi
+     phan tich do nhay tien nghiem da co (doi sang Beta(20; 2) thi p11 tren du
+     lieu that nhay tu 0,733 len 0,986).
+
+  4. COVERAGE CAO O gamma VA mu KHONG PHAI DAU HIEU TOT.
+     Ca ba kich ban deu dat mu_1 = mu_2 = 0 va gamma_1 = gamma_2 = (0,05; 0,05),
+     tuc hai tham so nay GIONG NHAU o ca hai trang thai. Chung mien nhiem voi
+     van de hoan vi nhan, nen coverage 0,72-1,00 cua chung khong noi len dieu
+     gi ve kha nang phan biet trang thai.
+
+  5. NU LA THAM SO VO HUONG, khong dinh gi den hoan vi nhan. Coverage cua no
+     (0,00 o S1/S3 nhung 0,75-0,94 o S2) la ket qua sach, dung duoc ngay.
+

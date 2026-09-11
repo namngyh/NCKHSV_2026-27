@@ -19,6 +19,9 @@ env/
 # Nên nay được theo dõi. Chỉ loại các thư mục chạy thử tạm thời.
 results_dryrun/
 results_mergetest/
+# Thu muc chay thu cua mo phong EGARCH (--nhanh): cau hinh nho, khong phai
+# ket qua nghien cuu. Cung ly do nhu results_dryrun/.
+code thuật toán/results/mo_phong_egarch_nhanh/
 .venv_gpu_test/
 
 # Trình soạn thảo và hệ điều hành
