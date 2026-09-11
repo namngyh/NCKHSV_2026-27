@@ -42,7 +42,8 @@ tài liệu cũ biết vấn đề đã được giải quyết chứ không ph�
 Đây là mục mới nhất; nếu mâu thuẫn với mô tả cũ bên dưới thì **mục này đúng**.
 
 **PR-A (MS-GARCH-X, S1/S2/S3, B=100, n=2000, 3 phương pháp): ĐÃ XONG.**
-897/900 lần lặp, chạy 10/09 09:18 → 11/09 19:19 = **34,0 giờ** trên 12 tiến
+**900/900 lần lặp** (897 trong lượt chính, 3 lần lặp `b=28` chạy bù sau theo quy
+tắc thử lại ở dưới), chạy 10/09 09:18 → 11/09 19:19 = **34,0 giờ** trên 12 tiến
 trình. Kết quả đã gộp vào `results/07_simulation_S1..S3.pt`. Bản sao kết quả
 **bước thăm dò cũ** (8 kịch bản, B=30/15, *có khối MCMC 3 lần lặp*) nằm ở
 `results/07_simulation_thamdo/` — **đừng xóa**, vì `combine()` chỉ ghi ba khóa
@@ -104,13 +105,30 @@ lẫn 3000** — nâng số bước không mua được gì mà đắt gấp 3,7
 thì tăng `num_particles` hoặc cho tốc độ học giảm dần. Cột ELBO của script đó
 **không dùng được** (ghi một mẫu đơn lẻ chứ không phải trung bình trượt).
 
-### b=28 hỏng ở CẢ BA kịch bản, và tái lập được
+### b=28: thủ phạm là ĐIỂM KHỞI TẠO, không phải dữ liệu — đã phân định
 
-Chỉ số `b` quyết định **đồng thời** dữ liệu (`torch.manual_seed(b)`) và ba điểm
-khởi tạo MLE (`base_seed+i`, tức seed 28/29/30), nên không tách được hai nguyên
-nhân chỉ bằng dữ liệu hiện có. Lần lặp thất bại **không sinh checkpoint** nên mỗi
-lần chạy lại đều thử lại rồi hỏng lại (~20 giây). Nên báo cáo thành **tỷ lệ không
-hội tụ của MLE** thay vì giấu đi.
+`b=28` của MLE hỏng ở **cả ba** kịch bản S1/S2/S3 dù chúng có DGP khác nhau. Đã
+phân định dứt điểm bằng thực nghiệm: **giữ nguyên dữ liệu seed 28**, chỉ đổi
+`base_seed` từ 28 sang 500 thì ước lượng **chạy trơn** (loglik = −3131,84).
+Xác nhận cơ chế trong code: `init_raw(config, seed)` chỉ nhận `config` và `seed`,
+**không đụng đến dữ liệu**, nên bộ ba điểm khởi tạo sinh từ seed 28/29/30 giống
+hệt nhau ở mọi kịch bản — đó là lý do cùng một `b` hỏng ở cả ba.
+
+**KHÔNG báo cáo thành "tỷ lệ không hội tụ của MLE".** Con số đó ngụ ý "khoảng 1%
+bộ dữ liệu khó ước lượng", trong khi sự thật là **0% bộ dữ liệu khó**: chỉ một
+lần rút ngẫu nhiên điểm khởi tạo bị xấu, độc lập hoàn toàn với dữ liệu. Nói như
+vậy là mô tả sai bản chất của bộ ước lượng.
+
+**Đã cài quy tắc thử lại, khai báo trước** (`OFFSET_THU_LAI = 1000` trong
+`scripts/chay_mo_phong_song_song.py`): nếu cả ba điểm khởi tạo phân kỳ thì rút
+một bộ điểm khởi tạo khác bằng `seed + 1000`, **giữ nguyên dữ liệu**. Đây không
+phải chọn lọc kết quả — quy tắc cố định trước khi chạy, không nhìn vào dữ liệu
+lẫn giá trị ước lượng thu được, và chỉ nói "gặp điểm xuất phát hỏng thì đổi điểm
+xuất phát". Checkpoint nay lưu thêm khóa `seed_khoi_tao` để kiểm toán được lần
+lặp nào đã phải thử lại. **Khi viết bài phải nêu rõ quy tắc này.**
+
+Lưu ý vận hành vẫn đúng: lần lặp thất bại **không sinh checkpoint**, nên trước
+khi có quy tắc thử lại thì mỗi lần chạy lại đều thử lại rồi hỏng lại (~20 giây).
 
 ### Công cụ mới của đợt này
 

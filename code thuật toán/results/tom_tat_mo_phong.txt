@@ -2,7 +2,7 @@
 TOM TAT NGHIEN CUU KHOI PHUC THAM SO (PARAMETER RECOVERY)
 MS-GARCH-X Student-t va EGARCH-X Student-t cho VN30F1M
 ==============================================================================
-Sinh luc: 2026-09-11 19:48:59
+Sinh luc: 2026-09-11 21:57:18
 Thu muc:  C:\Users\Admin\Desktop\nam\NCKH\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results
 
 Da SAP NHAN TRANG THAI truoc khi gop (tieu chi: phuong sai vo dieu kien
@@ -14,11 +14,11 @@ PHAN 1 -- PR-A: MS-GARCH-X Student-t, hai trang thai (15 tham so)
   Thiet ke: 3 kich ban x 3 phuong phap x B=100 lan lap, n = 2000 quan sat
             burn-in 200, k = 2 bien ngoai sinh
 
-  SO LAN LAP HOAN TAT  (B=100 la muc tieu; thieu = MLE phan ky NaN)
+  SO LAN LAP HOAN TAT  (B=100 la muc tieu)
     kich ban         MLE     VB-MF     VB-FR                  dao nhan
-    S1                99       100       100      MLE:23  VB-MF:48  VB-FR:49
-    S2                99       100       100      MLE:29  VB-MF:52  VB-FR:47
-    S3                99       100       100      MLE:27  VB-MF:48  VB-FR:53
+    S1               100       100       100      MLE:23  VB-MF:48  VB-FR:49
+    S2               100       100       100      MLE:30  VB-MF:52  VB-FR:47
+    S3               100       100       100      MLE:28  VB-MF:48  VB-FR:53
 
     'dao nhan' = so lan lap bo uoc luong tra ve nhan trang thai NGUOC quy uoc,
     da duoc hoan vi truoc khi gop. VB dao gan 50% -- tuc khong nhan dang nhan.
@@ -52,45 +52,45 @@ PHAN 1 -- PR-A: MS-GARCH-X Student-t, hai trang thai (15 tham so)
   UOC LUONG TRUNG BINH -- S1: Moc nen -- hai trang thai phan biet ro
     tham so     gia tri that        MLE      VB-MF      VB-FR
     omega1             0.050      0.085      0.186      0.224
-    omega2             0.400      1.074      0.232      0.542
+    omega2             0.400      1.076      0.232      0.542
     alpha1             0.050      0.084      0.344      0.290
-    alpha2             0.100      0.143      0.365      0.374
+    alpha2             0.100      0.142      0.365      0.374
     beta1              0.850      0.720      0.673      0.575
-    beta2              0.800      0.730      0.655      0.605
+    beta2              0.800      0.733      0.655      0.605
     p11                0.980      0.963      0.790      0.886
-    p22                0.950      0.896      0.674      0.713
-    nu                 8.000      6.402      3.739      4.483
+    p22                0.950      0.895      0.674      0.713
+    nu                 8.000      6.397      3.739      4.483
 
   UOC LUONG TRUNG BINH -- S2: Nhan dang yeu -- hai trang thai gan nhau
     tham so     gia tri that        MLE      VB-MF      VB-FR
-    omega1             0.080      0.109      0.388      0.397
-    omega2             0.140      0.650      0.415      0.618
+    omega1             0.080      0.108      0.388      0.397
+    omega2             0.140      0.646      0.415      0.618
     alpha1             0.060      0.051      0.144      0.131
-    alpha2             0.080      0.086      0.154      0.210
-    beta1              0.850      0.803      0.499      0.462
+    alpha2             0.080      0.087      0.154      0.210
+    beta1              0.850      0.804      0.499      0.462
     beta2              0.830      0.752      0.510      0.464
-    p11                0.950      0.909      0.741      0.835
-    p22                0.900      0.777      0.667      0.614
-    nu                 8.000      8.687      7.218      7.704
+    p11                0.950      0.910      0.741      0.835
+    p22                0.900      0.778      0.667      0.614
+    nu                 8.000      8.667      7.218      7.704
 
   UOC LUONG TRUNG BINH -- S3: Duoi rat day -- nu_0 = 4, sat bien ton tai phuong sai
     tham so     gia tri that        MLE      VB-MF      VB-FR
     omega1             0.050      0.090      0.273      0.281
-    omega2             0.400      1.092      0.335      0.673
+    omega2             0.400      1.096      0.335      0.673
     alpha1             0.050      0.071      0.541      0.361
-    alpha2             0.100      0.135      0.541      0.431
+    alpha2             0.100      0.134      0.541      0.431
     beta1              0.850      0.682      0.716      0.565
-    beta2              0.800      0.775      0.691      0.613
+    beta2              0.800      0.776      0.691      0.613
     p11                0.980      0.959      0.779      0.883
-    p22                0.950      0.894      0.681      0.729
-    nu                 4.000      3.937      2.404      2.795
+    p22                0.950      0.895      0.681      0.729
+    nu                 4.000      3.936      2.404      2.795
 
 ==============================================================================
 PHAN 2 -- PR-B: EGARCH-X Student-t, mot trang thai (8 tham so)
 ==============================================================================
   Thiet ke: 3 kich ban x 3 phuong phap x B=100 lan lap, n = 2000 quan sat
 
-  Tien do: 12/900 lan lap co checkpoint
+  Tien do: 72/900 lan lap co checkpoint
 
     E1   chua xong    Don bay ro -- theta_0 = -0,10
     E2   chua xong    KHONG don bay -- theta_0 = 0  (kich ban quan trong nhat)
@@ -114,12 +114,21 @@ PHAN 3 -- NHUNG DIEU PHAI NEU RO KHI BAO CAO
      phai chay lai bo loc tien mot luot voi tham so da luu (~25 phut), khong
      can uoc luong lai.
 
-  2. THIEU 3 LAN LAP: b=28 cua MLE o CA BA kich ban.
-     Ca ba diem khoi tao deu phan ky ve NaN. Do la loi TAI LAP duoc, khong
-     phai ngau nhien: chi so b quyet dinh dong thoi du lieu (manual_seed(b))
-     va ba diem khoi tao (base_seed+i). Lan lap that bai khong sinh
-     checkpoint nen moi lan chay lai deu thu lai va hong lai (~20 giay).
-     Nen bao cao thanh TY LE KHONG HOI TU cua MLE thay vi giau di.
+  2. QUY TAC THU LAI DIEM KHOI TAO -- PHAI NEU TRONG BAI.
+     Lan lap b=28 cua MLE phan ky ve NaN o CA BA kich ban. Da phan dinh
+     duoc thu pham: KHONG phai du lieu ma la DIEM KHOI TAO. Giu nguyen du
+     lieu seed 28 va chi doi base_seed tu 28 sang 500 thi uoc luong chay
+     tron (loglik = -3131,84); init_raw() chi nhan (config, seed) chu khong
+     dung den du lieu, nen bo ba diem khoi tao seed 28/29/30 hong y het o
+     moi kich ban.
+     Vi vay KHONG duoc bao cao thanh 'ty le khong hoi tu cua MLE': con so do
+     ngu y 1% bo du lieu kho uoc luong, trong khi su that la 0% bo du lieu
+     kho -- chi mot lan rut diem khoi tao xau, doc lap voi du lieu.
+     Quy tac da cai (OFFSET_THU_LAI = 1000 trong chay_mo_phong_song_song.py):
+     neu ca ba diem khoi tao phan ky thi rut bo khac bang seed+1000, GIU
+     NGUYEN du lieu. Quy tac co dinh truoc khi chay, khong nhin vao du lieu
+     lan gia tri uoc luong, nen khong phai chon loc ket qua. Checkpoint luu
+     khoa 'seed_khoi_tao' de kiem toan lan lap nao da phai thu lai.
 
   3. UOC LUONG VB CUA p_ss BI TIEN NGHIEM KEO.
      Tien nghiem p_ss ~ Beta(8; 2), trung binh 0,800. Gia tri that cua S1 la

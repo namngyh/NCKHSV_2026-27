@@ -43,6 +43,10 @@ from scripts.run_full_study import PRESETS
 
 METHODS = ("mle", "vb_mean_field", "vb_full_rank")
 
+# Do lech seed dung cho bo diem khoi tao THU HAI khi bo thu nhat phan ky.
+# Xem giai thich day du trong worker().
+OFFSET_THU_LAI = 1000
+
 
 def _log(msg: str) -> None:
     print(f"[{datetime.now():%Y-%m-%d %H:%M:%S}] {msg}", flush=True)
@@ -92,8 +96,34 @@ def worker(cfg, code: str, method: str, b: int) -> None:
                               burn_in=scn.burn_in, seed=seed)
     r = _apply_misspecification(sim.r, scn.misspecified)
     _log(f"[{code}/{method}/{b}] bat dau (T={scn.T}, seed={seed})")
-    rep = _run_one_method(method, r, sim.X, config, sim.state, seed=seed,
-                          method_kwargs=_method_kwargs(cfg, method))
+    try:
+        rep = _run_one_method(method, r, sim.X, config, sim.state, seed=seed,
+                              method_kwargs=_method_kwargs(cfg, method))
+        seed_dung = seed
+    except RuntimeError as loi:
+        # QUY TAC THU LAI -- KHAI BAO TRUOC, PHAI NEU TRONG BAI.
+        #
+        # Neu CA BA diem khoi tao deu phan ky ve NaN thi rut mot bo diem khoi
+        # tao KHAC bang seed + OFFSET_THU_LAI, GIU NGUYEN du lieu.
+        #
+        # Vi sao day khong phai chon loc ket qua: quy tac khong nhin vao du
+        # lieu, khong nhin vao gia tri uoc luong thu duoc, va co dinh truoc khi
+        # chay. No chi noi "gap diem xuat phat hong thi doi diem xuat phat" --
+        # dung dieu bat ky quy trinh uoc luong thuc te nao cung lam.
+        #
+        # Vi sao CAN thiet: da kiem chung thu pham la DIEM KHOI TAO chu khong
+        # phai du lieu. init_raw() chi nhan (config, seed), khong dung den du
+        # lieu, nen bo ba seed 28/29/30 hong y het o CA BA kich ban S1/S2/S3 du
+        # chung co DGP khac nhau; giu nguyen du lieu seed 28 va doi base_seed
+        # sang 500 thi chay duoc (loglik = -3131,84). Neu khong co quy tac nay
+        # ma bao cao thanh "ty le khong hoi tu cua MLE" thi se noi sai ban chat:
+        # khong phai 1% bo du lieu kho uoc luong, ma la mot lan rut diem khoi
+        # tao xau, doc lap voi du lieu.
+        _log(f"[{code}/{method}/{b}] bo diem khoi tao {seed} phan ky ({loi}); "
+             f"thu lai voi {seed + OFFSET_THU_LAI}, giu nguyen du lieu")
+        seed_dung = seed + OFFSET_THU_LAI
+        rep = _run_one_method(method, r, sim.X, config, sim.state, seed=seed_dung,
+                              method_kwargs=_method_kwargs(cfg, method))
     # Ghi ra file tam roi doi ten, thay vi ghi thang vao `path`. Neu may mat
     # dien dung luc dang ghi, ta chi co mot file .tmp thua -- vo hai vi `combine`
     # chi quet dung duoi .pt. Ghi thang thi co the sinh ra mot file .pt CUT DOI:
@@ -101,7 +131,7 @@ def worker(cfg, code: str, method: str, b: int) -> None:
     # khong doc noi. Do la kieu hong am tham, dat nhat de phat hien.
     tmp = path.with_suffix(".pt.tmp")
     torch.save({"rep": rep, "code": code, "method": method, "b": b,
-                "elapsed": time.time() - t0}, tmp)
+                "elapsed": time.time() - t0, "seed_khoi_tao": seed_dung}, tmp)
     os.replace(tmp, path)
     br = f"brier={rep.brier:.4f}" if rep.brier is not None else "brier=--"
     _log(f"[{code}/{method}/{b}] xong sau {(time.time()-t0)/60:.1f} phut ({br})")
