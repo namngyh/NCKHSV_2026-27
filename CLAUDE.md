@@ -37,7 +37,7 @@ File này nay **đã được track** cùng `Bài báo chính.tex`, `bao_cao_ket
 và toàn bộ `hinh*/`. Cảnh báo cũ không còn hiệu lực; giữ lại tiêu đề để ai đọc
 tài liệu cũ biết vấn đề đã được giải quyết chứ không phải bị bỏ quên.
 
-## TRẠNG THÁI BƯỚC 2 — MÔ PHỎNG KHÔI PHỤC THAM SỐ (cập nhật 11/09/2026)
+## TRẠNG THÁI BƯỚC 2 — MÔ PHỎNG KHÔI PHỤC THAM SỐ — ĐÃ XONG (cập nhật 13/09/2026)
 
 Đây là mục mới nhất; nếu mâu thuẫn với mô tả cũ bên dưới thì **mục này đúng**.
 
@@ -50,8 +50,100 @@ trình. Kết quả đã gộp vào `results/07_simulation_S1..S3.pt`. Bản sao
 `mle/vb_mean_field/vb_full_rank` nên nó đã ghi đè và làm mất khối `mcmc` trong
 `07_simulation_S1.pt`.
 
-**PR-B (EGARCH-X, E1/E2/E3, B=100, n=2000): ĐANG CHẠY**, khởi động 11/09
-19:19:53. Nhịp đo được: MLE **22,4 phút/lần lặp** → cận trên khoảng 28 giờ.
+**PR-B (EGARCH-X, E1/E2/E3, B=100, n=2000): ĐÃ XONG.** 900/900 lần lặp, chạy
+11/09 19:19 → 13/09 01:33 = **30,2 giờ** trên 12 tiến trình. Không lỗi nào,
+không file `.tmp` sót, và **không lần lặp nào phải dùng quy tắc thử lại điểm
+khởi tạo** — khác hẳn PR-A. Kết quả ở `results/mo_phong_egarch/E1..E3.pt`.
+
+### Kết quả Bước 2 — xếp hạng phương pháp
+
+Trên **59 ô RMSE** của cả hai nghiên cứu: **MLE thắng 45, VB-MF thắng 14,
+VB-FR thắng 0**. MLE cũng rẻ nhất (20–26 phút/lần lặp so với 23–40).
+
+| | VB-MF | VB-FR | Ghi chú |
+|---|---|---|---|
+| PR-A S1 / S2 / S3 | 0,321 / 0,453 / 0,339 | 0,427 / 0,505 / 0,423 | **không dùng được** |
+| PR-B E1 / E2 / E3 | 0,715 / 0,652 / 0,703 | 0,815 / 0,725 / 0,814 | dùng được có chọn lọc |
+
+Coverage (lý tưởng 0,95) tăng rõ khi bỏ cấu trúc chuyển trạng thái. VB-FR hơn
+VB-MF ở **cả sáu** cấu hình, không ngoại lệ. **MLE chưa có cột này** vì quy trình
+không gọi hàm sai số chuẩn Hessian — đây là khoảng trống còn lại, xem dưới.
+
+### Quy luật: VB chỉ thắng khi HAI điều kiện cùng đúng
+
+**(a) tham số nhận dạng yếu, VÀ (b) tiên nghiệm đặt đúng chỗ.** Bằng chứng đối
+chiếu nằm trong cùng bộ dữ liệu:
+
+| Tham số | Nhận dạng | Tiên nghiệm | Kết quả |
+|---|---|---|---|
+| $\omega_2$ (PR-A) | yếu | LogNormal phủ 0,40 hợp lý | VB thắng **3,5–12×** |
+| $p_{ss}$ (PR-A) | yếu | Beta(8;2) TB 0,80 vs thật 0,98 — **sai chỗ** | VB thua, coverage **0,00** |
+| $\theta$ (E2) | mạnh | Normal đúng tâm 0 | hoà RMSE, VB thắng coverage 0,96–0,98 |
+| $\nu$ ở $\nu_0=8$ | yếu | Gamma hợp lý | VB-MF thắng 5–9% |
+| $\nu$ ở $\nu_0=4$ | yếu hơn | Gamma | **MLE thắng** (0,435 vs 0,464) |
+
+Hai hàng cuối quan trọng cho bài: lợi thế của VB về $\nu$ **biến mất ở vùng đuôi
+dày**, tức đúng vùng của VN30F1M ($\hat\nu\approx4{,}08$). Không được ngoại suy
+kết quả $\nu_0=8$ sang dữ liệu thật.
+
+Kết luận: **giá trị của VB ở đây là giá trị của TIÊN NGHIỆM, không phải của
+thuật toán biến phân.** Cùng một cơ chế vừa cứu $\omega_2$ vừa giết $p_{ss}$.
+
+### Cơ chế MLE hỏng ở $\omega_2$ (chỗ duy nhất VB thắng áp đảo)
+
+MLE có **đuôi chạy trốn**: 13–15% số lần lặp cho $\omega_2>2{,}0$ (thật 0,40),
+cực đại 5,05 (S1) và 6,47 (S3); VB không bao giờ vượt 0,74. Truy được: 13 lần
+lặp chạy trốn đó đều là những lần $\alpha_2+\beta_2$ sụp xuống 0,443 thay vì
+0,940 — $\omega_2$ và độ dai dẳng đánh đổi nhau, MLE thỉnh thoảng rơi vào nhánh
+xấu. Nhưng VB cũng sai kiểu khác: trung vị 0,206 so với thật 0,40 (co quá mức),
+MLE 0,791 (nở quá mức). VB thắng RMSE vì tránh thảm hoạ đuôi, không phải vì
+đúng hơn ở tâm.
+
+**Khuyến nghị chưa có trong bài: MLE có phạt** (penalized MLE) — giữ độ sắc của
+MLE, thêm đúng số hạng phạt log-chuẩn lên $\omega$ mà VB đang dùng. Rẻ hơn VB,
+loại bỏ rủi ro chạy trốn. Trả lời thẳng câu "vận hành thế nào trong thực tế".
+
+### PR-B xác nhận bộ ước lượng EGARCH theo CẢ HAI chiều
+
+| | $\theta_0$ | Kết quả |
+|---|---|---|
+| E1 | −0,10 | **100/100** lần lặp cho $\hat\theta$ âm |
+| E2 | 0 | $\hat\theta$ TB **−0,0006**, t = −0,36, **47% âm** — không bịa ra đòn bẩy |
+| E3 | −0,10, $\nu_0=4$ | **100/100** âm, chệch −0,0031 |
+
+Hai phân bố E1 và E2 **tách rời hoàn toàn** (E1 cực đại −0,050; E2 cực tiểu
+−0,037): không một lần lặp nào trong 200 nằm vùng chồng lấn. Coverage của
+$\theta$ dưới VB-FR: 0,95 / 0,98 / 0,96 — đạt chuẩn ở cả ba kịch bản.
+
+$\nu$ ở E3 khôi phục gần như hoàn hảo: MLE cho TB **4,121** so với thật 4,0,
+trung vị 4,04, chệch chỉ **+3%** (so với +7% ở $\nu_0=8$). Lo ngại "mô hình đánh
+giá thấp độ dày đuôi" được hoá giải ở đúng vùng quan trọng nhất.
+
+### Sống núi cong $\omega/(1-\beta)$ — chướng ngại chung của VB và MCMC
+
+Mọi phương pháp khôi phục **chính xác** mức log-phương sai vô điều kiện
+(0,789–0,817 so với 0,800 thật) nhưng VB **trượt dọc sống núi**: ở E2, VB-FR cho
+$\omega$ sai gần 3 lần và $\beta=0{,}860$ thay vì 0,950 — nửa đời cú sốc 4,6
+phiên thay vì 13,5. Full-rank không cứu được vì họ Gauss nắm tương quan **tuyến
+tính**, còn sống núi này **cong** (hyperbol).
+
+Đây chính là thứ README ghi nhận làm NUTS phải hạ bước tích phân xuống $10^{-4}$
+"do tương quan mạnh giữa $\omega_s,\alpha_s,\beta_s$" — **một chướng ngại, hai
+nạn nhân**. Cách chữa không phải đổi phương pháp mà là **đổi tham số hoá** sang
+(mức, độ dai dẳng); khi đó sống núi thành trục toạ độ, mean-field cũng đủ và
+MCMC sẽ mixing nhanh hơn nhiều. Đáng cân nhắc **trước** khi chạy Bước 3.
+
+### Hai khoảng trống còn lại
+
+1. **Coverage của MLE chưa tính** ở cả hai nghiên cứu. Hàm
+   `natural_scale_standard_errors()` đã có cho MS-GARCH-X (chỉ chưa gọi);
+   `garch_mle.py` **chưa có** hàm tương ứng cho mô hình một trạng thái. Ước tính
+   gián tiếp từ tỷ số |chệch|/sd (MLE ≤ 0,37 ở mọi tham số EGARCH) cho thấy MLE
+   sẽ đạt **0,93–0,95**, tức nhiều khả năng thắng luôn cột khoảng tin cậy. Chi
+   phí: PR-B ~12 phút + ~30 dòng code; PR-A ~2 giờ nhưng vướng nghiệm sát biên.
+2. **Brier của PR-A vẫn sai** (tính trước khi sắp nhãn, checkpoint không lưu
+   $\xi_t$). Chạy lại bộ lọc tiến với tham số đã lưu là đủ, ~25 phút.
+
 
 ### BẪY LỚN NHẤT của đợt này: nhãn trạng thái không được sắp trước khi gộp
 
@@ -154,7 +246,9 @@ checkpoint **theo từng lần lặp** và chạy song song (trước đó tuầ
 | MS-GARCH-X, VB-MF | 30–39 |
 | MS-GARCH-X, VB-FR | 31–40 |
 | MS-GARCH-X, MCMC | **2.466** (khoảng 41 giờ — lý do MCMC đứng ngoài mô phỏng) |
-| EGARCH-X, MLE | 22,4 |
+| EGARCH-X, MLE | 20,4 |
+| EGARCH-X, VB-FR | 24,3 |
+| EGARCH-X, VB-MF | 26,7 |
 
 ## Bẫy đã gặp (đọc kỹ trước khi kết luận "chưa chạy" / "không tồn tại")
 
