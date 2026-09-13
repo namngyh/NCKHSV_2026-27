@@ -27,7 +27,18 @@ def model(
     prior: PriorConfig | None = None,
     variance_link: str = "clamp",
     floor: float = 1e-8,
+    fixed_nu: float | None = None,
 ):
+    """Mo hinh xac suat chung cho VB va MCMC.
+
+    `fixed_nu`: neu duoc dat, nu KHONG duoc lay mau ma giu co dinh o gia tri
+    nay. Dung cho MS-GARCH CHUAN: Student-t chuan hoa voi nu rat lon hoi tu ve
+    phan phoi chuan, nen ta cai mo hinh chuan bang chinh khung MS-GARCH-X thay
+    vi viet mot mo hinh rieng -- dung cach MLE dang lam cho mo hinh nay, nho do
+    hai phuong phap uoc luong tren CUNG MOT ham likelihood (nguyen tac cot loi
+    cua bai). nu co dinh thi khong tinh vao so tham so khi tinh AIC/BIC.
+    Mac dinh None giu nguyen hanh vi cu.
+    """
     prior = prior or PriorConfig()
     k = config.n_exog
 
@@ -56,14 +67,17 @@ def model(
         ]
     )
 
-    if config.state_specific_nu:
+    if fixed_nu is not None:
+        nu = torch.as_tensor(float(fixed_nu))
+    elif config.state_specific_nu:
         nu_minus_2 = pyro.sample(
             "nu_minus_2",
             dist.Gamma(prior.nu_shape, prior.nu_rate).expand([2]).to_event(1),
         )
+        nu = nu_minus_2 + 2.0
     else:
         nu_minus_2 = pyro.sample("nu_minus_2", dist.Gamma(prior.nu_shape, prior.nu_rate))
-    nu = nu_minus_2 + 2.0
+        nu = nu_minus_2 + 2.0
 
     params = MSGARCHXParams(mu=mu, omega=omega, alpha=alpha, beta=beta, gamma=gamma, P=P, nu=nu)
     out = ms_garch_forward_filter(params, r, X, variance_link=variance_link, floor=floor)

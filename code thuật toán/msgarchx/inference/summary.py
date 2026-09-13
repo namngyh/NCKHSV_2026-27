@@ -12,6 +12,12 @@ def posterior_summary(samples: dict[str, torch.Tensor]) -> dict[str, dict[str, t
     """samples[name] co shape (n_draws, *event_shape) -> {name: {mean, sd, q2.5, q97.5}}."""
     summary = {}
     for name, draws in samples.items():
+        if draws.numel() == 0:
+            # Site RONG. Mo hinh khong dung bien ngoai sinh (vd. MS-GARCH chuan,
+            # GARCH chuan) van khai bao site "gamma" nhung voi shape
+            # (n_draws, 2, 0). quantile() bao loi tren tensor rong, va thong ke
+            # cua mot tap rong cung khong co nghia -> bo qua han site do.
+            continue
         summary[name] = {
             "mean": draws.mean(dim=0),
             "sd": draws.std(dim=0),

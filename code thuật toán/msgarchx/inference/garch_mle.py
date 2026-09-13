@@ -219,3 +219,125 @@ def fit_garch_mle(
     aic = -2.0 * loglik + 2.0 * n_params
     bic = -2.0 * loglik + n_params * torch.log(torch.tensor(float(r.shape[0]))).item()
     return GARCHMLEResult(params=params, loglik=loglik, aic=aic, bic=bic, n_params=n_params, runs=runs)
+
+# ===========================================================================
+# Sai so chuan tu Hessian quan sat (mo hinh MOT trang thai)
+#
+# Ban song song cua natural_scale_standard_errors() trong mle.py, von chi lam
+# viec voi MS-GARCH-X. Tach rieng vi hai ho dung cau truc tham so khac nhau:
+# MS-GARCH-X dung mot vector `raw` phang, con ho mot trang thai dung mot dict
+# cac bien khong rang buoc.
+# ===========================================================================
+
+# Thu tu phang hoa, dung chung cho ca hai chieu (phang hoa va dat ten lai).
+_THU_TU = {
+    "garch": ["mu", "log_omega", "eta_alpha", "eta_beta", "gamma"],
+    "egarch": ["mu", "omega", "alpha", "theta", "eta_beta", "gamma"],
+}
+# Ten tham so TU NHIEN tuong ung, theo dung thu tu tren.
+_TEN_TU_NHIEN = {
+    "garch": ["mu", "omega", "alpha", "beta", "gamma"],
+    "egarch": ["mu", "omega", "alpha", "theta", "beta", "gamma"],
+}
+
+
+def _nghich_dao_softplus(x: torch.Tensor) -> torch.Tensor:
+    """Nghich dao cua softplus. Dung expm1 thay vi exp(x)-1 de on dinh khi x nho."""
+    return torch.log(torch.expm1(x))
+
+
+def _raw_tu_params(params, dist: str, family: str) -> dict:
+    """Dua tham so TU NHIEN ve lai khong gian KHONG rang buoc.
+
+    Can thiet vi GARCHMLEResult chi luu tham so tu nhien, trong khi Hessian
+    phai lay tren khong gian toi uu hoa that su dien ra (khong rang buoc) --
+    Hessian tho tren thang tu nhien se sai o nhung tham so co rang buoc.
+    """
+    if family == "garch":
+        raw = {
+            "mu": params.mu,
+            "log_omega": torch.log(params.omega),
+            "eta_alpha": _nghich_dao_softplus(params.alpha),
+            "eta_beta": _nghich_dao_softplus(params.beta),
+            "gamma": params.gamma,
+        }
+    else:
+        raw = {
+            "mu": params.mu,
+            "omega": params.omega,
+            "alpha": params.alpha,
+            "theta": params.theta,
+            "eta_beta": torch.log(params.beta / (1.0 - params.beta)),  # nghich dao sigmoid
+            "gamma": params.gamma,
+        }
+    if dist == "student_t":
+        raw["eta_nu"] = _nghich_dao_softplus(params.nu - 2.0)
+    return raw
+
+
+def _phang(raw: dict, dist: str, family: str) -> torch.Tensor:
+    ten = list(_THU_TU[family]) + (["eta_nu"] if dist == "student_t" else [])
+    return torch.cat([raw[t].reshape(-1) for t in ten])
+
+
+def _dung_lai(vec: torch.Tensor, k: int, dist: str, family: str) -> dict:
+    ten = list(_THU_TU[family]) + (["eta_nu"] if dist == "student_t" else [])
+    raw, pos = {}, 0
+    for t in ten:
+        n = k if t == "gamma" else 1
+        raw[t] = vec[pos] if n == 1 else vec[pos:pos + n]
+        pos += n
+    return raw
+
+
+def standard_errors_single(
+    params, r: torch.Tensor, X: torch.Tensor, dist: str = "student_t",
+    family: str = "garch", h0: torch.Tensor | None = None,
+) -> dict[str, torch.Tensor] | None:
+    """Sai so chuan tren thang do TU NHIEN cho mo hinh MOT trang thai.
+
+    Phuong phap delta: Cov_tu_nhien = J Cov_raw J^T, voi Cov_raw la nghich dao
+    Hessian quan sat cua -log-likelihood theo cac bien KHONG rang buoc, va
+    J = d(tham so tu nhien)/d(bien khong rang buoc).
+
+    Tra ve None neu Hessian khong kha nghich hoac cho phuong sai am -- truong
+    hop do nghia la nghiem khong phai cuc dai trong (vd. nam sat bien), khi ay
+    tiem can chuan cua uoc luong hop ly cuc dai khong ap dung va sai so chuan
+    tu Hessian KHONG hop le. Nguoi goi phai xu ly None chu dung coi la 0.
+    """
+    k = X.shape[1]
+    if h0 is None:
+        h0 = r.var()
+    vec = _phang(_raw_tu_params(params, dist, family), dist, family).detach().clone()
+
+    def nll(v):
+        return -_loglik(_unpack(_dung_lai(v, k, dist, family), dist, family), r, X, h0, family)
+
+    hess = torch.autograd.functional.hessian(nll, vec)
+    try:
+        cov_raw = torch.linalg.inv(hess)
+    except RuntimeError:
+        return None
+    if (torch.diagonal(cov_raw) < 0).any():
+        return None
+
+    def sang_tu_nhien(v):
+        p = _unpack(_dung_lai(v, k, dist, family), dist, family)
+        phan = [p.mu.reshape(-1), p.omega.reshape(-1), p.alpha.reshape(-1)]
+        if family == "egarch":
+            phan.append(p.theta.reshape(-1))
+        phan += [p.beta.reshape(-1), p.gamma.reshape(-1)]
+        if dist == "student_t":
+            phan.append(p.nu.reshape(-1))
+        return torch.cat(phan)
+
+    J = torch.autograd.functional.jacobian(sang_tu_nhien, vec)
+    se_phang = torch.sqrt(torch.diagonal(J @ cov_raw @ J.T).clamp(min=0.0))
+
+    ten = list(_TEN_TU_NHIEN[family]) + (["nu"] if dist == "student_t" else [])
+    ra, pos = {}, 0
+    for t in ten:
+        n = k if t == "gamma" else 1
+        ra[t] = se_phang[pos:pos + n] if t == "gamma" else se_phang[pos]
+        pos += n
+    return ra

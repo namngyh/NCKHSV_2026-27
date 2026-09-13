@@ -46,7 +46,9 @@ from msgarchx.evaluation.oos_single import (          # noqa: E402
     evaluate_single_regime_posterior,
 )
 from msgarchx.inference import model_spec              # noqa: E402
+from msgarchx.inference.bayes_model import model as ms_model  # noqa: E402
 from msgarchx.inference.bayes_single import model as single_model  # noqa: E402
+from msgarchx.inference.param_spec import ModelConfig  # noqa: E402
 from msgarchx.inference.garch_mle import fit_garch_mle  # noqa: E402
 from msgarchx.inference.mcmc import fit_mcmc           # noqa: E402
 from msgarchx.inference.variational import fit_vb      # noqa: E402
@@ -201,6 +203,50 @@ def chay_vb(cfg: CauHinh, spec, du_lieu: dict, guide_type: str) -> dict:
     }
 
 
+# Gia tri nu dung cho mo hinh CHUAN. Student-t chuan hoa voi nu rat lon hoi tu
+# ve phan phoi chuan; dung 1e6 de khop dung cach MLE dang lam cho MS-GARCH chuan.
+NU_CHUAN = 1.0e6
+
+
+def chay_vb_hai_trang_thai(cfg: CauHinh, spec, du_lieu: dict, guide_type: str) -> dict:
+    """VB cho mo hinh CHUYEN TRANG THAI (ms_garch_n, ms_garch_x_t).
+
+    Tach khoi chay_vb() vi ho hai trang thai dung mot mo hinh Pyro khac
+    (bayes_model thay vi bayes_single) va mot duong danh gia ngoai mau khac.
+    """
+    from scripts.run_full_study import _eval_msgarchx_posterior
+
+    n_train = du_lieu["n_train"]
+    r_all, X_all, rv_all = du_lieu["r_all"], du_lieu["X_all"], du_lieu["rv_all"]
+    X = lay_X(spec, X_all)
+    config = ModelConfig(n_exog=X.shape[1], state_specific_nu=False)
+    fixed_nu = None if spec.dist == "student_t" else NU_CHUAN
+
+    res = fit_vb(
+        r_all[:n_train], X[:n_train], config=config, guide_type=guide_type,
+        n_steps=cfg.vb_n_steps, n_posterior_draws=cfg.vb_n_draws,
+        seed=cfg.seed, verbose=True,
+        model_fn=ms_model, model_args=(config, None, "clamp", 1e-8, fixed_nu),
+    )
+
+    samples = dict(res.samples)
+    if fixed_nu is not None:
+        # params_from_trace() va duong danh gia ngoai mau deu doc khoa
+        # "nu_minus_2". Voi mo hinh chuan thi nu khong duoc lay mau nen khoa do
+        # vang mat; bo sung lai dung gia tri co dinh de phan con lai khong phai
+        # sua gi. KHONG tinh nu nay vao so tham so.
+        n = samples["mu"].shape[0]
+        samples["nu_minus_2"] = torch.full((n,), float(fixed_nu) - 2.0)
+
+    oos = _eval_msgarchx_posterior(samples, config, r_all, X, rv_all,
+                                   n_train, cfg.vb_oos_draws)
+    return {
+        "code": spec.code, "method": f"vb_{guide_type}",
+        "final_elbo": res.final_elbo, "summary": res.summary,
+        "samples": samples, "oos": oos,
+    }
+
+
 def chay_buoc_1(cfg: CauHinh, du_lieu: dict, bo_qua: set) -> dict:
     """Uoc luong moi mo hinh MOT trang thai bang ca ba phuong phap.
 
@@ -209,18 +255,24 @@ def chay_buoc_1(cfg: CauHinh, du_lieu: dict, bo_qua: set) -> dict:
     """
     ket_qua = {}
     for spec in model_spec.CATALOGUE:
-        if spec.n_regimes != 1:
-            continue                     # mo hinh chuyen trang thai: nap lai, xem nap_ket_qua_cu
         print(f"\n  === {spec.name} (d={spec.n_params(du_lieu['X_all'].shape[1])}) ===")
         if (spec.code, "mle") in bo_qua:
             print("    [nap lai] MLE da co trong 02_mle.pt, khong chay lai")
-        else:
+        elif spec.n_regimes == 1:
             ket_qua[(spec.code, "mle")] = checkpoint(
                 cfg, f"{spec.code}_mle", lambda s=spec: chay_mle(cfg, s, du_lieu))
+        else:
+            # MLE cho mo hinh chuyen trang thai qua dat de chay lai o day
+            # (M1 mat 424,7 phut); nap lai tu 02_mle.pt, xem nap_ket_qua_cu.
+            print("    [bo qua] MLE mo hinh chuyen trang thai: nap lai tu 02_mle.pt")
         for guide in ("mean_field", "full_rank"):
+            if (spec.code, f"vb_{guide}") in bo_qua:
+                print(f"    [nap lai] VB {guide} da co, khong chay lai")
+                continue
+            chay = chay_vb_hai_trang_thai if spec.n_regimes == 2 else chay_vb
             ket_qua[(spec.code, f"vb_{guide}")] = checkpoint(
                 cfg, f"{spec.code}_vb_{guide}",
-                lambda s=spec, g=guide: chay_vb(cfg, s, du_lieu, g))
+                lambda s=spec, g=guide, f=chay: f(cfg, s, du_lieu, g))
     return ket_qua
 
 
@@ -232,16 +284,15 @@ def kiem_ke(cfg: CauHinh, da_co: dict, k: int) -> None:
     """
     se_chay, bo_qua_cu, bo_qua_checkpoint = [], [], []
     for spec in model_spec.CATALOGUE:
-        if spec.n_regimes != 1:
-            for pp in PHUONG_PHAP:
-                if (spec.code, pp) in da_co:
-                    bo_qua_cu.append((spec.name, pp))
-            continue
         for pp in PHUONG_PHAP:
-            if pp == "mle" and (spec.code, pp) in da_co:
+            if (spec.code, pp) in da_co:
                 bo_qua_cu.append((spec.name, pp))
             elif (cfg.pipeline_dir / f"{spec.code}_{pp}.pt").exists():
                 bo_qua_checkpoint.append((spec.name, pp))
+            elif pp == "mle" and spec.n_regimes == 2:
+                # MLE cho mo hinh chuyen trang thai khong chay o day (qua dat,
+                # M1 mat 424,7 phut) va cung da co san trong 02_mle.pt.
+                continue
             else:
                 se_chay.append((spec.name, pp))
 

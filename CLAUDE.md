@@ -31,6 +31,155 @@ dẫn: TS. Châu.
 | `code thuật toán/msgarchx/simulation/run_simulation.py` | Runner mô phỏng, hỗ trợ methods `mle`, `vb_mean_field`, `vb_full_rank`, `mcmc` | `vb_full_rank` có code nhưng **chưa từng được gọi** trong lần chạy 8 kịch bản đã có — không có trong `results/07_simulation_S*.pt` |
 | `code thuật toán/results/*.pt` | Nguồn sự thật duy nhất cho mọi số liệu | Đọc bằng `torch.load(path, weights_only=False)`; cần `sys.path.insert(0, ".../code thuật toán")` trước khi load vì pickle tham chiếu class trong `msgarchx` |
 
+## TIẾN ĐỘ VÀ VIỆC CẦN LÀM (cập nhật 13/09/2026, 11:53)
+
+### Đang chạy ngay lúc này
+
+**Bước 1 — so sánh toàn bộ danh mục mô hình trên dữ liệu VN30F1M thật.**
+Khởi động 13/09 sáng bằng `chay_buoc1.bat`, chạy tuần tự một luồng, **6/17 mục
+xong** (ba mô hình GARCH một trạng thái × VB-MF và VB-FR). Còn lại: 3 EGARCH ×
+MLE, 6 EGARCH × VB, 2 MS-GARCH chuẩn × VB. Ước tính còn ~6 giờ.
+
+Checkpoint từng cặp (mô hình, phương pháp) trong `results/pipeline/`; Ctrl+C rồi
+chạy lại sẽ tự bỏ qua phần đã xong. Dùng `--bo-qua-mcmc`, tức **dừng trước
+Bước 3**.
+
+**Tín hiệu sơ bộ đáng chú ý** (từ lần chạy thử `--nhanh`, cấu hình bị cắt xén
+nặng nên chỉ là cận dưới): **EGARCH-X Student-t thắng cả AIC, BIC, QLIKE và
+NLS** — AIC 5606,87 so với 5648,87 của GARCH-X Student-t. Nó thắng *dù* được
+cấp ngân sách tối ưu hoá tệ hơn nhiều so với các mô hình GARCH (vốn nạp lại từ
+cấu hình đầy đủ), và bộ tối ưu kém hơn chỉ có thể cho log-likelihood **thấp
+hơn** — nên lợi thế này là thật và sẽ rộng thêm ở bản đầy đủ. Nếu giữ nguyên,
+**mô hình thắng cuộc của Bước 1 đổi từ GARCH-X Student-t sang EGARCH-X
+Student-t**, và vì đây là mô hình một trạng thái nên Bước 3 sẽ không vướng đối
+xứng hoán vị nhãn.
+
+### Trạng thái tổng thể của ba bước
+
+| Bước | Nội dung | Trạng thái |
+|---|---|---|
+| 1 | Danh mục 8 mô hình × 3 phương pháp, dữ liệu thật | **đang chạy, 6/17** |
+| 2 | Mô phỏng khôi phục tham số (PR-A + PR-B) | **XONG** 1.800/1.800 lần lặp |
+| 3 | MCMC trên mô hình thắng cuộc | chưa chạy — xem A4 |
+
+---
+
+## VIỆC CẦN LÀM, xếp theo mức độ chặn
+
+### Nhóm A — chặn: thiếu thì bài không hoàn chỉnh
+
+**A1. Đồng bộ bản thảo với kết quả thực tế — RỦI RO LỚN NHẤT HIỆN NAY.**
+
+Đây không phải việc tính toán mà là việc *bài đang mô tả một nghiên cứu khác
+với nghiên cứu đã chạy*:
+
+| File | Đang mô tả | Thực tế |
+|---|---|---|
+| `Bài báo chính.tex` | 8 kịch bản, B=30/15 | 3 kịch bản, B=100 |
+| `README.md` §11.2 | "4 kịch bản hiệu chuẩn theo VN30F1M" | 8 kịch bản tham số minh hoạ |
+| `bao_cao_ket_qua.tex` | sinh từ `report_data.json` | JSON **không tự đồng bộ** với `results/*.pt` |
+| nhiều chỗ | MS-GARCH-X là "mô hình chính" | có thể EGARCH-X-t mới thắng |
+
+`report_data.json` là điểm nguy hiểm nhất: nó được duy trì **thủ công**, không
+có script tái tạo. Từ lúc viết đến nay đã có 1.800 lần lặp mới, một lỗi sắp nhãn
+được sửa, và ba mô hình EGARCH được thêm. **Mọi con số trong
+`bao_cao_ket_qua.tex` hiện phải coi là CHƯA XÁC MINH.**
+
+Việc cần làm: viết script trích xuất `report_data.json` **tự động** từ
+`results/*.pt`, theo đúng tinh thần "một nguồn sự thật" mà `tom_tat_mo_phong.py`
+đã làm. Ước tính ~1 ngày, loại bỏ vĩnh viễn cả một họ lỗi.
+
+**A2. Tính coverage cho MLE — ~2,5 giờ.** Bảng so sánh phương pháp hiện **thiên
+vị VB** ở cột khoảng tin cậy chỉ vì MLE không được tính; RQ3 và RQ4 không trả
+lời đầy đủ được nếu thiếu. Hàm cho mô hình một trạng thái
+(`standard_errors_single` trong `garch_mle.py`) **đã viết và kiểm chứng sơ bộ**
+(tỷ số SE/sd Monte Carlo 0,97–1,41 trên một lần lặp E1); PR-A thì
+`natural_scale_standard_errors` có sẵn, chỉ chưa gọi. Ước tính gián tiếp từ tỷ
+số |chệch|/sd (MLE ≤ 0,37 ở mọi tham số EGARCH) cho thấy MLE nhiều khả năng đạt
+**0,93–0,95** và thắng luôn cột này. Cảnh báo: với PR-A, Hessian không hợp lệ khi
+nghiệm sát biên — đúng tình huống $p_{ss}$.
+
+**A3. Sửa Brier của PR-A — ~25 phút.** Hiện sai vì tính *trước* khi sắp nhãn
+trạng thái (VB-FR 0,63–0,68, tệ hơn đoán ngẫu nhiên 0,5). Checkpoint chỉ lưu con
+số vô hướng chứ không lưu $\xi_t$ nên không sửa được từ dữ liệu đã có; phải chạy
+lại **bộ lọc tiến** một lượt với tham số đã lưu — **không cần ước lượng lại**.
+
+**A4. Bước 3 — MCMC trên mô hình thắng cuộc. HOÃN ĐẾN CUỐI.** Nên **đổi tham số
+hoá trước**: Bước 2 đã chỉ ra sống núi cong $\omega/(1-\beta)$ vừa làm VB chệch
+vừa ép NUTS hạ bước tích phân xuống $10^{-4}$ — chạy MCMC trước khi sửa là lặp
+lại thất bại 64 giờ cũ. Bài vẫn hoàn chỉnh nếu Bước 3 báo cáo kết quả âm.
+
+### Nhóm B — nâng chất lượng đáng kể
+
+**B1. Phần ứng dụng ký quỹ động — QUAN TRỌNG NHẤT VỀ MẶT PHẢN BIỆN, ~2 ngày.**
+Hướng đã thống nhất với TS. Châu và là câu trả lời cho "ứng dụng thực tế thế
+nào", nhưng **chưa có dòng code nào**. Cần: chuyển $\widehat{\VaR}_t$ thành tỷ lệ
+ký quỹ, đối chiếu mức cố định 13% của VSD, chấm điểm bằng Basel traffic-light
+trên cửa sổ trượt 250 phiên. Tận dụng được ngay kiểm định Kupiec đã có.
+
+**B2. Tách "chệch do xấp xỉ" khỏi "chệch do tiên nghiệm" — ~3 giờ.** Phát hiện
+mạnh nhất của Bước 2 là VB bị tiên nghiệm kéo ($p_{ss}$ về đúng 0,790 = trung
+bình tiên nghiệm 0,800). Chạy lại VB trên một kịch bản mô phỏng với tiên nghiệm
+Beta(20; 2): nếu chệch biến mất thì **chứng minh** được cơ chế thay vì chỉ suy
+luận. Đây là loại bằng chứng biến một nhận xét thành một đóng góp.
+
+**B3. Kiểm định trượt gốc (walk-forward) cho mô hình thắng cuộc — ~4,5 giờ.**
+Cửa sổ khởi động $W=1200$, tái ước lượng theo quý (16 lần): 970 quan sát kiểm
+định thay vì 435, **lực kiểm định VaR từ 0,37 lên 0,74**, gần 4 cửa sổ Basel.
+Chỉ khả thi với mô hình một trạng thái (~17 phút/lần ước lượng); MS-GARCH-X sẽ
+mất ~113 giờ. Phải khai báo rõ đây là thiết kế **có tái ước lượng**, không so
+trực tiếp QLIKE với phần chính (tham số cố định).
+
+### Nhóm C — nhỏ, gom một đợt (~1 ngày)
+
+Từ chính danh sách README §16: **CRPS** đã cài nhưng chưa bao giờ được gọi;
+**biểu đồ PIT** mới vẽ cho M1, cần cho từng phương pháp; **ESS phần đuôi** cho
+MCMC; **kiểm định Diebold–Mariano** giữa các mô hình (có code, chưa rõ đã dùng).
+
+### Nếu phải chọn ba việc: A1 → B1 → A2
+
+A1 vì rủi ro lớn nhất hiện nay không phải thiếu kết quả mà là **báo cáo sai kết
+quả đã có**. B1 vì đó là phần phản biện sẽ hỏi và hiện đang trống. A2 vì rẻ và
+đang làm lệch kết luận trung tâm về so sánh phương pháp.
+
+### Đã bỏ khỏi phạm vi (người dùng chốt 13/09)
+
+- **Batch hoá / GPU** — đã đo khả thi (10–89× trên CPU) nhưng hai chỗ dùng chính
+  là PR-A và PR-B đều đã chạy xong; Bước 1 chỉ 17 mục tuần tự nên không giúp gì.
+- **MLE có phạt** (penalized MLE để trị đuôi chạy trốn của $\omega_2$) — vẫn là
+  khuyến nghị tốt, nhưng ra ngoài phạm vi bài.
+
+---
+
+## Nhận xét về cách chia dữ liệu (phân tích 13/09)
+
+Chia 80/20 theo thời gian: huấn luyện 1.735 quan sát (07/11/2017 → 16/10/2024),
+kiểm định 435 (17/10/2024 → 17/07/2026). Tỷ lệ thực là **79,95/20,05** vì mặt nạ
+đặt trên 2.171 phiên gốc rồi mất một quan sát do lấy sai phân.
+
+**Hợp lý**: chia theo thời gian không xáo trộn; chuẩn hoá biến ngoại sinh dùng
+đúng thống kê tập huấn luyện và đúng thứ tự (mặt nạ trước, lọc sau) nên không rò
+rỉ; $T=1735$ đủ để $p_{11}$, $p_{22}$, $\nu$, $\alpha_1$ bão hoà (bằng chứng từ
+S6/S1/S7: RMSE của $p_{22}$ là 0,099 ở $T=500$ nhưng 0,025 ở $T=2000$ và 0,023 ở
+$T=5000$).
+
+**Bất hợp lý**:
+- **Lực kiểm định VaR chỉ 0,37** ở mức sai gấp đôi (435 phiên, vùng chấp nhận
+  [1, 9] vi phạm). Đây là điểm yếu nghiêm trọng nhất vì VaR là trọng tâm ứng dụng.
+- 435 phiên chỉ đủ **1,7 cửa sổ Basel 250 phiên**.
+- Giả định tham số ổn định bị chính dữ liệu phản bác: chia tập huấn luyện làm
+  bốn, tỷ lệ thời gian ở trạng thái biến động cao là **23,6% → 36,2% → 23,5% →
+  4,1%**, rồi tập kiểm định quay lại 25,0%.
+- Trạng thái hiếm vẫn đói dữ liệu: $\omega_2$, $\alpha_2$, $\beta_2$ **chưa bão
+  hoà** ở $T=2000$ (RMSE của $\omega_2$: 1,152 ở $T=2000$ → 0,535 ở $T=5000$).
+
+**Đặc điểm tập kiểm định cần khai báo**: phương sai **thấp hơn** (sd 1,367 so với
+1,515 sau khi bỏ quan sát ngoại lai −11,66%) nhưng **đuôi dày hơn** (độ nhọn
+10,24 so với 8,74) và **nhiều thời gian ở trạng thái biến động cao hơn** (25,0%
+so với 21,8%). Đây đúng là cấu hình khiến mô hình trông đẹp ở QLIKE/NLS nhưng
+hỏng ở độ phủ đuôi — trong khi kiểm định VaR lại thiếu lực để phát hiện.
+
+
 ## ~~Cảnh báo: `document.tex` không có trong git~~ — ĐÃ XỬ LÝ (09/2026)
 
 File này nay **đã được track** cùng `Bài báo chính.tex`, `bao_cao_ket_qua.tex`
