@@ -209,6 +209,96 @@ def bang_mo_phong_egarch() -> None:
     p()
 
 
+
+# ===========================================================================
+# Buoc 3 -- MCMC tren mo hinh thang cuoc, va tra loi RQ3
+# ===========================================================================
+def _lay(d, k, f_, j=None):
+    """Doc mot thong ke tu summary; site vector thi lay toa do j."""
+    v = d[k][f_]
+    return float(v) if v.dim() == 0 else float(v[j])
+
+
+def bang_buoc_3() -> None:
+    f = RESULTS / "pipeline" / "mcmc_egarch_x_t.pt"
+    if not f.exists():
+        return
+    m = torch.load(f, weights_only=False)
+    mle = torch.load(RESULTS / "pipeline" / "egarch_x_t_mle.pt", weights_only=False)["params"]
+    vmf = torch.load(RESULTS / "pipeline" / "egarch_x_t_vb_mean_field.pt", weights_only=False)["summary"]
+    vfr = torch.load(RESULTS / "pipeline" / "egarch_x_t_vb_full_rank.pt", weights_only=False)["summary"]
+    sm = m["summary"]
+
+    # (nhan LaTeX, khoa site, toa do neu la vector, gia tri MLE)
+    hang = [(r"$\mu$", "mu", None, float(mle.mu)),
+            (r"$\omega$", "omega", None, float(mle.omega)),
+            (r"$\alpha$", "alpha", None, float(mle.alpha)),
+            (r"$\theta$", "theta", None, float(mle.theta)),
+            (r"$\beta$", "beta", None, float(mle.beta)),
+            (r"$\gamma_1$", "gamma", 0, float(mle.gamma[0])),
+            (r"$\gamma_2$", "gamma", 1, float(mle.gamma[1]))]
+
+    # --- Bang 1: bon phuong phap canh nhau -------------------------------
+    p(r"\begin{table}[H]")
+    p(r"\centering\footnotesize")
+    p(r"\caption{EGARCH-X Student-$t$ trên VN30F1M: bốn phương pháp suy diễn trên "
+      r"cùng một hàm likelihood}")
+    p(r"\label{tab:buoc3-bon-phuong-phap}")
+    p(r"\begin{tabular}{lrrrrl}")
+    p(r"\toprule")
+    p(r"\textbf{Tham số} & MLE & VB-MF & VB-FR & MCMC & Khoảng tin cậy 95\% (MCMC) \\")
+    p(r"\midrule")
+    for ten, k, j, ml in hang:
+        lo, hi = _lay(sm, k, "q2.5", j), _lay(sm, k, "q97.5", j)
+        p(f"{ten} & {so(ml, 4)} & {so(_lay(vmf, k, 'mean', j), 4)} & "
+          f"{so(_lay(vfr, k, 'mean', j), 4)} & {so(_lay(sm, k, 'mean', j), 4)} & "
+          f"[{so(lo, 4)}; {so(hi, 4)}] \\\\")
+    lo, hi = _lay(sm, "nu_minus_2", "q2.5") + 2, _lay(sm, "nu_minus_2", "q97.5") + 2
+    p(f"$\\nu$ & {so(float(mle.nu), 4)} & {so(_lay(vmf, 'nu_minus_2', 'mean') + 2, 4)} & "
+      f"{so(_lay(vfr, 'nu_minus_2', 'mean') + 2, 4)} & {so(_lay(sm, 'nu_minus_2', 'mean') + 2, 4)} & "
+      f"[{so(lo, 4)}; {so(hi, 4)}] \\\\")
+    p(r"\bottomrule")
+    p(r"\end{tabular}")
+    p(r"\vspace{0.3em}")
+    p(r"\raggedright\scriptsize")
+    p(r"\emph{Ghi chú:} MCMC dùng NUTS, 4 chuỗi $\times$ (1.000 warmup + 400 mẫu), "
+      r"khởi tạo phân tán quanh nghiệm MLE. Chẩn đoán: $\hat R$ lớn nhất "
+      + so(m["max_rhat"], 4) + ", ESS nhỏ nhất " + so(m["min_ess"], 0) + ", "
+      + str(m["n_divergences"]) + r" phân kỳ, " + so(m["giay"] / 3600, 1) + r" giờ. "
+      r"Cột VB và MCMC là trung bình hậu nghiệm; cột MLE là ước lượng điểm.")
+    p(r"\end{table}")
+    p()
+
+    # --- Bang 2: RQ3, ty so do lech chuan ----------------------------------
+    p(r"\begin{table}[H]")
+    p(r"\centering\footnotesize")
+    p(r"\caption{Trả lời RQ3: tỷ số độ lệch chuẩn hậu nghiệm "
+      r"$R_{sd} = \mathrm{sd}_{\mathrm{VB}} / \mathrm{sd}_{\mathrm{MCMC}}$}")
+    p(r"\label{tab:buoc3-rsd}")
+    p(r"\begin{tabular}{lrrrrr}")
+    p(r"\toprule")
+    p(r"\textbf{Tham số} & sd MCMC & sd VB-MF & sd VB-FR & $R_{sd}$ VB-MF & $R_{sd}$ VB-FR \\")
+    p(r"\midrule")
+    for ten, k, j, _ in hang[:5]:
+        a, b, c = _lay(sm, k, "sd", j), _lay(vmf, k, "sd", j), _lay(vfr, k, "sd", j)
+        p(f"{ten} & {so(a, 4)} & {so(b, 4)} & {so(c, 4)} & {so(b / a, 2)} & {so(c / a, 2)} \\\\")
+    a = _lay(sm, "nu_minus_2", "sd")
+    b = _lay(vmf, "nu_minus_2", "sd")
+    c = _lay(vfr, "nu_minus_2", "sd")
+    p(f"$\\nu$ & {so(a, 4)} & {so(b, 4)} & {so(c, 4)} & {so(b / a, 2)} & {so(c / a, 2)} \\\\")
+    p(r"\bottomrule")
+    p(r"\end{tabular}")
+    p(r"\vspace{0.3em}")
+    p(r"\raggedright\scriptsize")
+    p(r"\emph{Ghi chú:} $R_{sd} < 1$ nghĩa là VB tự nhận chắc chắn hơn hậu nghiệm "
+      r"thật, lấy MCMC hội tụ làm chuẩn. Mean-field đánh giá thấp bất định của "
+      r"$\omega$ và $\beta$ khoảng ba lần --- đúng hai tham số nằm trên sống núi "
+      r"cong $\omega/(1-\beta)$ mà nghiên cứu mô phỏng đã chỉ ra; full-rank thu "
+      r"hẹp khoảng cách nhưng vẫn hẹp hơn 25\% ở đúng hai tham số đó.")
+    p(r"\end{table}")
+    p()
+
+
 def main() -> None:
     p(r"% ==========================================================================")
     p(r"% FILE NAY DUOC SINH TU DONG -- KHONG SUA TAY.")
@@ -222,6 +312,7 @@ def main() -> None:
     bang_phan_ra(kq["bang"])
     bang_mo_phong_ms()
     bang_mo_phong_egarch()
+    bang_buoc_3()
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text("\n".join(_d) + "\n", encoding="utf-8")

@@ -49,8 +49,12 @@ from msgarchx.inference import model_spec              # noqa: E402
 from msgarchx.inference.bayes_model import model as ms_model  # noqa: E402
 from msgarchx.inference.bayes_single import model as single_model  # noqa: E402
 from msgarchx.inference.param_spec import ModelConfig  # noqa: E402
-from msgarchx.inference.garch_mle import fit_garch_mle  # noqa: E402
-from msgarchx.inference.mcmc import fit_mcmc           # noqa: E402
+from msgarchx.inference.garch_mle import (             # noqa: E402
+    fit_garch_mle, standard_errors_single,
+)
+from msgarchx.inference.mcmc import (                 # noqa: E402
+    fit_mcmc, initial_params_single_from_mle,
+)
 from msgarchx.inference.variational import fit_vb      # noqa: E402
 from msgarchx.models.egarch import EGARCHParams        # noqa: E402
 from msgarchx.models.garch import GARCHParams          # noqa: E402
@@ -432,6 +436,28 @@ def chay_mcmc_thang_cuoc(cfg: CauHinh, spec, du_lieu: dict) -> dict:
     print("  Luu y: mo hinh MOT trang thai khong co doi xung hoan vi nhan,")
     print("  nen khong gap van de da dinh da lam hong lan chay MS-GARCH-X truoc day.")
 
+    # KHOI TAO TU NGHIEM MLE, khong de Pyro tu khoi tao ngau nhien.
+    # Lan chay 13/09 khong truyen initial_params: chuoi dau thich nghi tot (buoc
+    # 0,70) nhung mot chuoi sau roi vao theta = +1,03, beta = 0,32 -- nguoc dau
+    # don bay -- roi buoc sup xuong 1,8e-07 va dung yen. Bon chuoi van PHAN TAN
+    # quanh nghiem MLE de R-hat con y nghia chan doan.
+    mle_path = cfg.pipeline_dir / f"{spec.code}_mle.pt"
+    if not mle_path.exists():
+        raise SystemExit(
+            f"Chua co nghiem MLE tai {mle_path.name} de khoi tao cac chuoi MCMC.\n"
+            "Chay Buoc 1 truoc."
+        )
+    params_mle = torch.load(mle_path, weights_only=False)["params"]
+    # Do lon nhieu loan lay theo SAI SO CHUAN tung tham so, khong phai mot hang
+    # so chung -- xem giai thich trong initial_params_single_from_mle().
+    se = standard_errors_single(params_mle, r_all[:n_train], X[:n_train],
+                                dist=spec.dist, family=spec.family)
+    if se is None:
+        print("  [canh bao] Hessian khong xac dinh duong, khong lay duoc sai so")
+        print("             chuan; lui ve nhieu loan ty le 10% gia tri tham so.")
+    print("  Khoi tao 4 chuoi quanh nghiem MLE (chuoi 0 dat dung tai nghiem,")
+    print("  ba chuoi con lai phan tan 2 sai so chuan).")
+
     res = fit_mcmc(
         r_all[:n_train], X[:n_train], config=None, prior=None,
         n_chains=cfg.mcmc_n_chains, n_warmup=cfg.mcmc_n_warmup,
@@ -440,6 +466,7 @@ def chay_mcmc_thang_cuoc(cfg: CauHinh, spec, du_lieu: dict) -> dict:
         verbose=True,
         checkpoint_path=cfg.pipeline_dir / f"mcmc_{spec.code}_tiendo.pt",
         model_fn=single_model, model_args=(spec, None),
+        initial_params=lambda c: initial_params_single_from_mle(params_mle, spec, c, se=se),
     )
     print(f"    R-hat lon nhat = {res.max_rhat:.4f}   ESS nho nhat = {res.min_ess:.1f}"
           f"   phan ky = {res.n_divergences}")
@@ -527,6 +554,17 @@ def main() -> None:
 
     if args.bo_qua_mcmc:
         print("\n--bo-qua-mcmc: dung tai day.")
+        return
+
+    if args.chi_bang:
+        # --chi-bang nghia la CHI IN BANG. Truoc day no chi bo qua Buoc 1 roi
+        # chay tiep xuong day, nen mot lenh nguoi dung tuong la doc-va-in lai
+        # am tham khoi dong mot lan MCMC dai 8 tieng. Da xay ra that ngay
+        # 13/09: lenh `--chi-bang` chay nen suot toi, ghi de len chinh file
+        # tien do cua mot lan chay khac, khien moi so doc tu file do khong con
+        # dang tin va dan toi mot loat chan doan sai.
+        print("\n--chi-bang: chi in bang, khong chay Buoc 3.")
+        print("Muon chay MCMC thi bo --chi-bang.")
         return
 
     print("\nBUOC 3 -- MCMC cho mo hinh thang cuoc")

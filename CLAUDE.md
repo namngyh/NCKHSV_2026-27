@@ -31,38 +31,110 @@ dẫn: TS. Châu.
 | `code thuật toán/msgarchx/simulation/run_simulation.py` | Runner mô phỏng, hỗ trợ methods `mle`, `vb_mean_field`, `vb_full_rank`, `mcmc` | `vb_full_rank` có code nhưng **chưa từng được gọi** trong lần chạy 8 kịch bản đã có — không có trong `results/07_simulation_S*.pt` |
 | `code thuật toán/results/*.pt` | Nguồn sự thật duy nhất cho mọi số liệu | Đọc bằng `torch.load(path, weights_only=False)`; cần `sys.path.insert(0, ".../code thuật toán")` trước khi load vì pickle tham chiếu class trong `msgarchx` |
 
-## TIẾN ĐỘ VÀ VIỆC CẦN LÀM (cập nhật 13/09/2026, 11:53)
+## TIẾN ĐỘ VÀ VIỆC CẦN LÀM (cập nhật 15/09/2026)
 
-### Đang chạy ngay lúc này
+### Toàn bộ thiết kế ba bước ĐÃ HOÀN TẤT — không còn tính toán nào đang chạy
 
-**Bước 1 — so sánh toàn bộ danh mục mô hình trên dữ liệu VN30F1M thật.**
-Khởi động 13/09 sáng bằng `chay_buoc1.bat`, chạy tuần tự một luồng, **6/17 mục
-xong** (ba mô hình GARCH một trạng thái × VB-MF và VB-FR). Còn lại: 3 EGARCH ×
-MLE, 6 EGARCH × VB, 2 MS-GARCH chuẩn × VB. Ước tính còn ~6 giờ.
+**Bước 1 xong 13/09 19:09**, đủ 24/24 ô (8 mô hình × 3 phương pháp).
+**EGARCH-X Student-t + MLE thắng cả bốn tiêu chí**: AIC 5606,87 · BIC 5650,54 ·
+QLIKE 0,9234 · NLS 1,5203. Bảng đầy đủ và phân rã đóng góp từng thành phần
+nằm trong `Bài báo/ket_qua_moi.tex` (sinh tự động).
 
-Checkpoint từng cặp (mô hình, phương pháp) trong `results/pipeline/`; Ctrl+C rồi
-chạy lại sẽ tự bỏ qua phần đã xong. Dùng `--bo-qua-mcmc`, tức **dừng trước
-Bước 3**.
+Tín hiệu từ lần chạy thử đã được bản đầy đủ **xác nhận nguyên vẹn**: các dòng
+EGARCH ở bản `--nhanh` chỉ là cận dưới, và bản đầy đủ cho đúng cùng con số
+AIC 5606,87 — tức MLE đã tìm được cực đại ngay cả với cấu hình bị cắt xén.
 
-**Tín hiệu sơ bộ đáng chú ý** (từ lần chạy thử `--nhanh`, cấu hình bị cắt xén
-nặng nên chỉ là cận dưới): **EGARCH-X Student-t thắng cả AIC, BIC, QLIKE và
-NLS** — AIC 5606,87 so với 5648,87 của GARCH-X Student-t. Nó thắng *dù* được
-cấp ngân sách tối ưu hoá tệ hơn nhiều so với các mô hình GARCH (vốn nạp lại từ
-cấu hình đầy đủ), và bộ tối ưu kém hơn chỉ có thể cho log-likelihood **thấp
-hơn** — nên lợi thế này là thật và sẽ rộng thêm ở bản đầy đủ. Nếu giữ nguyên,
-**mô hình thắng cuộc của Bước 1 đổi từ GARCH-X Student-t sang EGARCH-X
-Student-t**, và vì đây là mô hình một trạng thái nên Bước 3 sẽ không vướng đối
-xứng hoán vị nhãn.
+Ba phát hiện chính của Bước 1 (chi tiết trong `Bài báo/CAN_SUA_SAU_BUOC_1.md`):
+đuôi dày quan trọng nhất ($\Delta$AIC ≈ −235); biến ngoại sinh hữu ích gấp bốn
+lần trong EGARCH vì không vướng ràng buộc dương; **chuyển trạng thái làm mô hình
+tệ đi** ($\Delta$AIC = +1,7) — tức mô hình được đề xuất trong tên đề tài đã thua.
+
+**Bước 3 xong 15/09**, hội tụ — xem mục riêng ngay dưới.
 
 ### Trạng thái tổng thể của ba bước
 
 | Bước | Nội dung | Trạng thái |
 |---|---|---|
-| 1 | Danh mục 8 mô hình × 3 phương pháp, dữ liệu thật | **đang chạy, 6/17** |
+| 1 | Danh mục 8 mô hình × 3 phương pháp, dữ liệu thật | **XONG** 24/24 ô — EGARCH-X Student-t thắng cả bốn tiêu chí |
 | 2 | Mô phỏng khôi phục tham số (PR-A + PR-B) | **XONG** 1.800/1.800 lần lặp |
-| 3 | MCMC trên mô hình thắng cuộc | chưa chạy — xem A4 |
+| 3 | MCMC trên mô hình thắng cuộc | **XONG, HỘI TỤ** — $\hat R$ 1,0125, ESS 1.340, 0 phân kỳ |
 
 ---
+
+## BƯỚC 3 — MCMC TRÊN MÔ HÌNH THẮNG CUỘC: HỘI TỤ (cập nhật 15/09/2026)
+
+**Cả ba bước của thiết kế đã hoàn tất.** Bước 3 chạy 14/09 19:37 → 15/09 ~03:45,
+**8,1 giờ**, trên EGARCH-X Student-t bằng NUTS, 4 chuỗi × (1.000 warmup + 400
+mẫu), độ sâu cây tối đa 7, khởi tạo phân tán quanh nghiệm MLE.
+
+| Chẩn đoán | Lần này (EGARCH-X-t) | Lần MS-GARCH-X thất bại |
+|---|---|---|
+| $\hat R$ lớn nhất | **1,0125** | 2,84 |
+| ESS nhỏ nhất | **1.340** / 1.600 mẫu (84%) | ≈ 5 |
+| Số phân kỳ | **0** | — |
+| Thời gian | 8,1 giờ, 4 chuỗi **tuần tự** | 64 giờ, 4 chuỗi song song |
+
+Đây là bằng chứng dứt khoát cho luận điểm của thiết kế ba bước: **MCMC thất bại
+trước đây là do đối xứng hoán vị nhãn của cấu trúc chuyển trạng thái**, không
+phải do MCMC. Cùng thư viện, cùng thuật toán, cùng dữ liệu — bỏ cấu trúc chuyển
+trạng thái thì hội tụ.
+
+### Kết quả trên VN30F1M, bốn phương pháp cùng một likelihood
+
+| Tham số | MLE | VB-MF | VB-FR | MCMC | KTC 95% (MCMC) |
+|---|---|---|---|---|---|
+| $\theta$ | −0,1452 | −0,1407 | −0,1241 | **−0,1399** | **[−0,2125; −0,0710]** |
+| $\beta$ | 0,6832 | 0,6264 | 0,6390 | 0,6393 | [0,4912; 0,7562] |
+| $\nu$ | 4,2910 | 4,3897 | 4,3647 | 4,3644 | [3,5544; 5,4315] |
+| $\omega$ | 0,1599 | 0,1941 | 0,1897 | 0,1870 | [0,1093; 0,2948] |
+| $\alpha$ | 0,0721 | 0,1081 | 0,1066 | 0,1121 | [0,0268; 0,2110] |
+
+Hai phát hiện dùng thẳng trong bài:
+- **Hiệu ứng đòn bẩy của VN30F1M được xác lập thống kê**: khoảng tin cậy 95% của
+  $\theta$ **loại trừ 0**. Kết hợp với PR-B (E2: mô hình không bịa ra đòn bẩy khi
+  $\theta_0=0$), kết luận này được kiểm chứng cả hai chiều.
+- **$\nu \approx 4{,}36$** với KTC [3,55; 5,43] — đuôi rất dày, khớp $\hat\nu\approx4{,}08$
+  của MS-GARCH-X trước đây. E3 ($\nu_0=4$) đã xác nhận bộ ước lượng đáng tin ở đúng vùng này.
+
+### RQ3 trả lời được lần đầu tiên: $R_{sd} = \mathrm{sd}_{VB}/\mathrm{sd}_{MCMC}$
+
+| | $\mu$ | $\omega$ | $\alpha$ | $\theta$ | $\beta$ | $\nu$ |
+|---|---|---|---|---|---|---|
+| VB-MF | 0,95 | **0,37** | 0,88 | 0,92 | **0,29** | 0,63 |
+| VB-FR | 0,94 | **0,75** | 1,01 | 1,00 | **0,75** | 0,97 |
+
+Mean-field **đánh giá thấp bất định của $\omega$ và $\beta$ khoảng ba lần** —
+đúng hai tham số nằm trên sống núi cong $\omega/(1-\beta)$ mà mô phỏng đã chỉ ra
+(coverage của $\omega$, $\beta$ tệ nhất ở cả PR-A lẫn PR-B). Full-rank thu hẹp
+nhưng vẫn hẹp hơn 25% ở đúng hai tham số đó. Ở $\mu$, $\theta$, $\alpha$ thì cả
+hai họ VB gần khớp MCMC. **Kết quả mô phỏng và kết quả dữ liệu thật nói cùng một
+điều, bằng hai con đường độc lập.**
+
+### Hai sự cố vận hành ngày 13–14/09, đã ghi để không lặp lại
+
+1. **`--chi-bang` từng chảy tiếp xuống Bước 3.** Lệnh "chỉ in bảng" không kèm
+   `--bo-qua-mcmc` đã âm thầm khởi động MCMC 8 tiếng, chạy nền song song với
+   một lần chạy khác, **hai tiến trình ghi chồng cùng file tiến độ** → mọi số
+   đọc từ file đó hôm 13/09 không đáng tin và dẫn tới một loạt chẩn đoán sai.
+   Đã vá: `--chi-bang` nay dừng sau khi in bảng.
+2. **Không truyền `initial_params`** → Pyro dùng `init_to_uniform`, một chuỗi
+   rơi vào $\theta=+1{,}03$ (ngược dấu đòn bẩy), bước tích phân sụp xuống
+   $10^{-9}$. Đã thêm `initial_params_single_from_mle()` trong `mcmc.py`:
+   chuỗi 0 đúng tại nghiệm MLE, ba chuỗi còn lại phân tán **2 sai số chuẩn**
+   (từ `standard_errors_single`), có trần 1,0 trên thang đã biến đổi vì phương
+   pháp delta phóng đại khi tham số gần biên. Hằng số nhiễu loạn cố định là
+   sai: 0,3 trên $\theta$ có sai số chuẩn 0,035 là 15 độ lệch chuẩn.
+3. **`taskkill /F /IM python.exe` giết nhầm backend của dự án khác.** Từ nay chỉ
+   giết theo PID sau khi liệt kê dòng lệnh. `TaskStop` của harness **không giết
+   tiến trình con** — phải kiểm tra lại bằng `Get-CimInstance Win32_Process`.
+
+### Công cụ
+
+- `chay_buoc3_mcmc.bat`: chạy Bước 3 và hiện thanh tqdm trực tiếp trên cmd,
+  kèm ba chỉ số cần theo dõi (`s/it`, `step size`, `acc. prob`).
+- `sinh_ket_qua_moi.py` nay sinh **6 bảng**: thêm bảng bốn phương pháp và bảng
+  $R_{sd}$ cho `Bài báo/ket_qua_moi.tex`.
+
 
 ## VIỆC CẦN LÀM, xếp theo mức độ chặn
 
@@ -104,7 +176,7 @@ trạng thái (VB-FR 0,63–0,68, tệ hơn đoán ngẫu nhiên 0,5). Checkpoin
 số vô hướng chứ không lưu $\xi_t$ nên không sửa được từ dữ liệu đã có; phải chạy
 lại **bộ lọc tiến** một lượt với tham số đã lưu — **không cần ước lượng lại**.
 
-**A4. Bước 3 — MCMC trên mô hình thắng cuộc. HOÃN ĐẾN CUỐI.** Nên **đổi tham số
+**A4. ~~Bước 3 — MCMC~~ ĐÃ XONG 15/09, hội tụ không cần đổi tham số hoá.** Ghi chú cũ giữ lại để biết lý do từng hoãn: Nên **đổi tham số
 hoá trước**: Bước 2 đã chỉ ra sống núi cong $\omega/(1-\beta)$ vừa làm VB chệch
 vừa ép NUTS hạ bước tích phân xuống $10^{-4}$ — chạy MCMC trước khi sửa là lặp
 lại thất bại 64 giờ cũ. Bài vẫn hoàn chỉnh nếu Bước 3 báo cáo kết quả âm.

@@ -90,6 +90,102 @@ def initial_params_from_mle(params, chain: int, base_seed: int = 5000,
     }
 
 
+
+# Tran do lon nhieu loan tren thang da bien doi (log hoac logit). Phuong phap
+# delta la xap xi DIA PHUONG: khi tham so nam gan bien, mau so x hoac x(1-x) rat
+# nho nen do lon quy doi phong len vo ly. Vi du thuc te: alpha cua EGARCH-X
+# Student-t tren VN30F1M la 0,0721 voi sai so chuan 0,0569, quy doi sang thang
+# logit thanh 1,70 -- du de nem chuoi tu 0,072 len 0,615, tuc gap tam lan. Tran
+# 1,0 tuong ung voi he so khoang e = 2,7 tren thang ty le chenh, du phan tan de
+# R-hat co y nghia ma khong nem chuoi sang vung khac.
+TRAN_NHIEU = 1.0
+
+
+def initial_params_single_from_mle(params, spec, chain: int,
+                                   se: dict | None = None,
+                                   base_seed: int = 5000,
+                                   k_se: float = 2.0,
+                                   scale_du_phong: float = 0.1) -> dict:
+    """Diem khoi tao chuoi `chain` cho mo hinh MOT trang thai, dat quanh nghiem MLE.
+
+    VI SAO CAN. Khong truyen initial_params thi Pyro dung init_to_uniform, tuc
+    moi chuoi roi ngau nhien tren mien khong rang buoc. Da quan sat truc tiep hau
+    qua o lan chay EGARCH-X Student-t ngay 13/09: chuoi dau thich nghi tot (buoc
+    tich phan len 0,70; 3,68 giay/vong) nhung mot chuoi sau roi vao vung
+    theta = +1,03, beta = 0,32, omega = -1,32 -- nguoc dau don bay va cach xa
+    nghiem MLE -- roi buoc tich phan sup xuong 1,8e-07 va chuoi dung yen
+    (>= 43 giay/vong).
+
+    DO LON NHIEU LOAN PHAI THEO SAI SO CHUAN, khong phai mot hang so chung.
+    Mot hang so chung (vd. 0,3 nhu ban cho MS-GARCH-X) la vo nghia khi cac tham
+    so co bac do lon khac nhau: voi theta cua EGARCH-X Student-t tren VN30F1M
+    (uoc luong -0,145, sai so chuan ~0,02) thi 0,3 la khoang 15 do lech chuan --
+    du de nem chuoi sang vung doi dau don bay, tuc TAI TAO dung loi vua gap.
+    Nen mac dinh o day la `k_se = 2` lan sai so chuan: du phan tan de R-hat con y
+    nghia chan doan (Gelman-Rubin can diem xuat phat phan tan HON hau nghiem),
+    nhung khong nem chuoi sang mot che do khac.
+
+    `se`: dict ten -> sai so chuan tren thang TU NHIEN, lay tu
+    `garch_mle.standard_errors_single()`. Neu None (Hessian khong xac dinh duong,
+    thuong gap khi nghiem sat bien) thi lui ve hang so `scale_du_phong`.
+
+    Chuoi 0 dat DUNG TAI nghiem MLE; cac chuoi con lai nhieu loan quanh no.
+
+    Nhieu loan ton trong MIEN cua tung site, va do lon duoc quy doi sang thang
+    tuong ung bang phuong phap delta: site duong nhieu loan tren thang log (chia
+    cho x), site trong (0,1) nhieu loan tren thang logit (chia cho x(1-x)).
+
+    Tra ve dict tren MIEN HOP LE; Pyro tu bien doi sang khong gian khong rang buoc.
+    """
+    g = torch.Generator().manual_seed(base_seed + chain)
+    tat = (chain == 0)
+
+    def _do_lon(ten, x):
+        """Do lon nhieu loan tren thang TU NHIEN, dang tensor broadcast duoc voi x.
+
+        Tra ve tensor chu khong phai so vo huong vi `gamma` la VECTOR: moi toa do
+        co sai so chuan rieng nen phai nhieu loan rieng.
+        """
+        x = torch.as_tensor(x, dtype=torch.float64)
+        if tat:
+            return torch.zeros_like(x)
+        if se is not None and ten in se:
+            return k_se * torch.as_tensor(se[ten], dtype=torch.float64)
+        return scale_du_phong * x.abs().clamp(min=1e-3)
+
+    def cong(ten, x):
+        x = torch.as_tensor(x, dtype=torch.float64)
+        return x + _do_lon(ten, x) * torch.randn(x.shape, generator=g, dtype=torch.float64)
+
+    def qua_log(ten, x):
+        """Site duong: nhieu loan tren thang log, do lon = sai so chuan / x."""
+        x = torch.as_tensor(x, dtype=torch.float64)
+        s_log = (_do_lon(ten, x) / x.abs().clamp(min=1e-8)).clamp(max=TRAN_NHIEU)
+        return x * torch.exp(s_log * torch.randn(x.shape, generator=g, dtype=torch.float64))
+
+    def qua_logit(ten, x):
+        """Site trong (0,1): nhieu loan tren thang logit, do lon = SE / (x(1-x))."""
+        x = torch.as_tensor(x, dtype=torch.float64).clamp(1e-4, 1 - 1e-4)
+        s_logit = (_do_lon(ten, x) / (x * (1 - x)).clamp(max=1.0, min=1e-8)).clamp(max=TRAN_NHIEU)
+        return torch.sigmoid(torch.log(x) - torch.log1p(-x)
+                             + s_logit * torch.randn(x.shape, generator=g, dtype=torch.float64))
+
+    ra = {"mu": cong("mu", params.mu),
+          "alpha": qua_logit("alpha", params.alpha),
+          "beta": qua_logit("beta", params.beta)}
+    # omega: EGARCH dat tren thang log h nen KHONG rang buoc dau; GARCH thi duong.
+    ra["omega"] = (cong("omega", params.omega) if spec.family == "egarch"
+                   else qua_log("omega", params.omega))
+    if spec.family == "egarch":
+        ra["theta"] = cong("theta", params.theta)
+    if spec.use_exog:
+        # gamma la vector; dung sai so chuan cua toa do dau lam do lon chung.
+        ra["gamma"] = cong("gamma", params.gamma)
+    if spec.dist == "student_t":
+        ra["nu_minus_2"] = qua_log("nu", torch.as_tensor(params.nu) - 2.0)
+    return ra
+
+
 def fit_mcmc(
     r: torch.Tensor,
     X: torch.Tensor,
