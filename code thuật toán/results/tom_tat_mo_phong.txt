@@ -2,7 +2,7 @@
 TOM TAT NGHIEN CUU KHOI PHUC THAM SO (PARAMETER RECOVERY)
 MS-GARCH-X Student-t va EGARCH-X Student-t cho VN30F1M
 ==============================================================================
-Sinh luc: 2026-09-13 01:34:23
+Sinh luc: 2026-09-15 08:36:30
 Thu muc:  C:\Users\Admin\Desktop\nam\NCKH\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results
 
 Da SAP NHAN TRANG THAI truoc khi gop (tieu chi: phuong sai vo dieu kien

@@ -10,6 +10,21 @@ Tài liệu này trình bày đầy đủ cơ sở toán học, thuật toán v�
 được cài đặt. Hướng dẫn cài đặt thư viện, chạy thử và các lưu ý vận hành nằm ở
 [`code thuật toán/README.md`](code%20thuật%20toán/README.md).
 
+> **TRẠNG THÁI (15/09/2026) — toàn bộ thiết kế ba bước đã hoàn tất.** Phần lớn
+> tài liệu này mô tả thiết kế *ban đầu* (MS-GARCH-X là mô hình chính, tám kịch
+> bản mô phỏng $B$ thấp). Thiết kế hiện hành và kết quả thực tế nằm ở
+> [`CLAUDE.md`](CLAUDE.md) và [`Bài báo/ket_qua_moi.tex`](Bài%20báo/ket_qua_moi.tex)
+> (sinh tự động từ `results/*.pt`). Ba kết quả trung tâm:
+>
+> | Bước | Kết quả |
+> |---|---|
+> | 1 — So sánh 8 mô hình × 3 phương pháp trên dữ liệu thật | **EGARCH-X Student-t + MLE thắng cả AIC, BIC, QLIKE, NLS.** Thêm cấu trúc chuyển trạng thái làm AIC *xấu đi* 1,7 — mô hình được đề xuất trong tên đề tài đã thua. |
+> | 2 — Khôi phục tham số, 1.800 lần lặp | MLE thắng 45/59 ô RMSE; VB chỉ thắng khi tham số nhận dạng yếu **và** tiên nghiệm đặt đúng chỗ. Coverage của VB trên MS-GARCH-X không dùng được (0,32–0,51) vì đảo nhãn ~50% và tiên nghiệm kéo $p_{ss}$. |
+> | 3 — MCMC trên mô hình thắng cuộc | **Hội tụ**: $\hat R$ 1,0125, ESS 1.340, 0 phân kỳ, 8,1 giờ — so với $\hat R$ 2,84 sau 64 giờ trên MS-GARCH-X. RQ3 trả lời được: mean-field đánh giá thấp bất định của $\omega, \beta$ khoảng ba lần ($R_{sd}$ 0,37 và 0,29). |
+>
+> Các mục dưới đây được giữ nguyên làm tài liệu tham chiếu cho phần cài đặt còn
+> dùng chung; những chỗ đã biết là lỗi thời được đánh dấu tại chỗ.
+
 **Mục lục**
 
 1. [Câu hỏi nghiên cứu](#1-câu-hỏi-nghiên-cứu)
@@ -1120,16 +1135,55 @@ nghiên cứu mô phỏng đo được.
 Giá trị khởi tạo $h_0=\omega_s/\max(1-\alpha_s-\beta_s,\,0{,}05)$ là phương sai
 không điều kiện của trạng thái.
 
-### 11.2 Bốn kịch bản hiệu chuẩn theo VN30F1M
+### 11.2 Các kịch bản mô phỏng
 
-Các kịch bản mô phỏng được xây dựng theo nguyên tắc **hiệu chuẩn theo thực nghiệm (Empirical Calibration)**: Kịch bản chuẩn S1 lấy chính các tham số ước lượng được từ dữ liệu thực tế VN30F1M ($\nu_0 = 4{,}08$, $\omega = [0{,}10, 1{,}08]$, $\alpha = [0{,}11, 0{,}33]$, $\beta = [0{,}85, 0{,}30]$). Các kịch bản S2–S4 thử tải phương pháp dưới các điều kiện thị trường đặc thù:
+> **Mục này từng mô tả sai.** Bản trước viết "bốn kịch bản hiệu chuẩn theo
+> VN30F1M" với $\nu_0 = 4{,}08$, $\omega = [0{,}10; 1{,}08]$ — nhưng đó không phải
+> tham số mà code đã chạy. `scenarios.py` dùng **tham số minh hoạ**, không hiệu
+> chuẩn từ dữ liệu thật, và chính docstring của file tự khai báo điều đó. Đã sửa
+> mô tả cho khớp code (không sửa code cho khớp mô tả).
 
-| Mã | Tên kịch bản | Đặc điểm tham số | Mục đích kinh tế lượng |
+Mô phỏng khôi phục tham số gồm **hai nghiên cứu riêng**, phục vụ hai mục đích:
+
+| | PR-A | PR-B |
+|---|---|---|
+| Mô hình sinh dữ liệu | MS-GARCH-X Student-t, 2 trạng thái, 15 tham số | EGARCH-X Student-t, 1 trạng thái, 8 tham số |
+| Kịch bản | $S_1$, $S_2$, $S_3$ | $E_1$, $E_2$, $E_3$ |
+| $B$ / $T$ | 100 / 2000, burn-in 200 | 100 / 2000, burn-in 200 |
+| Phương pháp | MLE, VB-MF, VB-FR | MLE, VB-MF, VB-FR |
+| Mục đích | Kiểm định bộ ước lượng ở nơi khó nhất | Kiểm định bộ ước lượng mới, nhất là hệ số đòn bẩy $\theta$ theo **cả hai chiều** |
+
+**PR-A** — tham số minh hoạ, mỗi kịch bản trả lời một câu hỏi:
+
+| KB | $\omega$ | $\alpha$ | $\beta$ | $\nu_0$ | $p_{11}, p_{22}$ | Câu hỏi |
+|---|---|---|---|---|---|---|
+| $S_1$ | 0,05; 0,40 | 0,05; 0,10 | 0,85; 0,80 | 8 | 0,98; 0,95 | Mốc nền — hai trạng thái tách rõ |
+| $S_2$ | 0,08; 0,14 | 0,06; 0,08 | 0,85; 0,83 | 8 | 0,95; 0,90 | Nhận dạng yếu — nơi VB-MF khác VB-FR nhất |
+| $S_3$ | 0,05; 0,40 | 0,05; 0,10 | 0,85; 0,80 | **4** | 0,98; 0,95 | Đuôi rất dày, sát biên ($\hat\nu \approx 4{,}08$ trên VN30F1M) |
+
+Mọi kịch bản dùng $\mu = (0; 0)$, $\bm\gamma_1 = \bm\gamma_2 = (0{,}05; 0{,}05)$, $k=2$.
+
+**PR-B** — chung $\mu_0 = 0{,}05$, $\omega_0 = 0{,}04$, $\alpha_0 = 0{,}15$, $\beta_0 = 0{,}95$, $\bm\gamma_0 = (0{,}05; 0{,}05)$:
+
+| KB | $\theta_0$ | $\nu_0$ | Câu hỏi |
 |---|---|---|---|
-| S1 | Baseline VN30F1M | Calibrated từ VN30F1M: $\nu_0=4{,}1$, $\omega=[0{,}10, 1{,}08]$, $T=2000$ | Khôi phục tham số trên cấu hình thực tế của phái sinh VN |
-| S2 | Nhận dạng yếu | Hai trạng thái gần nhau: $\omega=[0{,}15, 0{,}25]$, $\alpha+\beta \approx 0{,}92$ | Kiểm tra khi bề mặt likelihood phẳng và đa cực trị |
-| S3 | Mẫu ngắn | Tham số như S1, nhưng $T=500$ quan sát | Đánh giá độ chệch mẫu nhỏ và tính ổn định của tiên nghiệm Bayes |
-| S4 | Chế độ hoảng loạn hiếm | $p_{11}=0{,}99, p_{22}=0{,}80$ (trạng thái 2 kéo dài trung bình 5 phiên) | Kiểm tra khả năng nhận dạng trạng thái hiếm và đột ngột |
+| $E_1$ | −0,10 | 8 | Có đòn bẩy → phát hiện được không? |
+| $E_2$ | **0** | 8 | Không đòn bẩy → có **bịa ra** không? (kịch bản quan trọng nhất) |
+| $E_3$ | −0,10 | 4 | Đuôi dày → còn khôi phục đúng không? |
+
+Bộ **tám kịch bản** $S_1$–$S_8$ ban đầu ($B = 30$ cho MLE, $15$ cho VB, có $S_6$
+với $T=500$ và $S_7$ với $T=5000$) được giữ làm **bước thăm dò** ở phụ lục; kết
+quả nằm trong `results/07_simulation_thamdo/`.
+
+Vì sao ba kịch bản với $B=100$ thay vì tám với $B$ thấp: sai số chuẩn Monte Carlo
+của một tỷ lệ độ phủ là $\sqrt{p(1-p)/B}$; với $p \approx 1/3$ nó giảm từ ±12,1
+điểm phần trăm ở $B=15$ xuống ±4,7 ở $B=100$.
+
+**Hai điều bắt buộc khi đọc kết quả** (chi tiết trong `CLAUDE.md`): nhãn trạng
+thái phải được **sắp trước khi gộp** — VB đảo nhãn ở ~50% số lần lặp, không sắp
+thì mọi chỉ tiêu của tham số theo trạng thái đều vô nghĩa; và $B=100$ là mục
+tiêu thiết kế, lần lặp thất bại được xử lý bằng **quy tắc thử lại điểm khởi
+tạo** khai báo trước (`OFFSET_THU_LAI = 1000`).
 
 ### 11.3 Tiêu chí đánh giá
 
@@ -1319,6 +1373,22 @@ không truyền `checkpoint_path` nên vẫn mất trắng nếu bị ngắt.
 ---
 
 ## 16. Những điểm chưa hoàn tất
+
+> **Cập nhật 15/09/2026.** Danh sách bên dưới viết trước khi ba bước hoàn tất.
+> Danh sách việc cần làm **hiện hành**, xếp theo mức độ chặn, nằm ở `CLAUDE.md`
+> (mục "VIỆC CẦN LÀM"). Tóm tắt những gì đã thay đổi so với danh sách này:
+>
+> - **Đã xong**: MCMC hội tụ trên mô hình thắng cuộc (Bước 3); khởi tạo chuỗi
+>   MCMC từ nghiệm MLE với nhiễu loạn theo sai số chuẩn; sai số chuẩn Hessian cho
+>   mô hình một trạng thái (`standard_errors_single`); ba mô hình EGARCH; VB cho
+>   MS-GARCH chuẩn; mô phỏng $B=100$ cho cả hai họ.
+> - **Phát hiện mới, chưa có trong danh sách này**: Brier của mô phỏng sai vì
+>   tính trước khi sắp nhãn trạng thái (không sửa được từ dữ liệu đã lưu, phải
+>   chạy lại bộ lọc); coverage của MLE chưa tính (hàm đã có, chưa gọi); bản thảo
+>   đang mô tả một nghiên cứu khác với nghiên cứu đã chạy (`report_data.json`
+>   duy trì thủ công, không tự đồng bộ) — xem `Bài báo/CAN_SUA_SAU_BUOC_1.md`.
+> - **Vẫn đúng**: các mục về CRPS, PIT theo từng phương pháp, ESS phần đuôi,
+>   tái ước lượng định kỳ.
 
 Danh sách này ghi lại trung thực khoảng cách giữa cài đặt hiện tại và yêu cầu đầy
 đủ của bản thảo.

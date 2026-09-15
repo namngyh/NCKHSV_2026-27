@@ -90,11 +90,35 @@ File này khớp nhất trong ba (nhắc EGARCH 23 lần, đã mô tả thiết 
 
 ---
 
-## Ý nghĩa cho Bước 3
+## Bước 3 đã chạy và HỘI TỤ (15/09) — bổ sung cho bản ghi chú này
 
-Mô hình thắng cuộc là **mô hình một trạng thái**, đúng như thiết kế ba bước đã tiên liệu. MCMC ở Bước 3 sẽ **không có đối xứng hoán vị nhãn** — nguyên nhân đã xác định của thất bại 64 giờ trước đây — và chỉ phải làm việc với 8 tham số thay vì 15.
+Dự đoán ở bản đầu ("Bước 3 sẽ không vướng đối xứng hoán vị nhãn") đã được xác nhận, **mà không cần đổi tham số hoá** như tôi từng khuyên. Khởi tạo bốn chuỗi phân tán quanh nghiệm MLE (2 sai số chuẩn) là đủ.
 
-Chướng ngại còn lại là sống núi cong $\omega/(1-\beta)$, thứ vừa làm VB chệch vừa ép NUTS hạ bước tích phân xuống $10^{-4}$. Nên **đổi tham số hoá sang (mức, độ dai dẳng) trước khi chạy Bước 3**.
+| Chẩn đoán | EGARCH-X-t | MS-GARCH-X (lần thất bại) |
+|---|---|---|
+| $\hat R$ lớn nhất | **1,0125** | 2,84 |
+| ESS nhỏ nhất | **1.340** / 1.600 | ≈ 5 |
+| Phân kỳ | 0 | — |
+| Thời gian | 8,1 giờ (4 chuỗi tuần tự) | 64 giờ, không hội tụ |
+
+Cùng thư viện, cùng thuật toán, cùng dữ liệu — bỏ cấu trúc chuyển trạng thái thì hội tụ. Đây là bằng chứng dứt khoát cho luận điểm trung tâm của thiết kế ba bước, và là **kết quả dương về MCMC** mà bài trước đây không có.
+
+**Hai kết quả dùng thẳng trong bài:**
+
+1. **Hiệu ứng đòn bẩy được xác lập thống kê**: $\theta = -0{,}1399$, khoảng tin cậy 95% **[−0,2125; −0,0710] loại trừ 0**. Kết hợp với kịch bản $E_2$ của PR-B (mô hình không bịa ra đòn bẩy khi $\theta_0 = 0$), kết luận được kiểm chứng cả hai chiều.
+
+2. **RQ3 trả lời được lần đầu tiên** — tỷ số $R_{sd} = \mathrm{sd}_{VB}/\mathrm{sd}_{MCMC}$ mà bài định nghĩa nhưng chưa từng tính được:
+
+| | $\mu$ | $\omega$ | $\alpha$ | $\theta$ | $\beta$ | $\nu$ |
+|---|---|---|---|---|---|---|
+| VB-MF | 0,95 | **0,37** | 0,88 | 0,92 | **0,29** | 0,63 |
+| VB-FR | 0,94 | **0,75** | 1,01 | 1,00 | **0,75** | 0,97 |
+
+Mean-field đánh giá thấp bất định của $\omega$ và $\beta$ khoảng **ba lần** — đúng hai tham số trên sống núi cong $\omega/(1-\beta)$ mà mô phỏng đã chỉ ra. Kết quả mô phỏng và kết quả dữ liệu thật nói cùng một điều bằng hai con đường độc lập. Bảng đầy đủ: `tab:buoc3-bon-phuong-phap` và `tab:buoc3-rsd` trong `ket_qua_moi.tex`.
+
+**Hệ quả cho dòng 1856 và 1931 của `Bài báo chính.tex`**: câu "Chuỗi MCMC không hội tụ nên không dùng làm chuẩn tham chiếu được" nay **sai** với mô hình thắng cuộc. RQ3 phải viết lại: có chuẩn tham chiếu, và kết luận về VB mean-field giờ là định lượng ($R_{sd} = 0{,}29$–$0{,}37$ ở $\omega, \beta$) chứ không còn phải suy từ mô phỏng.
+
+Sống núi cong vẫn hiện diện — chính nó làm $R_{sd}$ của VB thấp ở $\omega$, $\beta$ — nhưng NUTS đi qua được; VB thì không, vì họ Gauss không mô tả được đường cong. Đổi tham số hoá vẫn là hướng tốt để **VB** làm việc tốt hơn, không còn là điều kiện cho MCMC.
 
 ---
 

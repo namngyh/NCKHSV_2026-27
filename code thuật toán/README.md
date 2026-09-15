@@ -143,10 +143,21 @@ Nghĩa là **batch hóa đáng giá ngay cả khi không có GPU**, vì ở B=1 
 toàn bộ thời gian là chi phí vòng lặp Python. GPU thì chưa đo được (máy này
 không có) và vẫn chưa chắc thắng vì tensor quá nhỏ.
 
-**Về bước MCMC**: mô hình thắng cuộc nhiều khả năng là mô hình một trạng thái.
-Khi đó **không có đối xứng hoán vị nhãn**, tức không gặp vấn đề đa đỉnh đã làm
-hỏng ba lần chạy MCMC trên MS-GARCH-X trước đây. Nếu mô hình thắng cuộc lại là
-mô hình hai trạng thái, script sẽ dừng và báo rõ thay vì âm thầm chạy 64 giờ.
+**Về bước MCMC — ĐÃ CHẠY VÀ HỘI TỤ (15/09/2026).** Mô hình thắng cuộc là
+EGARCH-X Student-t (một trạng thái). NUTS 4 chuỗi × (1.000 warmup + 400 mẫu),
+khởi tạo phân tán quanh nghiệm MLE: $\hat R$ lớn nhất **1,0125**, ESS nhỏ nhất
+**1.340**, 0 phân kỳ, 8,1 giờ — so với $\hat R = 2{,}84$ sau 64 giờ trên
+MS-GARCH-X. Đúng như dự đoán ở đoạn cũ: bỏ đối xứng hoán vị nhãn là hội tụ.
+Kết quả ở `results/pipeline/mcmc_egarch_x_t.pt`.
+
+Ba điều rút ra khi vận hành, ghi để không lặp lại (chi tiết trong `CLAUDE.md`):
+`--chi-bang` nay **dừng sau khi in bảng** (trước đây nó chảy tiếp xuống Bước 3
+và âm thầm khởi động MCMC); chuỗi MCMC **phải** khởi tạo từ nghiệm MLE với nhiễu
+loạn theo sai số chuẩn (`initial_params_single_from_mle`), để Pyro tự khởi tạo
+thì một chuỗi rơi vào $\theta = +1{,}03$ và bước tích phân sụp xuống $10^{-9}$;
+và ghi chú "máy này không có GPU" ở đoạn trên là của máy **cũ** — máy hiện tại
+có RTX 4060, nhưng batch hoá/GPU đã được đưa ra ngoài phạm vi vì hai chỗ dùng
+chính (PR-A, PR-B) đã chạy xong.
 
 ---
 
@@ -188,6 +199,17 @@ thái, histogram PIT), kết quả mô phỏng S1-S8, và bảng chi phí tính 
   đang chạy ở cửa sổ khác (xem tiến độ tạm thời).
 - **`chon_cach_chay.bat`**: menu 4 lựa chọn, gộp mọi cách chạy bên dưới vào
   một cửa sổ duy nhất (xem "Bốn cách chạy pipeline").
+
+Ba file thêm trong đợt 09/2026, cho thiết kế ba bước (đều in tiến độ trực tiếp
+ra cửa sổ cmd, checkpoint từng đơn vị nhỏ, Ctrl+C rồi chạy lại là tiếp tục):
+
+- **`chay_mo_phong.bat`**: Bước 2 — menu chạy PR-A rồi tự động sang PR-B, xem
+  tiến độ, gộp kết quả, chạy thử, đổi số tiến trình song song (mặc định 12).
+- **`chay_buoc1.bat`**: Bước 1 — 8 mô hình × 3 phương pháp trên dữ liệu thật,
+  dừng trước MCMC (`--bo-qua-mcmc`).
+- **`chay_buoc3_mcmc.bat`**: Bước 3 — MCMC trên mô hình thắng cuộc, màn hình
+  giới thiệu ghi rõ ba chỉ số phải theo dõi trên thanh tqdm (`s/it`,
+  `step size`, `acc. prob`) và ngưỡng nào là hỏng.
 
 ## Bốn cách chạy pipeline
 
