@@ -66,10 +66,29 @@ MO_TA_S = {
     "S7": r"cỡ mẫu lớn, $T=5000$",
     "S8": r"sai đặc tả: $r_t + 0{,}3\,r_{t-1}$",
 }
+# Ban chu (khong toan) dung lam nhan dau trang PDF cho tieu de o tren. XeLaTeX +
+# unicode-math bi loi "Improper alphabetic constant" khi hyperref co gang doc
+# ky tu \nu (\mitnu) trong tieu de \subsection de sinh bookmark -- phai boc
+# \texorpdfstring{toan}{chu} thay vi de toan tho trong \subsection{}.
+MO_TA_S_CHU = {
+    "S1": "hai trang thai phan biet ro, nu0=8",
+    "S2": "hai trang thai gan nhau, nu0=8",
+    "S3": "duoi rat day, nu0=4",
+    "S4": "nu0=30 (gan phan phoi chuan)",
+    "S5": "trang thai bien dong cao hiem, p11=0,99, p22=0,85",
+    "S6": "co mau nho, T=500",
+    "S7": "co mau lon, T=5000",
+    "S8": "sai dac ta: r_t + 0,3 r_(t-1)",
+}
 MO_TA_E = {
     "E1": r"đòn bẩy rõ, $\theta_0=-0{,}10$, $\nu_0=8$",
     "E2": r"không đòn bẩy, $\theta_0=0$, $\nu_0=8$",
     "E3": r"đuôi dày, $\theta_0=-0{,}10$, $\nu_0=4$",
+}
+MO_TA_E_CHU = {
+    "E1": "don bay ro, theta0=-0,10, nu0=8",
+    "E2": "khong don bay, theta0=0, nu0=8",
+    "E3": "duoi day, theta0=-0,10, nu0=4",
 }
 
 
@@ -268,7 +287,7 @@ def phan_pr_a() -> tuple[str, dict]:
         d = torch.load(f, weights_only=False)
         that = _that_A(scn)
         ket_qua[code] = d
-        out.append(rf"\subsection{{{code} --- {MO_TA_S[code]}}}")
+        out.append(rf"\subsection{{{code} --- \texorpdfstring{{{MO_TA_S[code]}}}{{{MO_TA_S_CHU[code]}}}}}")
         gc = r", burn-in $=200$"
         if scn.misspecified:
             gc += r"; chuỗi ước lượng là $r_t+0{,}3\,r_{t-1}$"
@@ -295,7 +314,7 @@ def phan_pr_b() -> tuple[str, dict]:
         d = torch.load(f, weights_only=False)
         that = {k_: float(v) for k_, v in d["mle"]["tham_so_that"].items()}
         ket_qua[code] = d
-        out.append(rf"\subsection{{{code} --- {MO_TA_E[code]}}}")
+        out.append(rf"\subsection{{{code} --- \texorpdfstring{{{MO_TA_E[code]}}}{{{MO_TA_E_CHU[code]}}}}}")
         out.append(_bang_theta0(code, that, THU_TU_B, NHAN_B, scn.T, r", burn-in $=200$"))
         for pp in PP:
             if pp in d:
