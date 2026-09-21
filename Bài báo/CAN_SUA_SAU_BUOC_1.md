@@ -39,19 +39,21 @@ Tôi nghiêng về (1): nó đúng với những gì đã thực sự làm, và 
 | Dòng | Đang viết | Thực tế |
 |---|---|---|
 | **1931** | "VB mean-field … cho điểm log tốt nhất toàn bảng, $1{,}5354$" | **Sai.** NLS 1,5354 nay xếp **thứ 4**. Ba dòng EGARCH-X Student-t đều tốt hơn: 1,5203 (MLE), 1,5209 (VB-FR), 1,5215 (VB-MF) |
-| **1856, 1931** | "trên tám kịch bản, độ bao phủ … $0{,}236$ đến $0{,}440$, trung bình khoảng $0{,}33$" | Số liệu này lấy từ lần chạy **có lỗi không sắp nhãn trạng thái**. Số đúng sau khi sửa, $B=100$: VB-MF 0,321 / 0,453 / 0,339; VB-FR 0,427 / 0,505 / 0,423 |
+| **1856, 1931** | "trên tám kịch bản, độ bao phủ … $0{,}236$ đến $0{,}440$, trung bình khoảng $0{,}33$" | Số liệu này lấy từ lần chạy **có lỗi không sắp nhãn trạng thái**. Số đúng sau khi sửa, $B=100$: VB-MF 0,323 / 0,495 / 0,339; VB-FR 0,469 / 0,567 / 0,455 (đã đính chính 21/09 sau khi sửa lỗi giá trị thật của $p_{ss}$) |
 | **1412–1436** | "tám kịch bản", $B=30$ cho MLE và $B=15$ cho VB | Bước xác nhận dùng **ba kịch bản, $B=100$, cả ba phương pháp**. Bộ tám kịch bản $B$ thấp giữ làm phụ lục bổ trợ |
 | **1856, 1931** | RQ3 chỉ thảo luận VB mean-field | VB full-rank nay có số liệu đầy đủ và **tốt hơn VB-MF ở cả sáu cấu hình**. Bỏ qua nó là bỏ mất một nửa câu trả lời cho RQ3 |
 
 ### `bao_cao_ket_qua.tex`
 
-**Toàn bộ file phải coi là chưa xác minh.** Nó được sinh từ `report_data.json`, mà file JSON đó:
+> **Cập nhật 21/09.** Commit 70ccac5 đã đồng bộ file này với kết quả thật (thêm mục "ba bước", `\input{ket_qua_moi}`, chuyển 7 mục cũ thành Phụ lục A). Khối `sim` của `report_data.json` khi đó được **sửa tay** — nên khi chạy lại `01_sinh_hinh.py` nó bị ghi đè về cấu trúc cũ và `02_sinh_tex.py` hỏng. Nay đã vá `01_sinh_hinh.py` để tự sinh đúng cấu trúc (S1–S3 + E1–E3, ba phương pháp, gộp hai tầng), tức `report_data.json` **tái tạo được**, không còn phải sửa tay. Số liệu $p_{ss}$ trong đó cũng đã đúng sau khi sửa lỗi giá trị thật.
+
+Đoạn dưới là nhận xét ban đầu (13/09), giữ lại làm lịch sử:
+
+Nó được sinh từ `report_data.json`, mà file JSON đó lúc ấy:
 - được duy trì **thủ công**, không có script tái tạo;
 - tổ chức quanh bộ mã mô hình cũ (b1–b4, m1–m4) nên **không biểu diễn được** danh mục tám mô hình;
 - nhắc EGARCH **0 lần**;
 - chứa kết quả mô phỏng từ trước khi sửa lỗi sắp nhãn.
-
-Cách sửa đúng không phải chép tay số mới vào JSON mà là mở rộng `sinh_ket_qua_moi.py` để sinh nốt các bảng còn lại, rồi bỏ hẳn `report_data.json`.
 
 ### `document.tex`
 

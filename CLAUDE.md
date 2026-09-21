@@ -190,7 +190,7 @@ ký quỹ, đối chiếu mức cố định 13% của VSD, chấm điểm bằn
 trên cửa sổ trượt 250 phiên. Tận dụng được ngay kiểm định Kupiec đã có.
 
 **B2. Tách "chệch do xấp xỉ" khỏi "chệch do tiên nghiệm" — ~3 giờ.** Phát hiện
-mạnh nhất của Bước 2 là VB bị tiên nghiệm kéo ($p_{ss}$ về đúng 0,790 = trung
+mạnh nhất của Bước 2 là VB bị tiên nghiệm kéo ($p_{ss}$ về 0,810, sát trung
 bình tiên nghiệm 0,800). Chạy lại VB trên một kịch bản mô phỏng với tiên nghiệm
 Beta(20; 2): nếu chệch biến mất thì **chứng minh** được cơ chế thay vì chỉ suy
 luận. Đây là loại bằng chứng biến một nhận xét thành một đóng góp.
@@ -283,7 +283,7 @@ VB-FR thắng 0**. MLE cũng rẻ nhất (20–26 phút/lần lặp so với 23�
 
 | | VB-MF | VB-FR | Ghi chú |
 |---|---|---|---|
-| PR-A S1 / S2 / S3 | 0,321 / 0,453 / 0,339 | 0,427 / 0,505 / 0,423 | **không dùng được** |
+| PR-A S1 / S2 / S3 | 0,323 / 0,495 / 0,339 | 0,469 / 0,567 / 0,455 | **không dùng được** |
 | PR-B E1 / E2 / E3 | 0,715 / 0,652 / 0,703 | 0,815 / 0,725 / 0,814 | dùng được có chọn lọc |
 
 Coverage (lý tưởng 0,95) tăng rõ khi bỏ cấu trúc chuyển trạng thái. VB-FR hơn
@@ -298,7 +298,7 @@ chiếu nằm trong cùng bộ dữ liệu:
 | Tham số | Nhận dạng | Tiên nghiệm | Kết quả |
 |---|---|---|---|
 | $\omega_2$ (PR-A) | yếu | LogNormal phủ 0,40 hợp lý | VB thắng **3,5–12×** |
-| $p_{ss}$ (PR-A) | yếu | Beta(8;2) TB 0,80 vs thật 0,98 — **sai chỗ** | VB thua, coverage **0,00** |
+| $p_{ss}$ (PR-A) | yếu | Beta(8;2) TB 0,80 vs thật 0,98 — **sai chỗ** | VB thua: VB-MF coverage 0,00–0,05, VB-FR 0,23–0,69 |
 | $\theta$ (E2) | mạnh | Normal đúng tâm 0 | hoà RMSE, VB thắng coverage 0,96–0,98 |
 | $\nu$ ở $\nu_0=8$ | yếu | Gamma hợp lý | VB-MF thắng 5–9% |
 | $\nu$ ở $\nu_0=4$ | yếu hơn | Gamma | **MLE thắng** (0,435 vs 0,464) |
@@ -398,12 +398,25 @@ khoảng 25 phút. Chưa làm.
 
 ### Coverage thấp là do CHỆCH, và chệch phần lớn do TIÊN NGHIỆM
 
-Sắp nhãn xong coverage gần như không đổi (S1: 0,317 → 0,321 với VB-MF). Lý do:
-nó đã bằng 0 từ trước vì độ chệch quá lớn. Tiên nghiệm $p_{ss}\sim$ Beta(8; 2)
+Sắp nhãn xong coverage gần như không đổi (S1: 0,317 → 0,323 với VB-MF). Lý do:
+nó đã thấp từ trước vì độ chệch quá lớn. Tiên nghiệm $p_{ss}\sim$ Beta(8; 2)
 có trung bình **0,800**, trong khi giá trị thật của S1 là $p_{11}=0{,}98$. VB-MF
-cho **0,790** — gần đúng bằng trung bình tiên nghiệm; VB-FR cho 0,886; MLE
-(không có tiên nghiệm) cho **0,963**. Vì vậy coverage của $p_{11},p_{22}$ bằng
-**0,00 ở mọi kịch bản và mọi phương pháp Bayes**. Điều này khớp với phân tích độ
+cho **0,810** — sát trung bình tiên nghiệm; VB-FR cho 0,906; MLE (không có tiên
+nghiệm) cho **0,983** — gần như trùng giá trị thật. Coverage của $p_{11},p_{22}$:
+VB-MF **0,00–0,05** ở mọi kịch bản, VB-FR **0,23–0,69**.
+
+> **ĐÍNH CHÍNH 21/09.** Các số ở đoạn trên từng bị ghi sai (VB-MF 0,790, MLE
+> 0,963, và "coverage bằng 0,00 ở mọi kịch bản và mọi phương pháp Bayes"). Nguyên
+> nhân: `combine()` trong `chay_mo_phong_song_song.py` lấy giá trị thật của
+> $p_{ss}$ từ `params.P` — vốn chỉ là placeholder `eye(2)` — thay vì từ `P0`, nên
+> mọi Bias/RMSE/Coverage của $p_{11}, p_{22}$ trong PR-A được tính so với **1,0**
+> thay vì 0,98/0,95 (S1, S3) và 0,95/0,90 (S2). Đã sửa (đọc từ `P0`, giống bản
+> vá `run_scenario` của commit 70ccac5), gộp lại cả ba kịch bản, sinh lại mọi báo
+> cáo phái sinh. Bản gộp sai giữ ở `results/07_simulation_truoc_sua_p11/` để đối
+> chiếu. RMSE thắng/thua **không đổi** (MLE 19/27); coverage trung bình tăng
+> 0,00–0,06 điểm; tuyên bố "$p_{ss}$ coverage 0,00 ở mọi phương pháp" **rút lại**.
+
+Điều này khớp với phân tích độ
 nhạy đã có (đổi sang Beta(20; 2) thì $p_{11}$ trên dữ liệu thật nhảy từ 0,733
 lên 0,986). **Khi viết bài, không được nói "VB-MF đánh giá thấp bất định" như
 thể đó là tính chất thuần túy của mean-field.**

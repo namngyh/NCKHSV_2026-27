@@ -10,23 +10,11 @@ goto :menu
 
 :tim_python
 set "PYEXE="
-where python >nul 2>nul
-if errorlevel 1 goto :tim_python_thu_py
-set "PYEXE=python"
-goto :eof
-
-:tim_python_thu_py
-where py >nul 2>nul
-if errorlevel 1 goto :tim_python_khong_thay
-set "PYEXE=py"
-goto :eof
-
-:tim_python_khong_thay
-echo [LOI] Khong tim thay Python trong PATH.
-echo Hay chay cai_dat_va_chay_full.bat truoc it nhat mot lan.
-goto :eof
-
-:menu
+py -c "import torch" >nul 2>nul
+if not errorlevel 1 set "PYEXE=py"
+if not defined PYEXE python -c "import torch" >nul 2>nul
+if not defined PYEXE if not errorlevel 1 set "PYEXE=python"
+if not defined PYEXE goto :khong_co_python
 cls
 echo ================================================================
 echo  MO PHONG KHOI PHUC THAM SO (parameter recovery)
@@ -114,18 +102,18 @@ goto :xong_mot_muc
 rem --- Hai thu tuc goi that su, de muc [1] va muc [2]/[3] dung CHUNG mot lenh,
 rem --- khong bi lech tham so khi sau nay sua mot cho ma quen cho kia.
 :goi_pr_a
-%PYEXE% scripts\chay_mo_phong_song_song.py --scenarios S1,S2,S3 --methods mle,vb_mean_field,vb_full_rank --B 100 --jobs %JOBS%
+%PYEXE% scripts\pipeline\chay_mo_phong_song_song.py --scenarios S1,S2,S3 --methods mle,vb_mean_field,vb_full_rank --B 100 --jobs %JOBS%
 goto :eof
 
 :goi_pr_b
-%PYEXE% scripts\chay_mo_phong_egarch.py --jobs %JOBS%
+%PYEXE% scripts\pipeline\chay_mo_phong_egarch.py --jobs %JOBS%
 goto :eof
 
 :tien_do
 call :tim_python
 if not defined PYEXE goto :xong_mot_muc
 cls
-%PYEXE% scripts\tien_do_mo_phong.py --lap --moi 60 --jobs %JOBS%
+%PYEXE% scripts\tien_ich\tien_do_mo_phong.py --lap --moi 60 --jobs %JOBS%
 goto :xong_mot_muc
 
 :gop
@@ -133,10 +121,10 @@ call :tim_python
 if not defined PYEXE goto :xong_mot_muc
 cls
 echo === Gop PR-A -^> 07_simulation_S1.pt, S2, S3 ===
-%PYEXE% scripts\chay_mo_phong_song_song.py --combine --scenarios S1,S2,S3 --B 100
+%PYEXE% scripts\pipeline\chay_mo_phong_song_song.py --combine --scenarios S1,S2,S3 --B 100
 echo.
 echo === Gop PR-B -^> mo_phong_egarch\E1.pt, E2.pt, E3.pt ===
-%PYEXE% scripts\chay_mo_phong_egarch.py --combine
+%PYEXE% scripts\pipeline\chay_mo_phong_egarch.py --combine
 goto :xong_mot_muc
 
 :chay_thu
@@ -146,10 +134,10 @@ cls
 echo === Chay thu: cau hinh nho, ghi vao thu muc RIENG, khong dung ket qua that ===
 echo.
 echo --- PR-A ---
-%PYEXE% scripts\chay_mo_phong_song_song.py --preset dry-run --scenarios S1 --methods mle,vb_mean_field,vb_full_rank
+%PYEXE% scripts\pipeline\chay_mo_phong_song_song.py --preset dry-run --scenarios S1 --methods mle,vb_mean_field,vb_full_rank
 echo.
 echo --- PR-B ---
-%PYEXE% scripts\chay_mo_phong_egarch.py --nhanh --jobs %JOBS%
+%PYEXE% scripts\pipeline\chay_mo_phong_egarch.py --nhanh --jobs %JOBS%
 goto :xong_mot_muc
 
 :doi_jobs

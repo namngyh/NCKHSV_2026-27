@@ -7,12 +7,11 @@ set "PYTHONUNBUFFERED=1"
 title Buoc 3 -- MCMC tren mo hinh thang cuoc
 
 set "PYEXE="
-where python >nul 2>nul
-if not errorlevel 1 set "PYEXE=python"
-if not defined PYEXE where py >nul 2>nul
-if not defined PYEXE if not errorlevel 1 set "PYEXE=py"
+py -c "import torch" >nul 2>nul
+if not errorlevel 1 set "PYEXE=py"
+if not defined PYEXE python -c "import torch" >nul 2>nul
+if not defined PYEXE if not errorlevel 1 set "PYEXE=python"
 if not defined PYEXE goto :khong_co_python
-
 cls
 echo ================================================================
 echo  BUOC 3 -- MCMC (NUTS) tren mo hinh thang cuoc cua Buoc 1
@@ -48,7 +47,7 @@ echo.
 pause
 
 echo.
-%PYEXE% scripts\pipeline_all_models.py
+%PYEXE% scripts\pipeline\pipeline_all_models.py
 
 echo.
 echo ================================================================

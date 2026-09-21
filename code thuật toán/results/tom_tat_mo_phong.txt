@@ -2,7 +2,7 @@
 TOM TAT NGHIEN CUU KHOI PHUC THAM SO (PARAMETER RECOVERY)
 MS-GARCH-X Student-t va EGARCH-X Student-t cho VN30F1M
 ==============================================================================
-Sinh luc: 2026-09-15 08:36:30
+Sinh luc: 2026-09-21 08:41:57
 Thu muc:  C:\Users\Admin\Desktop\nam\NCKH\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results
 
 Da SAP NHAN TRANG THAI truoc khi gop (tieu chi: phuong sai vo dieu kien
@@ -25,9 +25,9 @@ PHAN 1 -- PR-A: MS-GARCH-X Student-t, hai trang thai (15 tham so)
 
   COVERAGE TRUNG BINH CUA KHOANG TIN CAY 95%  (ly tuong 0,95)
     kich ban       VB-MF     VB-FR   mo ta
-    S1             0.321     0.427   Moc nen -- hai trang thai phan biet ro
-    S2             0.453     0.505   Nhan dang yeu -- hai trang thai gan nhau
-    S3             0.339     0.423   Duoi rat day -- nu_0 = 4, sat bien ton tai phuong sai
+    S1             0.323     0.469   Moc nen -- hai trang thai phan biet ro
+    S2             0.495     0.567   Nhan dang yeu -- hai trang thai gan nhau
+    S3             0.339     0.455   Duoi rat day -- nu_0 = 4, sat bien ton tai phuong sai
 
     MLE khong co cot nay: quy trinh nay khong sinh khoang tin cay cho MLE.
 
@@ -41,8 +41,8 @@ PHAN 1 -- PR-A: MS-GARCH-X Student-t, hai trang thai (15 tham so)
     alpha2          0.00     0.18     0.43     0.69     0.00     0.19
     beta1           0.00     0.00     0.00     0.00     0.00     0.01
     beta2           0.00     0.33     0.00     0.01     0.11     0.30
-    p11             0.00     0.00     0.00     0.00     0.00     0.00
-    p22             0.00     0.00     0.00     0.00     0.00     0.00
+    p11             0.00     0.40     0.05     0.69     0.00     0.24
+    p22             0.03     0.23     0.58     0.25     0.00     0.25
     gamma1_0        0.90     0.91     0.98     1.00     0.81     0.86
     gamma1_1        0.79     0.92     0.95     0.94     0.72     0.84
     gamma2_0        0.87     0.95     0.96     0.96     0.87     0.92
@@ -57,8 +57,8 @@ PHAN 1 -- PR-A: MS-GARCH-X Student-t, hai trang thai (15 tham so)
     alpha2             0.100      0.142      0.365      0.374
     beta1              0.850      0.720      0.673      0.575
     beta2              0.800      0.733      0.655      0.605
-    p11                0.980      0.963      0.790      0.886
-    p22                0.950      0.895      0.674      0.713
+    p11                0.980      0.983      0.810      0.906
+    p22                0.950      0.945      0.724      0.763
     nu                 8.000      6.397      3.739      4.483
 
   UOC LUONG TRUNG BINH -- S2: Nhan dang yeu -- hai trang thai gan nhau
@@ -69,8 +69,8 @@ PHAN 1 -- PR-A: MS-GARCH-X Student-t, hai trang thai (15 tham so)
     alpha2             0.080      0.087      0.154      0.210
     beta1              0.850      0.804      0.499      0.462
     beta2              0.830      0.752      0.510      0.464
-    p11                0.950      0.910      0.741      0.835
-    p22                0.900      0.778      0.667      0.614
+    p11                0.950      0.960      0.791      0.885
+    p22                0.900      0.878      0.767      0.714
     nu                 8.000      8.667      7.218      7.704
 
   UOC LUONG TRUNG BINH -- S3: Duoi rat day -- nu_0 = 4, sat bien ton tai phuong sai
@@ -81,8 +81,8 @@ PHAN 1 -- PR-A: MS-GARCH-X Student-t, hai trang thai (15 tham so)
     alpha2             0.100      0.134      0.541      0.431
     beta1              0.850      0.682      0.716      0.565
     beta2              0.800      0.776      0.691      0.613
-    p11                0.980      0.959      0.779      0.883
-    p22                0.950      0.895      0.681      0.729
+    p11                0.980      0.979      0.799      0.903
+    p22                0.950      0.945      0.731      0.779
     nu                 4.000      3.936      2.404      2.795
 
 ==============================================================================

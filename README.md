@@ -19,7 +19,7 @@ Tài liệu này trình bày đầy đủ cơ sở toán học, thuật toán v�
 > | Bước | Kết quả |
 > |---|---|
 > | 1 — So sánh 8 mô hình × 3 phương pháp trên dữ liệu thật | **EGARCH-X Student-t + MLE thắng cả AIC, BIC, QLIKE, NLS.** Thêm cấu trúc chuyển trạng thái làm AIC *xấu đi* 1,7 — mô hình được đề xuất trong tên đề tài đã thua. |
-> | 2 — Khôi phục tham số, 1.800 lần lặp | MLE thắng 45/59 ô RMSE; VB chỉ thắng khi tham số nhận dạng yếu **và** tiên nghiệm đặt đúng chỗ. Coverage của VB trên MS-GARCH-X không dùng được (0,32–0,51) vì đảo nhãn ~50% và tiên nghiệm kéo $p_{ss}$. |
+> | 2 — Khôi phục tham số, 1.800 lần lặp | MLE thắng 45/59 ô RMSE; VB chỉ thắng khi tham số nhận dạng yếu **và** tiên nghiệm đặt đúng chỗ. Coverage của VB trên MS-GARCH-X không dùng được (0,32–0,57) vì đảo nhãn ~50% và tiên nghiệm kéo $p_{ss}$. |
 > | 3 — MCMC trên mô hình thắng cuộc | **Hội tụ**: $\hat R$ 1,0125, ESS 1.340, 0 phân kỳ, 8,1 giờ — so với $\hat R$ 2,84 sau 64 giờ trên MS-GARCH-X. RQ3 trả lời được: mean-field đánh giá thấp bất định của $\omega, \beta$ khoảng ba lần ($R_{sd}$ 0,37 và 0,29). |
 >
 > Các mục dưới đây được giữ nguyên làm tài liệu tham chiếu cho phần cài đặt còn

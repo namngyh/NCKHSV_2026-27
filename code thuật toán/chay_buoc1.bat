@@ -6,11 +6,14 @@ set "PYTHONIOENCODING=utf-8"
 set "PYTHONUNBUFFERED=1"
 title Buoc 1 -- so sanh toan bo danh muc mo hinh
 
+rem Chon interpreter CO TORCH, khong phai cai co ten "python": PATH may nay
+rem tro `python` toi Python 3.12 khong co torch (cai cho du an khac), con
+rem ban co torch la 3.13 qua `py`. Chon theo ten se chon nham.
 set "PYEXE="
-where python >nul 2>nul
-if not errorlevel 1 set "PYEXE=python"
-if not defined PYEXE where py >nul 2>nul
-if not defined PYEXE if not errorlevel 1 set "PYEXE=py"
+py -c "import torch" >nul 2>nul
+if not errorlevel 1 set "PYEXE=py"
+if not defined PYEXE python -c "import torch" >nul 2>nul
+if not defined PYEXE if not errorlevel 1 set "PYEXE=python"
 if not defined PYEXE goto :khong_co_python
 
 echo ================================================================
@@ -37,14 +40,14 @@ echo.
 pause
 
 echo.
-%PYEXE% scripts\pipeline_all_models.py --bo-qua-mcmc
+%PYEXE% scripts\pipeline\pipeline_all_models.py --bo-qua-mcmc
 
 echo.
 echo ================================================================
 echo  KET THUC luc %TIME%
 echo  Bang so sanh o tren; checkpoint trong results\pipeline\
 echo  Xem lai bang bat cu luc nao (khong tinh toan lai):
-echo      %PYEXE% scripts\pipeline_all_models.py --chi-bang
+echo      %PYEXE% scripts\pipeline\pipeline_all_models.py --chi-bang
 echo ================================================================
 pause
 goto :het

@@ -41,21 +41,58 @@
   \vspace{0.3em}#1\vspace{0.3em}
   \end{minipage}}\end{center}}
 
-\title{\vspace{-1.2cm}\textbf{Báo cáo kết quả ước lượng và so sánh mô hình}}
-\author{Nguyễn Hoài Nam, Nguyễn Thuận Hiếu, Đặng Chí Hiếu}
+\title{\vspace{-1.2cm}\textbf{Báo cáo kết quả ước lượng và so sánh mô hình}\\[0.25em]
+\large Danh mục GARCH/EGARCH/MS-GARCH-X, hợp đồng tương lai VN30F1M --- EGARCH-X Student-t là mô hình thắng cuộc}
+\author{}
 \date{}
 
 \begin{document}
 \maketitle
 \vspace{-1.6cm}
 
-\section{Kết quả trên dữ liệu thật}
+\section*{Tóm tắt kết quả}
+\hopketqua{
+\textbf{Năm kết luận chính.}
+\begin{enumerate}[leftmargin=1.6em,itemsep=0.25em,topsep=0.3em]
+  \item \textbf{Mô hình EGARCH-X với sai số Student-$t$, ước lượng bằng hợp lý cực đại (MLE), thắng cả bốn tiêu chí so sánh} trên toàn bộ danh mục tám mô hình và ba phương pháp suy diễn (MLE, Bayes biến phân mean-field, Bayes biến phân full-rank): AIC $5606{,}87$, BIC $5650{,}54$, QLIKE $0{,}9234$, điểm log âm ngoài mẫu $1{,}5203$ --- xem Bảng~\ref{tab:buoc1-so-sanh}.
+  \item \textbf{Thành phần đuôi dày của phân phối sai số (chuẩn $\to$ Student-$t$) là yếu tố cải thiện mô hình quan trọng nhất}, đóng góp gấp khoảng năm lần mọi thành phần khác (giảm AIC khoảng $235$ điểm, so với thành phần tốt thứ nhì chỉ giảm $49$ điểm). Ngược lại, \textbf{việc thêm cơ chế chuyển trạng thái Markov hai chế độ biến động làm mô hình xấu đi} (AIC tăng $1{,}71$ điểm) --- tức mô hình chuyển trạng thái Markov với sai số Student-$t$ và biến ngoại sinh (MS-GARCH-X Student-$t$), vốn là mô hình được đề xuất ban đầu của đề tài, không được dữ liệu thực nghiệm ủng hộ. Xem Bảng~\ref{tab:buoc1-phan-ra}.
+  \item \textbf{Phương pháp MCMC (thuật toán NUTS) hội tụ tốt khi áp dụng cho mô hình EGARCH-X một chế độ biến động}: hệ số $\hat R$ lớn nhất chỉ $1{,}0125$ (ngưỡng chấp nhận thông thường là $1{,}01$), cỡ mẫu hiệu quả nhỏ nhất đạt $1.340$ trên tổng $1.600$ mẫu hậu nghiệm ($84\%$), không có lần lặp phân kỳ nào. Kết quả này trái ngược hoàn toàn với lần chạy MCMC thất bại trước đó trên mô hình có cấu trúc chuyển trạng thái (xem Phụ lục A), qua đó xác nhận nguyên nhân thất bại là do đối xứng hoán vị nhãn trạng thái, không phải do bản thân phương pháp MCMC.
+  \item \textbf{Hiệu ứng đòn bẩy của lợi suất VN30F1M được xác lập có ý nghĩa thống kê}: khoảng tin cậy $95\%$ của hệ số đòn bẩy theo MCMC là $[-0{,}2125;\,-0{,}0710]$, loại trừ giá trị $0$. Kết quả này được củng cố thêm bằng một nghiên cứu mô phỏng riêng, trong đó dữ liệu giả lập không có hiệu ứng đòn bẩy vẫn cho ước lượng hệ số đòn bẩy gần $0$ --- tức mô hình không tự tạo ra hiệu ứng đòn bẩy giả.
+  \item \textbf{Phương pháp Bayes biến phân dạng mean-field đánh giá thấp mức độ bất định của hai tham số mức phương sai và độ dai dẳng của biến động khoảng ba lần} so với MCMC (được xem là chuẩn tham chiếu do đã hội tụ); Bayes biến phân dạng full-rank cải thiện đáng kể nhưng vẫn hẹp hơn khoảng $25\%$ ở hai tham số này. Một nghiên cứu mô phỏng khôi phục tham số độc lập, thực hiện trước khi biết kết quả trên dữ liệu thật, đã dự báo đúng chính hiện tượng này.
+\end{enumerate}
+\textbf{Lưu ý khi đọc phần còn lại của báo cáo:} Phụ lục A trình bày phân tích trên riêng mô hình chuyển trạng thái Markov (MS-GARCH-X Student-$t$) theo thiết kế nghiên cứu ban đầu, trước khi danh mục mô hình được mở rộng thêm họ EGARCH. Các phát hiện ở đó (MCMC không hội tụ, Bayes biến phân đánh giá thấp mức bất định) vẫn đúng và vẫn có giá trị làm bằng chứng khoa học, nhưng không còn là kết luận trung tâm của báo cáo --- kết luận trung tâm nằm ở Mục~\ref{sec:ket-qua-ba-buoc}.
+}
+
+\section{Kết quả trên dữ liệu thật: ba bước}
 \label{sec:ket-qua-ba-buoc}
+
+Mục này tổng hợp kết quả của \textbf{Bước 1} (so sánh toàn bộ danh mục tám mô
+hình và ba phương pháp suy diễn trên dữ liệu VN30F1M thật), \textbf{Bước 2}
+(mô phỏng khôi phục tham số, xem thêm Mục~\ref{sec:nghien-cuu-mo-phong} và
+phụ lục điện tử "Tám kịch bản mô phỏng" để có bảng chi tiết theo từng tham
+số), và \textbf{Bước 3} (ước lượng Bayes đầy đủ bằng MCMC, chạy một lần duy
+nhất trên mô hình thắng cuộc). Số liệu trong sáu bảng dưới đây được tổng hợp
+trực tiếp từ kết quả ước lượng, không nhập tay.
 
 \input{ket_qua_moi}
 
 
 \section{Phụ lục A: phân tích nội bộ MS-GARCH-X Student-$t$ (thiết kế trước khi mở rộng sang EGARCH)}
+
+Các mục dưới đây khảo sát riêng mô hình chuyển trạng thái Markov với sai số
+Student-$t$ và biến ngoại sinh (\textbf{MS-GARCH-X Student-$t$}), bằng bốn
+phương pháp suy diễn (hợp lý cực đại, Bayes biến phân mean-field, Bayes biến
+phân full-rank, MCMC), theo thiết kế nghiên cứu ban đầu --- trước khi danh
+mục mô hình được mở rộng thành tám mô hình ở Bước 1 (Mục~\ref{sec:ket-qua-ba-buoc}).
+Ba mô hình một chế độ dùng làm đối chứng (GARCH chuẩn, GARCH Student-$t$,
+GARCH-X Student-$t$) và các biến thể của MS-GARCH-X Student-$t$ ở đây
+\textbf{không bao gồm họ EGARCH}. Giữ lại nguyên vẹn vì đây là nơi duy nhất
+có: (a) so sánh trực tiếp bốn phương pháp suy diễn trên cùng một mô hình hai
+chế độ biến động, và (b) bằng chứng chi tiết cho việc MCMC không hội tụ trên
+cấu trúc chuyển trạng thái --- phát hiện vẫn đúng và vẫn là một phần lập luận
+của thiết kế ba bước (xem đối chiếu ở Mục~\ref{sec:ket-qua-ba-buoc}, nơi MCMC
+hội tụ khi bỏ cấu trúc chuyển trạng thái).
+
 
 \subsection{Danh mục mô hình và phương pháp}
 
@@ -184,13 +221,13 @@ Mục này trả lời câu hỏi trung tâm: bốn phương pháp suy diễn ch
 \toprule
 \textbf{Tham số} & \textbf{MLE (M1)} & \textbf{VB mean-field (M2)} & \textbf{VB full-rank (M3)} & \textbf{MCMC (M4)$^{*}$} \\
 \midrule
-$\alpha_1$ & \makecell{0{,}1091\\\scriptsize[0{,}056; 0{,}162]} & \makecell{0{,}2709\\\scriptsize[0{,}104; 0{,}485]} & \makecell{0{,}2721\\\scriptsize[0{,}070; 0{,}472]} \\
-$\alpha_2$ & \makecell{0{,}3288\\\scriptsize[0{,}048; 0{,}610]} & \makecell{0{,}2312\\\scriptsize[0{,}156; 0{,}551]} & \makecell{0{,}3823\\\scriptsize[0{,}123; 0{,}666]} \\
-$\beta_1$ & \makecell{0{,}8463\\\scriptsize[0{,}773; 0{,}920]} & \makecell{0{,}2985\\\scriptsize[0{,}157; 0{,}648]} & \makecell{0{,}5980\\\scriptsize[0{,}424; 0{,}816]} \\
-$\beta_2$ & \makecell{0{,}3006\\\scriptsize[-0{,}155; 0{,}756]} & \makecell{0{,}6268\\\scriptsize[0{,}284; 0{,}688]} & \makecell{0{,}6468\\\scriptsize[0{,}466; 0{,}838]} \\
-$p_{11}$ & \makecell{0{,}9986\\\scriptsize[0{,}996; 1{,}001]} & \makecell{0{,}7329\\\scriptsize[0{,}558; 0{,}945]} & \makecell{0{,}8675\\\scriptsize[0{,}667; 0{,}957]} \\
-$p_{22}$ & \makecell{0{,}9932\\\scriptsize[0{,}982; 1{,}004]} & \makecell{0{,}9199\\\scriptsize[0{,}703; 0{,}966]} & \makecell{0{,}8441\\\scriptsize[0{,}659; 0{,}953]} \\
-$\nu$ & \makecell{4{,}0761\\\scriptsize[3{,}237; 4{,}915]} & \makecell{3{,}5204\\\scriptsize[3{,}200; 3{,}905]} & \makecell{2{,}9779\\\scriptsize[2{,}656; 3{,}435]} \\
+$\alpha_1$ & \makecell{0{,}1091\\\scriptsize[0{,}056; 0{,}162]} & \makecell{0{,}2709\\\scriptsize[0{,}104; 0{,}485]} & \makecell{0{,}2721\\\scriptsize[0{,}070; 0{,}472]} & \makecell{0{,}2077\\\scriptsize[0{,}061; 0{,}428]} \\
+$\alpha_2$ & \makecell{0{,}3288\\\scriptsize[0{,}048; 0{,}610]} & \makecell{0{,}2312\\\scriptsize[0{,}156; 0{,}551]} & \makecell{0{,}3823\\\scriptsize[0{,}123; 0{,}666]} & \makecell{0{,}4056\\\scriptsize[0{,}181; 0{,}647]} \\
+$\beta_1$ & \makecell{0{,}8463\\\scriptsize[0{,}773; 0{,}920]} & \makecell{0{,}2985\\\scriptsize[0{,}157; 0{,}648]} & \makecell{0{,}5980\\\scriptsize[0{,}424; 0{,}816]} & \makecell{0{,}4594\\\scriptsize[0{,}212; 0{,}688]} \\
+$\beta_2$ & \makecell{0{,}3006\\\scriptsize[-0{,}155; 0{,}756]} & \makecell{0{,}6268\\\scriptsize[0{,}284; 0{,}688]} & \makecell{0{,}6468\\\scriptsize[0{,}466; 0{,}838]} & \makecell{0{,}6423\\\scriptsize[0{,}232; 0{,}836]} \\
+$p_{11}$ & \makecell{0{,}9986\\\scriptsize[0{,}996; 1{,}001]} & \makecell{0{,}7329\\\scriptsize[0{,}558; 0{,}945]} & \makecell{0{,}8675\\\scriptsize[0{,}667; 0{,}957]} & \makecell{0{,}8239\\\scriptsize[0{,}651; 0{,}964]} \\
+$p_{22}$ & \makecell{0{,}9932\\\scriptsize[0{,}982; 1{,}004]} & \makecell{0{,}9199\\\scriptsize[0{,}703; 0{,}966]} & \makecell{0{,}8441\\\scriptsize[0{,}659; 0{,}953]} & \makecell{0{,}7614\\\scriptsize[0{,}629; 0{,}891]} \\
+$\nu$ & \makecell{4{,}0761\\\scriptsize[3{,}237; 4{,}915]} & \makecell{3{,}5204\\\scriptsize[3{,}200; 3{,}905]} & \makecell{2{,}9779\\\scriptsize[2{,}656; 3{,}435]} & \makecell{4{,}0741\\\scriptsize[3{,}414; 5{,}025]} \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
@@ -214,8 +251,8 @@ $\nu$ & \makecell{4{,}0761\\\scriptsize[3{,}237; 4{,}915]} & \makecell{3{,}5204\
 \toprule
 \textbf{Đại lượng} & \textbf{MLE (M1)} & \textbf{VB mean-field (M2)} & \textbf{MCMC (M4)$^{*}$} \\
 \midrule
-$d_1$ (trạng thái biến động thấp) & 717{,}9 phiên & 3{,}7 phiên & -- phiên \\
-$d_2$ (trạng thái biến động cao) & 147{,}0 phiên & 12{,}5 phiên & -- phiên \\
+$d_1$ (trạng thái biến động thấp) & 717{,}9 phiên & 3{,}7 phiên & 5{,}7 phiên \\
+$d_2$ (trạng thái biến động cao) & 147{,}0 phiên & 12{,}5 phiên & 4{,}2 phiên \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
@@ -264,7 +301,7 @@ Số lần phân kỳ & \multicolumn{2}{c}{14} & \multicolumn{2}{c}{13} \\
 \midrule
 M2: VB mean-field & 6{,}60\% & Ổn định: hầu hết mẫu đã đúng quy ước \\
 M3: VB full-rank & 63{,}80\% & Bất ổn: gần một phép hoán vị toàn cục \\
-M4: MCMC & 48{,}50\% & Bất ổn nặng: gần mức ngẫu nhiên $50\%$ \\
+M4: MCMC & 71{,}06\% & Bất ổn nặng: gần mức ngẫu nhiên $50\%$ \\
 R1: VB, $\nu_s$ riêng & 91{,}70\% & Bất ổn: chủ yếu là hoán vị toàn cục \\
 \bottomrule
 \end{tabularx}
@@ -330,9 +367,9 @@ phụ lục bổ trợ, không còn là số liệu chính thức của mục n�
 \toprule
 \textbf{Phương pháp} & \textbf{Số lần lặp} & \textbf{$|$Độ chệch$|$ TB} & \textbf{RMSE TB} & \textbf{Coverage $95\%$} \\
 \midrule
-MLE & 100 & 0{,}0911 & 0{,}2353 & -- \\
-VB mean-field & 100 & 0{,}1755 & 0{,}2529 & 0{,}530 \\
-VB full-rank & 100 & 0{,}1587 & 0{,}2593 & 0{,}618 \\
+MLE & 100 & 0{,}0882 & 0{,}2338 & -- \\
+VB mean-field & 100 & 0{,}1723 & 0{,}2497 & 0{,}538 \\
+VB full-rank & 100 & 0{,}1555 & 0{,}2565 & 0{,}641 \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
@@ -930,8 +967,8 @@ $\gamma_{1,1}$ & 0{,}0095 & 0{,}0274 & 0{,}0116 & 0{,}0711 & 0{,}900 & -- & -- &
 $\gamma_{1,2}$ & 0{,}0114 & 0{,}0274 & 0{,}0283 & 0{,}0927 & 0{,}790 & -- & -- & -- \\
 $\gamma_{2,1}$ & 0{,}0158 & 0{,}2658 & -0{,}0073 & 0{,}0896 & 0{,}870 & -- & -- & -- \\
 $\gamma_{2,2}$ & 0{,}0723 & 0{,}3238 & -0{,}0027 & 0{,}0875 & 0{,}860 & -- & -- & -- \\
-$p_{11}$$^{\dagger}$ & 0{,}0028 & 0{,}0182 & -0{,}1701 & 0{,}1843 & 0{,}000 & -- & -- & -- \\
-$p_{22}$$^{\dagger}$ & -0{,}0046 & 0{,}0248 & -0{,}2258 & 0{,}2362 & 0{,}000 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & 0{,}0228 & 0{,}0290 & -0{,}1501 & 0{,}1661 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & 0{,}0454 & 0{,}0515 & -0{,}1758 & 0{,}1890 & 0{,}030 & -- & -- & -- \\
 $\nu$ & -1{,}6026 & 1{,}9532 & -4{,}2611 & 4{,}3395 & 0{,}000 & -- & -- & -- \\
 \midrule
 Tổng hợp & \multicolumn{2}{c}{$B=100$, Brier $=0{,}5298$} & \multicolumn{3}{c}{$B=100$, Brier $=0{,}5606$} & \multicolumn{3}{c}{---} \\
@@ -961,8 +998,8 @@ $\gamma_{1,1}$ & 0{,}0107 & 0{,}0685 & 0{,}0005 & 0{,}0548 & 0{,}980 & -- & -- &
 $\gamma_{1,2}$ & 0{,}0053 & 0{,}1138 & 0{,}0130 & 0{,}0517 & 0{,}950 & -- & -- & -- \\
 $\gamma_{2,1}$ & 0{,}0110 & 0{,}3641 & -0{,}0031 & 0{,}0488 & 0{,}960 & -- & -- & -- \\
 $\gamma_{2,2}$ & -0{,}0006 & 0{,}3779 & -0{,}0089 & 0{,}0580 & 0{,}930 & -- & -- & -- \\
-$p_{11}$$^{\dagger}$ & 0{,}0097 & 0{,}0761 & -0{,}1586 & 0{,}1628 & 0{,}000 & -- & -- & -- \\
-$p_{22}$$^{\dagger}$ & -0{,}0218 & 0{,}1233 & -0{,}1331 & 0{,}1402 & 0{,}000 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & 0{,}0597 & 0{,}0963 & -0{,}1086 & 0{,}1147 & 0{,}050 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & 0{,}0782 & 0{,}1444 & -0{,}0331 & 0{,}0550 & 0{,}580 & -- & -- & -- \\
 $\nu$ & 0{,}6672 & 1{,}7180 & -0{,}7824 & 1{,}3963 & 0{,}750 & -- & -- & -- \\
 \midrule
 Tổng hợp & \multicolumn{2}{c}{$B=100$, Brier $=0{,}7105$} & \multicolumn{3}{c}{$B=100$, Brier $=0{,}5154$} & \multicolumn{3}{c}{---} \\
@@ -992,8 +1029,8 @@ $\gamma_{1,1}$ & 0{,}0089 & 0{,}0289 & 0{,}0696 & 0{,}1128 & 0{,}810 & -- & -- &
 $\gamma_{1,2}$ & 0{,}0127 & 0{,}0291 & 0{,}0884 & 0{,}1365 & 0{,}720 & -- & -- & -- \\
 $\gamma_{2,1}$ & 0{,}0922 & 0{,}3872 & 0{,}0490 & 0{,}1097 & 0{,}870 & -- & -- & -- \\
 $\gamma_{2,2}$ & 0{,}0972 & 0{,}3207 & 0{,}0598 & 0{,}1149 & 0{,}890 & -- & -- & -- \\
-$p_{11}$$^{\dagger}$ & -0{,}0005 & 0{,}0177 & -0{,}1814 & 0{,}1888 & 0{,}000 & -- & -- & -- \\
-$p_{22}$$^{\dagger}$ & -0{,}0055 & 0{,}0385 & -0{,}2188 & 0{,}2251 & 0{,}000 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & 0{,}0195 & 0{,}0263 & -0{,}1614 & 0{,}1697 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & 0{,}0445 & 0{,}0586 & -0{,}1688 & 0{,}1769 & 0{,}000 & -- & -- & -- \\
 $\nu$ & -0{,}0641 & 0{,}5374 & -1{,}5962 & 1{,}6021 & 0{,}000 & -- & -- & -- \\
 \midrule
 Tổng hợp & \multicolumn{2}{c}{$B=100$, Brier $=0{,}5528$} & \multicolumn{3}{c}{$B=100$, Brier $=0{,}5442$} & \multicolumn{3}{c}{---} \\

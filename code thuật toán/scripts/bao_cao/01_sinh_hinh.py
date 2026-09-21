@@ -273,16 +273,30 @@ fig.tight_layout(); fig.savefig(os.path.join(FIG, "fig_cost.pdf")); plt.close(fi
 DATA["cost"] = {c[0]: c[1] / 60 for c in cost}
 
 # ---------------------------------------------------------------- Hinh 7: mo phong
+# Thiet ke hien hanh (Buoc 2): ba kich ban PR-A (S1-S3, MS-GARCH-X) + ba kich
+# ban PR-B (E1-E3, EGARCH-X), B=100, ba phuong phap MLE / VB-MF / VB-FR. Bo tam
+# kich ban S1-S8 B thap (chi la buoc tham do, giu o phu luc) va bo MCMC (khong
+# chay trong mo phong vi ~41 gio/lan lap). Truoc 21/09 khoi nay doc S1-S8 +
+# MCMC nen chay lai script se ghi de report_data.json ve cau truc cu va lam
+# 02_sinh_tex.py hong (KeyError 'VB full-rank').
 sims = {}
-for s in range(1, 9):
-    fp = os.path.join(R, f"07_simulation_S{s}.pt")
+for s in ("S1", "S2", "S3"):
+    fp = os.path.join(R, f"07_simulation_{s}.pt")
     if os.path.exists(fp):
-        sims[f"S{s}"] = torch.load(fp, weights_only=False)
+        sims[s] = torch.load(fp, weights_only=False)
+for e in ("E1", "E2", "E3"):
+    fp = os.path.join(R, "mo_phong_egarch", f"{e}.pt")
+    if os.path.exists(fp):
+        sims[e] = torch.load(fp, weights_only=False)
 
-meths = [("mle", "MLE", C_MLE), ("vb_mean_field", "VB mean-field", C_VB), ("mcmc", "MCMC", C_MCMC)]
+meths = [("mle", "MLE", C_MLE), ("vb_mean_field", "VB mean-field", C_VB),
+         ("vb_full_rank", "VB full-rank", C_MCMC)]
 agg = {}
 for mkey, mlab, _ in meths:
-    b, r_, c = [], [], []
+    # Gop HAI TANG: trung binh theo tham so TRONG tung kich ban, roi trung binh
+    # qua cac kich ban. Moi kich ban mot phieu bang nhau du so tham so khac
+    # nhau (15 o MS-GARCH-X, 8 o EGARCH-X).
+    b, r_, c, n = [], [], [], []
     for s, d in sims.items():
         if mkey not in d:
             continue
@@ -290,11 +304,13 @@ for mkey, mlab, _ in meths:
         r_.append(np.mean(list(d[mkey]["rmse"].values())))
         if d[mkey]["coverage"]:
             c.append(np.mean(list(d[mkey]["coverage"].values())))
-    agg[mlab] = dict(bias=np.mean(b) if b else np.nan,
-                     rmse=np.mean(r_) if r_ else np.nan,
-                     cov=np.mean(c) if c else np.nan,
-                     brier=np.mean([d[mkey]["mean_brier"] for d in sims.values() if mkey in d]),
-                     nrep=int(np.sum([d[mkey]["n_replications"] for d in sims.values() if mkey in d])))
+        n.append(int(d[mkey]["n_replications"]))
+    agg[mlab] = dict(bias=float(np.mean(b)) if b else None,
+                     rmse=float(np.mean(r_)) if r_ else None,
+                     cov=float(np.mean(c)) if c else None,
+                     nrep=float(np.mean(n)) if n else None,
+                     nrep_min=min(n) if n else None, nrep_max=max(n) if n else None,
+                     n_scenarios=len(n))
 DATA["sim"] = agg
 
 fig, axs = plt.subplots(1, 3, figsize=(7.2, 2.6))
@@ -303,9 +319,10 @@ for ax, key, title in [(axs[0], "bias", "|Độ chệch| trung bình"),
                        (axs[1], "rmse", "RMSE trung bình"),
                        (axs[2], "cov", "Coverage 95% trung bình")]:
     vals = [agg[n][key] for n in names]
+    vals = [np.nan if v is None else v for v in vals]
     bars = ax.bar(np.arange(len(names)), [0 if math.isnan(v) else v for v in vals], color=cols)
     ax.set_xticks(np.arange(len(names)))
-    ax.set_xticklabels(["MLE", "VB", "MCMC"], fontsize=8)
+    ax.set_xticklabels(["MLE", "VB-MF", "VB-FR"], fontsize=8)
     ax.set_title(title, fontsize=8.5)
     for b, v in zip(bars, vals):
         ax.annotate("không tính" if math.isnan(v) else f"{v:.3f}".replace(".", ","),
@@ -316,7 +333,7 @@ for ax, key, title in [(axs[0], "bias", "|Độ chệch| trung bình"),
         ax.annotate("mục tiêu 0,95", (len(names) - 0.5, 0.95), fontsize=6.5,
                     color="#1f7a4d", ha="right", va="bottom")
         ax.set_ylim(0, 1.05)
-fig.suptitle("Nghiên cứu mô phỏng S1–S8: nhỏ hơn tốt hơn (hai khung trái), gần 0,95 tốt hơn (khung phải)",
+fig.suptitle("Khôi phục tham số, 6 kịch bản (S1–S3, E1–E3), B=100: nhỏ hơn tốt hơn (hai khung trái), gần 0,95 tốt hơn (khung phải)",
              fontsize=8.5)
 fig.tight_layout(rect=[0, 0, 1, 0.92])
 fig.savefig(os.path.join(FIG, "fig_sim.pdf")); plt.close(fig)

@@ -149,6 +149,12 @@ def combine(cfg, codes: list[str]) -> None:
     scenarios = _scenarios(cfg)
     for code in codes:
         true_named = _named_params(scenarios[code].params)
+        # scenario.params.P chi la placeholder eye(2); ma tran chuyen trang thai
+        # THAT nam o P0 (xem scenarios.py). Khong ghi de thi Bias/RMSE/Coverage
+        # cua p11, p22 tinh so voi 1,0 thay vi 0,98/0,95 -- loi nay da lot qua
+        # toan bo 900 lan lap cua PR-A truoc khi duoc phat hien (21/09).
+        true_named["p11"] = float(scenarios[code].P0[0, 0])
+        true_named["p22"] = float(scenarios[code].P0[1, 1])
         out, tong = {}, 0
         for method in METHODS:
             files = sorted(sdir.glob(f"{code}_{method}_*.pt"))
