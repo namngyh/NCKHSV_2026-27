@@ -373,7 +373,7 @@ VB full-rank & 100 & 0{,}1555 & 0{,}2565 & 0{,}641 \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
-\item Độ chệch và RMSE lấy trung bình trên các tham số có thang đo khác nhau (gộp cả PR-A và PR-B), nên chỉ dùng để so sánh thô giữa các phương pháp --- xem \texttt{Bài báo/8\_kich\_ban\_mo\_phong.tex} để có bảng chi tiết theo từng tham số, từng kịch bản. Coverage lý tưởng là $0{,}95$; cả hai phương pháp Bayes đều thấp hơn nhiều, phần lớn do độ chệch (không phải khoảng tin cậy quá hẹp) --- ở $p_{11},p_{22}$ của PR-A, độ chệch chủ yếu đến từ tiên nghiệm Beta$(8;2)$ kéo ước lượng về trung bình tiên nghiệm $0{,}80$, không phải nhược điểm thuần túy của biến phân. MLE không sinh khoảng tin cậy trong quy trình này nên không tính được coverage.
+\item Độ chệch và RMSE lấy trung bình trên các tham số có thang đo khác nhau (gộp cả PR-A và PR-B), nên chỉ dùng để so sánh thô giữa các phương pháp --- xem \texttt{Bài báo/mo\_phong\_khoi\_phuc\_tham\_so.tex} để có bảng chi tiết theo từng tham số, từng kịch bản. Coverage lý tưởng là $0{,}95$; cả hai phương pháp Bayes đều thấp hơn nhiều, phần lớn do độ chệch (không phải khoảng tin cậy quá hẹp) --- ở $p_{11},p_{22}$ của PR-A, độ chệch chủ yếu đến từ tiên nghiệm Beta$(8;2)$ kéo ước lượng về trung bình tiên nghiệm $0{,}80$, không phải nhược điểm thuần túy của biến phân. MLE không sinh khoảng tin cậy trong quy trình này nên không tính được coverage.
 \item Cột Brier đã bỏ khỏi bảng này: Brier của PR-A được tính trước khi sắp nhãn trạng thái và hiện sai (một số giá trị VB-FR tệ hơn đoán ngẫu nhiên $0{,}50$), còn PR-B là mô hình một trạng thái nên không có xác suất trạng thái để tính Brier.
 \end{tablenotes}
 \end{threeparttable}

@@ -1,13 +1,14 @@
-"""Sinh phan PR-A + PR-B (LaTeX) cho `Bai bao/8_kich_ban_mo_phong.tex` truc tiep
-tu `results/07_simulation_S1..S3.pt` va `results/mo_phong_egarch/E1..E3.pt`.
+"""Sinh phan PR-A + PR-B (LaTeX) cho `Bai bao/mo_phong_khoi_phuc_tham_so.tex`
+(doi ten tu `8_kich_ban_mo_phong.tex`, da bo phu luc S1-S8 -- xem CLAUDE.md
+21/09/2026) truc tiep tu `results/07_simulation_S1..S3.pt` va
+`results/mo_phong_egarch/E1..E3.pt`.
 
-Khong nhap tay so lieu -- dung dinh dang bang giong voi phan Phu luc S1-S8 da co
-(Mean, Do chech, RMSE, SE, CP 95%) de nguoi doc doi chieu duoc hai nghien cuu.
+Khong nhap tay so lieu (Mean, Do chech, RMSE, SE, CP 95%).
 
 Chay:
     python "scripts/bao_cao/sinh_pr_a_pr_b_tex.py"
-In ra doan LaTeX (section PR-A + PR-B) ra stdout; script khac ghep vao file
-hoan chinh (xem `cap_nhat_8_kich_ban.py`).
+In ra doan LaTeX (section PR-A + PR-B) ra stdout; ghep thu cong vao file
+hoan chinh giua hai moc \\section{PR-A...} va \\section{PR-B...}.
 """
 from __future__ import annotations
 

@@ -647,6 +647,15 @@ tính (kết luận định tính không đổi).
 - **CHƯA cập nhật `bao_cao_ket_qua.tex`/`appendix_gen.py`/`8_kich_ban_mo_phong.tex`
   với số liệu đã sửa** — đang chờ người dùng quyết định cách xử lý (sửa lại
   Bias/RMSE bằng đại số + ghi chú giới hạn Coverage, hay chạy lại toàn bộ).
+  **Đã xử lý (21/09/2026)**: `bao_cao_ket_qua.tex`/`appendix_gen.py` sinh lại
+  đúng từ dữ liệu PR-A/PR-B thật. `8_kich_ban_mo_phong.tex` đổi tên thành
+  `Bài báo/mo_phong_khoi_phuc_tham_so.tex` và **bỏ hẳn phần phụ lục S1-S8**
+  (người dùng chốt: chỉ giữ PR-A ba kịch bản, không cần bộ tám kịch bản minh
+  họa cũ song song nữa — bộ tám kịch bản gộp đúng cách đã có sẵn trong
+  `tong_hop_ket_qua.tex`). File PR-A trong tài liệu đổi tên vẫn đang hiển thị
+  số liệu $p_{11}/p_{22}$ CŨ (trước khi vá lỗi `combine()` cùng ngày) — xem
+  cảnh báo ngay trong tài liệu, cần chạy lại `sinh_pr_a_pr_b_tex.py` khi có
+  Python.
 
 ## Quyết định thiết kế đã chốt (09/2026)
 
