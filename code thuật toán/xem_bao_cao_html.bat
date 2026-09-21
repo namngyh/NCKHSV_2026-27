@@ -4,7 +4,7 @@ chcp 65001 >nul
 cd /d "%~dp0"
 
 echo ============================================================
-echo  MS-GARCH-X VN30F1M -- Tao bao cao HTML tu ket qua trong results\
+echo  GARCH-VN30F1M -- Tao bao cao HTML tu ket qua trong results\
 echo ============================================================
 echo.
 

@@ -1,10 +1,12 @@
-# MS-GARCH-X Student-t cho VN30F1M — Tài liệu thuật toán và tính toán
+# GARCH-VN30F1M-MLE-VB-MCMC — Tài liệu thuật toán và tính toán
 
-Kho mã nguồn này cài đặt khung nghiên cứu **Markov-Switching GARCH-X với sai số
-Student-t chuẩn hóa** (viết tắt: MS-GARCH-X Student-t) cho chuỗi lợi suất hợp
-đồng tương lai VN30F1M, và so sánh ba phương pháp suy diễn trên **cùng một hàm
-hợp lý**: ước lượng hợp lý cực đại (MLE), Variational Bayes (VB) và Markov Chain
-Monte Carlo (MCMC).
+Kho mã nguồn này cài đặt và **so sánh toàn bộ danh mục mô hình họ GARCH**
+(GARCH, EGARCH, Markov-Switching GARCH-X, mỗi loại có/không biến ngoại sinh,
+sai số chuẩn hoặc Student-t) cho chuỗi lợi suất hợp đồng tương lai VN30F1M,
+bằng ba phương pháp suy diễn trên **cùng một hàm hợp lý**: ước lượng hợp lý
+cực đại (MLE), Variational Bayes (VB) và Markov Chain Monte Carlo (MCMC).
+MS-GARCH-X Student-t không còn là mô hình trung tâm duy nhất — vai trò đó là
+*kết quả* của việc so sánh, không phải giả định đầu vào (xem `CLAUDE.md`).
 
 Tài liệu này trình bày đầy đủ cơ sở toán học, thuật toán và quy trình tính toán
 được cài đặt. Hướng dẫn cài đặt thư viện, chạy thử và các lưu ý vận hành nằm ở

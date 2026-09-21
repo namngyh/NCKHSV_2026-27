@@ -1,8 +1,19 @@
-# CLAUDE.md — Bối cảnh dự án MS-GARCH-X Student-t (VN30F1M)
+# CLAUDE.md — Bối cảnh dự án GARCH-VN30F1M-MLE-VB-MCMC (trước đây: MS-GARCH-X Student-t)
 
 Ghi chú vận hành cho Claude khi làm việc trong repo này. Đọc file này trước khi
 đưa ra giả định về trạng thái dữ liệu/kết quả — nhiều thứ trong repo không như
 vẻ ngoài của nó (xem phần "Bẫy đã gặp" bên dưới).
+
+**ĐỔI TÊN DỰ ÁN (22/09/2026):** người dùng chốt đổi tên đề tài/repo từ
+"MS-GARCH-X-t-student-with-MCMC-VB-MLE" thành **GARCH-VN30F1M-MLE-VB-MCMC**,
+phản ánh đúng thực tế: đề tài **so sánh toàn bộ danh mục mô hình họ GARCH**
+trên VN30F1M bằng ba phương pháp suy diễn, MS-GARCH-X Student-t không còn là
+mô hình trung tâm mặc định. Mục "Tổng quan đề tài" ngay dưới đây mô tả khung
+**cũ** (hai phần, MS-GARCH-X là mô hình chính) — xem "Quyết định thiết kế đã
+chốt" và "ĐỢT 21/09/2026" bên dưới để biết khung hiện hành. Chưa cập nhật:
+nội dung mục Tổng quan bên dưới, GitHub repo (cần người dùng tự đổi tên qua
+Settings, tôi không có quyền/công cụ), thư mục cục bộ trên đĩa, và
+`document.tex`/`Bài báo chính.tex` (đang cố ý hoãn tới khi chốt hướng viết).
 
 ## Tổng quan đề tài
 

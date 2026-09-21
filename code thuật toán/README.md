@@ -1,9 +1,10 @@
-# Code thuật toán — MS-GARCH-X Student-t cho VN30F1M
+# Code thuật toán — GARCH-VN30F1M-MLE-VB-MCMC
 
-Cài đặt Python cho khung nghiên cứu mô tả trong `Bài báo/document.tex`:
-ước lượng và dự báo biến động theo trạng thái thị trường bằng MS-GARCH-X với
-sai số Student-t, so sánh hai khung suy diễn: **MLE (Frequentist) và Variational Bayes
-(Bayesian: Mean-Field & Full-Rank)** trên cùng một hàm hợp lý và cơ chế thu gọn (Gray).
+Cài đặt Python để **ước lượng và so sánh toàn bộ danh mục mô hình họ GARCH**
+(GARCH, EGARCH, Markov-Switching GARCH-X, có/không biến ngoại sinh, sai số
+chuẩn hoặc Student-t) trên chuỗi lợi suất VN30F1M, bằng ba phương pháp suy
+diễn trên cùng một hàm hợp lý: **MLE (Frequentist), Variational Bayes
+(Mean-Field & Full-Rank), và MCMC (NUTS)**.
 
 ## Cấu trúc
 

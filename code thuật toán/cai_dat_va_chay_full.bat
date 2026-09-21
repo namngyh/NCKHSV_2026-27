@@ -11,7 +11,7 @@ rem cua so cmd MOI voi /k (giu cua so lai sau khi script ket thuc, du thanh
 rem cong hay loi) roi thoat cua so goc ngay lap tuc.
 if not "%MSGARCHX_RELAUNCHED%"=="1" (
     set "MSGARCHX_RELAUNCHED=1"
-    start "MS-GARCH-X -- Cai dat va chay FULL" cmd /k "%~f0"
+    start "GARCH-VN30F1M -- Cai dat va chay FULL" cmd /k "%~f0"
     exit /b
 )
 
@@ -20,7 +20,7 @@ for /f "usebackq delims=" %%T in (`powershell -NoProfile -Command "Get-Date -For
 set "LOGFILE=logs\run_full_%TS%.log"
 
 echo ============================================================
-echo  MS-GARCH-X VN30F1M -- Cai dat thu vien va chay uoc luong FULL
+echo  GARCH-VN30F1M -- Cai dat thu vien va chay uoc luong FULL
 echo ============================================================
 echo.
 

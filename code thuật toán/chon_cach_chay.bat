@@ -27,7 +27,7 @@ goto :eof
 :menu
 cls
 echo ============================================================
-echo  MS-GARCH-X VN30F1M -- Chon cach chay
+echo  GARCH-VN30F1M -- Chon cach chay
 echo ============================================================
 echo.
 echo   1. Chay TOAN BO pipeline chinh (data/prelim/MLE/VB/R1/OOS/
