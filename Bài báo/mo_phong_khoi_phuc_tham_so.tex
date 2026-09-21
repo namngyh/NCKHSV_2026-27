@@ -76,29 +76,22 @@ PR-A, $B=29$/$15$ cho $S_4$--$S_8$) nằm trong \texttt{Bài báo/tong\_hop\_ket
   xu, một phát hiện độc lập đáng chú ý.
 \item \textbf{Placeholder $p_{11}=p_{22}=1{,}0$}: giá trị thật để tính Bias/RMSE/CP
   phải lấy từ $P_0$ của kịch bản, không phải placeholder $\mathrm{eye}(2)$
-  trong \texttt{scenario.params.P}.
+  trong \texttt{scenario.params.P}. Lỗi này từng lọt qua \texttt{run\_scenario()}
+  (đường tuần tự) lẫn \texttt{combine()} (đường song song, đã sinh ra toàn bộ
+  900 lần lặp của PR-A) --- phát hiện và vá độc lập hai lần, lần sau (21/09/2026)
+  đổi $p_{11}/p_{22}$ của PR-A đáng kể (ví dụ $S_1$: MLE $p_{11}=0{,}983$ thay vì
+  $0{,}963$ cũ; VB-FR coverage của $p_{11},p_{22}$ tăng từ gần $0$ lên
+  $0{,}23$--$0{,}69$). Bảng dưới đây đã dùng số liệu sau lần vá thứ hai.
+\item \textbf{Brier tính sai vì tính trước khi sắp nhãn}: đã chạy lại bộ lọc
+  tiến với tham số đã lưu (không cần ước lượng lại) để tính Brier đúng --- giá
+  trị trong caption mỗi bảng dưới đây đã là bản đúng.
+\item \textbf{Coverage của MLE chưa từng được tính}: nay tính bằng khoảng Wald
+  $\hat\theta\pm1{,}96\,\mathrm{SE}$ trên thang tự nhiên, SE từ Hessian quan
+  sát. \textbf{Hạn chế cần biết}: Hessian của MS-GARCH-X chỉ xác định dương ở
+  khoảng một nửa số lần lặp (ví dụ $S_1$: 50/100) --- cột CP của MLE dưới đây
+  là \emph{coverage có điều kiện trên tập con Hessian hợp lệ}, không phải trên
+  toàn bộ $B=100$ lần lặp.
 \end{itemize}
-
-\textbf{\color{Warn}CẢNH BÁO SỐ LIỆU CHƯA CẬP NHẬT (21/09/2026):} lỗi
-placeholder $p_{11}/p_{22}$ ở trên ban đầu chỉ được vá ở \texttt{run\_scenario()}
-(đường chạy tuần tự); một lỗi tương tự, độc lập, vừa được tìm thấy ở
-\texttt{combine()} --- đường chạy \emph{song song}, chính là đường đã sinh ra
-toàn bộ 900 lần lặp của PR-A hiển thị bên dưới. Sau khi vá, $p_{11}/p_{22}$
-của PR-A đổi đáng kể (ví dụ $S_1$: MLE $p_{11}$ đúng $=0{,}9828$ thay vì
-$0{,}963$; VB-MF $=0{,}810$ thay vì $0{,}790$; VB-FR $=0{,}906$ thay vì
-$0{,}886$) và coverage của VB-FR với $p_{11},p_{22}$ tăng từ mức gần $0$ lên
-$0{,}23$--$0{,}69$. \textbf{Các bảng PR-A ở Mục~1 bên dưới CHƯA được sinh lại
-với số liệu đã vá} --- xem \texttt{CLAUDE.md} mục "ĐỢT 21/09/2026" để biết số
-liệu đúng nhất, hoặc chạy lại \texttt{sinh\_pr\_a\_pr\_b\_tex.py} rồi lắp vào
-tài liệu này.
-
-\textbf{Hạn chế còn tồn tại, chưa sửa được (nêu rõ để không suy diễn quá số liệu):}
-Brier score của PR-A được tính \emph{trước} khi sắp nhãn và checkpoint không lưu
-lại $\xi_t$ chi tiết, nên hiện vẫn sai (một số giá trị VB-FR tệ hơn đoán ngẫu
-nhiên 0,50) --- không sửa được từ dữ liệu đã có, phải chạy lại bộ lọc tiến
-(ước tính 25 phút, không cần ước lượng lại). Coverage của MLE chưa được tính ở
-cả hai nghiên cứu (hàm sai số chuẩn tồn tại cho PR-A, chưa được gọi; PR-B chưa có
-hàm tương ứng).
 
 \clearpage
 \section{PR-A --- MS-GARCH-X Student-$t$, hai trạng thái}
@@ -111,8 +104,10 @@ giá trị ước lượng thật trên VN30F1M $\hat\nu\approx4{,}08$).
 Cách trình bày bảng: giá trị thật $\theta_0$, trung bình ước lượng qua các lần
 lặp (Mean $=\theta_0+$ Độ chệch), độ chệch, RMSE, độ lệch chuẩn Monte Carlo (SE,
 suy ra từ $\mathrm{SE}=\sqrt{\max(\mathrm{RMSE}^2-\mathrm{Bias}^2,0)}$), và độ
-phủ khoảng tin cậy 95\% (CP) khi phương pháp sinh khoảng tin cậy. MLE
-\textbf{không sinh khoảng tin cậy} trong quy trình này nên không có cột CP.
+phủ khoảng tin cậy 95\% (CP). Với VB, CP dùng phân vị hậu nghiệm; với MLE, CP
+dùng khoảng Wald từ Hessian quan sát, chỉ tính trên các lần lặp có Hessian xác
+định dương (khoảng một nửa số lần lặp đối với MS-GARCH-X --- xem phần Tổng
+quan ở đầu tài liệu).
 
 \subsection*{Kịch bản S1 --- Mốc nền --- hai trạng thái phân biệt rõ, $\nu_0=8$}
 \begin{table}[H]\centering\small
@@ -135,32 +130,32 @@ $\beta_2$ & 0,800 &  &  \\
 \end{table}
 
 \begin{table}[H]\centering\scriptsize
-\caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp, Brier trung bình $=0,5298$)}
-\begin{tabularx}{\textwidth}{l C C C C C}
+\caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp, Brier trung bình $=0,3969$)}
+\begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
-\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} \\
+\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
 \midrule
-$\mu_1$ & 0,000 & $-$0,002 & $-$0,002 & 0,023 & 0,023 \\
-$\mu_2$ & 0,000 & 0,004 & 0,004 & 0,135 & 0,135 \\
-$\omega_1$ & 0,050 & 0,085 & 0,035 & 0,054 & 0,041 \\
-$\omega_2$ & 0,400 & 1,076 & 0,676 & 1,152 & 0,933 \\
-$\alpha_1$ & 0,050 & 0,084 & 0,034 & 0,058 & 0,047 \\
-$\alpha_2$ & 0,100 & 0,142 & 0,042 & 0,102 & 0,093 \\
-$\beta_1$ & 0,850 & 0,720 & $-$0,130 & 0,160 & 0,094 \\
-$\beta_2$ & 0,800 & 0,733 & $-$0,067 & 0,256 & 0,247 \\
-$\gamma_{1,1}$ & 0,050 & 0,060 & 0,010 & 0,027 & 0,026 \\
-$\gamma_{1,2}$ & 0,050 & 0,061 & 0,011 & 0,027 & 0,025 \\
-$\gamma_{2,1}$ & 0,050 & 0,066 & 0,016 & 0,266 & 0,265 \\
-$\gamma_{2,2}$ & 0,050 & 0,122 & 0,072 & 0,324 & 0,316 \\
-$p_{11}$ & 0,980 & 0,963 & $-$0,017 & 0,025 & 0,018 \\
-$p_{22}$ & 0,950 & 0,895 & $-$0,055 & 0,060 & 0,024 \\
-$\nu$ & 8,000 & 6,397 & $-$1,603 & 1,953 & 1,117 \\
+$\mu_1$ & 0,000 & $-$0,002 & $-$0,002 & 0,023 & 0,023 & 84\% \\
+$\mu_2$ & 0,000 & 0,004 & 0,004 & 0,135 & 0,135 & 82\% \\
+$\omega_1$ & 0,050 & 0,085 & 0,035 & 0,054 & 0,041 & 84\% \\
+$\omega_2$ & 0,400 & 1,076 & 0,676 & 1,152 & 0,933 & 82\% \\
+$\alpha_1$ & 0,050 & 0,084 & 0,034 & 0,058 & 0,047 & 88\% \\
+$\alpha_2$ & 0,100 & 0,142 & 0,042 & 0,102 & 0,093 & 88\% \\
+$\beta_1$ & 0,850 & 0,720 & $-$0,130 & 0,160 & 0,094 & 60\% \\
+$\beta_2$ & 0,800 & 0,733 & $-$0,067 & 0,256 & 0,247 & 90\% \\
+$\gamma_{1,1}$ & 0,050 & 0,060 & 0,010 & 0,027 & 0,026 & 86\% \\
+$\gamma_{1,2}$ & 0,050 & 0,061 & 0,011 & 0,027 & 0,025 & 82\% \\
+$\gamma_{2,1}$ & 0,050 & 0,066 & 0,016 & 0,266 & 0,265 & 88\% \\
+$\gamma_{2,2}$ & 0,050 & 0,122 & 0,072 & 0,324 & 0,316 & 82\% \\
+$p_{11}$ & 0,980 & 0,983 & 0,003 & 0,018 & 0,018 & 52\% \\
+$p_{22}$ & 0,950 & 0,945 & $-$0,005 & 0,025 & 0,024 & 92\% \\
+$\nu$ & 8,000 & 6,397 & $-$1,603 & 1,953 & 1,117 & 62\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \begin{table}[H]\centering\scriptsize
-\caption{Bayes biến phân mean-field ($n=100$ lần lặp, Brier trung bình $=0,5606$)}
+\caption{Bayes biến phân mean-field ($n=100$ lần lặp, Brier trung bình $=0,4947$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
 \textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -177,15 +172,15 @@ $\gamma_{1,1}$ & 0,050 & 0,062 & 0,012 & 0,071 & 0,070 & 90\% \\
 $\gamma_{1,2}$ & 0,050 & 0,078 & 0,028 & 0,093 & 0,088 & 79\% \\
 $\gamma_{2,1}$ & 0,050 & 0,043 & $-$0,007 & 0,090 & 0,089 & 87\% \\
 $\gamma_{2,2}$ & 0,050 & 0,047 & $-$0,003 & 0,088 & 0,087 & 86\% \\
-$p_{11}$ & 0,980 & 0,790 & $-$0,190 & 0,203 & 0,071 & 0\% \\
-$p_{22}$ & 0,950 & 0,674 & $-$0,276 & 0,284 & 0,069 & 0\% \\
+$p_{11}$ & 0,980 & 0,810 & $-$0,170 & 0,184 & 0,071 & 0\% \\
+$p_{22}$ & 0,950 & 0,724 & $-$0,226 & 0,236 & 0,069 & 3\% \\
 $\nu$ & 8,000 & 3,739 & $-$4,261 & 4,340 & 0,821 & 0\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \begin{table}[H]\centering\scriptsize
-\caption{Bayes biến phân full-rank ($n=100$ lần lặp, Brier trung bình $=0,6794$)}
+\caption{Bayes biến phân full-rank ($n=100$ lần lặp, Brier trung bình $=0,4689$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
 \textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -202,8 +197,8 @@ $\gamma_{1,1}$ & 0,050 & 0,047 & $-$0,003 & 0,065 & 0,065 & 91\% \\
 $\gamma_{1,2}$ & 0,050 & 0,051 & 0,001 & 0,061 & 0,061 & 92\% \\
 $\gamma_{2,1}$ & 0,050 & 0,058 & 0,008 & 0,121 & 0,121 & 95\% \\
 $\gamma_{2,2}$ & 0,050 & 0,069 & 0,019 & 0,156 & 0,155 & 91\% \\
-$p_{11}$ & 0,980 & 0,886 & $-$0,094 & 0,124 & 0,080 & 0\% \\
-$p_{22}$ & 0,950 & 0,713 & $-$0,237 & 0,263 & 0,113 & 0\% \\
+$p_{11}$ & 0,980 & 0,906 & $-$0,074 & 0,109 & 0,080 & 40\% \\
+$p_{22}$ & 0,950 & 0,763 & $-$0,187 & 0,219 & 0,113 & 23\% \\
 $\nu$ & 8,000 & 4,483 & $-$3,517 & 3,677 & 1,071 & 8\% \\
 \bottomrule
 \end{tabularx}
@@ -233,32 +228,32 @@ $\beta_2$ & 0,830 &  &  \\
 \end{table}
 
 \begin{table}[H]\centering\scriptsize
-\caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp, Brier trung bình $=0,7105$)}
-\begin{tabularx}{\textwidth}{l C C C C C}
+\caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp, Brier trung bình $=0,6611$)}
+\begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
-\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} \\
+\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
 \midrule
-$\mu_1$ & 0,000 & $-$0,011 & $-$0,011 & 0,178 & 0,178 \\
-$\mu_2$ & 0,000 & 0,062 & 0,062 & 0,343 & 0,337 \\
-$\omega_1$ & 0,080 & 0,108 & 0,028 & 0,086 & 0,081 \\
-$\omega_2$ & 0,140 & 0,646 & 0,506 & 0,994 & 0,855 \\
-$\alpha_1$ & 0,060 & 0,051 & $-$0,009 & 0,045 & 0,044 \\
-$\alpha_2$ & 0,080 & 0,087 & 0,007 & 0,104 & 0,103 \\
-$\beta_1$ & 0,850 & 0,804 & $-$0,046 & 0,147 & 0,139 \\
-$\beta_2$ & 0,830 & 0,752 & $-$0,078 & 0,312 & 0,302 \\
-$\gamma_{1,1}$ & 0,050 & 0,061 & 0,011 & 0,068 & 0,068 \\
-$\gamma_{1,2}$ & 0,050 & 0,055 & 0,005 & 0,114 & 0,114 \\
-$\gamma_{2,1}$ & 0,050 & 0,061 & 0,011 & 0,364 & 0,364 \\
-$\gamma_{2,2}$ & 0,050 & 0,049 & $-$0,001 & 0,378 & 0,378 \\
-$p_{11}$ & 0,950 & 0,910 & $-$0,040 & 0,086 & 0,076 \\
-$p_{22}$ & 0,900 & 0,778 & $-$0,122 & 0,172 & 0,121 \\
-$\nu$ & 8,000 & 8,667 & 0,667 & 1,718 & 1,583 \\
+$\mu_1$ & 0,000 & $-$0,011 & $-$0,011 & 0,178 & 0,178 & 80\% \\
+$\mu_2$ & 0,000 & 0,062 & 0,062 & 0,343 & 0,337 & 63\% \\
+$\omega_1$ & 0,080 & 0,108 & 0,028 & 0,086 & 0,081 & 82\% \\
+$\omega_2$ & 0,140 & 0,646 & 0,506 & 0,994 & 0,855 & 69\% \\
+$\alpha_1$ & 0,060 & 0,051 & $-$0,009 & 0,045 & 0,044 & 76\% \\
+$\alpha_2$ & 0,080 & 0,087 & 0,007 & 0,104 & 0,103 & 78\% \\
+$\beta_1$ & 0,850 & 0,804 & $-$0,046 & 0,147 & 0,139 & 84\% \\
+$\beta_2$ & 0,830 & 0,752 & $-$0,078 & 0,312 & 0,302 & 76\% \\
+$\gamma_{1,1}$ & 0,050 & 0,061 & 0,011 & 0,068 & 0,068 & 78\% \\
+$\gamma_{1,2}$ & 0,050 & 0,055 & 0,005 & 0,114 & 0,114 & 73\% \\
+$\gamma_{2,1}$ & 0,050 & 0,061 & 0,011 & 0,364 & 0,364 & 76\% \\
+$\gamma_{2,2}$ & 0,050 & 0,049 & $-$0,001 & 0,378 & 0,378 & 73\% \\
+$p_{11}$ & 0,950 & 0,960 & 0,010 & 0,076 & 0,076 & 45\% \\
+$p_{22}$ & 0,900 & 0,878 & $-$0,022 & 0,123 & 0,121 & 59\% \\
+$\nu$ & 8,000 & 8,667 & 0,667 & 1,718 & 1,583 & 100\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \begin{table}[H]\centering\scriptsize
-\caption{Bayes biến phân mean-field ($n=100$ lần lặp, Brier trung bình $=0,5154$)}
+\caption{Bayes biến phân mean-field ($n=100$ lần lặp, Brier trung bình $=0,4976$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
 \textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -275,15 +270,15 @@ $\gamma_{1,1}$ & 0,050 & 0,051 & 0,001 & 0,055 & 0,055 & 98\% \\
 $\gamma_{1,2}$ & 0,050 & 0,063 & 0,013 & 0,052 & 0,050 & 95\% \\
 $\gamma_{2,1}$ & 0,050 & 0,047 & $-$0,003 & 0,049 & 0,049 & 96\% \\
 $\gamma_{2,2}$ & 0,050 & 0,041 & $-$0,009 & 0,058 & 0,057 & 93\% \\
-$p_{11}$ & 0,950 & 0,741 & $-$0,209 & 0,212 & 0,037 & 0\% \\
-$p_{22}$ & 0,900 & 0,667 & $-$0,233 & 0,237 & 0,044 & 0\% \\
+$p_{11}$ & 0,950 & 0,791 & $-$0,159 & 0,163 & 0,037 & 5\% \\
+$p_{22}$ & 0,900 & 0,767 & $-$0,133 & 0,140 & 0,044 & 58\% \\
 $\nu$ & 8,000 & 7,218 & $-$0,782 & 1,396 & 1,157 & 75\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \begin{table}[H]\centering\scriptsize
-\caption{Bayes biến phân full-rank ($n=100$ lần lặp, Brier trung bình $=0,6313$)}
+\caption{Bayes biến phân full-rank ($n=100$ lần lặp, Brier trung bình $=0,4894$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
 \textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -300,8 +295,8 @@ $\gamma_{1,1}$ & 0,050 & 0,051 & 0,001 & 0,047 & 0,047 & 100\% \\
 $\gamma_{1,2}$ & 0,050 & 0,066 & 0,016 & 0,051 & 0,049 & 94\% \\
 $\gamma_{2,1}$ & 0,050 & 0,067 & 0,017 & 0,107 & 0,106 & 96\% \\
 $\gamma_{2,2}$ & 0,050 & 0,048 & $-$0,002 & 0,131 & 0,131 & 94\% \\
-$p_{11}$ & 0,950 & 0,835 & $-$0,115 & 0,128 & 0,056 & 0\% \\
-$p_{22}$ & 0,900 & 0,614 & $-$0,286 & 0,292 & 0,061 & 0\% \\
+$p_{11}$ & 0,950 & 0,885 & $-$0,065 & 0,086 & 0,056 & 69\% \\
+$p_{22}$ & 0,900 & 0,714 & $-$0,186 & 0,195 & 0,061 & 25\% \\
 $\nu$ & 8,000 & 7,704 & $-$0,296 & 1,402 & 1,371 & 94\% \\
 \bottomrule
 \end{tabularx}
@@ -331,32 +326,32 @@ $\beta_2$ & 0,800 &  &  \\
 \end{table}
 
 \begin{table}[H]\centering\scriptsize
-\caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp, Brier trung bình $=0,5528$)}
-\begin{tabularx}{\textwidth}{l C C C C C}
+\caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp, Brier trung bình $=0,3992$)}
+\begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
-\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} \\
+\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
 \midrule
-$\mu_1$ & 0,000 & $-$0,001 & $-$0,001 & 0,020 & 0,020 \\
-$\mu_2$ & 0,000 & $-$0,008 & $-$0,008 & 0,111 & 0,111 \\
-$\omega_1$ & 0,050 & 0,090 & 0,040 & 0,057 & 0,040 \\
-$\omega_2$ & 0,400 & 1,096 & 0,696 & 1,434 & 1,253 \\
-$\alpha_1$ & 0,050 & 0,071 & 0,021 & 0,048 & 0,043 \\
-$\alpha_2$ & 0,100 & 0,134 & 0,034 & 0,113 & 0,108 \\
-$\beta_1$ & 0,850 & 0,682 & $-$0,168 & 0,201 & 0,110 \\
-$\beta_2$ & 0,800 & 0,776 & $-$0,024 & 0,260 & 0,259 \\
-$\gamma_{1,1}$ & 0,050 & 0,059 & 0,009 & 0,029 & 0,027 \\
-$\gamma_{1,2}$ & 0,050 & 0,063 & 0,013 & 0,029 & 0,026 \\
-$\gamma_{2,1}$ & 0,050 & 0,142 & 0,092 & 0,387 & 0,376 \\
-$\gamma_{2,2}$ & 0,050 & 0,147 & 0,097 & 0,321 & 0,306 \\
-$p_{11}$ & 0,980 & 0,959 & $-$0,021 & 0,027 & 0,018 \\
-$p_{22}$ & 0,950 & 0,895 & $-$0,055 & 0,067 & 0,038 \\
-$\nu$ & 4,000 & 3,936 & $-$0,064 & 0,537 & 0,534 \\
+$\mu_1$ & 0,000 & $-$0,001 & $-$0,001 & 0,020 & 0,020 & 83\% \\
+$\mu_2$ & 0,000 & $-$0,008 & $-$0,008 & 0,111 & 0,111 & 81\% \\
+$\omega_1$ & 0,050 & 0,090 & 0,040 & 0,057 & 0,040 & 83\% \\
+$\omega_2$ & 0,400 & 1,096 & 0,696 & 1,434 & 1,253 & 74\% \\
+$\alpha_1$ & 0,050 & 0,071 & 0,021 & 0,048 & 0,043 & 83\% \\
+$\alpha_2$ & 0,100 & 0,134 & 0,034 & 0,113 & 0,108 & 90\% \\
+$\beta_1$ & 0,850 & 0,682 & $-$0,168 & 0,201 & 0,110 & 52\% \\
+$\beta_2$ & 0,800 & 0,776 & $-$0,024 & 0,260 & 0,259 & 74\% \\
+$\gamma_{1,1}$ & 0,050 & 0,059 & 0,009 & 0,029 & 0,027 & 86\% \\
+$\gamma_{1,2}$ & 0,050 & 0,063 & 0,013 & 0,029 & 0,026 & 88\% \\
+$\gamma_{2,1}$ & 0,050 & 0,142 & 0,092 & 0,387 & 0,376 & 83\% \\
+$\gamma_{2,2}$ & 0,050 & 0,147 & 0,097 & 0,321 & 0,306 & 90\% \\
+$p_{11}$ & 0,980 & 0,979 & $-$0,001 & 0,018 & 0,018 & 62\% \\
+$p_{22}$ & 0,950 & 0,945 & $-$0,005 & 0,038 & 0,038 & 81\% \\
+$\nu$ & 4,000 & 3,936 & $-$0,064 & 0,537 & 0,534 & 76\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \begin{table}[H]\centering\scriptsize
-\caption{Bayes biến phân mean-field ($n=100$ lần lặp, Brier trung bình $=0,5442$)}
+\caption{Bayes biến phân mean-field ($n=100$ lần lặp, Brier trung bình $=0,4763$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
 \textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -373,15 +368,15 @@ $\gamma_{1,1}$ & 0,050 & 0,120 & 0,070 & 0,113 & 0,089 & 81\% \\
 $\gamma_{1,2}$ & 0,050 & 0,138 & 0,088 & 0,136 & 0,104 & 72\% \\
 $\gamma_{2,1}$ & 0,050 & 0,099 & 0,049 & 0,110 & 0,098 & 87\% \\
 $\gamma_{2,2}$ & 0,050 & 0,110 & 0,060 & 0,115 & 0,098 & 89\% \\
-$p_{11}$ & 0,980 & 0,779 & $-$0,201 & 0,208 & 0,053 & 0\% \\
-$p_{22}$ & 0,950 & 0,681 & $-$0,269 & 0,274 & 0,053 & 0\% \\
+$p_{11}$ & 0,980 & 0,799 & $-$0,181 & 0,189 & 0,053 & 0\% \\
+$p_{22}$ & 0,950 & 0,731 & $-$0,219 & 0,225 & 0,053 & 0\% \\
 $\nu$ & 4,000 & 2,404 & $-$1,596 & 1,602 & 0,137 & 0\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \begin{table}[H]\centering\scriptsize
-\caption{Bayes biến phân full-rank ($n=100$ lần lặp, Brier trung bình $=0,6433$)}
+\caption{Bayes biến phân full-rank ($n=100$ lần lặp, Brier trung bình $=0,4431$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
 \textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -398,8 +393,8 @@ $\gamma_{1,1}$ & 0,050 & 0,077 & 0,027 & 0,080 & 0,075 & 86\% \\
 $\gamma_{1,2}$ & 0,050 & 0,088 & 0,038 & 0,080 & 0,070 & 84\% \\
 $\gamma_{2,1}$ & 0,050 & 0,080 & 0,030 & 0,145 & 0,142 & 92\% \\
 $\gamma_{2,2}$ & 0,050 & 0,095 & 0,045 & 0,187 & 0,181 & 89\% \\
-$p_{11}$ & 0,980 & 0,883 & $-$0,097 & 0,117 & 0,066 & 0\% \\
-$p_{22}$ & 0,950 & 0,729 & $-$0,221 & 0,243 & 0,101 & 0\% \\
+$p_{11}$ & 0,980 & 0,903 & $-$0,077 & 0,101 & 0,066 & 24\% \\
+$p_{22}$ & 0,950 & 0,779 & $-$0,171 & 0,199 & 0,101 & 25\% \\
 $\nu$ & 4,000 & 2,795 & $-$1,205 & 1,240 & 0,290 & 4\% \\
 \bottomrule
 \end{tabularx}
@@ -408,13 +403,19 @@ $\nu$ & 4,000 & 2,795 & $-$1,205 & 1,240 & 0,290 & 4\% \\
 \emph{Đảo nhãn trạng thái trước khi gộp (đã sửa):} MLE 28/100, VB-MF 48/100, VB-FR 53/100 lần lặp trả về nhãn trạng thái ngược quy ước (đã hoán vị trước khi tính Bias/RMSE/CP ở trên).
 \bigskip
 
-\textbf{Đọc kết quả PR-A (tóm tắt, xem CLAUDE.md để biết đầy đủ):} MLE thắng RMSE
-ở phần lớn tham số cấu trúc nhưng có đuôi $\omega_2$ chạy trốn ở một số ít lần lặp
-(cực đại vượt 5,0 ở $S_1$); VB thắng rõ ở $\omega_2$ nhờ tiên nghiệm LogNormal
-tránh được đuôi đó, nhưng lại thua nặng ở $p_{11},p_{22}$ vì tiên nghiệm
-Beta$(8;2)$ (trung bình $0{,}80$) kéo ước lượng về gần trung bình tiên nghiệm --
-coverage của $p_{11},p_{22}$ bằng $0{,}00$ ở mọi kịch bản, mọi phương pháp Bayes,
-đây là hệ quả của độ chệch do tiên nghiệm, không phải khoảng tin cậy quá hẹp.
+\textbf{Đọc kết quả PR-A (tóm tắt):} sau khi vá lỗi $p_{11}/p_{22}$ (21/09/2026),
+bức tranh coverage của hai tham số này khác hẳn báo cáo trước --- \textbf{không
+còn đúng} để nói "coverage của $p_{11},p_{22}$ bằng $0{,}00$ ở mọi kịch bản,
+mọi phương pháp Bayes" như từng ghi nhận nhầm. Số liệu ở trên: MLE (khoảng
+Wald, có điều kiện trên Hessian hợp lệ) đạt $45$--$92\%$ tùy tham số/kịch bản;
+VB-FR đạt $23$--$69\%$, rõ ràng khá hơn VB-MF ($0$--$58\%$, phần lớn dưới
+$10\%$ trừ một trường hợp ở $S_2$). Tiên nghiệm Beta$(8;2)$ (trung bình
+$0{,}80$) kéo VB-MF về gần giá trị đó vẫn là cơ chế chính lý giải vì sao
+VB-MF còn yếu ở $p_{ss}$, nhưng không còn đúng để nói VB \emph{luôn luôn}
+thất bại ở tham số này --- VB-FR (nắm được tương quan hậu nghiệm) cải thiện
+rõ rệt so với VB-MF. Ở $\omega_2$ (tham số nhận dạng yếu khác), MLE vẫn có
+đuôi chạy trốn (cực đại vượt $5{,}0$ ở $S_1$) trong khi VB tránh được nhờ
+tiên nghiệm LogNormal --- đây là nơi VB thắng RMSE rõ nhất.
 
 \clearpage
 \section{PR-B --- EGARCH-X Student-$t$, một trạng thái}
@@ -443,18 +444,18 @@ $\theta$ & $-$0,100 & $\nu$ & 8,000 \\
 
 \begin{table}[H]\centering\scriptsize
 \caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp)}
-\begin{tabularx}{\textwidth}{l C C C C C}
+\begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
-\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} \\
+\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
 \midrule
-$\mu$ & 0,050 & 0,047 & $-$0,003 & 0,031 & 0,031 \\
-$\omega$ & 0,040 & 0,043 & 0,003 & 0,013 & 0,012 \\
-$\alpha$ & 0,150 & 0,148 & $-$0,002 & 0,028 & 0,028 \\
-$\theta$ & $-$0,100 & $-$0,103 & $-$0,003 & 0,018 & 0,018 \\
-$\beta$ & 0,950 & 0,946 & $-$0,004 & 0,014 & 0,014 \\
-$\gamma_1$ & 0,050 & 0,051 & 0,001 & 0,018 & 0,018 \\
-$\gamma_2$ & 0,050 & 0,054 & 0,004 & 0,018 & 0,017 \\
-$\nu$ & 8,000 & 8,570 & 0,570 & 1,648 & 1,546 \\
+$\mu$ & 0,050 & 0,047 & $-$0,003 & 0,031 & 0,031 & 97\% \\
+$\omega$ & 0,040 & 0,043 & 0,003 & 0,013 & 0,012 & 93\% \\
+$\alpha$ & 0,150 & 0,148 & $-$0,002 & 0,028 & 0,028 & 94\% \\
+$\theta$ & $-$0,100 & $-$0,103 & $-$0,003 & 0,018 & 0,018 & 95\% \\
+$\beta$ & 0,950 & 0,946 & $-$0,004 & 0,014 & 0,014 & 95\% \\
+$\gamma_1$ & 0,050 & 0,051 & 0,001 & 0,018 & 0,018 & 92\% \\
+$\gamma_2$ & 0,050 & 0,054 & 0,004 & 0,018 & 0,017 & 94\% \\
+$\nu$ & 8,000 & 8,570 & 0,570 & 1,648 & 1,546 & 97\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -515,18 +516,18 @@ $\theta$ & 0,000 & $\nu$ & 8,000 \\
 
 \begin{table}[H]\centering\scriptsize
 \caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp)}
-\begin{tabularx}{\textwidth}{l C C C C C}
+\begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
-\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} \\
+\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
 \midrule
-$\mu$ & 0,050 & 0,049 & $-$0,001 & 0,031 & 0,031 \\
-$\omega$ & 0,040 & 0,044 & 0,004 & 0,016 & 0,016 \\
-$\alpha$ & 0,150 & 0,149 & $-$0,001 & 0,029 & 0,029 \\
-$\theta$ & 0,000 & $-$0,001 & $-$0,001 & 0,017 & 0,017 \\
-$\beta$ & 0,950 & 0,944 & $-$0,006 & 0,019 & 0,018 \\
-$\gamma_1$ & 0,050 & 0,051 & 0,001 & 0,018 & 0,018 \\
-$\gamma_2$ & 0,050 & 0,056 & 0,006 & 0,019 & 0,018 \\
-$\nu$ & 8,000 & 8,572 & 0,572 & 1,643 & 1,540 \\
+$\mu$ & 0,050 & 0,049 & $-$0,001 & 0,031 & 0,031 & 97\% \\
+$\omega$ & 0,040 & 0,044 & 0,004 & 0,016 & 0,016 & 95\% \\
+$\alpha$ & 0,150 & 0,149 & $-$0,001 & 0,029 & 0,029 & 95\% \\
+$\theta$ & 0,000 & $-$0,001 & $-$0,001 & 0,017 & 0,017 & 97\% \\
+$\beta$ & 0,950 & 0,944 & $-$0,006 & 0,019 & 0,018 & 95\% \\
+$\gamma_1$ & 0,050 & 0,051 & 0,001 & 0,018 & 0,018 & 93\% \\
+$\gamma_2$ & 0,050 & 0,056 & 0,006 & 0,019 & 0,018 & 96\% \\
+$\nu$ & 8,000 & 8,572 & 0,572 & 1,643 & 1,540 & 97\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -587,18 +588,18 @@ $\theta$ & $-$0,100 & $\nu$ & 4,000 \\
 
 \begin{table}[H]\centering\scriptsize
 \caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp)}
-\begin{tabularx}{\textwidth}{l C C C C C}
+\begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
-\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} \\
+\textbf{Tham số} & \textbf{Thật ($\theta_0$)} & \textbf{Mean} & \textbf{Độ chệch} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
 \midrule
-$\mu$ & 0,050 & 0,048 & $-$0,002 & 0,026 & 0,026 \\
-$\omega$ & 0,040 & 0,043 & 0,003 & 0,013 & 0,012 \\
-$\alpha$ & 0,150 & 0,146 & $-$0,004 & 0,032 & 0,032 \\
-$\theta$ & $-$0,100 & $-$0,103 & $-$0,003 & 0,022 & 0,021 \\
-$\beta$ & 0,950 & 0,946 & $-$0,004 & 0,015 & 0,014 \\
-$\gamma_1$ & 0,050 & 0,050 & 0,000 & 0,021 & 0,021 \\
-$\gamma_2$ & 0,050 & 0,054 & 0,004 & 0,022 & 0,021 \\
-$\nu$ & 4,000 & 4,121 & 0,121 & 0,435 & 0,418 \\
+$\mu$ & 0,050 & 0,048 & $-$0,002 & 0,026 & 0,026 & 93\% \\
+$\omega$ & 0,040 & 0,043 & 0,003 & 0,013 & 0,012 & 95\% \\
+$\alpha$ & 0,150 & 0,146 & $-$0,004 & 0,032 & 0,032 & 89\% \\
+$\theta$ & $-$0,100 & $-$0,103 & $-$0,003 & 0,022 & 0,021 & 95\% \\
+$\beta$ & 0,950 & 0,946 & $-$0,004 & 0,015 & 0,014 & 92\% \\
+$\gamma_1$ & 0,050 & 0,050 & 0,000 & 0,021 & 0,021 & 92\% \\
+$\gamma_2$ & 0,050 & 0,054 & 0,004 & 0,022 & 0,021 & 89\% \\
+$\nu$ & 4,000 & 4,121 & 0,121 & 0,435 & 0,418 & 98\% \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -643,11 +644,13 @@ $\nu$ & 4,000 & 4,131 & 0,131 & 0,466 & 0,447 & 92\% \\
 
 \textbf{Đọc kết quả PR-B (tóm tắt):} bộ ước lượng khôi phục đòn bẩy đúng theo CẢ
 HAI chiều --- $E_1$: 100/100 lần lặp cho $\hat\theta$ âm; $E_2$: $\hat\theta$
-trung bình gần 0 (không bịa ra đòn bẩy giả); $E_3$: 100/100 âm, đúng dấu ngay cả
-khi đuôi rất dày. Phân bố $\hat\theta$ của $E_1$ và $E_2$ tách rời hoàn toàn
-(không chồng lấn). $\nu$ ở $E_3$ khôi phục gần như hoàn hảo (chệch chỉ khoảng
-$+3\%$), hóa giải lo ngại mô hình đánh giá thấp độ dày đuôi đúng ở vùng quan
-trọng nhất của VN30F1M.
+trung bình gần 0 ($-0{,}001$ đến $-0{,}003$, không bịa ra đòn bẩy giả); $E_3$:
+100/100 âm, đúng dấu ngay cả khi đuôi rất dày. $\nu$ ở $E_3$ khôi phục gần như
+hoàn hảo (MLE $4{,}131$ so với thật $4{,}000$), hóa giải lo ngại mô hình đánh
+giá thấp độ dày đuôi đúng ở vùng quan trọng nhất của VN30F1M. \textbf{Coverage
+của $\theta$ nay có cả cột MLE} (bổ sung 21/09/2026, Hessian một trạng thái
+luôn xác định dương nên không cần điều kiện hóa như PR-A): $95$--$98\%$ ở cả
+ba phương pháp, cả ba kịch bản --- đạt chuẩn $0{,}95$ đồng đều, khác hẳn PR-A.
 
 \clearpage
 \section{Bước 3 --- xác nhận chéo giữa mô phỏng và dữ liệu thật}

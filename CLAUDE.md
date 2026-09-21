@@ -652,10 +652,16 @@ tính (kết luận định tính không đổi).
   `Bài báo/mo_phong_khoi_phuc_tham_so.tex` và **bỏ hẳn phần phụ lục S1-S8**
   (người dùng chốt: chỉ giữ PR-A ba kịch bản, không cần bộ tám kịch bản minh
   họa cũ song song nữa — bộ tám kịch bản gộp đúng cách đã có sẵn trong
-  `tong_hop_ket_qua.tex`). File PR-A trong tài liệu đổi tên vẫn đang hiển thị
-  số liệu $p_{11}/p_{22}$ CŨ (trước khi vá lỗi `combine()` cùng ngày) — xem
-  cảnh báo ngay trong tài liệu, cần chạy lại `sinh_pr_a_pr_b_tex.py` khi có
-  Python.
+  `tong_hop_ket_qua.tex`). **Đã sinh lại số liệu PR-A đúng (21/09/2026, cùng
+  ngày)**: Python trên máy này hóa ra nằm trong môi trường conda `quant311`
+  (`D:\App\miniconda\envs\quant311\python.exe`), không phải PATH hệ thống —
+  đã chạy `sinh_pr_a_pr_b_tex.py` bằng interpreter đó, lắp lại đúng vào
+  `mo_phong_khoi_phuc_tham_so.tex` (đã kiểm chứng $p_{11}$ của $S_1$/MLE =
+  $0{,}983$, khớp số trong ĐỢT 21/09/2026). Bảng MLE giờ có luôn cột CP (nhờ
+  `bo_sung_coverage_brier.py` đã gộp coverage + Brier đúng vào cùng file
+  `.pt`), và caption Brier đã đúng. Hai đoạn tóm tắt "Đọc kết quả PR-A/PR-B"
+  cũng viết lại theo số liệu mới — không còn tuyên bố sai "coverage
+  $p_{11},p_{22}$ bằng 0,00 ở mọi kịch bản, mọi phương pháp Bayes".
 
 ## Quyết định thiết kế đã chốt (09/2026)
 
