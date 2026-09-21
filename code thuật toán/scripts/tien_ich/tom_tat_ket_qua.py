@@ -325,7 +325,7 @@ def _muc_do_nhay(rd: Path) -> list:
 def _muc_mcmc(rd: Path) -> list:
     """Chan doan hoi tu MCMC, ke ca cac lan chay da that bai."""
     L = [LINE, "PHAN 4 -- CHAN DOAN MCMC (NUTS)", LINE, ""]
-    lan = [("04_mcmc_lan1_duongcheo", "Lan 1: ma tran khoi luong DUONG CHEO, "
+    lan = [("lich_su_sua_loi/04_mcmc_lan1_duongcheo", "Lan 1: ma tran khoi luong DUONG CHEO, "
             "warmup 250, khoi tao tu tien nghiem"),
            ("04_mcmc", "Lan 2: ma tran khoi luong DAC, warmup 1000, "
             "khoi tao tu nghiem MLE chinh quy")]

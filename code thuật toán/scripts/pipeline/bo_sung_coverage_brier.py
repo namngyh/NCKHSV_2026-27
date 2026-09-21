@@ -188,8 +188,8 @@ def combine(nhanh: bool) -> None:
     if nhanh:
         _log("--nhanh: khong ghep vao ket qua that.")
         return
-    bk = RESULTS / f"07_simulation_truoc_bosung_{datetime.now():%Y%m%d_%H%M}"
-    bk.mkdir(exist_ok=True)
+    bk = RESULTS / "lich_su_sua_loi" / f"07_simulation_truoc_bosung_{datetime.now():%Y%m%d_%H%M}"
+    bk.mkdir(parents=True, exist_ok=True)
 
     # ---- PR-A ----
     scen = default_scenarios(T_default=2000, B_default=100)

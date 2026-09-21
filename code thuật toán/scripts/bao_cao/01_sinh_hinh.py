@@ -37,7 +37,7 @@ C_BEST, C_BASE = "#2E5A88", "#9AA5B1"
 mle = torch.load(os.path.join(R, "02_mle.pt"), weights_only=False)
 vb = torch.load(os.path.join(R, "03_vb.pt"), weights_only=False)
 mc2_p = os.path.join(R, "04_mcmc.pt")
-mc1_p = os.path.join(R, "04_mcmc_lan1_duongcheo.pt")
+mc1_p = os.path.join(R, "lich_su_sua_loi", "04_mcmc_lan1_duongcheo.pt")
 mc2 = torch.load(mc2_p, weights_only=False)["m4"] if os.path.exists(mc2_p) else None
 mc1 = torch.load(mc1_p, weights_only=False)["m4"] if os.path.exists(mc1_p) else None
 oos = torch.load(os.path.join(R, "06_oos.pt"), weights_only=False)

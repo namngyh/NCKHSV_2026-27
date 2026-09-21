@@ -46,3 +46,8 @@ Bài báo/*.blg
 
 # Thu muc chi dung de kiem chung tinh tai lap (chay lai mot diem khoi tao da co)
 results_tailap/
+
+# Nhat ky tung tac vu (hang nghin file nho): giu tren dia, khong theo doi
+# trong git tu 21/09/2026 -- moi con so trong bai deu tai lap duoc tu
+# results/parts/ va results/*.pt, khong can log de kiem chung.
+code thuật toán/logs/

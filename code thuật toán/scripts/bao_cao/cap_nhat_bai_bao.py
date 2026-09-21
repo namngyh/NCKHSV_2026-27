@@ -403,7 +403,7 @@ def main() -> int:
         # Lan chay 1 co M4 KHONG hop le (R-hat ~ 4), nhung ket qua cua B1-M3
         # van dung vi tham so cua chung khong doi. Dung lai phan hop le va BO
         # HAN M4 -- de trong con hon dien mot con so khong dang tin.
-        oos = _nap("06_oos_lan1_M4_hong")
+        oos = _nap("lich_su_sua_loi/06_oos_lan1_M4_hong")
         if oos is not None:
             oos = {k: v for k, v in oos.items() if k != "m4"}
             print("  [luu y] dung ket qua ngoai mau cua lan chay 1, DA BO M4 "

@@ -1173,7 +1173,7 @@ Mọi kịch bản dùng $\mu = (0; 0)$, $\bm\gamma_1 = \bm\gamma_2 = (0{,}05; 0
 
 Bộ **tám kịch bản** $S_1$–$S_8$ ban đầu ($B = 30$ cho MLE, $15$ cho VB, có $S_6$
 với $T=500$ và $S_7$ với $T=5000$) được giữ làm **bước thăm dò** ở phụ lục; kết
-quả nằm trong `results/07_simulation_thamdo/`.
+quả cũ (có hai lỗi gộp, đã xoá 21/09) được gộp lại từ `results/parts/sim/` với bản vá; xem `Bài báo/tong_hop_ket_qua.tex`.
 
 Vì sao ba kịch bản với $B=100$ thay vì tám với $B$ thấp: sai số chuẩn Monte Carlo
 của một tỷ lệ độ phủ là $\sqrt{p(1-p)/B}$; với $p \approx 1/3$ nó giảm từ ±12,1

@@ -88,6 +88,19 @@ cột MLE (Wald) trong tab:pra-coverage; ghi chú Brier trong `tom_tat_mo_phong.
 cập nhật (Phần 1 của file txt đó vẫn chưa in Brier/coverage MLE — dùng
 `tong_hop_ket_qua.tex` làm nguồn chính).
 
+**6. Dọn thư mục (người dùng duyệt "ok làm đi").** Đã xoá: `results_dryrun/`,
+`results/pipeline_nhanh/`, `results/mo_phong_egarch_nhanh/` (chạy thử), hai
+file `.bak` trong `Bài báo/`, `results/07_simulation_thamdo/` (8 file cũ có
+cả hai lỗi gộp — tái tạo được từ `parts/sim/`). Đã gom vào
+`results/lich_su_sua_loi/`: `07_simulation_truoc_sua_p11/`,
+`07_simulation_truoc_bosung_*` (2), và **hai file lần chạy hỏng**
+`04_mcmc_lan1_duongcheo.pt`, `06_oos_lan1_M4_hong.pt` (bằng chứng MCMC lần 1
+$\hat R\approx4$ mà phụ lục trích — KHÔNG xoá; 4 script đọc chúng đã trỏ lại
+đường mới). `logs/` bỏ theo dõi git (`git rm --cached`, thêm vào .gitignore),
+giữ trên đĩa. Giữ nguyên: `report.html`, `regime_signal_vn30f1m.csv` (đầu ra
+có script sinh), ba thư mục `hinh*` (mỗi thư mục do một `.tex` khác tham chiếu).
+`bo_sung_coverage_brier.py --combine` nay sao lưu vào `lich_su_sua_loi/`.
+
 **Quyết định chốt trong đợt:** bảng 8 kịch bản dùng mọi lần lặp có sẵn ($B$
 ghi trong caption, S1–S3 = 100, S4–S8 = 29/15) thay vì cắt S1–S3 xuống $B$
 thấp — tránh hai bộ số khác nhau cho cùng S1 trong một tài liệu. Không đụng
