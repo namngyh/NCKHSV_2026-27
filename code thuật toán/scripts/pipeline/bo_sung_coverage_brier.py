@@ -52,7 +52,7 @@ from msgarchx.simulation.dgp import simulate_egarch, simulate_ms_garch_x   # noq
 from msgarchx.simulation.metrics import brier_state, coverage              # noqa: E402
 from msgarchx.simulation.run_egarch import default_egarch_scenarios, named_params_egarch  # noqa: E402
 from msgarchx.simulation.run_simulation import (                           # noqa: E402
-    _named_params, sap_nhan_trang_thai)
+    _apply_misspecification, _named_params, sap_nhan_trang_thai)
 from msgarchx.simulation.scenarios import default_scenarios                # noqa: E402
 from scripts.pipeline.chay_mo_phong_song_song import _spawn                # noqa: E402
 
@@ -115,19 +115,23 @@ def worker(kb: str, pp: str, b: int, T: int) -> None:
         cfg = ModelConfig(n_exog=2, state_specific_nu=False)
         sim = simulate_ms_garch_x(scn.params, scn.P0, scn.T, n_exog=2,
                                   burn_in=scn.burn_in, seed=b)
+        # S8 la kich ban SAI DAC TA: chuoi uoc luong la r + 0,3 r_{t-1}, khong
+        # phai sim.r. Bo loc va Hessian phai chay tren dung chuoi da dung de
+        # uoc luong (giong het worker cua chay_mo_phong_song_song.py).
+        r = _apply_misspecification(sim.r, scn.misspecified)
         rep = torch.load(SIM_DIR / f"{kb}_{pp}_{b:03d}.pt", weights_only=False)["rep"]
         rep = sap_nhan_trang_thai(rep)
         params = _ms_params_tu_dict(rep.point_estimate, 2)
 
         # (2) Brier dung: bo loc tien voi tham so DA SAP NHAN, so voi trang thai that.
         with torch.no_grad():
-            out = ms_garch_forward_filter(params, sim.r, sim.X)
+            out = ms_garch_forward_filter(params, r, sim.X)
         ra["brier"] = brier_state(out["xi_filt"].numpy(), sim.state.numpy())
 
         # (1) Coverage cho MLE: sai so chuan Hessian tai nghiem da luu.
         if pp == "mle":
             raw = pack_params(params, cfg)
-            se = natural_scale_standard_errors(raw, cfg, sim.r, sim.X)
+            se = natural_scale_standard_errors(raw, cfg, r, sim.X)
             ra["se_ok"] = se is not None
             if se is not None:
                 # Ghep SE theo TEN, khong theo vi tri: _named_params() xep p11,p22
@@ -189,8 +193,10 @@ def combine(nhanh: bool) -> None:
 
     # ---- PR-A ----
     scen = default_scenarios(T_default=2000, B_default=100)
-    for kb in ("S1", "S2", "S3"):
+    for kb in scen:                                  # S1..S8, kich ban nao co file
         f = RESULTS / f"07_simulation_{kb}.pt"
+        if not f.exists() or not any(OUT_DIR.glob(f"{kb}_*.pt")):
+            continue
         shutil.copy(f, bk / f.name)
         d = torch.load(f, weights_only=False)
         that = _named_params(scen[kb].params)
@@ -248,6 +254,8 @@ def main() -> int:
     ap.add_argument("--jobs", type=int, default=12)
     ap.add_argument("--combine", action="store_true")
     ap.add_argument("--worker", nargs=3, metavar=("KB", "PP", "B"))
+    ap.add_argument("--kich-ban", nargs="+", default=["S1", "S2", "S3", "E1", "E2", "E3"],
+                    help="kich ban can bo sung, vd. --kich-ban S4 S5 S6 S7 S8")
     args = ap.parse_args()
     T = 2000
 
@@ -259,15 +267,25 @@ def main() -> int:
         return 0
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    nB = 2 if args.nhanh else 100
     tasks = []
-    for kb in ("S1", "S2", "S3"):
+    kb_S = [k for k in args.kich_ban if k.startswith("S")]
+    kb_E = [k for k in args.kich_ban if k.startswith("E")]
+    for kb in kb_S:
         for pp in PP:                       # Brier cho ca ba; SE chi cho mle
-            for b in range(nB):
+            # Chi nhung lan lap DA CO checkpoint uoc luong (S4-S8 co it hon 100).
+            co_san = sorted(SIM_DIR.glob(f"{kb}_{pp}_*.pt"))
+            if args.nhanh:
+                co_san = co_san[:2]
+            for f in co_san:
+                b = int(f.stem.rsplit("_", 1)[1])
                 if not (OUT_DIR / f"{kb}_{pp}_{b:03d}.pt").exists():
                     tasks.append(["--worker", kb, pp, str(b)])
-    for kb in ("E1", "E2", "E3"):
-        for b in range(nB):                 # chi mle (coverage)
+    for kb in kb_E:
+        co_san = sorted((RESULTS / "mo_phong_egarch" / "parts").glob(f"{kb}_mle_*.pt"))
+        if args.nhanh:
+            co_san = co_san[:2]
+        for f in co_san:                    # chi mle (coverage)
+            b = int(f.stem.rsplit("_", 1)[1])
             if not (OUT_DIR / f"{kb}_mle_{b:03d}.pt").exists():
                 tasks.append(["--worker", kb, "mle", str(b)])
     if not tasks:

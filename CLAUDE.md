@@ -31,6 +31,70 @@ dẫn: TS. Châu.
 | `code thuật toán/msgarchx/simulation/run_simulation.py` | Runner mô phỏng, hỗ trợ methods `mle`, `vb_mean_field`, `vb_full_rank`, `mcmc` | `vb_full_rank` có code nhưng **chưa từng được gọi** trong lần chạy 8 kịch bản đã có — không có trong `results/07_simulation_S*.pt` |
 | `code thuật toán/results/*.pt` | Nguồn sự thật duy nhất cho mọi số liệu | Đọc bằng `torch.load(path, weights_only=False)`; cần `sys.path.insert(0, ".../code thuật toán")` trước khi load vì pickle tham chiếu class trong `msgarchx` |
 
+## ĐỢT 21/09/2026 — KIỂM TOÁN, BỔ SUNG COVERAGE MLE + BRIER, TỔNG HỢP 8 KỊCH BẢN
+
+Người dùng yêu cầu "chắc chắn" kết quả trước khi làm phần ứng dụng. Đã làm:
+
+**1. Kiểm toán độc lập — `scripts/tien_ich/kiem_toan_ket_qua.py`** →
+`results/kiem_toan_ket_qua.txt`. Mọi con số trong bảng cuối được tính LẠI từ
+nguồn thô (checkpoint từng lần lặp, tham số đã lưu, dữ liệu gốc) bằng đường
+viết lại (sắp nhãn, Bias/RMSE/Coverage, QLIKE/NLS/AIC/BIC, R̂), rồi đối chiếu
+với file tổng hợp. Kết quả: **545 đạt, 0 hỏng thực sự** (2 "hỏng" là khối
+S1/mcmc 3 lần lặp thăm dò không có trong file gộp — đã hạ thành cảnh báo).
+Bước 1: 24/24 ô tái lập được loglik/AIC/BIC/QLIKE/NLS/h_hat/NLS-hỗn-hợp từ
+tham số hoặc mẫu hậu nghiệm đã lưu (lệch 0). Bước 3: summary tái lập đến
+1e-16; R̂ tách đôi viết lại ≤ 1,0053 (Pyro báo 1,0125 — cùng kết luận).
+Cờ: `--spot N` tính lại Brier từ đầu (sinh lại dữ liệu + bộ lọc), `--grad N`
+đo gradient tại nghiệm MLE. Chạy lại sau MỌI lần gộp.
+
+**2. `chay_bo_sung.bat` đã xong 1.200/1.200 (08:50→09:53) và gộp.** Sau đó
+chạy thêm S4–S8 (`--kich-ban S4 S5 S6 S7 S8`, 213 tác vụ, 10:05→10:33).
+Bản gốc trước gộp: `results/07_simulation_truoc_bosung_20260921_0953/` và
+`_1033/`. Khối đã sửa có khoá `brier_da_sap_nhan=True`, `n_se_ok`, `n_se_hong`,
+`coverage_nguon`.
+
+**3. Bốn phát hiện từ bổ sung + kiểm toán — PHẢI nêu khi báo cáo:**
+
+| Phát hiện | Số liệu | Hệ quả |
+|---|---|---|
+| Brier đúng (sau sắp nhãn) thấp hơn hẳn bản sai | S1: MLE 0,397 / MF 0,495 / FR 0,469 (bản sai 0,530/0,561/0,679); S2: 0,661/0,498/0,489; S3: 0,399/0,476/0,443 | MLE thắng Brier ở S1, S3; VB thắng ở S2 (nhận dạng yếu). VB-FR không còn "tệ hơn ngẫu nhiên" |
+| **Hessian MLE của MS-GARCH-X chỉ xác định dương ở ~50 % lần lặp** | S1 50/100, S2 49/100, S3 42/100; S4 15/29, S5 3/29, S6 8/30, S7 8/21, S8 20/29 | Coverage Wald của MLE là **coverage có điều kiện** trên tập con đó; bảng phải ghi n_se_ok. Bảng tổng hợp bỏ trống CP khi n_se_ok < 10 |
+| Coverage MLE (PR-A, trên tập con) 0,74–0,80 trung bình; $p_{11}$ và $\beta_1$, $\nu$ thấp nhất (0,45–0,62) | VB-MF 0,32–0,50, VB-FR 0,46–0,57 | MLE vẫn tốt nhất ở coverage nhưng xa 0,95 — sống núi $\omega/(1-\beta)$ + khoảng Wald vượt biên ($p_{ss}>1$ ở 37–86 lần) |
+| Coverage MLE PR-B (EGARCH-X) **0,89–0,98, đủ 100/100 Hessian** | E1 0,92–0,97; E2 0,93–0,97; E3 0,89–0,98 | Đúng dự đoán 0,93–0,95 trong A2; MLE trên EGARCH đạt chuẩn |
+
+Thêm một điều **chưa kết luận**: gradient của $-\ell$ theo tham số raw tại
+nghiệm MLE đã lưu của MS-GARCH-X lớn ở ~70 % lần lặp (trung vị 1e1–1e3, max
+1e7), nhưng trị riêng lớn nhất của Hessian tới 1e8 nên gradient lớn có thể chỉ
+là điều kiện xấu (bước Newton ~1e-6, thay đổi $\ell$ ~1e-4) chứ không phải
+dừng sớm. Đang thử LBFGS tiếp 25 bước từ nghiệm đã lưu (script trong
+scratchpad); nếu $\ell$ tăng đáng kể thì MLE mô phỏng (n_starts=3, Adam 400 +
+LBFGS 200) chưa hội tụ hẳn và phải ghi rõ. Không ảnh hưởng PR-B.
+
+**4. `Bài báo/tong_hop_ket_qua.tex`** — sinh bởi
+`scripts/bao_cao/sinh_tong_hop_ket_qua.py`: CHỈ BẢNG, 48 bảng: dữ liệu; Bước 1
+(trong mẫu, ngoài mẫu, VaR Kupiec/Christoffersen); PR-A **8 kịch bản** ($\theta_0$
++ 3 bảng/kịch bản, Brier trong caption, CP MLE kèm n_se_ok); PR-B 3 kịch bản;
+Bước 3 (hậu nghiệm + $R_{sd}$); bảng đếm thắng RMSE. S4–S8 gộp lại từ
+checkpoint với CẢ HAI bản vá (sắp nhãn + $p_{ss}$ từ P0), $B$ = 29/15 như bản
+gốc — bản cũ trong `07_simulation_thamdo/` có cả hai lỗi, KHÔNG dùng.
+Đã kiểm tra tĩnh: cân bằng môi trường, đúng số cột, không ký tự chưa escape.
+**Máy này không có XeLaTeX** — PDF phải biên dịch nơi khác (`xelatex` 2 lần).
+
+**5. Sửa nhỏ:** `Bài báo chính.tex` eq:brier-state đổi $\xi_{t\mid T}$ →
+$\xi_{t\mid t}$ (code luôn dùng xác suất lọc); `bo_sung_coverage_brier.py` nay
+áp `_apply_misspecification` cho S8 (trước bỏ sót — S1–S3 không ảnh hưởng),
+nhận `--kich-ban`, đọc số lần lặp từ checkpoint có sẵn; `ket_qua_moi.tex` có
+cột MLE (Wald) trong tab:pra-coverage; ghi chú Brier trong `tom_tat_mo_phong.py`
+cập nhật (Phần 1 của file txt đó vẫn chưa in Brier/coverage MLE — dùng
+`tong_hop_ket_qua.tex` làm nguồn chính).
+
+**Quyết định chốt trong đợt:** bảng 8 kịch bản dùng mọi lần lặp có sẵn ($B$
+ghi trong caption, S1–S3 = 100, S4–S8 = 29/15) thay vì cắt S1–S3 xuống $B$
+thấp — tránh hai bộ số khác nhau cho cùng S1 trong một tài liệu. Không đụng
+skew-$t$ (người dùng chốt chỉ làm 1–5).
+
+---
+
 ## TIẾN ĐỘ VÀ VIỆC CẦN LÀM (cập nhật 15/09/2026)
 
 ### Toàn bộ thiết kế ba bước ĐÃ HOÀN TẤT — không còn tính toán nào đang chạy
@@ -161,7 +225,7 @@ Việc cần làm: viết script trích xuất `report_data.json` **tự động
 `results/*.pt`, theo đúng tinh thần "một nguồn sự thật" mà `tom_tat_mo_phong.py`
 đã làm. Ước tính ~1 ngày, loại bỏ vĩnh viễn cả một họ lỗi.
 
-**A2. Tính coverage cho MLE — ~2,5 giờ.** Bảng so sánh phương pháp hiện **thiên
+**A2. ~~Tính coverage cho MLE~~ ĐÃ XONG 21/09 (xem đợt 21/09 ở đầu file — chỉ ~50 % Hessian PD ở PR-A).** Ghi chú cũ: Bảng so sánh phương pháp hiện **thiên
 vị VB** ở cột khoảng tin cậy chỉ vì MLE không được tính; RQ3 và RQ4 không trả
 lời đầy đủ được nếu thiếu. Hàm cho mô hình một trạng thái
 (`standard_errors_single` trong `garch_mle.py`) **đã viết và kiểm chứng sơ bộ**
@@ -171,7 +235,7 @@ số |chệch|/sd (MLE ≤ 0,37 ở mọi tham số EGARCH) cho thấy MLE nhi�
 **0,93–0,95** và thắng luôn cột này. Cảnh báo: với PR-A, Hessian không hợp lệ khi
 nghiệm sát biên — đúng tình huống $p_{ss}$.
 
-**A3. Sửa Brier của PR-A — ~25 phút.** Hiện sai vì tính *trước* khi sắp nhãn
+**A3. ~~Sửa Brier của PR-A~~ ĐÃ XONG 21/09.** Ghi chú cũ: Hiện sai vì tính *trước* khi sắp nhãn
 trạng thái (VB-FR 0,63–0,68, tệ hơn đoán ngẫu nhiên 0,5). Checkpoint chỉ lưu con
 số vô hướng chứ không lưu $\xi_t$ nên không sửa được từ dữ liệu đã có; phải chạy
 lại **bộ lọc tiến** một lượt với tham số đã lưu — **không cần ước lượng lại**.
@@ -388,7 +452,7 @@ $\boldsymbol{\gamma}$, vì cả ba kịch bản đặt $\mu_1=\mu_2=0$ và
 $\boldsymbol{\gamma}_1=\boldsymbol{\gamma}_2$); (3) Brier **tệ hơn đoán ngẫu
 nhiên** (0,5).
 
-### Brier hiện vẫn SAI, và không sửa được từ dữ liệu đã có
+### ~~Brier hiện vẫn SAI~~ — ĐÃ SỬA 21/09 bằng bo_sung_coverage_brier.py (ghi chú cũ giữ lại)
 
 Brier được tính trong từng lần lặp từ $\xi_t$ **trước** khi sắp nhãn, mà
 checkpoint chỉ lưu con số vô hướng chứ không lưu $\xi_t$. Giá trị hiện tại

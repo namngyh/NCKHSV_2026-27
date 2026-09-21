@@ -1470,7 +1470,7 @@ Với tham số thật $\theta_0$ và ước lượng $\widehat\theta_b$ tại l
   \label{eq:coverage}
 \end{equation}
 
-Độ chính xác xác suất trạng thái được đánh giá bằng Brier score:
+Độ chính xác xác suất trạng thái được đánh giá bằng Brier score trên xác suất lọc $\widehat\xi_{t\mid t}(s)$ (\cref{subsec:state-probabilities}), tính với bộ tham số ước lượng \emph{sau khi} đã sắp nhãn trạng thái theo \cref{eq:label-identification}:
 \begin{equation}
   \operatorname{Brier}
   =
@@ -1478,7 +1478,7 @@ Với tham số thật $\theta_0$ và ước lượng $\widehat\theta_b$ tại l
   \sum_{t=1}^{T}
   \sum_{s=1}^{2}
   \left[
-    \widehat\xi_{t\mid T}(s)-\ind\{S_t=s\}
+    \widehat\xi_{t\mid t}(s)-\ind\{S_t=s\}
   \right]^2.
   \label{eq:brier-state}
 \end{equation}

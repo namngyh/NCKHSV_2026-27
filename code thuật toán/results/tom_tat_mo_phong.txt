@@ -2,7 +2,7 @@
 TOM TAT NGHIEN CUU KHOI PHUC THAM SO (PARAMETER RECOVERY)
 MS-GARCH-X Student-t va EGARCH-X Student-t cho VN30F1M
 ==============================================================================
-Sinh luc: 2026-09-21 08:41:57
+Sinh luc: 2026-09-21 10:40:27
 Thu muc:  C:\Users\Admin\Desktop\nam\NCKH\MS-GARCH-X-t-student-with-MCMC-VB-MLE\code thuật toán\results
 
 Da SAP NHAN TRANG THAI truoc khi gop (tieu chi: phuong sai vo dieu kien
@@ -95,21 +95,21 @@ PHAN 2 -- PR-B: EGARCH-X Student-t, mot trang thai (8 tham so)
     E1: Don bay ro -- theta_0 = -0,10
         theta that = -0.100   nu that = 8.00
         phuong phap       n   bias(theta)   rmse(theta)   cov(theta)
-        MLE             100       -0.0026        0.0185           --
+        MLE             100       -0.0026        0.0185        0.950
         VB-MF           100       -0.0111        0.0229        0.890
         VB-FR           100       -0.0141        0.0259        0.950
 
     E2: KHONG don bay -- theta_0 = 0  (kich ban quan trong nhat)
         theta that = +0.000   nu that = 8.00
         phuong phap       n   bias(theta)   rmse(theta)   cov(theta)
-        MLE             100       -0.0006        0.0166           --
+        MLE             100       -0.0006        0.0166        0.970
         VB-MF           100       -0.0001        0.0209        0.960
         VB-FR           100       -0.0026        0.0228        0.980
 
     E3: Duoi day -- nu_0 = 4, co don bay
         theta that = -0.100   nu that = 4.00
         phuong phap       n   bias(theta)   rmse(theta)   cov(theta)
-        MLE             100       -0.0031        0.0216           --
+        MLE             100       -0.0031        0.0216        0.950
         VB-MF           100       -0.0128        0.0253        0.910
         VB-FR           100       -0.0165        0.0286        0.960
 
@@ -121,14 +121,13 @@ PHAN 2 -- PR-B: EGARCH-X Student-t, mot trang thai (8 tham so)
 PHAN 3 -- NHUNG DIEU PHAI NEU RO KHI BAO CAO
 ==============================================================================
 
-  1. BRIER HIEN CHUA DUNG DUOC.
-     Brier duoc tinh trong tung lan lap tu xac suat loc xi_t, TRUOC khi sap
-     nhan trang thai, va checkpoint chi luu lai con so vo huong chu khong luu
-     xi_t. Vi vay khong sua lai duoc tu du lieu da co. Bang chung cho thay no
-     that su bi hong: Brier cua VB-FR la 0,63-0,68, TE HON ca doan ngau nhien
-     (0,50) -- dieu chi xay ra khi gan nhan sai he thong. Muon co Brier dung
-     phai chay lai bo loc tien mot luot voi tham so da luu (~25 phut), khong
-     can uoc luong lai.
+  1. BRIER DA DUOC TINH LAI (21/09) -- gia tri o Phan 1 la ban dung.
+     Brier goc tinh TRUOC khi sap nhan trang thai nen sai (VB-FR 0,63-0,68,
+     te hon doan ngau nhien 0,50). scripts/pipeline/bo_sung_coverage_brier.py
+     da chay lai bo loc tien voi tham so DA SAP NHAN va ghi de mean_brier;
+     khoa brier_da_sap_nhan=True danh dau khoi da sua. Cung script tinh
+     coverage Wald cho MLE, chi tren lan lap co Hessian xac dinh duong
+     (n_se_ok / n_se_hong ghi trong khoi mle; PR-A chi ~50%, PR-B 100%).
 
   2. QUY TAC THU LAI DIEM KHOI TAO -- PHAI NEU TRONG BAI.
      Lan lap b=28 cua MLE phan ky ve NaN o CA BA kich ban. Da phan dinh

@@ -1,7 +1,7 @@
 % ==========================================================================
 % FILE NAY DUOC SINH TU DONG -- KHONG SUA TAY.
 % Sinh boi: code thuat toan/scripts/bao_cao/sinh_ket_qua_moi.py
-% Sinh luc: 2026-09-21 08:41:50
+% Sinh luc: 2026-09-21 10:40:30
 % Muon doi noi dung: sua script roi chay lai.
 % ==========================================================================
 
@@ -71,18 +71,18 @@ Chuyển trạng thái, biến thể X Student-$t$ & 5648,87 & 5650,58 & 1,71 \\
 \centering\footnotesize
 \caption{Khôi phục tham số, MS-GARCH-X Student-$t$: độ phủ trung bình của khoảng tin cậy 95\%}
 \label{tab:pra-coverage}
-\begin{tabular}{llrrr}
+\begin{tabular}{llrrrr}
 \toprule
-\textbf{KB} & \textbf{Đặc điểm} & $n$ & VB-MF & VB-FR \\
+\textbf{KB} & \textbf{Đặc điểm} & $n$ & MLE (Wald) & VB-MF & VB-FR \\
 \midrule
-$S_{1}$ & Hai trạng thái phân biệt rõ & 100 & 0,323 & 0,469 \\
-$S_{2}$ & Nhận dạng yếu, hai trạng thái gần nhau & 100 & 0,495 & 0,567 \\
-$S_{3}$ & Đuôi rất dày, $\nu_0 = 4$ & 100 & 0,339 & 0,455 \\
+$S_{1}$ & Hai trạng thái phân biệt rõ & 100 & 0,801 (50/100) & 0,323 & 0,469 \\
+$S_{2}$ & Nhận dạng yếu, hai trạng thái gần nhau & 100 & 0,740 (49/100) & 0,495 & 0,567 \\
+$S_{3}$ & Đuôi rất dày, $\nu_0 = 4$ & 100 & 0,792 (42/100) & 0,339 & 0,455 \\
 \bottomrule
 \end{tabular}
 \vspace{0.3em}
 \raggedright\scriptsize
-\emph{Ghi chú:} Giá trị lý tưởng là $0{,}95$. Mỗi kịch bản $T = 2000$ quan sát, burn-in 200. Ước lượng hợp lý cực đại không có cột này vì quy trình không sinh khoảng tin cậy cho nó. Nhãn trạng thái đã được sắp theo phương sai vô điều kiện $\omega_s/(1-\alpha_s-\beta_s)$ \emph{trước khi} gộp; không sắp nhãn thì mọi chỉ tiêu của tham số theo trạng thái đều vô nghĩa vì hai phương pháp Bayes đảo nhãn ở khoảng một nửa số lần lặp.
+\emph{Ghi chú:} Giá trị lý tưởng là $0{,}95$. Mỗi kịch bản $T = 2000$ quan sát, burn-in 200. Cột MLE là khoảng Wald từ Hessian quan sát, tính trên số lần lặp có Hessian xác định dương (trong ngoặc); ở khoảng một nửa số lần lặp nghiệm nằm trên vùng phẳng hoặc sống núi của hàm hợp lý nên Hessian không xác định dương và không có khoảng Wald. Nhãn trạng thái đã được sắp theo phương sai vô điều kiện $\omega_s/(1-\alpha_s-\beta_s)$ \emph{trước khi} gộp; không sắp nhãn thì mọi chỉ tiêu của tham số theo trạng thái đều vô nghĩa vì hai phương pháp Bayes đảo nhãn ở khoảng một nửa số lần lặp.
 \end{table}
 
 \begin{table}[H]
@@ -93,15 +93,15 @@ $S_{3}$ & Đuôi rất dày, $\nu_0 = 4$ & 100 & 0,339 & 0,455 \\
 \toprule
 \textbf{KB} & \textbf{Phương pháp} & $n$ & Độ chệch & RMSE & Độ phủ \\
 \midrule
-$E_{1}$ ($\theta_0 = -0{,}10$) & MLE & 100 & -0,0026 & 0,0185 & -- \\
+$E_{1}$ ($\theta_0 = -0{,}10$) & MLE & 100 & -0,0026 & 0,0185 & 0,950 \\
  & VB-MF & 100 & -0,0111 & 0,0229 & 0,890 \\
  & VB-FR & 100 & -0,0141 & 0,0259 & 0,950 \\
 \addlinespace[0.2em]
-$E_{2}$ ($\theta_0 = 0$) & MLE & 100 & -0,0006 & 0,0166 & -- \\
+$E_{2}$ ($\theta_0 = 0$) & MLE & 100 & -0,0006 & 0,0166 & 0,970 \\
  & VB-MF & 100 & -0,0001 & 0,0209 & 0,960 \\
  & VB-FR & 100 & -0,0026 & 0,0228 & 0,980 \\
 \addlinespace[0.2em]
-$E_{3}$ ($\nu_0 = 4$) & MLE & 100 & -0,0031 & 0,0216 & -- \\
+$E_{3}$ ($\nu_0 = 4$) & MLE & 100 & -0,0031 & 0,0216 & 0,950 \\
  & VB-MF & 100 & -0,0128 & 0,0253 & 0,910 \\
  & VB-FR & 100 & -0,0165 & 0,0286 & 0,960 \\
 \addlinespace[0.2em]

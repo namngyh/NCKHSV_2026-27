@@ -142,9 +142,9 @@ def bang_mo_phong_ms() -> None:
     p(r"\caption{Khôi phục tham số, MS-GARCH-X Student-$t$: độ phủ trung bình của "
       r"khoảng tin cậy 95\%}")
     p(r"\label{tab:pra-coverage}")
-    p(r"\begin{tabular}{llrrr}")
+    p(r"\begin{tabular}{llrrrr}")
     p(r"\toprule")
-    p(r"\textbf{KB} & \textbf{Đặc điểm} & $n$ & VB-MF & VB-FR \\")
+    p(r"\textbf{KB} & \textbf{Đặc điểm} & $n$ & MLE (Wald) & VB-MF & VB-FR \\")
     p(r"\midrule")
     for ma, mt in mo_ta.items():
         f = RESULTS / f"07_simulation_{ma}.pt"
@@ -152,15 +152,21 @@ def bang_mo_phong_ms() -> None:
             continue
         d = torch.load(f, weights_only=False)
         n = d["vb_mean_field"]["n_replications"]
-        p(f"${ma[0]}_{{{ma[1]}}}$ & {mt} & {n} & "
+        n_ok = d["mle"].get("n_se_ok")
+        mle_txt = so(_cov_tb(d["mle"]), 3)
+        if n_ok is not None:
+            mle_txt += f" ({n_ok}/{d['mle']['n_replications']})"
+        p(f"${ma[0]}_{{{ma[1]}}}$ & {mt} & {n} & {mle_txt} & "
           f"{so(_cov_tb(d['vb_mean_field']), 3)} & {so(_cov_tb(d['vb_full_rank']), 3)} \\\\")
     p(r"\bottomrule")
     p(r"\end{tabular}")
     p(r"\vspace{0.3em}")
     p(r"\raggedright\scriptsize")
     p(r"\emph{Ghi chú:} Giá trị lý tưởng là $0{,}95$. Mỗi kịch bản $T = 2000$ "
-      r"quan sát, burn-in 200. Ước lượng hợp lý cực đại không có cột này vì quy "
-      r"trình không sinh khoảng tin cậy cho nó. Nhãn trạng thái đã được sắp theo "
+      r"quan sát, burn-in 200. Cột MLE là khoảng Wald từ Hessian quan sát, tính "
+      r"trên số lần lặp có Hessian xác định dương (trong ngoặc); ở khoảng một nửa "
+      r"số lần lặp nghiệm nằm trên vùng phẳng hoặc sống núi của hàm hợp lý nên "
+      r"Hessian không xác định dương và không có khoảng Wald. Nhãn trạng thái đã được sắp theo "
       r"phương sai vô điều kiện $\omega_s/(1-\alpha_s-\beta_s)$ \emph{trước khi} "
       r"gộp; không sắp nhãn thì mọi chỉ tiêu của tham số theo trạng thái đều vô "
       r"nghĩa vì hai phương pháp Bayes đảo nhãn ở khoảng một nửa số lần lặp.")
