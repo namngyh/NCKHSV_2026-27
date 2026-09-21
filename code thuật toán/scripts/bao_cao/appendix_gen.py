@@ -529,7 +529,7 @@ biến động thấp là $\Pr(\nu_{\text{cao}}<\nu_{\text{thấp}}\mid \mathcal
     A(r"""
 Các bảng dưới đây là bản chạy CŨ ($B=15$--$30$), \emph{trước} khi phát hiện và
 sửa lỗi đối xứng hoán vị nhãn trạng thái (xem \texttt{CLAUDE.md}). Số liệu
-chính thức của Bước 2 nay là PR-A + PR-B ($B=100$, đã sắp nhãn) ở
+chính thức của Bước 2 nay là hai nghiên cứu MS-GARCH-X và EGARCH-X ($B=100$, đã sắp nhãn) ở
 Mục~\ref{sec:nghien-cuu-mo-phong} phía trên; giữ lại phần này thuần túy làm
 bằng chứng bổ trợ và tài liệu lịch sử về quá trình phát triển phương pháp.
 

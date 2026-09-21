@@ -108,7 +108,7 @@ def pct(x) -> str:
 
 
 def bang(cot: str, dau: str, hang: list[str], caption: str, nhan: str,
-         co: str = r"\scriptsize", ghi_chu: str | None = None, longtable: bool = False) -> str:
+         co: str = r"\footnotesize", ghi_chu: str | None = None, longtable: bool = False) -> str:
     """Mot bang booktabs; `cot` la dinh dang cot, `dau` la dong tieu de."""
     o = []
     if longtable:
@@ -151,13 +151,13 @@ def phan_du_lieu() -> str:
     t1 = bang("l r r r r r",
               r"\textbf{Chuỗi} & $N$ & \textbf{Trung bình} & \textbf{Độ lệch chuẩn} & \textbf{Min} & \textbf{Max}",
               hang, "Thống kê mô tả lợi suất ngày và biến động thực tế VN30F1M", "tab:du-lieu",
-              co=r"\small")
+              co=r"\normalsize")
     hang2 = [rf"Huấn luyện & {str(dates[0])[:10]} & {str(dates[n_tr - 1])[:10]} & {n_tr} & {so(100 * n_tr / n, 2)}\%",
              rf"Kiểm định & {str(dates[n_tr])[:10]} & {str(dates[-1])[:10]} & {n - n_tr} & {so(100 * (n - n_tr) / n, 2)}\%",
              rf"Tổng & {str(dates[0])[:10]} & {str(dates[-1])[:10]} & {n} & 100\%"]
     t2 = bang("l l l r r",
               r"\textbf{Tập} & \textbf{Từ} & \textbf{Đến} & \textbf{Số phiên} & \textbf{Tỷ lệ}",
-              hang2, "Cách chia tập huấn luyện / kiểm định", "tab:chia-tap", co=r"\small")
+              hang2, "Cách chia tập huấn luyện / kiểm định", "tab:chia-tap", co=r"\normalsize")
     return r"\section{Dữ liệu}" + "\n" + t1 + t2
 
 
@@ -246,7 +246,7 @@ def _bang_theta0(code: str, that: dict, thu_tu: list, nhan: dict, T: int, ghi_ch
         r_ = f"{nhan[phai[i]]} & {so(that[phai[i]], 3)}" if i < len(phai) else "&"
         hang.append(f"{l} & {r_}")
     return bang("l r l r", r"\textbf{Tham số} & $\theta_0$ & \textbf{Tham số} & $\theta_0$", hang,
-                rf"{code}: tham số thật $\theta_0$; $T={T}${ghi_chu}", f"tab:theta0-{code}", co=r"\small")
+                rf"{code}: tham số thật $\theta_0$; $T={T}${ghi_chu}", f"tab:theta0-{code}", co=r"\normalsize")
 
 
 def _bang_khoi_phuc(code: str, pp: str, m: dict, that: dict, thu_tu: list, nhan: dict) -> str:
@@ -278,7 +278,7 @@ def _bang_khoi_phuc(code: str, pp: str, m: dict, that: dict, thu_tu: list, nhan:
 
 def phan_pr_a() -> tuple[str, dict]:
     scns = default_scenarios()
-    out = [r"\section{Bước 2 --- PR-A: khôi phục tham số MS-GARCH-X Student-$t$ (8 kịch bản)}"]
+    out = [r"\section{Bước 2 --- Khôi phục tham số: MS-GARCH-X Student-$t$ (8 kịch bản)}"]
     ket_qua = {}
     for code, scn in scns.items():
         f = RES / f"07_simulation_{code}.pt"
@@ -305,7 +305,7 @@ def phan_pr_a() -> tuple[str, dict]:
 # ------------------------------------------------------------------ 4. PR-B
 def phan_pr_b() -> tuple[str, dict]:
     scns = default_egarch_scenarios()
-    out = [r"\section{Bước 2 --- PR-B: khôi phục tham số EGARCH-X Student-$t$ (3 kịch bản)}"]
+    out = [r"\section{Bước 2 --- Khôi phục tham số: EGARCH-X Student-$t$ (3 kịch bản)}"]
     ket_qua = {}
     for code, scn in scns.items():
         f = RES / "mo_phong_egarch" / f"{code}.pt"
@@ -360,11 +360,11 @@ def phan_buoc_3() -> str:
               hang, rf"Bước 3 --- MCMC (NUTS) trên EGARCH-X Student-$t$, dữ liệu huấn luyện: "
               rf"4 chuỗi $\times$ 400 mẫu, $\max\hat R={so(m['max_rhat'], 4)}$, "
               rf"$\min$ ESS $={m['min_ess']:.0f}$, {m['n_divergences']} phân kỳ, {m['giay'] / 3600:.1f} giờ",
-              "tab:b3-mcmc", co=r"\small")
+              "tab:b3-mcmc", co=r"\normalsize")
     t2 = bang("l r r r",
               r"\textbf{Tham số} & $\mathrm{sd}_{\text{MCMC}}$ & $R_{sd}$ VB-MF & $R_{sd}$ VB-FR",
               hang_r, r"Bước 3 --- $R_{sd}=\mathrm{sd}_{\text{VB}}/\mathrm{sd}_{\text{MCMC}}$ "
-              r"(độ lệch chuẩn hậu nghiệm VB so với MCMC, cùng dữ liệu)", "tab:b3-rsd", co=r"\small")
+              r"(độ lệch chuẩn hậu nghiệm VB so với MCMC, cùng dữ liệu)", "tab:b3-rsd", co=r"\normalsize")
     return r"\section{Bước 3 --- MCMC trên mô hình thắng cuộc}" + "\n" + t1 + t2
 
 
@@ -385,7 +385,7 @@ def phan_dem_thang(kq_a: dict, kq_b: dict) -> str:
         "l r l r r r",
         r"\textbf{Kịch bản} & \textbf{Số tham số} & $B$ (MLE/MF/FR) & \textbf{MLE} & \textbf{VB-MF} & \textbf{VB-FR}",
         hang, "Số tham số mà mỗi phương pháp đạt RMSE nhỏ nhất, theo kịch bản. "
-        "Kịch bản không có VB-FR ghi $--$", "tab:dem-thang", co=r"\small")
+        "Kịch bản không có VB-FR ghi $--$", "tab:dem-thang", co=r"\normalsize")
 
 
 # ------------------------------------------------------------------ van ban
@@ -397,12 +397,18 @@ PREAMBLE = r"""% !TeX program = xelatex
 \usepackage{unicode-math}
 \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
 \IfFontExistsTF{Cambria Math}{\setmathfont{Cambria Math}}{\setmathfont{Latin Modern Math}}
-\usepackage[a4paper,top=2.2cm,bottom=2.2cm,left=2.0cm,right=2.0cm]{geometry}
+\usepackage[a4paper,top=2.2cm,bottom=2.2cm,left=1.8cm,right=1.8cm]{geometry}
 \usepackage{booktabs}
 \usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{array}
 \usepackage{float}
 \usepackage{caption}
+\usepackage{microtype}
 \usepackage[hidelinks]{hyperref}
+\emergencystretch=3em
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \captionsetup{font=small,labelfont=bf,skip=4pt}
 \renewcommand{\tablename}{Bảng}
 \setlength{\parindent}{0pt}
@@ -421,18 +427,20 @@ PREAMBLE = r"""% !TeX program = xelatex
 
 CHU_THICH = r"""
 \section*{Ký hiệu}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{@{}l X@{}}
 \toprule
-MLE / VB-MF / VB-FR / MCMC & hợp lý cực đại / Bayes biến phân mean-field / full-rank / NUTS \\
-$d$, $\ell$ & số tham số tự do, log-hợp-lý tại nghiệm \\
-QLIKE & $\frac1N\sum_t[\log\hat h_t + RV_t/\hat h_t]$ \\
-NLS & $-\frac1N\sum_t\log\hat f_t(r_t)$ (VB, MCMC: mật độ dự báo hỗn hợp qua mẫu hậu nghiệm) \\
-Mean, Bias, RMSE, SE & $\bar\theta$, $\bar\theta-\theta_0$, $\sqrt{\frac1B\sum(\hat\theta_b-\theta_0)^2}$, $\sqrt{\text{RMSE}^2-\text{Bias}^2}$ \\
-CP 95\% & tỷ lệ lần lặp mà khoảng 95\% (VB: phân vị hậu nghiệm; MLE: Wald từ Hessian quan sát) chứa $\theta_0$ \\
-Brier & $\frac1T\sum_t\sum_{s=1}^2[\hat\xi_{t|t}(s)-\mathbb 1\{S_t=s\}]^2$, thang $[0,2]$, xác suất lọc sau khi sắp nhãn \\
-$R_{sd}$ & $\mathrm{sd}_{\text{VB}}/\mathrm{sd}_{\text{MCMC}}$ trên cùng dữ liệu \\
+\textbf{Ký hiệu} & \textbf{Ý nghĩa} \\
+\midrule
+MLE / VB-MF / VB-FR / MCMC & Hợp lý cực đại / Bayes biến phân mean-field / Bayes biến phân full-rank / MCMC (thuật toán NUTS) \\
+$d$, $\ell$ & Số tham số tự do; log-hợp-lý tại nghiệm \\
+QLIKE & $\dfrac1N\displaystyle\sum_t\Big[\log\hat h_t + \dfrac{RV_t}{\hat h_t}\Big]$ --- sai số dự báo phương sai, nhỏ hơn là tốt hơn \\[0.6em]
+NLS & $-\dfrac1N\displaystyle\sum_t\log\hat f_t(r_t)$ --- điểm log âm trung bình; với VB/MCMC dùng mật độ dự báo hỗn hợp qua mẫu hậu nghiệm \\[0.6em]
+Mean, Bias, RMSE, SE & Trung bình ước lượng $\bar\theta$; độ chệch $\bar\theta-\theta_0$; căn sai số toàn phương trung bình $\sqrt{\frac1B\sum(\hat\theta_b-\theta_0)^2}$; độ lệch chuẩn Monte Carlo $\sqrt{\text{RMSE}^2-\text{Bias}^2}$ \\
+CP 95\% & Tỷ lệ lần lặp mà khoảng tin cậy/tin tưởng 95\% chứa $\theta_0$ (VB: phân vị hậu nghiệm; MLE: khoảng Wald từ Hessian quan sát) \\
+Brier & $\dfrac1T\displaystyle\sum_t\sum_{s=1}^2\big[\hat\xi_{t\mid t}(s)-\mathbb{1}\{S_t=s\}\big]^2$ --- sai số dự báo xác suất trạng thái, thang $[0,2]$, tính sau khi đã sắp nhãn trạng thái \\[0.6em]
+$R_{sd}$ & $\mathrm{sd}_{\text{VB}}/\mathrm{sd}_{\text{MCMC}}$ --- tỷ số độ lệch chuẩn hậu nghiệm, cùng dữ liệu, lấy MCMC làm chuẩn tham chiếu \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \clearpage
 """
 

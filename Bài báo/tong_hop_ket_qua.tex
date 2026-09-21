@@ -6,12 +6,18 @@
 \usepackage{unicode-math}
 \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
 \IfFontExistsTF{Cambria Math}{\setmathfont{Cambria Math}}{\setmathfont{Latin Modern Math}}
-\usepackage[a4paper,top=2.2cm,bottom=2.2cm,left=2.0cm,right=2.0cm]{geometry}
+\usepackage[a4paper,top=2.2cm,bottom=2.2cm,left=1.8cm,right=1.8cm]{geometry}
 \usepackage{booktabs}
 \usepackage{longtable}
+\usepackage{tabularx}
+\usepackage{array}
 \usepackage{float}
 \usepackage{caption}
+\usepackage{microtype}
 \usepackage[hidelinks]{hyperref}
+\emergencystretch=3em
+\newcolumntype{C}{>{\centering\arraybackslash}X}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \captionsetup{font=small,labelfont=bf,skip=4pt}
 \renewcommand{\tablename}{Bảng}
 \setlength{\parindent}{0pt}
@@ -29,22 +35,24 @@
 
 
 \section*{Ký hiệu}
-\begin{tabular}{ll}
+\begin{tabularx}{\textwidth}{@{}l X@{}}
 \toprule
-MLE / VB-MF / VB-FR / MCMC & hợp lý cực đại / Bayes biến phân mean-field / full-rank / NUTS \\
-$d$, $\ell$ & số tham số tự do, log-hợp-lý tại nghiệm \\
-QLIKE & $\frac1N\sum_t[\log\hat h_t + RV_t/\hat h_t]$ \\
-NLS & $-\frac1N\sum_t\log\hat f_t(r_t)$ (VB, MCMC: mật độ dự báo hỗn hợp qua mẫu hậu nghiệm) \\
-Mean, Bias, RMSE, SE & $\bar\theta$, $\bar\theta-\theta_0$, $\sqrt{\frac1B\sum(\hat\theta_b-\theta_0)^2}$, $\sqrt{\text{RMSE}^2-\text{Bias}^2}$ \\
-CP 95\% & tỷ lệ lần lặp mà khoảng 95\% (VB: phân vị hậu nghiệm; MLE: Wald từ Hessian quan sát) chứa $\theta_0$ \\
-Brier & $\frac1T\sum_t\sum_{s=1}^2[\hat\xi_{t|t}(s)-\mathbb 1\{S_t=s\}]^2$, thang $[0,2]$, xác suất lọc sau khi sắp nhãn \\
-$R_{sd}$ & $\mathrm{sd}_{\text{VB}}/\mathrm{sd}_{\text{MCMC}}$ trên cùng dữ liệu \\
+\textbf{Ký hiệu} & \textbf{Ý nghĩa} \\
+\midrule
+MLE / VB-MF / VB-FR / MCMC & Hợp lý cực đại / Bayes biến phân mean-field / Bayes biến phân full-rank / MCMC (thuật toán NUTS) \\
+$d$, $\ell$ & Số tham số tự do; log-hợp-lý tại nghiệm \\
+QLIKE & $\dfrac1N\displaystyle\sum_t\Big[\log\hat h_t + \dfrac{RV_t}{\hat h_t}\Big]$ --- sai số dự báo phương sai, nhỏ hơn là tốt hơn \\[0.6em]
+NLS & $-\dfrac1N\displaystyle\sum_t\log\hat f_t(r_t)$ --- điểm log âm trung bình; với VB/MCMC dùng mật độ dự báo hỗn hợp qua mẫu hậu nghiệm \\[0.6em]
+Mean, Bias, RMSE, SE & Trung bình ước lượng $\bar\theta$; độ chệch $\bar\theta-\theta_0$; căn sai số toàn phương trung bình $\sqrt{\frac1B\sum(\hat\theta_b-\theta_0)^2}$; độ lệch chuẩn Monte Carlo $\sqrt{\text{RMSE}^2-\text{Bias}^2}$ \\
+CP 95\% & Tỷ lệ lần lặp mà khoảng tin cậy/tin tưởng 95\% chứa $\theta_0$ (VB: phân vị hậu nghiệm; MLE: khoảng Wald từ Hessian quan sát) \\
+Brier & $\dfrac1T\displaystyle\sum_t\sum_{s=1}^2\big[\hat\xi_{t\mid t}(s)-\mathbb{1}\{S_t=s\}\big]^2$ --- sai số dự báo xác suất trạng thái, thang $[0,2]$, tính sau khi đã sắp nhãn trạng thái \\[0.6em]
+$R_{sd}$ & $\mathrm{sd}_{\text{VB}}/\mathrm{sd}_{\text{MCMC}}$ --- tỷ số độ lệch chuẩn hậu nghiệm, cùng dữ liệu, lấy MCMC làm chuẩn tham chiếu \\
 \bottomrule
-\end{tabular}
+\end{tabularx}
 \clearpage
 
 \section{Dữ liệu}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{Thống kê mô tả lợi suất ngày và biến động thực tế VN30F1M}\label{tab:du-lieu}
 \begin{tabular}{l r r r r r}
 \toprule
@@ -59,7 +67,7 @@ $RV_t$ (kiểm định) & 435 & 1,0828 & 2,0302 & 0,118 & 31,233 \\
 \bottomrule
 \end{tabular}
 \end{table}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{Cách chia tập huấn luyện / kiểm định}\label{tab:chia-tap}
 \begin{tabular}{l l l r r}
 \toprule
@@ -73,7 +81,7 @@ Tổng & 2017-11-07 & 2026-07-17 & 2170 & 100\% \\
 \end{table}
 
 \section{Bước 1 --- tám mô hình, ba phương pháp, dữ liệu VN30F1M}
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bước 1 --- khớp trong mẫu ($n_{\text{huấn luyện}}=1735$). $d$ = số tham số tự do; AIC $=2d-2\ell$, BIC $=d\ln n-2\ell$; ELBO chỉ có với VB}\label{tab:b1-trong-mau}
 \begin{tabular}{l l r r r r r}
 \toprule
@@ -106,7 +114,7 @@ MS-GARCH-X Student-t & VB-FR & 15 & -- & -- & -- & $-$2866,36 \\
 \bottomrule
 \end{tabular}
 \end{table}
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bước 1 --- dự báo ngoài mẫu ($n_{\text{kiểm định}}=435$): MAE, RMSE, QLIKE so với $RV_t$; NLS = điểm log âm trung bình. Nhỏ hơn là tốt hơn}\label{tab:b1-ngoai-mau}
 \begin{tabular}{l l r r r r}
 \toprule
@@ -139,7 +147,7 @@ MS-GARCH-X Student-t & VB-FR & 1,9505 & 3,1874 & 1,1434 & 1,5392 \\
 \bottomrule
 \end{tabular}
 \end{table}
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bước 1 --- kiểm định VaR ngoài mẫu ($n=435$; kỳ vọng 4,4 và 21,8 vi phạm). $p_{\text{UC}}$: Kupiec; $p_{\text{CC}}$: Christoffersen}\label{tab:b1-var}
 \begin{tabular}{l l r r r r r r}
 \toprule
@@ -173,9 +181,9 @@ MS-GARCH-X Student-t & VB-FR & 4 & 0,864 & 0,949 & 26 & 0,364 & 0,358 \\
 \end{tabular}
 \end{table}
 
-\section{Bước 2 --- PR-A: khôi phục tham số MS-GARCH-X Student-$t$ (8 kịch bản)}
+\section{Bước 2 --- Khôi phục tham số: MS-GARCH-X Student-$t$ (8 kịch bản)}
 \subsection{S1 --- \texorpdfstring{hai trạng thái phân biệt rõ, $\nu_0=8$}{hai trang thai phan biet ro, nu0=8}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S1: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S1}
 \begin{tabular}{l r l r}
 \toprule
@@ -193,7 +201,7 @@ $\beta_2$ & 0,800 & & \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S1 --- Hợp lý cực đại (MLE), $B=100$ lần lặp, Brier $=0,3969$; CP 95\% Wald trên 50/100 lần lặp có Hessian xác định dương}\label{tab:S1-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -218,7 +226,7 @@ $\nu$ & 8,000 & 6,397 & $-$1,603 & 1,953 & 1,117 & 62\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S1 --- Bayes biến phân mean-field (VB-MF), $B=100$ lần lặp, Brier $=0,4947$}\label{tab:S1-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -243,7 +251,7 @@ $\nu$ & 8,000 & 3,739 & $-$4,261 & 4,340 & 0,821 & 0\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S1 --- Bayes biến phân full-rank (VB-FR), $B=100$ lần lặp, Brier $=0,4689$}\label{tab:S1-vb_full_rank}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -271,7 +279,7 @@ $\nu$ & 8,000 & 4,483 & $-$3,517 & 3,677 & 1,071 & 8\% \\
 \noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 23/100 ; VB-MF 48/100 ; VB-FR 49/100.\normalsize
 
 \subsection{S2 --- \texorpdfstring{hai trạng thái gần nhau, $\nu_0=8$}{hai trang thai gan nhau, nu0=8}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S2: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S2}
 \begin{tabular}{l r l r}
 \toprule
@@ -289,7 +297,7 @@ $\beta_2$ & 0,830 & & \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S2 --- Hợp lý cực đại (MLE), $B=100$ lần lặp, Brier $=0,6611$; CP 95\% Wald trên 49/100 lần lặp có Hessian xác định dương}\label{tab:S2-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -314,7 +322,7 @@ $\nu$ & 8,000 & 8,667 & 0,667 & 1,718 & 1,583 & 100\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S2 --- Bayes biến phân mean-field (VB-MF), $B=100$ lần lặp, Brier $=0,4976$}\label{tab:S2-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -339,7 +347,7 @@ $\nu$ & 8,000 & 7,218 & $-$0,782 & 1,396 & 1,157 & 75\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S2 --- Bayes biến phân full-rank (VB-FR), $B=100$ lần lặp, Brier $=0,4894$}\label{tab:S2-vb_full_rank}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -367,7 +375,7 @@ $\nu$ & 8,000 & 7,704 & $-$0,296 & 1,402 & 1,371 & 94\% \\
 \noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 30/100 ; VB-MF 52/100 ; VB-FR 47/100.\normalsize
 
 \subsection{S3 --- \texorpdfstring{đuôi rất dày, $\nu_0=4$}{duoi rat day, nu0=4}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S3: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S3}
 \begin{tabular}{l r l r}
 \toprule
@@ -385,7 +393,7 @@ $\beta_2$ & 0,800 & & \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S3 --- Hợp lý cực đại (MLE), $B=100$ lần lặp, Brier $=0,3992$; CP 95\% Wald trên 42/100 lần lặp có Hessian xác định dương}\label{tab:S3-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -410,7 +418,7 @@ $\nu$ & 4,000 & 3,936 & $-$0,064 & 0,537 & 0,534 & 76\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S3 --- Bayes biến phân mean-field (VB-MF), $B=100$ lần lặp, Brier $=0,4763$}\label{tab:S3-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -435,7 +443,7 @@ $\nu$ & 4,000 & 2,404 & $-$1,596 & 1,602 & 0,137 & 0\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S3 --- Bayes biến phân full-rank (VB-FR), $B=100$ lần lặp, Brier $=0,4431$}\label{tab:S3-vb_full_rank}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -463,7 +471,7 @@ $\nu$ & 4,000 & 2,795 & $-$1,205 & 1,240 & 0,290 & 4\% \\
 \noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 28/100 ; VB-MF 48/100 ; VB-FR 53/100.\normalsize
 
 \subsection{S4 --- \texorpdfstring{$\nu_0=30$ (gần phân phối chuẩn)}{nu0=30 (gan phan phoi chuan)}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S4: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S4}
 \begin{tabular}{l r l r}
 \toprule
@@ -481,7 +489,7 @@ $\beta_2$ & 0,800 & & \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S4 --- Hợp lý cực đại (MLE), $B=29$ lần lặp, Brier $=0,4535$; CP 95\% Wald trên 15/29 lần lặp có Hessian xác định dương}\label{tab:S4-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -506,7 +514,7 @@ $\nu$ & 30,000 & 12,449 & $-$17,551 & 18,058 & 4,249 & 27\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S4 --- Bayes biến phân mean-field (VB-MF), $B=15$ lần lặp, Brier $=0,4754$}\label{tab:S4-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -534,7 +542,7 @@ $\nu$ & 30,000 & 7,258 & $-$22,742 & 22,835 & 2,064 & 0\% \\
 \noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 6/29 ; VB-MF 5/15.\normalsize
 
 \subsection{S5 --- \texorpdfstring{trạng thái biến động cao hiếm, $p_{11}=0{,}99$, $p_{22}=0{,}85$}{trang thai bien dong cao hiem, p11=0,99, p22=0,85}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S5: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S5}
 \begin{tabular}{l r l r}
 \toprule
@@ -552,7 +560,7 @@ $\beta_2$ & 0,800 & & \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S5 --- Hợp lý cực đại (MLE), $B=29$ lần lặp, Brier $=0,1688$; CP 95\% bỏ trống vì chỉ 3/29 lần lặp có Hessian xác định dương}\label{tab:S5-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -577,7 +585,7 @@ $\nu$ & 8,000 & 6,553 & $-$1,447 & 1,702 & 0,897 & -- \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S5 --- Bayes biến phân mean-field (VB-MF), $B=15$ lần lặp, Brier $=0,4629$}\label{tab:S5-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -605,7 +613,7 @@ $\nu$ & 8,000 & 3,339 & $-$4,661 & 4,697 & 0,582 & 0\% \\
 \noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 6/29 ; VB-MF 6/15.\normalsize
 
 \subsection{S6 --- \texorpdfstring{cỡ mẫu nhỏ, $T=500$}{co mau nho, T=500}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S6: tham số thật $\theta_0$; $T=500$, burn-in $=200$}\label{tab:theta0-S6}
 \begin{tabular}{l r l r}
 \toprule
@@ -623,7 +631,7 @@ $\beta_2$ & 0,800 & & \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S6 --- Hợp lý cực đại (MLE), $B=30$ lần lặp, Brier $=0,4338$; CP 95\% bỏ trống vì chỉ 8/30 lần lặp có Hessian xác định dương}\label{tab:S6-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -648,7 +656,7 @@ $\nu$ & 8,000 & 7,081 & $-$0,919 & 3,363 & 3,235 & -- \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S6 --- Bayes biến phân mean-field (VB-MF), $B=15$ lần lặp, Brier $=0,5360$}\label{tab:S6-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -676,7 +684,7 @@ $\nu$ & 8,000 & 3,085 & $-$4,915 & 4,946 & 0,554 & 0\% \\
 \noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 10/30 ; VB-MF 8/15.\normalsize
 
 \subsection{S7 --- \texorpdfstring{cỡ mẫu lớn, $T=5000$}{co mau lon, T=5000}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S7: tham số thật $\theta_0$; $T=5000$, burn-in $=200$}\label{tab:theta0-S7}
 \begin{tabular}{l r l r}
 \toprule
@@ -694,7 +702,7 @@ $\beta_2$ & 0,800 & & \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S7 --- Hợp lý cực đại (MLE), $B=21$ lần lặp, Brier $=0,4019$; CP 95\% bỏ trống vì chỉ 8/21 lần lặp có Hessian xác định dương}\label{tab:S7-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -719,7 +727,7 @@ $\nu$ & 8,000 & 6,231 & $-$1,769 & 1,926 & 0,762 & -- \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S7 --- Bayes biến phân mean-field (VB-MF), $B=15$ lần lặp, Brier $=0,4263$}\label{tab:S7-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -747,7 +755,7 @@ $\nu$ & 8,000 & 3,628 & $-$4,372 & 4,418 & 0,637 & 0\% \\
 \noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 10/21 ; VB-MF 9/15.\normalsize
 
 \subsection{S8 --- \texorpdfstring{sai đặc tả: $r_t + 0{,}3\,r_{t-1}$}{sai dac ta: r_t + 0,3 r_(t-1)}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S8: tham số thật $\theta_0$; $T=2000$, burn-in $=200$; chuỗi ước lượng là $r_t+0{,}3\,r_{t-1}$}\label{tab:theta0-S8}
 \begin{tabular}{l r l r}
 \toprule
@@ -765,7 +773,7 @@ $\beta_2$ & 0,800 & & \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S8 --- Hợp lý cực đại (MLE), $B=29$ lần lặp, Brier $=0,5419$; CP 95\% Wald trên 20/29 lần lặp có Hessian xác định dương}\label{tab:S8-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -790,7 +798,7 @@ $\nu$ & 8,000 & 7,044 & $-$0,956 & 1,861 & 1,596 & 70\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{S8 --- Bayes biến phân mean-field (VB-MF), $B=15$ lần lặp, Brier $=0,5977$}\label{tab:S8-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -817,9 +825,9 @@ $\nu$ & 8,000 & 3,609 & $-$4,391 & 4,453 & 0,739 & 0\% \\
 
 \noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 8/29 ; VB-MF 10/15.\normalsize
 
-\section{Bước 2 --- PR-B: khôi phục tham số EGARCH-X Student-$t$ (3 kịch bản)}
+\section{Bước 2 --- Khôi phục tham số: EGARCH-X Student-$t$ (3 kịch bản)}
 \subsection{E1 --- \texorpdfstring{đòn bẩy rõ, $\theta_0=-0{,}10$, $\nu_0=8$}{don bay ro, theta0=-0,10, nu0=8}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{E1: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-E1}
 \begin{tabular}{l r l r}
 \toprule
@@ -833,7 +841,7 @@ $\theta$ & $-$0,100 & $\nu$ & 8,000 \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{E1 --- Hợp lý cực đại (MLE), $B=100$ lần lặp; CP 95\% Wald trên 100/100 lần lặp có Hessian xác định dương}\label{tab:E1-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -851,7 +859,7 @@ $\nu$ & 8,000 & 8,570 & 0,570 & 1,648 & 1,546 & 97\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{E1 --- Bayes biến phân mean-field (VB-MF), $B=100$ lần lặp}\label{tab:E1-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -869,7 +877,7 @@ $\nu$ & 8,000 & 8,632 & 0,632 & 1,570 & 1,437 & 95\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{E1 --- Bayes biến phân full-rank (VB-FR), $B=100$ lần lặp}\label{tab:E1-vb_full_rank}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -888,7 +896,7 @@ $\nu$ & 8,000 & 8,548 & 0,548 & 1,601 & 1,504 & 96\% \\
 \end{table}
 
 \subsection{E2 --- \texorpdfstring{không đòn bẩy, $\theta_0=0$, $\nu_0=8$}{khong don bay, theta0=0, nu0=8}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{E2: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-E2}
 \begin{tabular}{l r l r}
 \toprule
@@ -902,7 +910,7 @@ $\theta$ & 0,000 & $\nu$ & 8,000 \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{E2 --- Hợp lý cực đại (MLE), $B=100$ lần lặp; CP 95\% Wald trên 100/100 lần lặp có Hessian xác định dương}\label{tab:E2-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -920,7 +928,7 @@ $\nu$ & 8,000 & 8,572 & 0,572 & 1,643 & 1,540 & 97\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{E2 --- Bayes biến phân mean-field (VB-MF), $B=100$ lần lặp}\label{tab:E2-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -938,7 +946,7 @@ $\nu$ & 8,000 & 8,497 & 0,497 & 1,502 & 1,417 & 94\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{E2 --- Bayes biến phân full-rank (VB-FR), $B=100$ lần lặp}\label{tab:E2-vb_full_rank}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -957,7 +965,7 @@ $\nu$ & 8,000 & 8,478 & 0,478 & 1,546 & 1,471 & 97\% \\
 \end{table}
 
 \subsection{E3 --- \texorpdfstring{đuôi dày, $\theta_0=-0{,}10$, $\nu_0=4$}{duoi day, theta0=-0,10, nu0=4}}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{E3: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-E3}
 \begin{tabular}{l r l r}
 \toprule
@@ -971,7 +979,7 @@ $\theta$ & $-$0,100 & $\nu$ & 4,000 \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{E3 --- Hợp lý cực đại (MLE), $B=100$ lần lặp; CP 95\% Wald trên 100/100 lần lặp có Hessian xác định dương}\label{tab:E3-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -989,7 +997,7 @@ $\nu$ & 4,000 & 4,121 & 0,121 & 0,435 & 0,418 & 98\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{E3 --- Bayes biến phân mean-field (VB-MF), $B=100$ lần lặp}\label{tab:E3-vb_mean_field}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -1007,7 +1015,7 @@ $\nu$ & 4,000 & 4,188 & 0,188 & 0,464 & 0,424 & 83\% \\
 \end{tabular}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{E3 --- Bayes biến phân full-rank (VB-FR), $B=100$ lần lặp}\label{tab:E3-vb_full_rank}
 \begin{tabular}{l r r r r r r}
 \toprule
@@ -1026,7 +1034,7 @@ $\nu$ & 4,000 & 4,131 & 0,131 & 0,466 & 0,447 & 92\% \\
 \end{table}
 
 \section{Bước 3 --- MCMC trên mô hình thắng cuộc}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{Bước 3 --- MCMC (NUTS) trên EGARCH-X Student-$t$, dữ liệu huấn luyện: 4 chuỗi $\times$ 400 mẫu, $\max\hat R=1,0125$, $\min$ ESS $=1340$, 0 phân kỳ, 8.1 giờ}\label{tab:b3-mcmc}
 \begin{tabular}{l r r r c}
 \toprule
@@ -1043,7 +1051,7 @@ $\nu$ & 4,2910 & 4,3644 & 0,4809 & [3,5544; 5,4315] \\
 \bottomrule
 \end{tabular}
 \end{table}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{Bước 3 --- $R_{sd}=\mathrm{sd}_{\text{VB}}/\mathrm{sd}_{\text{MCMC}}$ (độ lệch chuẩn hậu nghiệm VB so với MCMC, cùng dữ liệu)}\label{tab:b3-rsd}
 \begin{tabular}{l r r r}
 \toprule
@@ -1062,7 +1070,7 @@ $\nu$ & 0,4809 & 0,63 & 0,97 \\
 \end{table}
 
 \section{Đếm số tham số có RMSE nhỏ nhất theo phương pháp}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{Số tham số mà mỗi phương pháp đạt RMSE nhỏ nhất, theo kịch bản. Kịch bản không có VB-FR ghi $--$}\label{tab:dem-thang}
 \begin{tabular}{l r l r r r}
 \toprule

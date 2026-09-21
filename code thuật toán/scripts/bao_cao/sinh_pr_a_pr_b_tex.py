@@ -88,7 +88,7 @@ def _bang_tham_so(ten_params, nhan, thuat, method_dict, theta0, brier=None):
     co_cp = bool(cov)
     cols = "l C C C C C" + (" C" if co_cp else "")
     out = []
-    out.append(r"\begin{table}[H]\centering\scriptsize")
+    out.append(r"\begin{table}[H]\centering\footnotesize")
     brier_txt = f", Brier trung bình $={_so(brier, 4)}$" if brier is not None else ""
     out.append(
         rf"\caption{{{thuat} ($n={n}$ lần lặp{brier_txt})}}"
@@ -119,7 +119,7 @@ def _bang_tham_so(ten_params, nhan, thuat, method_dict, theta0, brier=None):
 
 
 def _bang_theta0_pra(code: str, theta0: dict) -> str:
-    out = [r"\begin{table}[H]\centering\small",
+    out = [r"\begin{table}[H]\centering\normalsize",
            rf"\caption{{{code}: toàn bộ tham số thật $\theta_0$ dùng để sinh dữ liệu}}",
            r"\begin{tabularx}{\textwidth}{l C  l C}",
            r"\toprule",
@@ -180,7 +180,7 @@ def sinh_prb() -> str:
         theta0 = d["mle"]["tham_so_that"]
         theta0 = {k: float(v) for k, v in theta0.items()}
         out.append(rf"\subsection*{{Kịch bản {code} --- {mo_ta[code]}}}")
-        tbl = [r"\begin{table}[H]\centering\small",
+        tbl = [r"\begin{table}[H]\centering\normalsize",
                rf"\caption{{{code}: toàn bộ tham số thật $\theta_0$ dùng để sinh dữ liệu}}",
                r"\begin{tabularx}{\textwidth}{l C  l C}",
                r"\toprule",

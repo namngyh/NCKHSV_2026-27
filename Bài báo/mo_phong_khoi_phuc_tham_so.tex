@@ -1,15 +1,16 @@
 % !TeX program = xelatex
 % !TeX encoding = UTF-8
-% Sinh tu du lieu that: PR-A/PR-B qua scripts/bao_cao/sinh_pr_a_pr_b_tex.py --
-% khong nhap tay. Phu luc S1-S8 (ban minh hoa cu, B thap) da BO -- xem git
-% history neu can, thay bang tong_hop_ket_qua.tex (gop S1-S8 vao mot bo bang
-% duy nhat, khong trung lap voi PR-A).
+% Sinh tu du lieu that: nghien cuu MS-GARCH-X + EGARCH-X qua
+% scripts/bao_cao/sinh_pr_a_pr_b_tex.py -- khong nhap tay. Phu luc S1-S8
+% (ban minh hoa cu, B thap) da BO -- xem git history neu can, thay bang
+% tong_hop_ket_qua.tex (gop S1-S8 vao mot bo bang duy nhat, khong trung
+% lap voi nghien cuu MS-GARCH-X chinh thuc).
 \documentclass[11pt,a4paper]{article}
 \usepackage{fontspec}
 \usepackage{unicode-math}
 \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
 \IfFontExistsTF{Cambria Math}{\setmathfont{Cambria Math}}{\setmathfont{LibertinusMath-Regular.otf}}
-\usepackage[a4paper,top=2.2cm,bottom=2.2cm,left=2.0cm,right=2.0cm]{geometry}
+\usepackage[a4paper,top=2.2cm,bottom=2.2cm,left=1.8cm,right=1.8cm]{geometry}
 \usepackage{booktabs}
 \usepackage{tabularx}
 \usepackage{array}
@@ -32,7 +33,7 @@
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 
 \title{\vspace{-1.2cm}\textbf{Nghiên cứu mô phỏng khôi phục tham số --- Bước 2}\\[0.25em]
-\large PR-A (MS-GARCH-X) + PR-B (EGARCH-X) Student-$t$}
+\large MS-GARCH-X và EGARCH-X Student-$t$}
 \author{}
 \date{}
 
@@ -47,29 +48,30 @@ chính thức} (Bước 2 trong thiết kế ba bước hiện hành của đề
 nhận chéo với Bước 3:
 
 \begin{itemize}
-\item \textbf{PR-A} --- MS-GARCH-X Student-$t$, hai trạng thái (15 tham số),
+\item \textbf{MS-GARCH-X Student-$t$}, hai trạng thái (15 tham số),
   3 kịch bản $S_1,S_2,S_3$ $\times$ 3 phương pháp (MLE, VB mean-field, VB
   full-rank) $\times$ $B=100$ lần lặp, $T=2000$. \textbf{Đã hoàn tất 900/900
   lần lặp.}
-\item \textbf{PR-B} --- EGARCH-X Student-$t$, một trạng thái (8 tham số),
+\item \textbf{EGARCH-X Student-$t$}, một trạng thái (8 tham số),
   3 kịch bản $E_1,E_2,E_3$ $\times$ 3 phương pháp $\times$ $B=100$, $T=2000$.
   \textbf{Đã hoàn tất 900/900 lần lặp.}
 \item \textbf{Bước 3} --- MCMC một lần duy nhất trên EGARCH-X Student-$t$ áp
   lên dữ liệu VN30F1M thật, \textbf{đã hội tụ} ($\hat R=1{,}0125$). Bảng
   $R_{sd}$ xác nhận trên dữ liệu thật đúng phát hiện "VB đánh giá thấp bất
-  định ở $\omega,\beta$" mà PR-A/PR-B đã chỉ ra trên dữ liệu mô phỏng.
+  định ở $\omega,\beta$" mà hai nghiên cứu mô phỏng trên đã chỉ ra.
 \end{itemize}
 
 \textbf{Về bộ tám kịch bản minh họa cũ ($S_1$--$S_8$, $B=15$--$30$, trước khi
 sửa lỗi sắp nhãn trạng thái):} tài liệu này không còn trình bày riêng bộ đó
 nữa, để tránh hai bộ số khác nhau cho cùng tên kịch bản $S_1,S_2,S_3$ trong
 một tài liệu. Bộ tám kịch bản gộp đúng cách (dùng $B=100$ cho $S_1$--$S_3$ từ
-PR-A, $B=29$/$15$ cho $S_4$--$S_8$) nằm trong \texttt{Bài báo/tong\_hop\_ket\_qua.tex}.
+nghiên cứu MS-GARCH-X chính thức, $B=29$/$15$ cho $S_4$--$S_8$) nằm trong
+\texttt{Bài báo/tong\_hop\_ket\_qua.tex}.
 
-\textbf{Sửa lỗi quan trọng đã áp dụng cho PR-A/PR-B:}
+\textbf{Sửa lỗi quan trọng đã áp dụng cho cả hai nghiên cứu mô phỏng:}
 \begin{itemize}
-\item \textbf{Đối xứng hoán vị nhãn trạng thái} (chỉ PR-A, vì PR-B là mô hình một
-  trạng thái không có đối xứng này): bộ ước lượng có thể trả về "trạng thái 1"/
+\item \textbf{Đối xứng hoán vị nhãn trạng thái} (chỉ ở MS-GARCH-X, vì EGARCH-X
+  là mô hình một trạng thái không có đối xứng này): bộ ước lượng có thể trả về "trạng thái 1"/
   "trạng thái 2" theo thứ tự tùy ý. Đã sắp nhãn theo phương sai vô điều kiện
   $\omega_s/(1-\alpha_s-\beta_s)$ (trạng thái 1 = biến động thấp) trước khi tính
   Bias/RMSE/CP. \textbf{VB đảo nhãn gần 50\% lần lặp} --- gần đúng bằng tung đồng
@@ -78,8 +80,8 @@ PR-A, $B=29$/$15$ cho $S_4$--$S_8$) nằm trong \texttt{Bài báo/tong\_hop\_ket
   phải lấy từ $P_0$ của kịch bản, không phải placeholder $\mathrm{eye}(2)$
   trong \texttt{scenario.params.P}. Lỗi này từng lọt qua \texttt{run\_scenario()}
   (đường tuần tự) lẫn \texttt{combine()} (đường song song, đã sinh ra toàn bộ
-  900 lần lặp của PR-A) --- phát hiện và vá độc lập hai lần, lần sau (21/09/2026)
-  đổi $p_{11}/p_{22}$ của PR-A đáng kể (ví dụ $S_1$: MLE $p_{11}=0{,}983$ thay vì
+  900 lần lặp của nghiên cứu MS-GARCH-X) --- phát hiện và vá độc lập hai lần, lần sau (21/09/2026)
+  đổi $p_{11}/p_{22}$ đáng kể (ví dụ $S_1$: MLE $p_{11}=0{,}983$ thay vì
   $0{,}963$ cũ; VB-FR coverage của $p_{11},p_{22}$ tăng từ gần $0$ lên
   $0{,}23$--$0{,}69$). Bảng dưới đây đã dùng số liệu sau lần vá thứ hai.
 \item \textbf{Brier tính sai vì tính trước khi sắp nhãn}: đã chạy lại bộ lọc
@@ -94,7 +96,7 @@ PR-A, $B=29$/$15$ cho $S_4$--$S_8$) nằm trong \texttt{Bài báo/tong\_hop\_ket
 \end{itemize}
 
 \clearpage
-\section{PR-A --- MS-GARCH-X Student-$t$, hai trạng thái}
+\section{MS-GARCH-X Student-$t$, hai trạng thái}
 
 Ba kịch bản: $S_1$ (mốc nền, hai trạng thái phân biệt rõ), $S_2$ (nhận dạng yếu,
 hai trạng thái gần nhau --- cũng là nơi VB mean-field và VB full-rank khác nhau rõ
@@ -110,7 +112,7 @@ dùng khoảng Wald từ Hessian quan sát, chỉ tính trên các lần lặp c
 quan ở đầu tài liệu).
 
 \subsection*{Kịch bản S1 --- Mốc nền --- hai trạng thái phân biệt rõ, $\nu_0=8$}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S1: toàn bộ tham số thật $\theta_0$ dùng để sinh dữ liệu}
 \begin{tabularx}{\textwidth}{l C  l C}
 \toprule
@@ -129,7 +131,7 @@ $\beta_2$ & 0,800 &  &  \\
 \vspace{0.2em}\raggedright\scriptsize \emph{Ghi chú:} $T=2000$, burn-in $=200$, $B=100$ lần lặp (mục tiêu và thực đạt đều bằng nhau, trừ vài lần lặp phân kỳ NaN đã dùng quy tắc thử lại điểm khởi tạo).
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp, Brier trung bình $=0,3969$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -154,7 +156,7 @@ $\nu$ & 8,000 & 6,397 & $-$1,603 & 1,953 & 1,117 & 62\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân mean-field ($n=100$ lần lặp, Brier trung bình $=0,4947$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -179,7 +181,7 @@ $\nu$ & 8,000 & 3,739 & $-$4,261 & 4,340 & 0,821 & 0\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân full-rank ($n=100$ lần lặp, Brier trung bình $=0,4689$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -208,7 +210,7 @@ $\nu$ & 8,000 & 4,483 & $-$3,517 & 3,677 & 1,071 & 8\% \\
 \bigskip
 
 \subsection*{Kịch bản S2 --- Nhận dạng yếu --- hai trạng thái gần nhau, $\nu_0=8$}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S2: toàn bộ tham số thật $\theta_0$ dùng để sinh dữ liệu}
 \begin{tabularx}{\textwidth}{l C  l C}
 \toprule
@@ -227,7 +229,7 @@ $\beta_2$ & 0,830 &  &  \\
 \vspace{0.2em}\raggedright\scriptsize \emph{Ghi chú:} $T=2000$, burn-in $=200$, $B=100$ lần lặp (mục tiêu và thực đạt đều bằng nhau, trừ vài lần lặp phân kỳ NaN đã dùng quy tắc thử lại điểm khởi tạo).
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp, Brier trung bình $=0,6611$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -252,7 +254,7 @@ $\nu$ & 8,000 & 8,667 & 0,667 & 1,718 & 1,583 & 100\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân mean-field ($n=100$ lần lặp, Brier trung bình $=0,4976$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -277,7 +279,7 @@ $\nu$ & 8,000 & 7,218 & $-$0,782 & 1,396 & 1,157 & 75\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân full-rank ($n=100$ lần lặp, Brier trung bình $=0,4894$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -306,7 +308,7 @@ $\nu$ & 8,000 & 7,704 & $-$0,296 & 1,402 & 1,371 & 94\% \\
 \bigskip
 
 \subsection*{Kịch bản S3 --- Đuôi rất dày --- $\nu_0=4$, sát biên tồn tại phương sai}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{S3: toàn bộ tham số thật $\theta_0$ dùng để sinh dữ liệu}
 \begin{tabularx}{\textwidth}{l C  l C}
 \toprule
@@ -325,7 +327,7 @@ $\beta_2$ & 0,800 &  &  \\
 \vspace{0.2em}\raggedright\scriptsize \emph{Ghi chú:} $T=2000$, burn-in $=200$, $B=100$ lần lặp (mục tiêu và thực đạt đều bằng nhau, trừ vài lần lặp phân kỳ NaN đã dùng quy tắc thử lại điểm khởi tạo).
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp, Brier trung bình $=0,3992$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -350,7 +352,7 @@ $\nu$ & 4,000 & 3,936 & $-$0,064 & 0,537 & 0,534 & 76\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân mean-field ($n=100$ lần lặp, Brier trung bình $=0,4763$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -375,7 +377,7 @@ $\nu$ & 4,000 & 2,404 & $-$1,596 & 1,602 & 0,137 & 0\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân full-rank ($n=100$ lần lặp, Brier trung bình $=0,4431$)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -403,7 +405,7 @@ $\nu$ & 4,000 & 2,795 & $-$1,205 & 1,240 & 0,290 & 4\% \\
 \emph{Đảo nhãn trạng thái trước khi gộp (đã sửa):} MLE 28/100, VB-MF 48/100, VB-FR 53/100 lần lặp trả về nhãn trạng thái ngược quy ước (đã hoán vị trước khi tính Bias/RMSE/CP ở trên).
 \bigskip
 
-\textbf{Đọc kết quả PR-A (tóm tắt):} sau khi vá lỗi $p_{11}/p_{22}$ (21/09/2026),
+\textbf{Đọc kết quả MS-GARCH-X (tóm tắt):} sau khi vá lỗi $p_{11}/p_{22}$ (21/09/2026),
 bức tranh coverage của hai tham số này khác hẳn báo cáo trước --- \textbf{không
 còn đúng} để nói "coverage của $p_{11},p_{22}$ bằng $0{,}00$ ở mọi kịch bản,
 mọi phương pháp Bayes" như từng ghi nhận nhầm. Số liệu ở trên: MLE (khoảng
@@ -418,16 +420,16 @@ rõ rệt so với VB-MF. Ở $\omega_2$ (tham số nhận dạng yếu khác), 
 tiên nghiệm LogNormal --- đây là nơi VB thắng RMSE rõ nhất.
 
 \clearpage
-\section{PR-B --- EGARCH-X Student-$t$, một trạng thái}
+\section{EGARCH-X Student-$t$, một trạng thái}
 
 Ba kịch bản: $E_1$ (đòn bẩy rõ $\theta_0=-0{,}10$), $E_2$ (không đòn bẩy
 $\theta_0=0$ --- \textbf{kịch bản quan trọng nhất}, kiểm tra mô hình có bịa ra
 hiệu ứng đòn bẩy khi dữ liệu vốn không có không), $E_3$ (đuôi dày $\nu_0=4$, có
 đòn bẩy). Mô hình một trạng thái nên \textbf{không có đối xứng hoán vị nhãn} --
-đây là lý do PR-B không gặp vấn đề đảo nhãn như PR-A.
+đây là lý do EGARCH-X không gặp vấn đề đảo nhãn như MS-GARCH-X.
 
 \subsection*{Kịch bản E1 --- Đòn bẩy rõ, $\theta_0=-0{,}10$}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{E1: toàn bộ tham số thật $\theta_0$ dùng để sinh dữ liệu}
 \begin{tabularx}{\textwidth}{l C  l C}
 \toprule
@@ -442,7 +444,7 @@ $\theta$ & $-$0,100 & $\nu$ & 8,000 \\
 \vspace{0.2em}\raggedright\scriptsize \emph{Ghi chú:} $T=2000$, $B=100$ lần lặp, mô hình một trạng thái (không có đối xứng hoán vị nhãn).
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -460,7 +462,7 @@ $\nu$ & 8,000 & 8,570 & 0,570 & 1,648 & 1,546 & 97\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân mean-field ($n=100$ lần lặp)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -478,7 +480,7 @@ $\nu$ & 8,000 & 8,632 & 0,632 & 1,570 & 1,437 & 95\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân full-rank ($n=100$ lần lặp)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -499,7 +501,7 @@ $\nu$ & 8,000 & 8,548 & 0,548 & 1,601 & 1,504 & 96\% \\
 \bigskip
 
 \subsection*{Kịch bản E2 --- Không đòn bẩy, $\theta_0=0$ --- kịch bản quan trọng nhất}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{E2: toàn bộ tham số thật $\theta_0$ dùng để sinh dữ liệu}
 \begin{tabularx}{\textwidth}{l C  l C}
 \toprule
@@ -514,7 +516,7 @@ $\theta$ & 0,000 & $\nu$ & 8,000 \\
 \vspace{0.2em}\raggedright\scriptsize \emph{Ghi chú:} $T=2000$, $B=100$ lần lặp, mô hình một trạng thái (không có đối xứng hoán vị nhãn).
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -532,7 +534,7 @@ $\nu$ & 8,000 & 8,572 & 0,572 & 1,643 & 1,540 & 97\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân mean-field ($n=100$ lần lặp)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -550,7 +552,7 @@ $\nu$ & 8,000 & 8,497 & 0,497 & 1,502 & 1,417 & 94\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân full-rank ($n=100$ lần lặp)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -571,7 +573,7 @@ $\nu$ & 8,000 & 8,478 & 0,478 & 1,546 & 1,471 & 97\% \\
 \bigskip
 
 \subsection*{Kịch bản E3 --- Đuôi dày, $\nu_0=4$, có đòn bẩy}
-\begin{table}[H]\centering\small
+\begin{table}[H]\centering\normalsize
 \caption{E3: toàn bộ tham số thật $\theta_0$ dùng để sinh dữ liệu}
 \begin{tabularx}{\textwidth}{l C  l C}
 \toprule
@@ -586,7 +588,7 @@ $\theta$ & $-$0,100 & $\nu$ & 4,000 \\
 \vspace{0.2em}\raggedright\scriptsize \emph{Ghi chú:} $T=2000$, $B=100$ lần lặp, mô hình một trạng thái (không có đối xứng hoán vị nhãn).
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Hợp lý cực đại (MLE) ($n=100$ lần lặp)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -604,7 +606,7 @@ $\nu$ & 4,000 & 4,121 & 0,121 & 0,435 & 0,418 & 98\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân mean-field ($n=100$ lần lặp)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -622,7 +624,7 @@ $\nu$ & 4,000 & 4,188 & 0,188 & 0,464 & 0,424 & 83\% \\
 \end{tabularx}
 \end{table}
 
-\begin{table}[H]\centering\scriptsize
+\begin{table}[H]\centering\footnotesize
 \caption{Bayes biến phân full-rank ($n=100$ lần lặp)}
 \begin{tabularx}{\textwidth}{l C C C C C C}
 \toprule
@@ -642,24 +644,24 @@ $\nu$ & 4,000 & 4,131 & 0,131 & 0,466 & 0,447 & 92\% \\
 
 \bigskip
 
-\textbf{Đọc kết quả PR-B (tóm tắt):} bộ ước lượng khôi phục đòn bẩy đúng theo CẢ
+\textbf{Đọc kết quả EGARCH-X (tóm tắt):} bộ ước lượng khôi phục đòn bẩy đúng theo CẢ
 HAI chiều --- $E_1$: 100/100 lần lặp cho $\hat\theta$ âm; $E_2$: $\hat\theta$
 trung bình gần 0 ($-0{,}001$ đến $-0{,}003$, không bịa ra đòn bẩy giả); $E_3$:
 100/100 âm, đúng dấu ngay cả khi đuôi rất dày. $\nu$ ở $E_3$ khôi phục gần như
 hoàn hảo (MLE $4{,}131$ so với thật $4{,}000$), hóa giải lo ngại mô hình đánh
 giá thấp độ dày đuôi đúng ở vùng quan trọng nhất của VN30F1M. \textbf{Coverage
 của $\theta$ nay có cả cột MLE} (bổ sung 21/09/2026, Hessian một trạng thái
-luôn xác định dương nên không cần điều kiện hóa như PR-A): $95$--$98\%$ ở cả
-ba phương pháp, cả ba kịch bản --- đạt chuẩn $0{,}95$ đồng đều, khác hẳn PR-A.
+luôn xác định dương nên không cần điều kiện hóa như MS-GARCH-X): $95$--$98\%$ ở cả
+ba phương pháp, cả ba kịch bản --- đạt chuẩn $0{,}95$ đồng đều, khác hẳn MS-GARCH-X.
 
 \clearpage
 \section{Bước 3 --- xác nhận chéo giữa mô phỏng và dữ liệu thật}
 
-PR-A và PR-B kiểm định bộ ước lượng trên dữ liệu \emph{mô phỏng}, nơi biết
-trước tham số thật. Bước 3 chạy MCMC (NUTS) một lần duy nhất trên
-\textbf{EGARCH-X Student-$t$} --- mô hình thắng cuộc của Bước 1 --- áp lên
-\textbf{dữ liệu VN30F1M thật}, cho một phép kiểm định độc lập thứ hai của
-đúng những phát hiện mà PR-A/PR-B đã nêu.
+Hai nghiên cứu mô phỏng ở trên (MS-GARCH-X và EGARCH-X) kiểm định bộ ước
+lượng trên dữ liệu \emph{mô phỏng}, nơi biết trước tham số thật. Bước 3 chạy
+MCMC (NUTS) một lần duy nhất trên \textbf{EGARCH-X Student-$t$} --- mô hình
+thắng cuộc của Bước 1 --- áp lên \textbf{dữ liệu VN30F1M thật}, cho một phép
+kiểm định độc lập thứ hai của đúng những phát hiện đã nêu ở trên.
 
 \textbf{MCMC hội tụ, khác hẳn lần thất bại trên MS-GARCH-X:} 4 chuỗi $\times$
 (1.000 warmup + 400 mẫu), khởi tạo phân tán quanh nghiệm MLE, 8,1 giờ.
@@ -686,12 +688,12 @@ $\alpha$ & 0{,}0721 & 0{,}1081 & 0{,}1066 & 0{,}1121 & $[0{,}0268;\,0{,}2110]$ \
 \end{table}
 
 \textbf{Hiệu ứng đòn bẩy của VN30F1M được xác lập thống kê}: khoảng tin cậy
-95\% của $\theta$ loại trừ 0. Kết hợp với $E_2$ của PR-B ($\theta_0=0$: mô hình
+95\% của $\theta$ loại trừ 0. Kết hợp với kịch bản $E_2$ của nghiên cứu EGARCH-X ($\theta_0=0$: mô hình
 không bịa ra đòn bẩy khi dữ liệu vốn không có), kết luận này được kiểm chứng
 \textbf{cả hai chiều} --- một lần trên dữ liệu mô phỏng có $\theta_0$ biết
 trước, một lần trên dữ liệu thật không biết $\theta$ thật.
 
-\subsection*{$R_{sd}$ --- tỷ số độ lệch chuẩn VB/MCMC, xác nhận trực tiếp phát hiện của PR-A/PR-B}
+\subsection*{$R_{sd}$ --- tỷ số độ lệch chuẩn VB/MCMC, xác nhận trực tiếp phát hiện của hai nghiên cứu mô phỏng}
 
 Coi MCMC là chuẩn tham chiếu (đã hội tụ), tỷ số $R_{sd}=\mathrm{sd}_{VB}/\mathrm{sd}_{MCMC}$
 đo mức VB đánh giá thấp bất định hậu nghiệm --- $R_{sd}<1$ nghĩa là khoảng tin
@@ -710,12 +712,13 @@ VB-FR & 0{,}94 & \textbf{0{,}75} & 1{,}01 & 1{,}00 & \textbf{0{,}75} & 0{,}97 \\
 \end{table}
 
 Mean-field đánh giá thấp bất định của $\omega$ và $\beta$ khoảng \textbf{ba
-lần} --- đúng hai tham số nằm trên sống núi cong $\omega/(1-\beta)$ mà PR-A và
-PR-B đã chỉ ra là nơi coverage của VB tệ nhất. Full-rank thu hẹp khoảng cách
-nhưng vẫn hẹp hơn MCMC khoảng 25\% ở đúng hai tham số đó; ở $\mu,\theta,\alpha$
-thì cả hai họ VB gần khớp MCMC. \textbf{Kết quả mô phỏng (PR-A/PR-B) và kết
-quả dữ liệu thật (Bước 3) nói cùng một điều, bằng hai con đường hoàn toàn độc
-lập} --- đây là dạng bằng chứng mạnh nhất có thể đưa ra cho luận điểm về sống
-núi cong, vì mô phỏng biết trước tham số thật còn dữ liệu thật thì không.
+lần} --- đúng hai tham số nằm trên sống núi cong $\omega/(1-\beta)$ mà cả
+nghiên cứu MS-GARCH-X lẫn EGARCH-X đã chỉ ra là nơi coverage của VB tệ nhất.
+Full-rank thu hẹp khoảng cách nhưng vẫn hẹp hơn MCMC khoảng 25\% ở đúng hai
+tham số đó; ở $\mu,\theta,\alpha$ thì cả hai họ VB gần khớp MCMC. \textbf{Kết
+quả mô phỏng (hai nghiên cứu ở trên) và kết quả dữ liệu thật (Bước 3) nói
+cùng một điều, bằng hai con đường hoàn toàn độc lập} --- đây là dạng bằng
+chứng mạnh nhất có thể đưa ra cho luận điểm về sống núi cong, vì mô phỏng
+biết trước tham số thật còn dữ liệu thật thì không.
 
 \end{document}

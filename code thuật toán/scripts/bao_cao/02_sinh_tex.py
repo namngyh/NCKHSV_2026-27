@@ -440,10 +440,10 @@ A(r"""
 
 Trên dữ liệu thật không biết tham số đúng, nên chất lượng ước lượng được đánh
 giá bổ sung bằng hai nghiên cứu khôi phục tham số với tham số đã biết trước:
-\textbf{PR-A} (MS-GARCH-X Student-$t$, hai trạng thái, kịch bản $S_1,S_2,S_3$)
-và \textbf{PR-B} (EGARCH-X Student-$t$, một trạng thái, kịch bản $E_1,E_2,E_3$)
+\textbf{MS-GARCH-X Student-$t$} (hai trạng thái, kịch bản $S_1,S_2,S_3$)
+và \textbf{EGARCH-X Student-$t$} (một trạng thái, kịch bản $E_1,E_2,E_3$)
 --- mỗi kịch bản $B=100$ lần lặp, $T=2000$, ba phương pháp (MLE, VB mean-field,
-VB full-rank). Trước khi tính Bias/RMSE/Coverage của PR-A, nhãn trạng thái đã
+VB full-rank). Trước khi tính Bias/RMSE/Coverage của MS-GARCH-X, nhãn trạng thái đã
 được sắp lại theo phương sai vô điều kiện (bộ ước lượng có đối xứng hoán vị
 nhãn nên có thể trả về "trạng thái 1"/"trạng thái 2" theo thứ tự tùy ý --- VB
 đảo nhãn ở gần một nửa số lần lặp nếu không sắp lại). Bộ tám kịch bản $S_1$--$S_8$
@@ -451,7 +451,7 @@ minh họa cũ (tham số không hiệu chỉnh theo VN30F1M, $B=15$--$30$) đư
 phụ lục bổ trợ, không còn là số liệu chính thức của mục này.
 
 \begin{table}[H]\centering
-\caption{Kết quả mô phỏng gộp trên PR-A + PR-B (sáu kịch bản, $B=100$)}
+\caption{Kết quả mô phỏng gộp trên MS-GARCH-X và EGARCH-X (sáu kịch bản, $B=100$)}
 \begin{threeparttable}
 \begin{tabularx}{\textwidth}{l C C C C}
 \toprule
@@ -465,8 +465,8 @@ for nm in ["MLE", "VB mean-field", "VB full-rank"]:
 A(r"""\bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
-\item Độ chệch và RMSE lấy trung bình trên các tham số có thang đo khác nhau (gộp cả PR-A và PR-B), nên chỉ dùng để so sánh thô giữa các phương pháp --- xem \texttt{Bài báo/mo\_phong\_khoi\_phuc\_tham\_so.tex} để có bảng chi tiết theo từng tham số, từng kịch bản. Coverage lý tưởng là $0{,}95$; cả hai phương pháp Bayes đều thấp hơn nhiều, phần lớn do độ chệch (không phải khoảng tin cậy quá hẹp) --- ở $p_{11},p_{22}$ của PR-A, độ chệch chủ yếu đến từ tiên nghiệm Beta$(8;2)$ kéo ước lượng về trung bình tiên nghiệm $0{,}80$, không phải nhược điểm thuần túy của biến phân. MLE không sinh khoảng tin cậy trong quy trình này nên không tính được coverage.
-\item Cột Brier đã bỏ khỏi bảng này: Brier của PR-A được tính trước khi sắp nhãn trạng thái và hiện sai (một số giá trị VB-FR tệ hơn đoán ngẫu nhiên $0{,}50$), còn PR-B là mô hình một trạng thái nên không có xác suất trạng thái để tính Brier.
+\item Độ chệch và RMSE lấy trung bình trên các tham số có thang đo khác nhau (gộp cả hai nghiên cứu), nên chỉ dùng để so sánh thô giữa các phương pháp --- xem \texttt{Bài báo/mo\_phong\_khoi\_phuc\_tham\_so.tex} để có bảng chi tiết theo từng tham số, từng kịch bản. Coverage lý tưởng là $0{,}95$; cả hai phương pháp Bayes đều thấp hơn nhiều, phần lớn do độ chệch (không phải khoảng tin cậy quá hẹp) --- ở $p_{11},p_{22}$ của MS-GARCH-X, độ chệch chủ yếu đến từ tiên nghiệm Beta$(8;2)$ kéo ước lượng về trung bình tiên nghiệm $0{,}80$, không phải nhược điểm thuần túy của biến phân. MLE không sinh khoảng tin cậy trong quy trình này nên không tính được coverage.
+\item Cột Brier đã bỏ khỏi bảng gộp này (chưa cập nhật vào số liệu thô của bảng này); Brier \emph{đúng} (sau sắp nhãn) của MS-GARCH-X và Brier có ý nghĩa hạn chế cho EGARCH-X (mô hình một trạng thái, không có xác suất trạng thái) nằm trong \texttt{Bài báo/mo\_phong\_khoi\_phuc\_tham\_so.tex} và \texttt{tong\_hop\_ket\_qua.tex}.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
