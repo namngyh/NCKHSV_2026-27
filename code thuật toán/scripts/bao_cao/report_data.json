@@ -343,36 +343,34 @@
   "R1": 76.22343796094259,
   "M4": 3840.0
  },
+ "_sim_nguon": "PR-A (S1/S2/S3, MS-GARCH-X) + PR-B (E1/E2/E3, EGARCH-X), B=100/kich ban, da sap nhan trang thai. Sinh boi scripts/bao_cao/sinh_hinh_mo_phong.py (thay cho khoi mo phong cu trong 01_sinh_hinh.py, doc 07_simulation_S1..S8.pt -- 8 kich ban minh hoa B=15-30, KHONG con la nguon chinh thuc). Cap nhat 15/09/2026.",
  "sim": {
   "MLE": {
-   "bias": 0.2965,
-   "rmse": 0.4983,
+   "bias": 0.0911,
+   "rmse": 0.2353,
    "cov": null,
-   "brier": 0.5307,
-   "nrep": 28.1,
-   "nrep_min": 21,
-   "nrep_max": 30,
-   "n_scenarios": 8
+   "nrep": 100.0,
+   "nrep_min": 100,
+   "nrep_max": 100,
+   "n_scenarios": 6
   },
   "VB mean-field": {
-   "bias": 0.5347,
-   "rmse": 0.5784,
-   "cov": 0.3306,
-   "brier": 0.5811,
-   "nrep": 15.0,
-   "nrep_min": 15,
-   "nrep_max": 15,
-   "n_scenarios": 8
+   "bias": 0.1755,
+   "rmse": 0.2529,
+   "cov": 0.5304,
+   "nrep": 100.0,
+   "nrep_min": 100,
+   "nrep_max": 100,
+   "n_scenarios": 6
   },
-  "MCMC": {
-   "bias": 0.6224,
-   "rmse": 0.6427,
-   "cov": 0.5111,
-   "brier": 0.5406,
-   "nrep": 3.0,
-   "nrep_min": 3,
-   "nrep_max": 3,
-   "n_scenarios": 1
+  "VB full-rank": {
+   "bias": 0.1587,
+   "rmse": 0.2593,
+   "cov": 0.6181,
+   "nrep": 100.0,
+   "nrep_min": 100,
+   "nrep_max": 100,
+   "n_scenarios": 6
   }
  }
 }

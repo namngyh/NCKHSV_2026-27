@@ -41,27 +41,23 @@
   \vspace{0.3em}#1\vspace{0.3em}
   \end{minipage}}\end{center}}
 
-\title{\vspace{-1.2cm}\textbf{Báo cáo kết quả ước lượng và so sánh mô hình}\\[0.25em]
-\large MS-GARCH-X Student-t cho hợp đồng tương lai VN30F1M}
-\author{}
+\title{\vspace{-1.2cm}\textbf{Báo cáo kết quả ước lượng và so sánh mô hình}}
+\author{Nguyễn Hoài Nam, Nguyễn Thuận Hiếu, Đặng Chí Hiếu}
 \date{}
 
 \begin{document}
 \maketitle
 \vspace{-1.6cm}
 
-\section*{Tóm tắt kết quả}
-\hopketqua{
-\textbf{Bốn kết luận chính.}
-\begin{enumerate}[leftmargin=1.6em,itemsep=0.25em,topsep=0.3em]
-  \item \textbf{Mô hình một chế độ thắng cả trong mẫu lẫn ngoài mẫu.} B3 (GARCH-X Student-t) đạt AIC thấp nhất (5648{,}87), BIC thấp nhất (5687{,}08) và QLIKE ngoài mẫu tốt nhất (0{,}9520), vượt M1 (MS-GARCH-X) ở cả ba tiêu chí dù M1 có log-hợp-lý cao hơn.
-  \item \textbf{Variational Bayes cho dự báo mật độ tốt nhất với chi phí thấp.} M2 đạt điểm log âm nhỏ nhất (1{,}5354) trong 77{,}9 phút, so với 424{,}7 phút của M1.
-  \item \textbf{MCMC thất bại.} Sau hai lần chạy được lưu, $\widehat{R}$ tốt nhất chỉ đạt 2{,}8379 (yêu cầu $<1{,}01$) và ESS nhỏ nhất 4{,}7; 48{,}50\% mẫu hậu nghiệm phải đổi nhãn trạng thái, tức danh tính trạng thái không ổn định ngay trong một lần chạy.
-  \item \textbf{Cấu trúc chuyển trạng thái không được dữ liệu nhận dạng.} Bốn phương pháp cho $p_{11}$ trải từ 0{,}7329 đến 0{,}9986, tương ứng thời gian tồn tại trạng thái chênh nhau hai bậc độ lớn.
-\end{enumerate}
-}
+\section{Kết quả trên dữ liệu thật}
+\label{sec:ket-qua-ba-buoc}
 
-\section{Danh mục mô hình và phương pháp}
+\input{ket_qua_moi}
+
+
+\section{Phụ lục A: phân tích nội bộ MS-GARCH-X Student-$t$ (thiết kế trước khi mở rộng sang EGARCH)}
+
+\subsection{Danh mục mô hình và phương pháp}
 
 \begin{table}[H]\centering
 \caption{Các mô hình được ước lượng và phương pháp suy diễn tương ứng}
@@ -83,7 +79,7 @@ R1 & MS-GARCH-X, $\nu_s$ riêng & Student-t & 2 & VB mean-field \\
 \end{table}
 
 
-\section{So sánh trong mẫu}
+\subsection{So sánh trong mẫu}
 
 \begin{table}[H]\centering
 \caption{Log-hợp-lý và tiêu chí thông tin (tập huấn luyện $1735$ quan sát)}
@@ -111,7 +107,7 @@ M1 & 15 & -2810{,}29 & 5650{,}58 & 2 & 5732{,}46 & 3 \\
 \end{figure}
 
 
-\section{So sánh ngoài mẫu}
+\subsection{So sánh ngoài mẫu}
 
 \begin{table}[H]\centering
 \caption{Dự báo biến động và mật độ ngoài mẫu ($435$ quan sát kiểm định)}
@@ -143,7 +139,7 @@ M4$^{*}$ & 1{,}3172 & 2{,}4334 & 0{,}9786 & 3 & 1{,}5383 & 3 \\
 \end{figure}
 
 
-\section{Kiểm định giá trị chịu rủi ro (VaR)}
+\subsection{Kiểm định giá trị chịu rủi ro (VaR)}
 
 \begin{table}[H]\centering
 \caption{Kiểm định VaR ngoài mẫu ở hai mức tin cậy}
@@ -177,7 +173,7 @@ M4$^{*}$ & 4 & 0{,}864 & 0{,}949 & 25 & 0{,}484 & 0{,}370 \\
 \end{figure}
 
 
-\section{So sánh bốn phương pháp ước lượng trên cùng một mô hình}
+\subsection{So sánh bốn phương pháp ước lượng trên cùng một mô hình}
 
 Mục này trả lời câu hỏi trung tâm: bốn phương pháp suy diễn cho kết quả \emph{khác nhau đến mức nào} khi áp dụng cho cùng một đặc tả MS-GARCH-X Student-t và cùng một tập dữ liệu.
 
@@ -230,7 +226,7 @@ $d_2$ (trạng thái biến động cao) & 147{,}0 phiên & 12{,}5 phiên & -- p
 \end{table}
 
 
-\section{Chẩn đoán hội tụ}
+\subsection{Chẩn đoán hội tụ}
 
 \begin{table}[H]\centering
 \caption{Chẩn đoán hội tụ MCMC (NUTS), bốn chuỗi $\times$ $400$ mẫu}
@@ -280,7 +276,7 @@ R1: VB, $\nu_s$ riêng & 91{,}70\% & Bất ổn: chủ yếu là hoán vị toà
 \end{figure}
 
 
-\section{Chi phí tính toán}
+\subsection{Chi phí tính toán}
 
 \begin{table}[H]\centering
 \caption{Thời gian ước lượng theo mô hình}
@@ -313,51 +309,79 @@ M4 & MCMC (NUTS) & 3840{,}0 & \textcolor{Warn}{\textbf{Không}} \\
 
 
 \section{Nghiên cứu mô phỏng}
+\label{sec:nghien-cuu-mo-phong}
 
-Trên dữ liệu thật không biết tham số đúng, nên chất lượng ước lượng được đánh giá bổ sung bằng mô phỏng tám kịch bản $S_1$--$S_8$ với tham số đã biết trước.
+Trên dữ liệu thật không biết tham số đúng, nên chất lượng ước lượng được đánh
+giá bổ sung bằng hai nghiên cứu khôi phục tham số với tham số đã biết trước:
+\textbf{PR-A} (MS-GARCH-X Student-$t$, hai trạng thái, kịch bản $S_1,S_2,S_3$)
+và \textbf{PR-B} (EGARCH-X Student-$t$, một trạng thái, kịch bản $E_1,E_2,E_3$)
+--- mỗi kịch bản $B=100$ lần lặp, $T=2000$, ba phương pháp (MLE, VB mean-field,
+VB full-rank). Trước khi tính Bias/RMSE/Coverage của PR-A, nhãn trạng thái đã
+được sắp lại theo phương sai vô điều kiện (bộ ước lượng có đối xứng hoán vị
+nhãn nên có thể trả về "trạng thái 1"/"trạng thái 2" theo thứ tự tùy ý --- VB
+đảo nhãn ở gần một nửa số lần lặp nếu không sắp lại). Bộ tám kịch bản $S_1$--$S_8$
+minh họa cũ (tham số không hiệu chỉnh theo VN30F1M, $B=15$--$30$) được giữ làm
+phụ lục bổ trợ, không còn là số liệu chính thức của mục này.
 
 \begin{table}[H]\centering
-\caption{Kết quả mô phỏng gộp trên tám kịch bản}
+\caption{Kết quả mô phỏng gộp trên PR-A + PR-B (sáu kịch bản, $B=100$)}
 \begin{threeparttable}
-\begin{tabularx}{\textwidth}{l C C C C C}
+\begin{tabularx}{\textwidth}{l C C C C}
 \toprule
-\textbf{Phương pháp} & \textbf{Số lần lặp} & \textbf{$|$Độ chệch$|$ TB} & \textbf{RMSE TB} & \textbf{Coverage $95\%$} & \textbf{Brier} \\
+\textbf{Phương pháp} & \textbf{Số lần lặp} & \textbf{$|$Độ chệch$|$ TB} & \textbf{RMSE TB} & \textbf{Coverage $95\%$} \\
 \midrule
-MLE & 28{,}1 (21--30) & 0{,}2965 & 0{,}4983 & -- & 0{,}5307 \\
-VB mean-field & 15{,}0 & 0{,}5347 & 0{,}5784 & 0{,}331 & 0{,}5811 \\
-MCMC & 3{,}0 & 0{,}6224 & 0{,}6427 & 0{,}511 & 0{,}5406 \\
+MLE & 100 & 0{,}0911 & 0{,}2353 & -- \\
+VB mean-field & 100 & 0{,}1755 & 0{,}2529 & 0{,}530 \\
+VB full-rank & 100 & 0{,}1587 & 0{,}2593 & 0{,}618 \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
-\item Độ chệch và RMSE lấy trung bình trên các tham số có thang đo khác nhau, nên chỉ dùng để so sánh thô giữa các phương pháp. Coverage lý tưởng là $0{,}95$; cả hai phương pháp Bayes đều thấp hơn nhiều, tức khoảng tin cậy hậu nghiệm \emph{hẹp hơn thực tế} --- chúng đánh giá thấp mức bất định. MLE không sinh khoảng tin cậy trong quy trình mô phỏng nên không tính được coverage.
-\item Số lần lặp của MCMC rất nhỏ ($3$) do chi phí tính toán, nên các con số ở hàng này chỉ mang tính tham khảo.
+\item Độ chệch và RMSE lấy trung bình trên các tham số có thang đo khác nhau (gộp cả PR-A và PR-B), nên chỉ dùng để so sánh thô giữa các phương pháp --- xem \texttt{Bài báo/8\_kich\_ban\_mo\_phong.tex} để có bảng chi tiết theo từng tham số, từng kịch bản. Coverage lý tưởng là $0{,}95$; cả hai phương pháp Bayes đều thấp hơn nhiều, phần lớn do độ chệch (không phải khoảng tin cậy quá hẹp) --- ở $p_{11},p_{22}$ của PR-A, độ chệch chủ yếu đến từ tiên nghiệm Beta$(8;2)$ kéo ước lượng về trung bình tiên nghiệm $0{,}80$, không phải nhược điểm thuần túy của biến phân. MLE không sinh khoảng tin cậy trong quy trình này nên không tính được coverage.
+\item Cột Brier đã bỏ khỏi bảng này: Brier của PR-A được tính trước khi sắp nhãn trạng thái và hiện sai (một số giá trị VB-FR tệ hơn đoán ngẫu nhiên $0{,}50$), còn PR-B là mô hình một trạng thái nên không có xác suất trạng thái để tính Brier.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-\begin{figure}[H]\centering
-\includegraphics[width=\textwidth]{hinh_bao_cao/fig_sim.pdf}
-\caption{MLE khôi phục tham số chính xác nhất trên dữ liệu mô phỏng; cả hai phương pháp Bayes đều đánh giá thấp bất định một cách đáng kể.}
-\end{figure}
 
-
-\section{Kết luận so sánh}
+\subsection{Kết luận so sánh trong Phụ lục A (chỉ MS-GARCH-X, 5 mô hình)}
 
 \begin{table}[H]\centering
-\caption{Nên dùng phương pháp nào cho mục đích nào}
+\caption{Trong phạm vi hẹp của Phụ lục A: nên dùng phương pháp nào cho mục đích nào}
 \begin{threeparttable}
 \begin{tabularx}{\textwidth}{L C L}
 \toprule
 \textbf{Mục đích} & \textbf{Lựa chọn} & \textbf{Căn cứ} \\
 \midrule
-Dự báo phương sai điểm & B3 (GARCH-X, MLE) & QLIKE 0{,}9520 --- tốt nhất; đồng thời AIC và BIC thấp nhất \\
-Dự báo mật độ / VaR & M2 (VB mean-field) & NLS 1{,}5354 --- tốt nhất; vượt qua mọi kiểm định VaR \\
+Dự báo phương sai điểm & B3 (GARCH-X, MLE) & QLIKE 0{,}9520 --- tốt nhất \emph{trong danh mục 5 mô hình này}; đồng thời AIC và BIC thấp nhất \\
+Dự báo mật độ / VaR & M2 (VB mean-field) & NLS 1{,}5354 --- tốt nhất \emph{trong danh mục 5 mô hình này}; vượt qua mọi kiểm định VaR \\
 Ước lượng tham số có sai số chuẩn & B3 (MLE) & Hội tụ ở mọi điểm khởi tạo, nghiệm không sát biên \\
-Suy diễn Bayes đầy đủ cho MS-GARCH-X & \textcolor{Warn}{Chưa khả thi} & MCMC không hội tụ; VB đánh giá thấp bất định \\
+Suy diễn Bayes đầy đủ cho \emph{MS-GARCH-X cụ thể} & \textcolor{Warn}{Chưa khả thi} & MCMC không hội tụ trên cấu trúc chuyển trạng thái này; VB đánh giá thấp bất định \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
-\item Kết luận bao trùm: trên dữ liệu VN30F1M hiện có, việc bổ sung \emph{biến ngoại sinh} mang lại cải thiện rõ rệt và ổn định, trong khi việc bổ sung \emph{cơ chế chuyển trạng thái ẩn} làm tăng đáng kể chi phí tính toán và độ bất định của kết luận mà không cải thiện dự báo ngoài mẫu.
+\item Kết luận này chỉ có giá trị \textbf{trong phạm vi 5 mô hình của Phụ lục A} (không có EGARCH). Trên toàn bộ danh mục 8 mô hình của Bước 1, EGARCH-X Student-t vượt qua cả B3 lẫn M2 --- xem Mục~\ref{sec:ket-qua-ba-buoc}.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+\section{Kết luận chung}
+
+\begin{table}[H]\centering
+\caption{Nên dùng mô hình/phương pháp nào cho mục đích nào (toàn bộ danh mục, ba bước)}
+\begin{threeparttable}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4.0cm} >{\centering\arraybackslash}p{3.4cm} X}
+\toprule
+\textbf{Mục đích} & \textbf{Lựa chọn} & \textbf{Căn cứ} \\
+\midrule
+Dự báo phương sai điểm và mật độ & EGARCH-X Student-$t$ (MLE) & Thắng cả AIC, BIC, QLIKE, NLS trên toàn bộ 8 mô hình $\times$ 3 phương pháp \\
+Suy diễn Bayes đầy đủ (khoảng tin cậy, hậu nghiệm) & MCMC (NUTS) trên EGARCH-X-$t$ & Hội tụ tốt ($\hat R=1{,}0125$, ESS $1.340$, $0$ phân kỳ); không khả thi trên MS-GARCH-X do đối xứng hoán vị nhãn \\
+Ước lượng nhanh, chi phí thấp & MLE hoặc VB mean-field trên EGARCH-X-$t$ & Hai phương pháp gần như ngang nhau ở QLIKE ($0{,}9234$ so với $0{,}9281$) --- khác hẳn GARCH-X, nơi ràng buộc dương phá hoại VB \\
+Đánh giá độ tin cậy khoảng tin cậy của VB & Có phạt bằng $R_{sd}$ so với MCMC & VB mean-field hẹp hơn thực tế khoảng $3$ lần ở $\omega,\beta$; VB full-rank khá hơn nhưng vẫn hẹp hơn $\sim\!25\%$ \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\small
+\item Kết luận bao trùm: \textbf{đuôi dày} là thành phần cấu trúc quan trọng nhất; \textbf{biến ngoại sinh} hữu ích hơn hẳn khi mô hình không bị ràng buộc dương phá hoại (EGARCH so với GARCH-X); \textbf{chuyển trạng thái ẩn} không được dữ liệu VN30F1M ủng hộ --- làm mô hình tệ đi ở Bước 1 và là nguyên nhân duy nhất khiến MCMC thất bại ở lần chạy đầu.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -857,7 +881,13 @@ M4 & 5\% & 25 & 5{,}75\% & 0{,}4887 & 0{,}4845 & 1{,}9899 & 0{,}3697 \\
 \end{tablenotes}
 \end{table}
 
-\section{Nghiên cứu mô phỏng đầy đủ}
+\section{Phụ lục: tám kịch bản mô phỏng bản gốc (\texorpdfstring{$S_1$--$S_8$}{S1-S8})}
+
+Các bảng dưới đây là bản chạy CŨ ($B=15$--$30$), \emph{trước} khi phát hiện và
+sửa lỗi đối xứng hoán vị nhãn trạng thái (xem \texttt{CLAUDE.md}). Số liệu
+chính thức của Bước 2 nay là PR-A + PR-B ($B=100$, đã sắp nhãn) ở
+Mục~\ref{sec:nghien-cuu-mo-phong} phía trên; giữ lại phần này thuần túy làm
+bằng chứng bổ trợ và tài liệu lịch sử về quá trình phát triển phương pháp.
 
 \begin{table}[H]\centering\footnotesize
 \caption{Định nghĩa tám kịch bản: giá trị tham số THẬT dùng để sinh dữ liệu}
@@ -888,25 +918,28 @@ S8 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 
 \cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
 \textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
 \midrule
-$\mu_1$ & -0{,}0022 & 0{,}0446 & 0{,}0033 & 0{,}0629 & 0{,}733 & -0{,}0535 & 0{,}0633 & 1{,}000 \\
-$\mu_2$ & 0{,}0131 & 0{,}1109 & 0{,}0258 & 0{,}1142 & 0{,}667 & -0{,}0400 & 0{,}0654 & 1{,}000 \\
-$\omega_1$ & 0{,}2086 & 0{,}5814 & 0{,}1483 & 0{,}1611 & 0{,}000 & 0{,}3483 & 0{,}3635 & 0{,}000 \\
-$\omega_2$ & 0{,}6852 & 1{,}2431 & -0{,}2022 & 0{,}2130 & 0{,}133 & 0{,}7191 & 0{,}7211 & 1{,}000 \\
-$\alpha_1$ & 0{,}0278 & 0{,}0567 & 0{,}2818 & 0{,}2924 & 0{,}000 & 0{,}2799 & 0{,}2805 & 0{,}000 \\
-$\alpha_2$ & 0{,}0312 & 0{,}0959 & 0{,}2399 & 0{,}2532 & 0{,}000 & 0{,}3989 & 0{,}4020 & 0{,}000 \\
-$\beta_1$ & -0{,}1376 & 0{,}1876 & -0{,}1762 & 0{,}1830 & 0{,}000 & -0{,}2505 & 0{,}2576 & 0{,}667 \\
-$\beta_2$ & -0{,}1330 & 0{,}2376 & -0{,}1303 & 0{,}1421 & 0{,}000 & -0{,}3626 & 0{,}3687 & 0{,}333 \\
-$\gamma_{1,1}$ & 0{,}0309 & 0{,}1305 & -0{,}0117 & 0{,}0690 & 0{,}933 & 0{,}5630 & 0{,}5705 & 1{,}000 \\
-$\gamma_{1,2}$ & 0{,}0149 & 0{,}2231 & 0{,}0035 & 0{,}0864 & 0{,}867 & 0{,}5228 & 0{,}5598 & 0{,}667 \\
-$\gamma_{2,1}$ & 0{,}0061 & 0{,}1889 & -0{,}0028 & 0{,}0894 & 0{,}867 & -0{,}0623 & 0{,}1404 & 1{,}000 \\
-$\gamma_{2,2}$ & -0{,}0078 & 0{,}2110 & 0{,}0228 & 0{,}1183 & 0{,}800 & -0{,}7188 & 0{,}7505 & 1{,}000 \\
-$p_{11}$ & -0{,}0222 & 0{,}0324 & -0{,}2205 & 0{,}2293 & 0{,}000 & -0{,}5240 & 0{,}5387 & 0{,}000 \\
-$p_{22}$ & -0{,}0469 & 0{,}0532 & -0{,}2367 & 0{,}2496 & 0{,}000 & -0{,}4983 & 0{,}5015 & 0{,}000 \\
-$\nu$ & -1{,}3254 & 1{,}7682 & -4{,}0213 & 4{,}1406 & 0{,}000 & -3{,}9938 & 4{,}0562 & 0{,}000 \\
+$\mu_1$ & -0{,}0023 & 0{,}0228 & -0{,}0080 & 0{,}0991 & 0{,}640 & -- & -- & -- \\
+$\mu_2$ & 0{,}0037 & 0{,}1351 & -0{,}0002 & 0{,}1118 & 0{,}590 & -- & -- & -- \\
+$\omega_1$ & 0{,}0347 & 0{,}0535 & 0{,}1358 & 0{,}1536 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}6755 & 1{,}1520 & -0{,}1677 & 0{,}1900 & 0{,}160 & -- & -- & -- \\
+$\alpha_1$ & 0{,}0339 & 0{,}0582 & 0{,}2941 & 0{,}3079 & 0{,}000 & -- & -- & -- \\
+$\alpha_2$ & 0{,}0415 & 0{,}1020 & 0{,}2649 & 0{,}2785 & 0{,}000 & -- & -- & -- \\
+$\beta_1$ & -0{,}1296 & 0{,}1602 & -0{,}1770 & 0{,}1860 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & -0{,}0665 & 0{,}2561 & -0{,}1450 & 0{,}1537 & 0{,}000 & -- & -- & -- \\
+$\gamma_{1,1}$ & 0{,}0095 & 0{,}0274 & 0{,}0116 & 0{,}0711 & 0{,}900 & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0114 & 0{,}0274 & 0{,}0283 & 0{,}0927 & 0{,}790 & -- & -- & -- \\
+$\gamma_{2,1}$ & 0{,}0158 & 0{,}2658 & -0{,}0073 & 0{,}0896 & 0{,}870 & -- & -- & -- \\
+$\gamma_{2,2}$ & 0{,}0723 & 0{,}3238 & -0{,}0027 & 0{,}0875 & 0{,}860 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & 0{,}0028 & 0{,}0182 & -0{,}1701 & 0{,}1843 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & -0{,}0046 & 0{,}0248 & -0{,}2258 & 0{,}2362 & 0{,}000 & -- & -- & -- \\
+$\nu$ & -1{,}6026 & 1{,}9532 & -4{,}2611 & 4{,}3395 & 0{,}000 & -- & -- & -- \\
 \midrule
-Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}4851$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5414$} & \multicolumn{3}{c}{$B=3$, Brier $=0{,}5406$} \\
+Tổng hợp & \multicolumn{2}{c}{$B=100$, Brier $=0{,}5298$} & \multicolumn{3}{c}{$B=100$, Brier $=0{,}5606$} & \multicolumn{3}{c}{---} \\
 \bottomrule
 \end{tabularx}
+\begin{tablenotes}\footnotesize
+\item[$\dagger$] Chệch/RMSE của $p_{11}$, $p_{22}$ đã được SỬA LẠI bằng đại số so với bản gốc từng lưu trong \texttt{07\_simulation\_S*.pt} (bản gốc tính nhầm giá trị thật là $1{,}0$ thay vì $P_0$ thật dùng để sinh dữ liệu -- xem \texttt{CLAUDE.md}). Cột \textbf{Cov.} của $p_{11}$, $p_{22}$ KHÔNG sửa lại được bằng cách này (cần cận khoảng tin cậy từng lần lặp, dữ liệu chi tiết đã không còn lưu) -- đọc các số Coverage này một cách thận trọng, chỉ mang tính tham khảo định tính.
+\end{tablenotes}
 \end{table}
 \begin{table}[H]\centering\scriptsize
 \caption{Kịch bản S2: độ chệch, RMSE và coverage theo từng tham số}
@@ -916,25 +949,28 @@ Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}4851$} & \multicolumn{3}{c
 \cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
 \textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
 \midrule
-$\mu_1$ & -0{,}0196 & 0{,}0489 & -0{,}0427 & 0{,}1346 & 0{,}667 & -- & -- & -- \\
-$\mu_2$ & 0{,}0183 & 0{,}3236 & 0{,}0601 & 0{,}1577 & 0{,}667 & -- & -- & -- \\
-$\omega_1$ & 0{,}1062 & 0{,}3003 & 0{,}3428 & 0{,}3516 & 0{,}000 & -- & -- & -- \\
-$\omega_2$ & 0{,}6099 & 0{,}9750 & 0{,}2820 & 0{,}2925 & 0{,}000 & -- & -- & -- \\
-$\alpha_1$ & -0{,}0188 & 0{,}0371 & 0{,}0816 & 0{,}0891 & 0{,}267 & -- & -- & -- \\
-$\alpha_2$ & 0{,}0326 & 0{,}1292 & 0{,}0748 & 0{,}0913 & 0{,}400 & -- & -- & -- \\
-$\beta_1$ & -0{,}0572 & 0{,}1453 & -0{,}3779 & 0{,}3829 & 0{,}000 & -- & -- & -- \\
-$\beta_2$ & -0{,}1819 & 0{,}3548 & -0{,}3452 & 0{,}3513 & 0{,}000 & -- & -- & -- \\
-$\gamma_{1,1}$ & 0{,}0225 & 0{,}0591 & 0{,}0096 & 0{,}0515 & 1{,}000 & -- & -- & -- \\
-$\gamma_{1,2}$ & 0{,}0167 & 0{,}0639 & 0{,}0047 & 0{,}0670 & 0{,}867 & -- & -- & -- \\
-$\gamma_{2,1}$ & 0{,}0677 & 0{,}3963 & -0{,}0264 & 0{,}0610 & 0{,}933 & -- & -- & -- \\
-$\gamma_{2,2}$ & 0{,}0296 & 0{,}3701 & 0{,}0062 & 0{,}0618 & 1{,}000 & -- & -- & -- \\
-$p_{11}$ & -0{,}0275 & 0{,}0460 & -0{,}2394 & 0{,}2443 & 0{,}000 & -- & -- & -- \\
-$p_{22}$ & -0{,}1143 & 0{,}1620 & -0{,}2175 & 0{,}2230 & 0{,}000 & -- & -- & -- \\
-$\nu$ & 0{,}9200 & 2{,}0993 & -0{,}6886 & 1{,}4105 & 0{,}800 & -- & -- & -- \\
+$\mu_1$ & -0{,}0109 & 0{,}1779 & -0{,}0002 & 0{,}0803 & 0{,}810 & -- & -- & -- \\
+$\mu_2$ & 0{,}0621 & 0{,}3427 & -0{,}0018 & 0{,}1009 & 0{,}810 & -- & -- & -- \\
+$\omega_1$ & 0{,}0282 & 0{,}0859 & 0{,}3084 & 0{,}3166 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}5063 & 0{,}9936 & 0{,}2754 & 0{,}2869 & 0{,}000 & -- & -- & -- \\
+$\alpha_1$ & -0{,}0094 & 0{,}0446 & 0{,}0840 & 0{,}0884 & 0{,}170 & -- & -- & -- \\
+$\alpha_2$ & 0{,}0066 & 0{,}1036 & 0{,}0735 & 0{,}0817 & 0{,}430 & -- & -- & -- \\
+$\beta_1$ & -0{,}0463 & 0{,}1469 & -0{,}3514 & 0{,}3581 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & -0{,}0783 & 0{,}3117 & -0{,}3197 & 0{,}3257 & 0{,}000 & -- & -- & -- \\
+$\gamma_{1,1}$ & 0{,}0107 & 0{,}0685 & 0{,}0005 & 0{,}0548 & 0{,}980 & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0053 & 0{,}1138 & 0{,}0130 & 0{,}0517 & 0{,}950 & -- & -- & -- \\
+$\gamma_{2,1}$ & 0{,}0110 & 0{,}3641 & -0{,}0031 & 0{,}0488 & 0{,}960 & -- & -- & -- \\
+$\gamma_{2,2}$ & -0{,}0006 & 0{,}3779 & -0{,}0089 & 0{,}0580 & 0{,}930 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & 0{,}0097 & 0{,}0761 & -0{,}1586 & 0{,}1628 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & -0{,}0218 & 0{,}1233 & -0{,}1331 & 0{,}1402 & 0{,}000 & -- & -- & -- \\
+$\nu$ & 0{,}6672 & 1{,}7180 & -0{,}7824 & 1{,}3963 & 0{,}750 & -- & -- & -- \\
 \midrule
-Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}6328$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5451$} & \multicolumn{3}{c}{---} \\
+Tổng hợp & \multicolumn{2}{c}{$B=100$, Brier $=0{,}7105$} & \multicolumn{3}{c}{$B=100$, Brier $=0{,}5154$} & \multicolumn{3}{c}{---} \\
 \bottomrule
 \end{tabularx}
+\begin{tablenotes}\footnotesize
+\item[$\dagger$] Chệch/RMSE của $p_{11}$, $p_{22}$ đã được SỬA LẠI bằng đại số so với bản gốc từng lưu trong \texttt{07\_simulation\_S*.pt} (bản gốc tính nhầm giá trị thật là $1{,}0$ thay vì $P_0$ thật dùng để sinh dữ liệu -- xem \texttt{CLAUDE.md}). Cột \textbf{Cov.} của $p_{11}$, $p_{22}$ KHÔNG sửa lại được bằng cách này (cần cận khoảng tin cậy từng lần lặp, dữ liệu chi tiết đã không còn lưu) -- đọc các số Coverage này một cách thận trọng, chỉ mang tính tham khảo định tính.
+\end{tablenotes}
 \end{table}
 \begin{table}[H]\centering\scriptsize
 \caption{Kịch bản S3: độ chệch, RMSE và coverage theo từng tham số}
@@ -944,25 +980,28 @@ Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}6328$} & \multicolumn{3}{c
 \cmidrule(lr){2-3}\cmidrule(lr){4-6}\cmidrule(lr){7-9}
 \textbf{Tham số} & Chệch & RMSE & Chệch & RMSE & Cov. & Chệch & RMSE & Cov. \\
 \midrule
-$\mu_1$ & -0{,}0079 & 0{,}0244 & -0{,}0302 & 0{,}1241 & 0{,}467 & -- & -- & -- \\
-$\mu_2$ & -0{,}0005 & 0{,}0951 & 0{,}0303 & 0{,}0974 & 0{,}400 & -- & -- & -- \\
-$\omega_1$ & 0{,}1354 & 0{,}2847 & 0{,}2338 & 0{,}2413 & 0{,}000 & -- & -- & -- \\
-$\omega_2$ & 0{,}7871 & 1{,}7012 & -0{,}1070 & 0{,}1263 & 0{,}333 & -- & -- & -- \\
-$\alpha_1$ & 0{,}0176 & 0{,}0494 & 0{,}4836 & 0{,}4906 & 0{,}000 & -- & -- & -- \\
-$\alpha_2$ & 0{,}0165 & 0{,}0835 & 0{,}4269 & 0{,}4402 & 0{,}000 & -- & -- & -- \\
-$\beta_1$ & -0{,}1310 & 0{,}1696 & -0{,}1434 & 0{,}1486 & 0{,}000 & -- & -- & -- \\
-$\beta_2$ & -0{,}0795 & 0{,}2826 & -0{,}0873 & 0{,}0969 & 0{,}133 & -- & -- & -- \\
-$\gamma_{1,1}$ & 0{,}0074 & 0{,}0572 & 0{,}0365 & 0{,}0829 & 0{,}933 & -- & -- & -- \\
-$\gamma_{1,2}$ & -0{,}0152 & 0{,}1132 & 0{,}0705 & 0{,}1047 & 0{,}800 & -- & -- & -- \\
-$\gamma_{2,1}$ & 0{,}0843 & 0{,}3669 & 0{,}0326 & 0{,}0990 & 0{,}933 & -- & -- & -- \\
-$\gamma_{2,2}$ & 0{,}1607 & 0{,}3351 & 0{,}0297 & 0{,}0977 & 0{,}867 & -- & -- & -- \\
-$p_{11}$ & -0{,}0203 & 0{,}0245 & -0{,}2436 & 0{,}2480 & 0{,}000 & -- & -- & -- \\
-$p_{22}$ & -0{,}0524 & 0{,}0625 & -0{,}2271 & 0{,}2331 & 0{,}000 & -- & -- & -- \\
-$\nu$ & -0{,}0954 & 0{,}4827 & -1{,}5715 & 1{,}5791 & 0{,}000 & -- & -- & -- \\
+$\mu_1$ & -0{,}0006 & 0{,}0197 & 0{,}0081 & 0{,}0790 & 0{,}640 & -- & -- & -- \\
+$\mu_2$ & -0{,}0082 & 0{,}1109 & -0{,}0059 & 0{,}1028 & 0{,}600 & -- & -- & -- \\
+$\omega_1$ & 0{,}0405 & 0{,}0572 & 0{,}2227 & 0{,}2337 & 0{,}000 & -- & -- & -- \\
+$\omega_2$ & 0{,}6962 & 1{,}4337 & -0{,}0648 & 0{,}1192 & 0{,}450 & -- & -- & -- \\
+$\alpha_1$ & 0{,}0206 & 0{,}0475 & 0{,}4912 & 0{,}5011 & 0{,}000 & -- & -- & -- \\
+$\alpha_2$ & 0{,}0335 & 0{,}1128 & 0{,}4411 & 0{,}4500 & 0{,}000 & -- & -- & -- \\
+$\beta_1$ & -0{,}1683 & 0{,}2009 & -0{,}1343 & 0{,}1433 & 0{,}000 & -- & -- & -- \\
+$\beta_2$ & -0{,}0238 & 0{,}2597 & -0{,}1089 & 0{,}1229 & 0{,}110 & -- & -- & -- \\
+$\gamma_{1,1}$ & 0{,}0089 & 0{,}0289 & 0{,}0696 & 0{,}1128 & 0{,}810 & -- & -- & -- \\
+$\gamma_{1,2}$ & 0{,}0127 & 0{,}0291 & 0{,}0884 & 0{,}1365 & 0{,}720 & -- & -- & -- \\
+$\gamma_{2,1}$ & 0{,}0922 & 0{,}3872 & 0{,}0490 & 0{,}1097 & 0{,}870 & -- & -- & -- \\
+$\gamma_{2,2}$ & 0{,}0972 & 0{,}3207 & 0{,}0598 & 0{,}1149 & 0{,}890 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & -0{,}0005 & 0{,}0177 & -0{,}1814 & 0{,}1888 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & -0{,}0055 & 0{,}0385 & -0{,}2188 & 0{,}2251 & 0{,}000 & -- & -- & -- \\
+$\nu$ & -0{,}0641 & 0{,}5374 & -1{,}5962 & 1{,}6021 & 0{,}000 & -- & -- & -- \\
 \midrule
-Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}4861$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5408$} & \multicolumn{3}{c}{---} \\
+Tổng hợp & \multicolumn{2}{c}{$B=100$, Brier $=0{,}5528$} & \multicolumn{3}{c}{$B=100$, Brier $=0{,}5442$} & \multicolumn{3}{c}{---} \\
 \bottomrule
 \end{tabularx}
+\begin{tablenotes}\footnotesize
+\item[$\dagger$] Chệch/RMSE của $p_{11}$, $p_{22}$ đã được SỬA LẠI bằng đại số so với bản gốc từng lưu trong \texttt{07\_simulation\_S*.pt} (bản gốc tính nhầm giá trị thật là $1{,}0$ thay vì $P_0$ thật dùng để sinh dữ liệu -- xem \texttt{CLAUDE.md}). Cột \textbf{Cov.} của $p_{11}$, $p_{22}$ KHÔNG sửa lại được bằng cách này (cần cận khoảng tin cậy từng lần lặp, dữ liệu chi tiết đã không còn lưu) -- đọc các số Coverage này một cách thận trọng, chỉ mang tính tham khảo định tính.
+\end{tablenotes}
 \end{table}
 \begin{table}[H]\centering\scriptsize
 \caption{Kịch bản S4: độ chệch, RMSE và coverage theo từng tham số}
@@ -984,13 +1023,16 @@ $\gamma_{1,1}$ & 0{,}0243 & 0{,}0450 & -0{,}0163 & 0{,}0722 & 0{,}933 & -- & -- 
 $\gamma_{1,2}$ & 0{,}0063 & 0{,}2025 & 0{,}0170 & 0{,}0714 & 0{,}867 & -- & -- & -- \\
 $\gamma_{2,1}$ & -0{,}1016 & 0{,}4713 & -0{,}0222 & 0{,}0803 & 0{,}867 & -- & -- & -- \\
 $\gamma_{2,2}$ & -0{,}0415 & 0{,}3838 & -0{,}0218 & 0{,}0724 & 0{,}867 & -- & -- & -- \\
-$p_{11}$ & -0{,}0278 & 0{,}0592 & -0{,}2136 & 0{,}2370 & 0{,}000 & -- & -- & -- \\
-$p_{22}$ & -0{,}0573 & 0{,}0807 & -0{,}2554 & 0{,}2742 & 0{,}000 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & -0{,}0078 & 0{,}0528 & -0{,}1936 & 0{,}2191 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & -0{,}0073 & 0{,}0574 & -0{,}2054 & 0{,}2284 & 0{,}000 & -- & -- & -- \\
 $\nu$ & -17{,}5508 & 18{,}0578 & -22{,}7418 & 22{,}8353 & 0{,}000 & -- & -- & -- \\
 \midrule
 Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}5115$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5512$} & \multicolumn{3}{c}{---} \\
 \bottomrule
 \end{tabularx}
+\begin{tablenotes}\footnotesize
+\item[$\dagger$] Chệch/RMSE của $p_{11}$, $p_{22}$ đã được SỬA LẠI bằng đại số so với bản gốc từng lưu trong \texttt{07\_simulation\_S*.pt} (bản gốc tính nhầm giá trị thật là $1{,}0$ thay vì $P_0$ thật dùng để sinh dữ liệu -- xem \texttt{CLAUDE.md}). Cột \textbf{Cov.} của $p_{11}$, $p_{22}$ KHÔNG sửa lại được bằng cách này (cần cận khoảng tin cậy từng lần lặp, dữ liệu chi tiết đã không còn lưu) -- đọc các số Coverage này một cách thận trọng, chỉ mang tính tham khảo định tính.
+\end{tablenotes}
 \end{table}
 \begin{table}[H]\centering\scriptsize
 \caption{Kịch bản S5: độ chệch, RMSE và coverage theo từng tham số}
@@ -1012,13 +1054,16 @@ $\gamma_{1,1}$ & -0{,}0015 & 0{,}1170 & 0{,}0238 & 0{,}0635 & 0{,}933 & -- & -- 
 $\gamma_{1,2}$ & 0{,}0370 & 0{,}0999 & 0{,}0038 & 0{,}0387 & 1{,}000 & -- & -- & -- \\
 $\gamma_{2,1}$ & 0{,}1439 & 0{,}3073 & 0{,}0130 & 0{,}0502 & 1{,}000 & -- & -- & -- \\
 $\gamma_{2,2}$ & 0{,}0668 & 0{,}1788 & 0{,}0321 & 0{,}0745 & 0{,}867 & -- & -- & -- \\
-$p_{11}$ & -0{,}0271 & 0{,}0438 & -0{,}2934 & 0{,}3018 & 0{,}000 & -- & -- & -- \\
-$p_{22}$ & -0{,}1130 & 0{,}1438 & -0{,}2803 & 0{,}2927 & 0{,}000 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & -0{,}0171 & 0{,}0384 & -0{,}2834 & 0{,}2921 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & 0{,}0370 & 0{,}0963 & -0{,}1303 & 0{,}1552 & 0{,}000 & -- & -- & -- \\
 $\nu$ & -1{,}4469 & 1{,}7024 & -4{,}6609 & 4{,}6971 & 0{,}000 & -- & -- & -- \\
 \midrule
 Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}4029$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5679$} & \multicolumn{3}{c}{---} \\
 \bottomrule
 \end{tabularx}
+\begin{tablenotes}\footnotesize
+\item[$\dagger$] Chệch/RMSE của $p_{11}$, $p_{22}$ đã được SỬA LẠI bằng đại số so với bản gốc từng lưu trong \texttt{07\_simulation\_S*.pt} (bản gốc tính nhầm giá trị thật là $1{,}0$ thay vì $P_0$ thật dùng để sinh dữ liệu -- xem \texttt{CLAUDE.md}). Cột \textbf{Cov.} của $p_{11}$, $p_{22}$ KHÔNG sửa lại được bằng cách này (cần cận khoảng tin cậy từng lần lặp, dữ liệu chi tiết đã không còn lưu) -- đọc các số Coverage này một cách thận trọng, chỉ mang tính tham khảo định tính.
+\end{tablenotes}
 \end{table}
 \begin{table}[H]\centering\scriptsize
 \caption{Kịch bản S6: độ chệch, RMSE và coverage theo từng tham số}
@@ -1040,13 +1085,16 @@ $\gamma_{1,1}$ & 0{,}0665 & 0{,}1782 & -0{,}0061 & 0{,}1153 & 1{,}000 & -- & -- 
 $\gamma_{1,2}$ & 0{,}0767 & 0{,}3156 & -0{,}0022 & 0{,}0504 & 1{,}000 & -- & -- & -- \\
 $\gamma_{2,1}$ & 0{,}1035 & 0{,}3356 & 0{,}0175 & 0{,}0830 & 1{,}000 & -- & -- & -- \\
 $\gamma_{2,2}$ & 0{,}0643 & 0{,}3643 & 0{,}0098 & 0{,}0979 & 1{,}000 & -- & -- & -- \\
-$p_{11}$ & -0{,}0367 & 0{,}0696 & -0{,}2093 & 0{,}2124 & 0{,}000 & -- & -- & -- \\
-$p_{22}$ & -0{,}0745 & 0{,}1151 & -0{,}2137 & 0{,}2186 & 0{,}000 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & -0{,}0167 & 0{,}0614 & -0{,}1893 & 0{,}1928 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & -0{,}0245 & 0{,}0911 & -0{,}1637 & 0{,}1701 & 0{,}000 & -- & -- & -- \\
 $\nu$ & -0{,}9191 & 3{,}3627 & -4{,}9151 & 4{,}9463 & 0{,}000 & -- & -- & -- \\
 \midrule
 Tổng hợp & \multicolumn{2}{c}{$B=30$, Brier $=0{,}6009$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}5198$} & \multicolumn{3}{c}{---} \\
 \bottomrule
 \end{tabularx}
+\begin{tablenotes}\footnotesize
+\item[$\dagger$] Chệch/RMSE của $p_{11}$, $p_{22}$ đã được SỬA LẠI bằng đại số so với bản gốc từng lưu trong \texttt{07\_simulation\_S*.pt} (bản gốc tính nhầm giá trị thật là $1{,}0$ thay vì $P_0$ thật dùng để sinh dữ liệu -- xem \texttt{CLAUDE.md}). Cột \textbf{Cov.} của $p_{11}$, $p_{22}$ KHÔNG sửa lại được bằng cách này (cần cận khoảng tin cậy từng lần lặp, dữ liệu chi tiết đã không còn lưu) -- đọc các số Coverage này một cách thận trọng, chỉ mang tính tham khảo định tính.
+\end{tablenotes}
 \end{table}
 \begin{table}[H]\centering\scriptsize
 \caption{Kịch bản S7: độ chệch, RMSE và coverage theo từng tham số}
@@ -1068,13 +1116,16 @@ $\gamma_{1,1}$ & 0{,}0226 & 0{,}0676 & -0{,}0177 & 0{,}0901 & 0{,}733 & -- & -- 
 $\gamma_{1,2}$ & 0{,}0553 & 0{,}1253 & 0{,}0113 & 0{,}0730 & 0{,}733 & -- & -- & -- \\
 $\gamma_{2,1}$ & 0{,}0684 & 0{,}1199 & -0{,}0011 & 0{,}0776 & 0{,}667 & -- & -- & -- \\
 $\gamma_{2,2}$ & 0{,}0442 & 0{,}1154 & 0{,}0025 & 0{,}0612 & 0{,}667 & -- & -- & -- \\
-$p_{11}$ & -0{,}0258 & 0{,}0336 & -0{,}3546 & 0{,}3761 & 0{,}000 & -- & -- & -- \\
-$p_{22}$ & -0{,}0460 & 0{,}0523 & -0{,}2485 & 0{,}2818 & 0{,}000 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & -0{,}0058 & 0{,}0223 & -0{,}3346 & 0{,}3573 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & 0{,}0040 & 0{,}0252 & -0{,}1985 & 0{,}2388 & 0{,}000 & -- & -- & -- \\
 $\nu$ & -1{,}7693 & 1{,}9262 & -4{,}3719 & 4{,}4182 & 0{,}000 & -- & -- & -- \\
 \midrule
 Tổng hợp & \multicolumn{2}{c}{$B=21$, Brier $=0{,}5921$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}7094$} & \multicolumn{3}{c}{---} \\
 \bottomrule
 \end{tabularx}
+\begin{tablenotes}\footnotesize
+\item[$\dagger$] Chệch/RMSE của $p_{11}$, $p_{22}$ đã được SỬA LẠI bằng đại số so với bản gốc từng lưu trong \texttt{07\_simulation\_S*.pt} (bản gốc tính nhầm giá trị thật là $1{,}0$ thay vì $P_0$ thật dùng để sinh dữ liệu -- xem \texttt{CLAUDE.md}). Cột \textbf{Cov.} của $p_{11}$, $p_{22}$ KHÔNG sửa lại được bằng cách này (cần cận khoảng tin cậy từng lần lặp, dữ liệu chi tiết đã không còn lưu) -- đọc các số Coverage này một cách thận trọng, chỉ mang tính tham khảo định tính.
+\end{tablenotes}
 \end{table}
 \begin{table}[H]\centering\scriptsize
 \caption{Kịch bản S8: độ chệch, RMSE và coverage theo từng tham số}
@@ -1096,13 +1147,16 @@ $\gamma_{1,1}$ & 0{,}0415 & 0{,}1664 & -0{,}0028 & 0{,}0840 & 0{,}800 & -- & -- 
 $\gamma_{1,2}$ & 0{,}0338 & 0{,}1582 & 0{,}0065 & 0{,}0386 & 1{,}000 & -- & -- & -- \\
 $\gamma_{2,1}$ & 0{,}0292 & 0{,}2859 & -0{,}0229 & 0{,}0685 & 0{,}800 & -- & -- & -- \\
 $\gamma_{2,2}$ & 0{,}0564 & 0{,}2657 & 0{,}0044 & 0{,}0647 & 0{,}933 & -- & -- & -- \\
-$p_{11}$ & -0{,}0427 & 0{,}0773 & -0{,}2286 & 0{,}2334 & 0{,}000 & -- & -- & -- \\
-$p_{22}$ & -0{,}0868 & 0{,}1304 & -0{,}1840 & 0{,}1902 & 0{,}000 & -- & -- & -- \\
+$p_{11}$$^{\dagger}$ & -0{,}0227 & 0{,}0683 & -0{,}2086 & 0{,}2139 & 0{,}000 & -- & -- & -- \\
+$p_{22}$$^{\dagger}$ & -0{,}0368 & 0{,}1041 & -0{,}1340 & 0{,}1424 & 0{,}000 & -- & -- & -- \\
 $\nu$ & -0{,}9561 & 1{,}8606 & -4{,}3910 & 4{,}4528 & 0{,}000 & -- & -- & -- \\
 \midrule
 Tổng hợp & \multicolumn{2}{c}{$B=29$, Brier $=0{,}5345$} & \multicolumn{3}{c}{$B=15$, Brier $=0{,}6734$} & \multicolumn{3}{c}{---} \\
 \bottomrule
 \end{tabularx}
+\begin{tablenotes}\footnotesize
+\item[$\dagger$] Chệch/RMSE của $p_{11}$, $p_{22}$ đã được SỬA LẠI bằng đại số so với bản gốc từng lưu trong \texttt{07\_simulation\_S*.pt} (bản gốc tính nhầm giá trị thật là $1{,}0$ thay vì $P_0$ thật dùng để sinh dữ liệu -- xem \texttt{CLAUDE.md}). Cột \textbf{Cov.} của $p_{11}$, $p_{22}$ KHÔNG sửa lại được bằng cách này (cần cận khoảng tin cậy từng lần lặp, dữ liệu chi tiết đã không còn lưu) -- đọc các số Coverage này một cách thận trọng, chỉ mang tính tham khảo định tính.
+\end{tablenotes}
 \end{table}
 
 \begin{table}[H]\centering\footnotesize

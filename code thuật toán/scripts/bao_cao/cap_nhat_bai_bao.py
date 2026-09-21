@@ -7,8 +7,8 @@ checkpoint (vd. MCMC xong) se tu dien not cac cot con trong.
 O nhung cho chua co so lieu chac chan, script GIU dau "--" thay vi bia ra con so.
 
 Chay:
-    python scripts/cap_nhat_bai_bao.py            # xem truoc, khong ghi
-    python scripts/cap_nhat_bai_bao.py --ghi      # ghi vao .tex
+    python scripts/bao_cao/cap_nhat_bai_bao.py            # xem truoc, khong ghi
+    python scripts/bao_cao/cap_nhat_bai_bao.py --ghi      # ghi vao .tex
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ import re
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 TEX = ROOT.parent / "Bài báo" / "Bài báo chính.tex"
 RESULTS = ROOT / "results"

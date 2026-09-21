@@ -35,7 +35,7 @@ if not exist "results" (
     exit /b 1
 )
 
-%PYEXE% scripts\build_html_report.py --results-dir results --out report.html
+%PYEXE% scripts\tien_ich\build_html_report.py --results-dir results --out report.html
 if errorlevel 1 (
     echo [LOI] Tao bao cao that bai. Xem thong bao loi o tren.
     pause

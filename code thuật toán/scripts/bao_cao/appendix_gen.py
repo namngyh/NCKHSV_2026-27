@@ -9,8 +9,30 @@ sys.path.insert(0, ROOT)
 
 import torch
 from msgarchx.inference.summary import posterior_summary, relabel_posterior_samples
+from msgarchx.simulation.scenarios import default_scenarios
 
 R = os.path.join(ROOT, "results")
+
+# 07_simulation_S*.pt luu Bias/RMSE cua p11/p22 tinh SAI (so voi placeholder
+# eye(2) trong scenario.params.P, thay vi P0 that -- xem CLAUDE.md "Loi da
+# tim thay va sua"). Sua lai bang dai so KHONG can chay lai: Var = RMSE^2 -
+# Bias^2 bat bien voi theta0 (khong doi), nen:
+#   Bias_dung = (theta0_sai + Bias_sai) - theta0_dung
+#   RMSE_dung = sqrt(Var + Bias_dung^2)
+# Coverage KHONG sua duoc kieu nay (can chan CI tung lan lap, da bi xoa) --
+# giu nguyen so bao cao nhung ghi chu ro trong bang.
+_THETA0_SAI_P = 1.0  # eye(2): p11 = p22 = 1.0
+
+
+def _sua_bias_rmse_p(key: str, bias: float | None, rmse: float | None, ma_kich_ban: str) -> tuple:
+    if key not in ("p11", "p22") or bias is None or rmse is None:
+        return bias, rmse
+    scn = default_scenarios()[ma_kich_ban]
+    theta0_dung = float(scn.P0[0, 0]) if key == "p11" else float(scn.P0[1, 1])
+    var = max(rmse * rmse - bias * bias, 0.0)
+    bias_dung = (_THETA0_SAI_P + bias) - theta0_dung
+    rmse_dung = math.sqrt(var + bias_dung * bias_dung)
+    return bias_dung, rmse_dung
 
 
 def f(x, n=4):
@@ -503,8 +525,14 @@ biến động thấp là $\Pr(\nu_{\text{cao}}<\nu_{\text{thấp}}\mid \mathcal
 """)
 
     # ============================================================ J. Mo phong
-    A(r"\section{Nghiên cứu mô phỏng đầy đủ}")
+    A(r"\section{Phụ lục: tám kịch bản mô phỏng bản gốc (\texorpdfstring{$S_1$--$S_8$}{S1-S8})}")
     A(r"""
+Các bảng dưới đây là bản chạy CŨ ($B=15$--$30$), \emph{trước} khi phát hiện và
+sửa lỗi đối xứng hoán vị nhãn trạng thái (xem \texttt{CLAUDE.md}). Số liệu
+chính thức của Bước 2 nay là PR-A + PR-B ($B=100$, đã sắp nhãn) ở
+Mục~\ref{sec:nghien-cuu-mo-phong} phía trên; giữ lại phần này thuần túy làm
+bằng chứng bổ trợ và tài liệu lịch sử về quá trình phát triển phương pháp.
+
 \begin{table}[H]\centering\footnotesize
 \caption{Định nghĩa tám kịch bản: giá trị tham số THẬT dùng để sinh dữ liệu}
 \begin{tabularx}{\textwidth}{l C C C C C C L}
@@ -548,17 +576,19 @@ S8 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 
         A(r"\midrule")
         for key, tex in PN:
             cells = []
+            tex_hien = tex + (r"$^{\dagger}$" if key in ("p11", "p22") else "")
             for meth, with_cov in [("mle", False), ("vb_mean_field", True), ("mcmc", True)]:
                 if meth not in d:
                     cells += ["--", "--"] + (["--"] if with_cov else [])
                     continue
                 b = d[meth]["bias"].get(key)
                 rr = d[meth]["rmse"].get(key)
+                b, rr = _sua_bias_rmse_p(key, b, rr, f"S{s}")
                 cells += [f(b) if b is not None else "--", f(rr) if rr is not None else "--"]
                 if with_cov:
                     c = d[meth]["coverage"].get(key)
                     cells.append(f(c, 3) if c is not None else "--")
-            A(rf"{tex} & " + " & ".join(cells) + r" \\")
+            A(rf"{tex_hien} & " + " & ".join(cells) + r" \\")
         A(r"\midrule")
         nrow = []
         for meth, with_cov in [("mle", False), ("vb_mean_field", True), ("mcmc", True)]:
@@ -571,6 +601,9 @@ S8 & 0{,}05; 0{,}40 & 0{,}05; 0{,}10 & 0{,}85; 0{,}80 & 8{,}00 & 0{,}98; 0{,}95 
         A(r"Tổng hợp & " + " & ".join(nrow) + r" \\")
         A(r"\bottomrule")
         A(r"\end{tabularx}")
+        A(r"""\begin{tablenotes}\footnotesize
+\item[$\dagger$] Chệch/RMSE của $p_{11}$, $p_{22}$ đã được SỬA LẠI bằng đại số so với bản gốc từng lưu trong \texttt{07\_simulation\_S*.pt} (bản gốc tính nhầm giá trị thật là $1{,}0$ thay vì $P_0$ thật dùng để sinh dữ liệu -- xem \texttt{CLAUDE.md}). Cột \textbf{Cov.} của $p_{11}$, $p_{22}$ KHÔNG sửa lại được bằng cách này (cần cận khoảng tin cậy từng lần lặp, dữ liệu chi tiết đã không còn lưu) -- đọc các số Coverage này một cách thận trọng, chỉ mang tính tham khảo định tính.
+\end{tablenotes}""")
         A(r"\end{table}")
 
     if data is not None:

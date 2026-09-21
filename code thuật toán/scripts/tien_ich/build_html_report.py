@@ -8,8 +8,8 @@ loi. Ngoai ra MOI muc deu duoc boc trong `_safe` -- neu mot muc gap loi bat
 ngo, bao cao van duoc tao va in traceback ngay tai cho, giong triet ly
 `safe_checkpoint` cua run_full_study.py.
 
-Chay: python scripts/build_html_report.py [--results-dir results] [--out report.html]
-      python scripts/build_html_report.py --fragment   # bo <html>/<head>, de dan vao Artifact
+Chay: python scripts/tien_ich/build_html_report.py [--results-dir results] [--out report.html]
+      python scripts/tien_ich/build_html_report.py --fragment   # bo <html>/<head>, de dan vao Artifact
 """
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ import sys
 import traceback
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 import numpy as np
@@ -883,7 +883,7 @@ def build_report(results_dir: Path, fragment: bool = False) -> str:
 {status}
 <nav class="toc">{toc}</nav>
 {body}
-<p class="note">Bao cao sinh tu scripts/build_html_report.py. Cac bang so hoa dua tren checkpoint trong thu muc results/.</p>"""
+<p class="note">Bao cao sinh tu scripts/tien_ich/build_html_report.py. Cac bang so hoa dua tren checkpoint trong thu muc results/.</p>"""
 
     if fragment:
         return f"<title>{_TITLE}</title>\n<style>{_CSS}</style>\n{inner}\n"

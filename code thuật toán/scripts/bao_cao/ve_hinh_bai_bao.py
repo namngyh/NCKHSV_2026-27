@@ -4,14 +4,14 @@ CHI ve nhung hinh co du lieu CHAC CHAN. Hinh nao can ket qua chua tin duoc
 (vd. M4 khi chuoi MCMC chua hoi tu) thi bo qua, khong ve.
 
 Chay:
-    python scripts/ve_hinh_bai_bao.py
+    python scripts/bao_cao/ve_hinh_bai_bao.py
 """
 from __future__ import annotations
 
 import sys
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 HINH = ROOT.parent / "Bài báo" / "hinh"
 

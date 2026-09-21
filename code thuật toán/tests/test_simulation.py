@@ -1,10 +1,13 @@
+import pytest
 import numpy as np
 import torch
 
+from msgarchx.inference.param_spec import ModelConfig
 from msgarchx.models.ms_garch import MSGARCHXParams
 from msgarchx.simulation.dgp import simulate_ms_garch_x
 from msgarchx.simulation.metrics import bias, brier_state, coverage, parameter_rmse
-from msgarchx.simulation.scenarios import default_scenarios
+from msgarchx.simulation.run_simulation import run_scenario
+from msgarchx.simulation.scenarios import SimulationScenario, default_scenarios
 
 
 def _make_params():
@@ -115,3 +118,39 @@ def test_sap_nhan_luy_dang():
     mot = sap_nhan_trang_thai(_rep_mau(0.40, 0.05))
     hai = sap_nhan_trang_thai(mot)
     assert mot.point_estimate == hai.point_estimate
+
+
+def test_run_scenario_true_p11_p22_come_from_P0_not_placeholder():
+    """`scenario.params.P` chi la placeholder (xem docstring `_base_params`
+    trong scenarios.py, "khong dung truc tiep, P0 rieng duoc truyen vao
+    DGP"). Bias/RMSE cua p11/p22 phai tinh so voi `scenario.P0` -- KHONG
+    phai `scenario.params.P`.
+
+    Regression cho loi da tim thay va sua (10/2026): `run_scenario` truoc do
+    goi `_named_params(scenario.params)` truc tiep de lay theta_0, khien
+    Bias/RMSE cua p11/p22 tren TOAN BO S1-S8 da bao cao bi tinh nham so voi
+    p11=p22=1.0 (eye(2)) thay vi P0 that. Vi DGP chi doc P0 (khong doc
+    params.P), hai kich ban duoi day sinh CUNG MOT du lieu (cung seed, cung
+    P0) nhung co placeholder params.P khac nhau -- Bias phai GIONG HET nhau.
+    """
+    P0_that = torch.tensor([[0.7, 0.3], [0.2, 0.8]])
+    base = _make_params()
+    config = ModelConfig(n_exog=2, state_specific_nu=False)
+    method_kwargs = {"mle": {"n_starts": 1, "n_adam": 30, "n_lbfgs": 10}}
+
+    scn_eye = SimulationScenario(
+        code="T1", description="placeholder eye(2)",
+        params=base._replace(P=torch.eye(2)), P0=P0_that,
+        T=100, B=1, burn_in=20,
+    )
+    scn_khac = SimulationScenario(
+        code="T2", description="placeholder khac",
+        params=base._replace(P=torch.tensor([[0.1, 0.9], [0.9, 0.1]])), P0=P0_that,
+        T=100, B=1, burn_in=20,
+    )
+
+    out1 = run_scenario(scn_eye, config, methods=("mle",), base_seed=0, method_kwargs=method_kwargs)
+    out2 = run_scenario(scn_khac, config, methods=("mle",), base_seed=0, method_kwargs=method_kwargs)
+
+    assert out1["mle"]["bias"]["p11"] == pytest.approx(out2["mle"]["bias"]["p11"])
+    assert out1["mle"]["bias"]["p22"] == pytest.approx(out2["mle"]["bias"]["p22"])

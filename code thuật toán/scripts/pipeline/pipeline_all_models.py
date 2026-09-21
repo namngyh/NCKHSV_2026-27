@@ -1,10 +1,10 @@
 """Pipeline: TOAN BO mo hinh x 3 phuong phap -> chon mo hinh tot nhat -> MCMC.
 
 CACH CHAY
-    python scripts/pipeline_all_models.py                 # chay day du
-    python scripts/pipeline_all_models.py --nhanh         # cau hinh nho, de thu duong chay
-    python scripts/pipeline_all_models.py --bo-qua-mcmc   # dung truoc Buoc 3
-    python scripts/pipeline_all_models.py --chi-bang      # chi in bang tu checkpoint da co
+    python scripts/pipeline/pipeline_all_models.py                 # chay day du
+    python scripts/pipeline/pipeline_all_models.py --nhanh         # cau hinh nho, de thu duong chay
+    python scripts/pipeline/pipeline_all_models.py --bo-qua-mcmc   # dung truoc Buoc 3
+    python scripts/pipeline/pipeline_all_models.py --chi-bang      # chi in bang tu checkpoint da co
 
 THIET KE BA BUOC (xem CLAUDE.md muc "Cau truc nghien cuu ba buoc")
     Buoc 1  Moi mo hinh trong CATALOGUE x {MLE, VB mean-field, VB full-rank}
@@ -38,7 +38,7 @@ try:                                   # in tieng Viet ra console Windows
 except Exception:
     pass
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from msgarchx.evaluation.oos_single import (          # noqa: E402
@@ -130,7 +130,7 @@ def nap_du_lieu(cfg: CauHinh) -> dict:
     if not path.exists():
         raise SystemExit(
             f"Khong tim thay {path}.\n"
-            "Chay buoc chuan bi du lieu truoc: python scripts/run_full_study.py --only data"
+            "Chay buoc chuan bi du lieu truoc: python scripts/pipeline/run_full_study.py --only data"
         )
     return torch.load(path, weights_only=False)
 
@@ -551,6 +551,13 @@ def main() -> None:
             print(f"  (theo {tc.upper()} thi tot nhat lai la: {t['ten']} + {t['phuong_phap']})")
         except SystemExit:
             pass
+
+    if args.chi_bang:
+        # BAO LOI DA SUA: truoc day nhanh --chi-bang khong return o day, nen
+        # roi thang xuong Buoc 3 va am tham chay MCMC that (hang gio) chi vi
+        # nguoi dung muon xem lai bang cu. --chi-bang phai la READ-ONLY.
+        print("\n--chi-bang: chi in bang, dung tai day (khong chay Buoc 3).")
+        return
 
     if args.bo_qua_mcmc:
         print("\n--bo-qua-mcmc: dung tai day.")

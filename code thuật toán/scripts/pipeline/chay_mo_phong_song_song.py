@@ -1,17 +1,21 @@
-"""Chay nghien cuu mo phong S1-S4 SONG SONG theo tung LAN LAP.
+"""Chay nghien cuu mo phong PR-A (S1/S2/S3) SONG SONG theo tung LAN LAP.
 
 VI SAO: `run_full_study.py --only simulation` chay tuan tu tung kich ban va lan lap.
-Voi 4 kich ban hieu chinh VN30F1M (S1-S4) x cac phuong phap (MLE, VB-MF, VB-FR),
-chay song song tren nhieu tien trinh giup tan dung toi da CPU da nhan.
+Voi 3 kich ban minh hoa S1/S2/S3 (xem docstring `simulation/scenarios.py` --
+tham so VI DU hop ly ve mat dinh tinh, CHUA hieu chinh theo VN30F1M that) x
+cac phuong phap (MLE, VB-MF, VB-FR), chay song song tren nhieu tien trinh
+giup tan dung toi da CPU da nhan. Ket qua chinh thuc da bao cao (900/900 lan
+lap, xem CLAUDE.md) chi dung S1/S2/S3; co "--scenarios" mac dinh con S4 la
+tan du chua don, dung de mo rong sau nay neu can.
 
 MOI LAN LAP MOT CHECKPOINT (`results/parts/sim/<kich_ban>_<phuong_phap>_<b>.pt`)
 nen dung giua chung khong mat gi, va co the chay bo sung tung phan.
 Sau khi hoan tat, dung `--combine` de gop thanh `results/07_simulation_S*.pt`.
 
 Chay:
-    python scripts/chay_mo_phong_song_song.py --methods mle,vb_mean_field,vb_full_rank
-    python scripts/chay_mo_phong_song_song.py --scenarios S1 --jobs 4
-    python scripts/chay_mo_phong_song_song.py --combine
+    python scripts/pipeline/chay_mo_phong_song_song.py --methods mle,vb_mean_field,vb_full_rank
+    python scripts/pipeline/chay_mo_phong_song_song.py --scenarios S1 --jobs 4
+    python scripts/pipeline/chay_mo_phong_song_song.py --combine
 """
 from __future__ import annotations
 
@@ -24,7 +28,7 @@ from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 import torch
@@ -39,7 +43,7 @@ from msgarchx.simulation.run_simulation import (
     sap_nhan_trang_thai,
 )
 from msgarchx.simulation.scenarios import default_scenarios
-from scripts.run_full_study import PRESETS
+from scripts.pipeline.run_full_study import PRESETS
 
 METHODS = ("mle", "vb_mean_field", "vb_full_rank")
 

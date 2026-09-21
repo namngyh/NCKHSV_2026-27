@@ -17,8 +17,8 @@ viec lay mau hau nghiem bang Predictive -- moi mau phai chay lai bo loc tien
 qua 2000 quan sat, 500 mau la them ~13 phut.
 
 Chay:
-    python scripts/kiem_tra_hoi_tu_vb.py
-    python scripts/kiem_tra_hoi_tu_vb.py --n-steps 3000 --kich-ban S1 --b 0
+    python scripts/tien_ich/kiem_tra_hoi_tu_vb.py
+    python scripts/tien_ich/kiem_tra_hoi_tu_vb.py --n-steps 3000 --kich-ban S1 --b 0
 """
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ try:
 except Exception:
     pass
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 import pyro  # noqa: E402

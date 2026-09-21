@@ -19,9 +19,9 @@ CAC BIEN THE (chon bang --bien-the):
   ca_hai       Ap dong thoi hai thay doi tren.
 
 Chay:
-    python scripts/chay_do_nhay_prior.py --tat-ca --jobs 2
-    python scripts/chay_do_nhay_prior.py --bien-the omega_hc
-    python scripts/chay_do_nhay_prior.py --so-sanh
+    python scripts/pipeline/chay_do_nhay_prior.py --tat-ca --jobs 2
+    python scripts/pipeline/chay_do_nhay_prior.py --bien-the omega_hc
+    python scripts/pipeline/chay_do_nhay_prior.py --so-sanh
 """
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ from dataclasses import replace
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 import torch
@@ -42,7 +42,7 @@ import torch
 from msgarchx.inference.param_spec import ModelConfig, PriorConfig
 from msgarchx.inference.summary import posterior_summary, relabel_posterior_samples
 from msgarchx.inference.variational import fit_vb
-from scripts.run_full_study import PRESETS
+from scripts.pipeline.run_full_study import PRESETS
 
 BIEN_THE = {
     "goc": (PriorConfig(), "đặc tả bản thảo: omega ~ LogNormal(0,1), p_ss ~ Beta(8,2)"),

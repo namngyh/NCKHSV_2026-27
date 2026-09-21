@@ -76,10 +76,10 @@ echo (co the go nhieu buoc cach nhau boi dau cach, vd: mle vb r1)
 set /p "STAGE=Nhap TEN BUOC muon chay: "
 if "%STAGE%"=="" goto :menu
 echo.
-echo Dang chay: %PYEXE% -u scripts\run_full_study.py --preset full --only %STAGE%
+echo Dang chay: %PYEXE% -u scripts\pipeline\run_full_study.py --preset full --only %STAGE%
 echo (Ket qua checkpoint vao results\, co the dong cua so va chay tiep sau.)
 echo.
-%PYEXE% -u scripts\run_full_study.py --preset full --only %STAGE%
+%PYEXE% -u scripts\pipeline\run_full_study.py --preset full --only %STAGE%
 echo.
 echo Da xong (hoac gap loi, xem thong bao o tren).
 pause >nul
@@ -90,16 +90,16 @@ call :tim_python
 if "%PYEXE%"=="" pause
 if "%PYEXE%"=="" goto :menu
 echo.
-%PYEXE% scripts\run_one_model.py --list
+%PYEXE% scripts\pipeline\run_one_model.py --list
 echo.
 set /p "MID=Nhap SO MO HINH muon chay (vd: 5), de trong de huy: "
 if "%MID%"=="" goto :menu
 echo.
-echo Dang chay: %PYEXE% -u scripts\run_one_model.py %MID%
+echo Dang chay: %PYEXE% -u scripts\pipeline\run_one_model.py %MID%
 echo (Tien do in truc tiep o duoi; ket qua tu dong ghi them vao
 echo  results\screening_log.txt, khong xoa noi dung cu.)
 echo.
-%PYEXE% -u scripts\run_one_model.py %MID%
+%PYEXE% -u scripts\pipeline\run_one_model.py %MID%
 echo.
 pause >nul
 goto :menu
@@ -110,7 +110,7 @@ if "%PYEXE%"=="" pause
 if "%PYEXE%"=="" goto :menu
 if not exist "results" goto :chua_co_results
 echo.
-%PYEXE% scripts\build_html_report.py --results-dir results --out report.html
+%PYEXE% scripts\tien_ich\build_html_report.py --results-dir results --out report.html
 if errorlevel 1 goto :bao_cao_loi
 echo.
 echo Da tao report.html. Dang mo bang trinh duyet mac dinh ...

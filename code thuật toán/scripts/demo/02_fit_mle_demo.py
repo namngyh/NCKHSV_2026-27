@@ -5,7 +5,7 @@ Bien ngoai sinh hien co tu ohlc_export.csv: log(1+VOL_{t-1}), log(RV_{t-1}+eps).
 BASIS/EXP/ROLL can them du lieu chi so VN30 co so va lich dao han hop dong
 (chua co trong file nay) nen chua duoc dua vao o ban demo nay.
 
-Chay: python scripts/02_fit_mle_demo.py [duong_dan_csv]
+Chay: python scripts/demo/02_fit_mle_demo.py [duong_dan_csv]
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ from pathlib import Path
 import pandas as pd
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from msgarchx.data.exogenous import build_exogenous_matrix, standardize_with_train_stats
 from msgarchx.data.loader import load_vn30f1m_daily
@@ -46,7 +46,7 @@ def main():
     import time
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("csv_path", nargs="?", default=str(Path(__file__).resolve().parents[1] / "ohlc_export.csv"))
+    parser.add_argument("csv_path", nargs="?", default=str(Path(__file__).resolve().parents[2] / "ohlc_export.csv"))
     parser.add_argument("--n-starts", type=int, default=2, help="So diem khoi tao MLE cho M1 (mac dinh nho de chay nhanh; tang len 4-8 cho ket qua bao cao chinh thuc)")
     parser.add_argument("--n-adam", type=int, default=150)
     parser.add_argument("--n-lbfgs", type=int, default=60)

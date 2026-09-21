@@ -10,8 +10,8 @@ Doc `results/parts/*.pt` neu co (chay bang run_models_parallel.py), neu khong
 thi doc thang `02_mle.pt` / `03_vb.pt` / `05_r1.pt`.
 
 Chay:
-    python scripts/tom_tat_ket_qua.py
-    python scripts/tom_tat_ket_qua.py --results-dir results --out results/tom_tat.txt
+    python scripts/tien_ich/tom_tat_ket_qua.py
+    python scripts/tien_ich/tom_tat_ket_qua.py --results-dir results --out results/tom_tat.txt
 """
 from __future__ import annotations
 
@@ -20,7 +20,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 import torch

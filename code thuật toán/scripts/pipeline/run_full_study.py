@@ -18,9 +18,9 @@ luc nao ma khong mat tien do):
 
 Pham vi nghien cuu: MLE + VB mean-field + VB full-rank (khong co MCMC).
 
-Chay: python scripts/run_full_study.py --preset full
-      python scripts/run_full_study.py --preset dry-run
-      python scripts/run_full_study.py --preset full --only simulation
+Chay: python scripts/pipeline/run_full_study.py --preset full
+      python scripts/pipeline/run_full_study.py --preset dry-run
+      python scripts/pipeline/run_full_study.py --preset full --only simulation
 """
 from __future__ import annotations
 
@@ -34,7 +34,7 @@ from pathlib import Path
 import pandas as pd
 import torch
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from msgarchx.data.exogenous import build_exogenous_matrix, standardize_with_train_stats

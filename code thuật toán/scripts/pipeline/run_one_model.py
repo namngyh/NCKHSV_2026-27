@@ -22,10 +22,10 @@ han, ngay chuyen hop dong) DA BO theo yeu cau, vi du lieu tho tuong ung
 chua co trong ohlc_export.csv. Muc 19 (HAR-RV) va 20 (Realized GARCH) cung
 chua chay duoc vi chua co model tuong ung trong msgarchx/models/.
 
-Chay: python scripts/run_one_model.py --list
-      python scripts/run_one_model.py 1
-      python scripts/run_one_model.py 5 --n-starts 2 --n-adam 150 --n-lbfgs 80
-      python scripts/run_one_model.py 3 --force
+Chay: python scripts/pipeline/run_one_model.py --list
+      python scripts/pipeline/run_one_model.py 1
+      python scripts/pipeline/run_one_model.py 5 --n-starts 2 --n-adam 150 --n-lbfgs 80
+      python scripts/pipeline/run_one_model.py 3 --force
 """
 from __future__ import annotations
 
@@ -36,7 +36,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 import pandas as pd
@@ -122,7 +122,7 @@ def _print_registry() -> None:
     print("nam trong script nay: chung chay TREN mo hinh da chon sau khi so sanh")
     print("ket qua 01-14, khong phai mot dac ta co dinh tu dau.")
     print()
-    print("Vi du: python scripts/run_one_model.py 5")
+    print("Vi du: python scripts/pipeline/run_one_model.py 5")
 
 
 # ============================================================

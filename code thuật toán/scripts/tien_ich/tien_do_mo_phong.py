@@ -7,9 +7,9 @@ luc nao va bao nhieu cua so cung duoc, khong anh huong gi den lan chay dang co.
     PR-B  EGARCH-X Student-t     E1,E2,E3   -> results/mo_phong_egarch/<KB>.pt
 
 Chay:
-    python scripts/tien_do_mo_phong.py
-    python scripts/tien_do_mo_phong.py --lap          # cap nhat moi 60 giay
-    python scripts/tien_do_mo_phong.py --jobs 12      # de uoc luong thoi gian con lai
+    python scripts/tien_ich/tien_do_mo_phong.py
+    python scripts/tien_ich/tien_do_mo_phong.py --lap          # cap nhat moi 60 giay
+    python scripts/tien_ich/tien_do_mo_phong.py --jobs 12      # de uoc luong thoi gian con lai
 Hoac double-click `chay_mo_phong.bat` roi chon muc "Xem tien do".
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 import torch  # noqa: E402

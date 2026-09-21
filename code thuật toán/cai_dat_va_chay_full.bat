@@ -102,7 +102,7 @@ rem "-u" tat buffering de moi dong print hien ra ngay lap tuc.
 rem Viec ghi nhat ky do chinh Python dam nhan qua --log-file.
 echo Nhat ky day du: %LOGFILE%
 echo.
-%PYEXE% -u scripts\run_full_study.py --preset full --log-file "%LOGFILE%"
+%PYEXE% -u scripts\pipeline\run_full_study.py --preset full --log-file "%LOGFILE%"
 
 :ketthuc
 echo.

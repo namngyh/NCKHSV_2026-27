@@ -12,7 +12,7 @@ Do ca ban BATCH (B bo tham so doc lap trong mot vong lap) vi day moi la tinh
 huong GPU co co hoi: chi phi kernel launch duoc chia deu cho B bo tham so.
 
 Chay:
-    .venv_gpu_test/Scripts/python.exe scripts/do_gpu_vs_cpu.py
+    .venv_gpu_test/Scripts/python.exe scripts/tien_ich/do_gpu_vs_cpu.py
 """
 from __future__ import annotations
 

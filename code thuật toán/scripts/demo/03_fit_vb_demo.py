@@ -5,7 +5,7 @@ Minh hoa quy trinh uoc luong xap xi hau nghiem bang Stochastic Variational Infer
 su dung Pyro. Mac dinh dung mot cua so con (vd. 300 quan sat gan nhat) de minh hoa nhanh;
 uoc luong chinh thuc tren toan bo 2.000 quan sat da duoc luu tai results/03_vb.pt.
 
-Chay: python scripts/03_fit_vb_demo.py [duong_dan_csv] [so_quan_sat]
+Chay: python scripts/demo/03_fit_vb_demo.py [duong_dan_csv] [so_quan_sat]
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from pathlib import Path
 import pandas as pd
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from msgarchx.data.exogenous import build_exogenous_matrix, standardize_with_train_stats
 from msgarchx.data.loader import load_vn30f1m_daily
@@ -40,7 +40,7 @@ def prepare_data(csv_path: str, window: int):
 
 
 def main():
-    csv_path = sys.argv[1] if len(sys.argv) > 1 else str(Path(__file__).resolve().parents[1] / "ohlc_export.csv")
+    csv_path = sys.argv[1] if len(sys.argv) > 1 else str(Path(__file__).resolve().parents[2] / "ohlc_export.csv")
     window = int(sys.argv[2]) if len(sys.argv) > 2 else 300
 
     r, X = prepare_data(csv_path, window)

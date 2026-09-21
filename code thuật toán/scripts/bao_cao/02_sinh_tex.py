@@ -91,7 +91,7 @@ A(r"""% !TeX program = xelatex
   \end{minipage}}\end{center}}
 
 \title{\vspace{-1.2cm}\textbf{Báo cáo kết quả ước lượng và so sánh mô hình}\\[0.25em]
-\large MS-GARCH-X Student-t cho hợp đồng tương lai VN30F1M}
+\large Danh mục GARCH/EGARCH/MS-GARCH-X, hợp đồng tương lai VN30F1M --- EGARCH-X Student-t là mô hình thắng cuộc}
 \author{}
 \date{}
 
@@ -108,18 +108,54 @@ best_bic = min(mo5, key=lambda m: IS[m]["bic"])
 
 A(r"\section*{Tóm tắt kết quả}")
 A(r"\hopketqua{" + rf"""
-\textbf{{Bốn kết luận chính.}}
+\textbf{{Năm kết luận chính.}}
 \begin{{enumerate}}[leftmargin=1.6em,itemsep=0.25em,topsep=0.3em]
-  \item \textbf{{Mô hình một chế độ thắng cả trong mẫu lẫn ngoài mẫu.}} B3 (GARCH-X Student-t) đạt AIC thấp nhất ({f(IS['b3']['aic'],2)}), BIC thấp nhất ({f(IS['b3']['bic'],2)}) và QLIKE ngoài mẫu tốt nhất ({f(OO['b3']['qlike'])}), vượt M1 (MS-GARCH-X) ở cả ba tiêu chí dù M1 có log-hợp-lý cao hơn.
-  \item \textbf{{Variational Bayes cho dự báo mật độ tốt nhất với chi phí thấp.}} M2 đạt điểm log âm nhỏ nhất ({f(OO['m2']['nls'])}) trong {f(COST['M2'],1)} phút, so với {f(COST['M1'],1)} phút của M1.
-  \item \textbf{{MCMC thất bại.}} Sau hai lần chạy được lưu, $\widehat{{R}}$ tốt nhất chỉ đạt {f(MC['lan2']['max_rhat'],4)} (yêu cầu $<1{{,}}01$) và ESS nhỏ nhất {f(MC['lan2']['min_ess'],1)}; {f(REL['m4']*100,2)}\% mẫu hậu nghiệm phải đổi nhãn trạng thái, tức danh tính trạng thái không ổn định ngay trong một lần chạy.
-  \item \textbf{{Cấu trúc chuyển trạng thái không được dữ liệu nhận dạng.}} Bốn phương pháp cho $p_{{11}}$ trải từ {f(FOR['$p_{11}$']['VB mean-field (M2)'][0],4)} đến {f(FOR['$p_{11}$']['MLE (M1)'][0],4)}, tương ứng thời gian tồn tại trạng thái chênh nhau hai bậc độ lớn.
+  \item \textbf{{Mô hình EGARCH-X với sai số Student-$t$, ước lượng bằng hợp lý cực đại (MLE), thắng cả bốn tiêu chí so sánh}} trên toàn bộ danh mục tám mô hình và ba phương pháp suy diễn (MLE, Bayes biến phân mean-field, Bayes biến phân full-rank): AIC $5606{{,}}87$, BIC $5650{{,}}54$, QLIKE $0{{,}}9234$, điểm log âm ngoài mẫu $1{{,}}5203$ --- xem Bảng~\ref{{tab:buoc1-so-sanh}}.
+  \item \textbf{{Thành phần đuôi dày của phân phối sai số (chuẩn $\to$ Student-$t$) là yếu tố cải thiện mô hình quan trọng nhất}}, đóng góp gấp khoảng năm lần mọi thành phần khác (giảm AIC khoảng $235$ điểm, so với thành phần tốt thứ nhì chỉ giảm $49$ điểm). Ngược lại, \textbf{{việc thêm cơ chế chuyển trạng thái Markov hai chế độ biến động làm mô hình xấu đi}} (AIC tăng $1{{,}}71$ điểm) --- tức mô hình chuyển trạng thái Markov với sai số Student-$t$ và biến ngoại sinh (MS-GARCH-X Student-$t$), vốn là mô hình được đề xuất ban đầu của đề tài, không được dữ liệu thực nghiệm ủng hộ. Xem Bảng~\ref{{tab:buoc1-phan-ra}}.
+  \item \textbf{{Phương pháp MCMC (thuật toán NUTS) hội tụ tốt khi áp dụng cho mô hình EGARCH-X một chế độ biến động}}: hệ số $\hat R$ lớn nhất chỉ $1{{,}}0125$ (ngưỡng chấp nhận thông thường là $1{{,}}01$), cỡ mẫu hiệu quả nhỏ nhất đạt $1.340$ trên tổng $1.600$ mẫu hậu nghiệm ($84\%$), không có lần lặp phân kỳ nào. Kết quả này trái ngược hoàn toàn với lần chạy MCMC thất bại trước đó trên mô hình có cấu trúc chuyển trạng thái (xem Phụ lục A), qua đó xác nhận nguyên nhân thất bại là do đối xứng hoán vị nhãn trạng thái, không phải do bản thân phương pháp MCMC.
+  \item \textbf{{Hiệu ứng đòn bẩy của lợi suất VN30F1M được xác lập có ý nghĩa thống kê}}: khoảng tin cậy $95\%$ của hệ số đòn bẩy theo MCMC là $[-0{{,}}2125;\,-0{{,}}0710]$, loại trừ giá trị $0$. Kết quả này được củng cố thêm bằng một nghiên cứu mô phỏng riêng, trong đó dữ liệu giả lập không có hiệu ứng đòn bẩy vẫn cho ước lượng hệ số đòn bẩy gần $0$ --- tức mô hình không tự tạo ra hiệu ứng đòn bẩy giả.
+  \item \textbf{{Phương pháp Bayes biến phân dạng mean-field đánh giá thấp mức độ bất định của hai tham số mức phương sai và độ dai dẳng của biến động khoảng ba lần}} so với MCMC (được xem là chuẩn tham chiếu do đã hội tụ); Bayes biến phân dạng full-rank cải thiện đáng kể nhưng vẫn hẹp hơn khoảng $25\%$ ở hai tham số này. Một nghiên cứu mô phỏng khôi phục tham số độc lập, thực hiện trước khi biết kết quả trên dữ liệu thật, đã dự báo đúng chính hiện tượng này.
 \end{{enumerate}}
+\textbf{{Lưu ý khi đọc phần còn lại của báo cáo:}} Phụ lục A trình bày phân tích trên riêng mô hình chuyển trạng thái Markov (MS-GARCH-X Student-$t$) theo thiết kế nghiên cứu ban đầu, trước khi danh mục mô hình được mở rộng thêm họ EGARCH. Các phát hiện ở đó (MCMC không hội tụ, Bayes biến phân đánh giá thấp mức bất định) vẫn đúng và vẫn có giá trị làm bằng chứng khoa học, nhưng không còn là kết luận trung tâm của báo cáo --- kết luận trung tâm nằm ở Mục~\ref{{sec:ket-qua-ba-buoc}}.
 """ + "}")
+
+# ---------------------------------------------------------- 0b. Ket qua 3 buoc
+A(r"""
+\section{Kết quả trên dữ liệu thật: ba bước}
+\label{sec:ket-qua-ba-buoc}
+
+Mục này tổng hợp kết quả của \textbf{Bước 1} (so sánh toàn bộ danh mục tám mô
+hình và ba phương pháp suy diễn trên dữ liệu VN30F1M thật), \textbf{Bước 2}
+(mô phỏng khôi phục tham số, xem thêm Mục~\ref{sec:nghien-cuu-mo-phong} và
+phụ lục điện tử "Tám kịch bản mô phỏng" để có bảng chi tiết theo từng tham
+số), và \textbf{Bước 3} (ước lượng Bayes đầy đủ bằng MCMC, chạy một lần duy
+nhất trên mô hình thắng cuộc). Số liệu trong sáu bảng dưới đây được tổng hợp
+trực tiếp từ kết quả ước lượng, không nhập tay.
+
+\input{ket_qua_moi}
+""")
+
+A(r"""
+\section{Phụ lục A: phân tích nội bộ MS-GARCH-X Student-$t$ (thiết kế trước khi mở rộng sang EGARCH)}
+
+Các mục dưới đây khảo sát riêng mô hình chuyển trạng thái Markov với sai số
+Student-$t$ và biến ngoại sinh (\textbf{MS-GARCH-X Student-$t$}), bằng bốn
+phương pháp suy diễn (hợp lý cực đại, Bayes biến phân mean-field, Bayes biến
+phân full-rank, MCMC), theo thiết kế nghiên cứu ban đầu --- trước khi danh
+mục mô hình được mở rộng thành tám mô hình ở Bước 1 (Mục~\ref{sec:ket-qua-ba-buoc}).
+Ba mô hình một chế độ dùng làm đối chứng (GARCH chuẩn, GARCH Student-$t$,
+GARCH-X Student-$t$) và các biến thể của MS-GARCH-X Student-$t$ ở đây
+\textbf{không bao gồm họ EGARCH}. Giữ lại nguyên vẹn vì đây là nơi duy nhất
+có: (a) so sánh trực tiếp bốn phương pháp suy diễn trên cùng một mô hình hai
+chế độ biến động, và (b) bằng chứng chi tiết cho việc MCMC không hội tụ trên
+cấu trúc chuyển trạng thái --- phát hiện vẫn đúng và vẫn là một phần lập luận
+của thiết kế ba bước (xem đối chiếu ở Mục~\ref{sec:ket-qua-ba-buoc}, nơi MCMC
+hội tụ khi bỏ cấu trúc chuyển trạng thái).
+""")
 
 # ---------------------------------------------------------------- 1. Danh muc
 A(r"""
-\section{Danh mục mô hình và phương pháp}
+\subsection{Danh mục mô hình và phương pháp}
 
 \begin{table}[H]\centering
 \caption{Các mô hình được ước lượng và phương pháp suy diễn tương ứng}
@@ -143,7 +179,7 @@ R1 & MS-GARCH-X, $\nu_s$ riêng & Student-t & 2 & VB mean-field \\
 
 # ---------------------------------------------------------------- 2. Trong mau
 A(r"""
-\section{So sánh trong mẫu}
+\subsection{So sánh trong mẫu}
 
 \begin{table}[H]\centering
 \caption{Log-hợp-lý và tiêu chí thông tin (tập huấn luyện $1735$ quan sát)}
@@ -173,7 +209,7 @@ A(r"""\bottomrule
 
 # ---------------------------------------------------------------- 3. Ngoai mau
 A(r"""
-\section{So sánh ngoài mẫu}
+\subsection{So sánh ngoài mẫu}
 
 \begin{table}[H]\centering
 \caption{Dự báo biến động và mật độ ngoài mẫu ($435$ quan sát kiểm định)}
@@ -205,7 +241,7 @@ A(r"""\bottomrule
 
 # ---------------------------------------------------------------- 4. VaR
 A(r"""
-\section{Kiểm định giá trị chịu rủi ro (VaR)}
+\subsection{Kiểm định giá trị chịu rủi ro (VaR)}
 
 \begin{table}[H]\centering
 \caption{Kiểm định VaR ngoài mẫu ở hai mức tin cậy}
@@ -238,7 +274,7 @@ A(r"""\bottomrule
 
 # ---------------------------------------------------------------- 5. So sanh phuong phap
 A(r"""
-\section{So sánh bốn phương pháp ước lượng trên cùng một mô hình}
+\subsection{So sánh bốn phương pháp ước lượng trên cùng một mô hình}
 
 Mục này trả lời câu hỏi trung tâm: bốn phương pháp suy diễn cho kết quả \emph{khác nhau đến mức nào} khi áp dụng cho cùng một đặc tả MS-GARCH-X Student-t và cùng một tập dữ liệu.
 
@@ -312,7 +348,7 @@ A(r"""\bottomrule
 
 # ---------------------------------------------------------------- 6. Chan doan
 A(r"""
-\section{Chẩn đoán hội tụ}
+\subsection{Chẩn đoán hội tụ}
 
 \begin{table}[H]\centering
 \caption{Chẩn đoán hội tụ MCMC (NUTS), bốn chuỗi $\times$ $400$ mẫu}
@@ -369,7 +405,7 @@ A(r"""\bottomrule
 
 # ---------------------------------------------------------------- 7. Chi phi
 A(r"""
-\section{Chi phí tính toán}
+\subsection{Chi phí tính toán}
 
 \begin{table}[H]\centering
 \caption{Thời gian ước lượng theo mô hình}
@@ -400,55 +436,84 @@ A(r"""\bottomrule
 # ---------------------------------------------------------------- 8. Mo phong
 A(r"""
 \section{Nghiên cứu mô phỏng}
+\label{sec:nghien-cuu-mo-phong}
 
-Trên dữ liệu thật không biết tham số đúng, nên chất lượng ước lượng được đánh giá bổ sung bằng mô phỏng tám kịch bản $S_1$--$S_8$ với tham số đã biết trước.
+Trên dữ liệu thật không biết tham số đúng, nên chất lượng ước lượng được đánh
+giá bổ sung bằng hai nghiên cứu khôi phục tham số với tham số đã biết trước:
+\textbf{PR-A} (MS-GARCH-X Student-$t$, hai trạng thái, kịch bản $S_1,S_2,S_3$)
+và \textbf{PR-B} (EGARCH-X Student-$t$, một trạng thái, kịch bản $E_1,E_2,E_3$)
+--- mỗi kịch bản $B=100$ lần lặp, $T=2000$, ba phương pháp (MLE, VB mean-field,
+VB full-rank). Trước khi tính Bias/RMSE/Coverage của PR-A, nhãn trạng thái đã
+được sắp lại theo phương sai vô điều kiện (bộ ước lượng có đối xứng hoán vị
+nhãn nên có thể trả về "trạng thái 1"/"trạng thái 2" theo thứ tự tùy ý --- VB
+đảo nhãn ở gần một nửa số lần lặp nếu không sắp lại). Bộ tám kịch bản $S_1$--$S_8$
+minh họa cũ (tham số không hiệu chỉnh theo VN30F1M, $B=15$--$30$) được giữ làm
+phụ lục bổ trợ, không còn là số liệu chính thức của mục này.
 
 \begin{table}[H]\centering
-\caption{Kết quả mô phỏng gộp trên tám kịch bản}
+\caption{Kết quả mô phỏng gộp trên PR-A + PR-B (sáu kịch bản, $B=100$)}
 \begin{threeparttable}
-\begin{tabularx}{\textwidth}{l C C C C C}
+\begin{tabularx}{\textwidth}{l C C C C}
 \toprule
-\textbf{Phương pháp} & \textbf{Số lần lặp} & \textbf{$|$Độ chệch$|$ TB} & \textbf{RMSE TB} & \textbf{Coverage $95\%$} & \textbf{Brier} \\
+\textbf{Phương pháp} & \textbf{Số lần lặp} & \textbf{$|$Độ chệch$|$ TB} & \textbf{RMSE TB} & \textbf{Coverage $95\%$} \\
 \midrule""")
-for nm in ["MLE", "VB mean-field", "MCMC"]:
+for nm in ["MLE", "VB mean-field", "VB full-rank"]:
     s = SIM[nm]
     cov = "--" if (s["cov"] is None or (isinstance(s["cov"], float) and math.isnan(s["cov"]))) else f(s["cov"], 3)
-    nrep_txt = f(s['nrep'], 1) + (rf" ({s['nrep_min']}--{s['nrep_max']})" if s.get("nrep_min") != s.get("nrep_max") else "")
-    A(rf"{nm} & {nrep_txt} & {f(s['bias'],4)} & {f(s['rmse'],4)} & {cov} & {f(s['brier'],4)} \\")
+    nrep_txt = f(s['nrep'], 0) + (rf" ({s['nrep_min']}--{s['nrep_max']})" if s.get("nrep_min") != s.get("nrep_max") else "")
+    A(rf"{nm} & {nrep_txt} & {f(s['bias'],4)} & {f(s['rmse'],4)} & {cov} \\")
 A(r"""\bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
-\item Độ chệch và RMSE lấy trung bình trên các tham số có thang đo khác nhau, nên chỉ dùng để so sánh thô giữa các phương pháp. Coverage lý tưởng là $0{,}95$; cả hai phương pháp Bayes đều thấp hơn nhiều, tức khoảng tin cậy hậu nghiệm \emph{hẹp hơn thực tế} --- chúng đánh giá thấp mức bất định. MLE không sinh khoảng tin cậy trong quy trình mô phỏng nên không tính được coverage.
-\item Số lần lặp của MCMC rất nhỏ ($3$) do chi phí tính toán, nên các con số ở hàng này chỉ mang tính tham khảo.
+\item Độ chệch và RMSE lấy trung bình trên các tham số có thang đo khác nhau (gộp cả PR-A và PR-B), nên chỉ dùng để so sánh thô giữa các phương pháp --- xem \texttt{Bài báo/8\_kich\_ban\_mo\_phong.tex} để có bảng chi tiết theo từng tham số, từng kịch bản. Coverage lý tưởng là $0{,}95$; cả hai phương pháp Bayes đều thấp hơn nhiều, phần lớn do độ chệch (không phải khoảng tin cậy quá hẹp) --- ở $p_{11},p_{22}$ của PR-A, độ chệch chủ yếu đến từ tiên nghiệm Beta$(8;2)$ kéo ước lượng về trung bình tiên nghiệm $0{,}80$, không phải nhược điểm thuần túy của biến phân. MLE không sinh khoảng tin cậy trong quy trình này nên không tính được coverage.
+\item Cột Brier đã bỏ khỏi bảng này: Brier của PR-A được tính trước khi sắp nhãn trạng thái và hiện sai (một số giá trị VB-FR tệ hơn đoán ngẫu nhiên $0{,}50$), còn PR-B là mô hình một trạng thái nên không có xác suất trạng thái để tính Brier.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
-
-\begin{figure}[H]\centering
-\includegraphics[width=\textwidth]{hinh_bao_cao/fig_sim.pdf}
-\caption{MLE khôi phục tham số chính xác nhất trên dữ liệu mô phỏng; cả hai phương pháp Bayes đều đánh giá thấp bất định một cách đáng kể.}
-\end{figure}
 """)
 
 # ---------------------------------------------------------------- 9. Ket luan
 A(r"""
-\section{Kết luận so sánh}
+\subsection{Kết luận so sánh trong Phụ lục A (chỉ MS-GARCH-X, 5 mô hình)}
 
 \begin{table}[H]\centering
-\caption{Nên dùng phương pháp nào cho mục đích nào}
+\caption{Trong phạm vi hẹp của Phụ lục A: nên dùng phương pháp nào cho mục đích nào}
 \begin{threeparttable}
 \begin{tabularx}{\textwidth}{L C L}
 \toprule
 \textbf{Mục đích} & \textbf{Lựa chọn} & \textbf{Căn cứ} \\
 \midrule
-Dự báo phương sai điểm & B3 (GARCH-X, MLE) & QLIKE """ + f(OO["b3"]["qlike"]) + r""" --- tốt nhất; đồng thời AIC và BIC thấp nhất \\
-Dự báo mật độ / VaR & M2 (VB mean-field) & NLS """ + f(OO["m2"]["nls"]) + r""" --- tốt nhất; vượt qua mọi kiểm định VaR \\
+Dự báo phương sai điểm & B3 (GARCH-X, MLE) & QLIKE """ + f(OO["b3"]["qlike"]) + r""" --- tốt nhất \emph{trong danh mục 5 mô hình này}; đồng thời AIC và BIC thấp nhất \\
+Dự báo mật độ / VaR & M2 (VB mean-field) & NLS """ + f(OO["m2"]["nls"]) + r""" --- tốt nhất \emph{trong danh mục 5 mô hình này}; vượt qua mọi kiểm định VaR \\
 Ước lượng tham số có sai số chuẩn & B3 (MLE) & Hội tụ ở mọi điểm khởi tạo, nghiệm không sát biên \\
-Suy diễn Bayes đầy đủ cho MS-GARCH-X & \textcolor{Warn}{Chưa khả thi} & MCMC không hội tụ; VB đánh giá thấp bất định \\
+Suy diễn Bayes đầy đủ cho \emph{MS-GARCH-X cụ thể} & \textcolor{Warn}{Chưa khả thi} & MCMC không hội tụ trên cấu trúc chuyển trạng thái này; VB đánh giá thấp bất định \\
 \bottomrule
 \end{tabularx}
 \begin{tablenotes}\small
-\item Kết luận bao trùm: trên dữ liệu VN30F1M hiện có, việc bổ sung \emph{biến ngoại sinh} mang lại cải thiện rõ rệt và ổn định, trong khi việc bổ sung \emph{cơ chế chuyển trạng thái ẩn} làm tăng đáng kể chi phí tính toán và độ bất định của kết luận mà không cải thiện dự báo ngoài mẫu.
+\item Kết luận này chỉ có giá trị \textbf{trong phạm vi 5 mô hình của Phụ lục A} (không có EGARCH). Trên toàn bộ danh mục 8 mô hình của Bước 1, EGARCH-X Student-t vượt qua cả B3 lẫn M2 --- xem Mục~\ref{sec:ket-qua-ba-buoc}.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+""")
+
+A(r"""
+\section{Kết luận chung}
+
+\begin{table}[H]\centering
+\caption{Nên dùng mô hình/phương pháp nào cho mục đích nào (toàn bộ danh mục, ba bước)}
+\begin{threeparttable}
+\begin{tabularx}{\textwidth}{L C L}
+\toprule
+\textbf{Mục đích} & \textbf{Lựa chọn} & \textbf{Căn cứ} \\
+\midrule
+Dự báo phương sai điểm và mật độ & EGARCH-X Student-$t$ (MLE) & Thắng cả AIC, BIC, QLIKE, NLS trên toàn bộ 8 mô hình $\times$ 3 phương pháp \\
+Suy diễn Bayes đầy đủ (khoảng tin cậy, hậu nghiệm) & MCMC (NUTS) trên EGARCH-X-$t$ & Hội tụ tốt ($\hat R=1{,}0125$, ESS $1.340$, $0$ phân kỳ); không khả thi trên MS-GARCH-X do đối xứng hoán vị nhãn \\
+Ước lượng nhanh, chi phí thấp & MLE hoặc VB mean-field trên EGARCH-X-$t$ & Hai phương pháp gần như ngang nhau ở QLIKE ($0{,}9234$ so với $0{,}9281$) --- khác hẳn GARCH-X, nơi ràng buộc dương phá hoại VB \\
+Đánh giá độ tin cậy khoảng tin cậy của VB & Có phạt bằng $R_{sd}$ so với MCMC & VB mean-field hẹp hơn thực tế khoảng $3$ lần ở $\omega,\beta$; VB full-rank khá hơn nhưng vẫn hẹp hơn $\sim\!25\%$ \\
+\bottomrule
+\end{tabularx}
+\begin{tablenotes}\small
+\item Kết luận bao trùm: \textbf{đuôi dày} là thành phần cấu trúc quan trọng nhất; \textbf{biến ngoại sinh} hữu ích hơn hẳn khi mô hình không bị ràng buộc dương phá hoại (EGARCH so với GARCH-X); \textbf{chuyển trạng thái ẩn} không được dữ liệu VN30F1M ủng hộ --- làm mô hình tệ đi ở Bước 1 và là nguyên nhân duy nhất khiến MCMC thất bại ở lần chạy đầu.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}

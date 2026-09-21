@@ -530,6 +530,34 @@ checkpoint **theo từng lần lặp** và chạy song song (trước đó tuầ
   thiết kế để phủ: mức phân biệt trạng thái, độ dày đuôi (2 hướng), cỡ mẫu (2
   hướng), độ hiếm trạng thái, sai đặc tả.
 
+**⚠️ Lỗi đã tìm thấy và sửa (10/2026) — ảnh hưởng số liệu $p_{11}$/$p_{22}$ đã
+báo cáo của S1–S8.** `run_scenario()` (`msgarchx/simulation/run_simulation.py`)
+và `combine()` (`scripts/pipeline/chay_mo_phong_song_song.py`) từng lấy giá trị "thật"
+để tính Bias/RMSE bằng `_named_params(scenario.params)` — nhưng
+`scenario.params.P` chỉ là **placeholder `eye(2)`** (tự ghi trong docstring
+`_base_params`: "khong dung truc tiep, P0 rieng duoc truyen vao DGP"). Nghĩa
+là Bias/RMSE của $p_{11}$/$p_{22}$ trong **toàn bộ `07_simulation_S1..S8.pt`
+đã lưu, và mọi số liệu trích từ đó trong `bao_cao_ket_qua.tex`, đều tính sai**
+— so với $p_{11}=p_{22}=1{,}0$ thay vì $P_0$ thật. Đo cụ thể: S1/MLE bias báo
+cáo $-0{,}0222$, giá trị đúng chỉ $-0{,}0022$ (sai 10 lần); S2/MLE dấu bias
+còn **đổi chiều** ($-0{,}0275\to+0{,}0225$). VB-MF/MCMC vẫn tệ ở cả hai cách
+tính (kết luận định tính không đổi).
+
+- **Đã sửa tại nguồn**: cả hai hàm trên giờ ghi đè `true_named["p11"]`/
+  `["p22"]` bằng `scenario.P0` sau khi gọi `_named_params`. Có test hồi quy
+  `tests/test_simulation.py::test_run_scenario_true_p11_p22_come_from_P0_not_placeholder`.
+- **Bias/Mean của S1–S8 SỬA ĐƯỢC bằng đại số** từ chính `07_simulation_S*.pt`
+  đã lưu, không cần chạy lại: $\mathrm{Var}=\mathrm{RMSE}_{sai}^2-\mathrm{Bias}_{sai}^2$
+  không phụ thuộc $\theta_0$ (không đổi), nên
+  $\mathrm{Bias}_{đúng}=(1{,}0+\mathrm{Bias}_{sai})-P_{0,đúng}$, rồi
+  $\mathrm{RMSE}_{đúng}=\sqrt{\mathrm{Var}+\mathrm{Bias}_{đúng}^2}$.
+- **Coverage KHÔNG sửa được bằng đại số** (cần chặn CI từng lần lặp, dữ liệu
+  đó nằm trong `results/parts/sim/` — đã bị xóa ở commit `adceec7`) — muốn
+  đúng phải chạy lại hoặc ghi chú giới hạn khi báo cáo.
+- **CHƯA cập nhật `bao_cao_ket_qua.tex`/`appendix_gen.py`/`8_kich_ban_mo_phong.tex`
+  với số liệu đã sửa** — đang chờ người dùng quyết định cách xử lý (sửa lại
+  Bias/RMSE bằng đại số + ghi chú giới hạn Coverage, hay chạy lại toàn bộ).
+
 ## Quyết định thiết kế đã chốt (09/2026)
 
 Đây là trạng thái hiện hành, **thay thế** mọi mô tả cũ mâu thuẫn trong
@@ -563,15 +591,15 @@ không chạy được cho mô hình một trạng thái. Đã bổ sung
 GARCH lẫn EGARCH) và thêm tham số `model_fn`/`model_args` vào `fit_vb` và
 `fit_mcmc` — mặc định giữ nguyên hành vi cũ.
 
-## Pipeline: `scripts/pipeline_all_models.py`
+## Pipeline: `scripts/pipeline/pipeline_all_models.py`
 
 ```
-python scripts/pipeline_all_models.py --kiem-ke      # xem trước: chạy gì, bỏ qua gì (không tính toán)
-python scripts/pipeline_all_models.py                # chạy đầy đủ
-python scripts/pipeline_all_models.py --nhanh        # cấu hình nhỏ, thử đường chạy
-python scripts/pipeline_all_models.py --bo-qua-mcmc  # dừng trước Bước 3
-python scripts/pipeline_all_models.py --chi-bang     # chỉ in bảng từ checkpoint đã có
-python scripts/pipeline_all_models.py --tieu-chi nls # đổi tiêu chí chọn mô hình
+python scripts/pipeline/pipeline_all_models.py --kiem-ke      # xem trước: chạy gì, bỏ qua gì (không tính toán)
+python scripts/pipeline/pipeline_all_models.py                # chạy đầy đủ
+python scripts/pipeline/pipeline_all_models.py --nhanh        # cấu hình nhỏ, thử đường chạy
+python scripts/pipeline/pipeline_all_models.py --bo-qua-mcmc  # dừng trước Bước 3
+python scripts/pipeline/pipeline_all_models.py --chi-bang     # chỉ in bảng từ checkpoint đã có
+python scripts/pipeline/pipeline_all_models.py --tieu-chi nls # đổi tiêu chí chọn mô hình
 ```
 
 Hai nguyên tắc đã cài vào pipeline:
@@ -592,8 +620,8 @@ xong" và bỏ qua — một cái bẫy im lặng.
 **Files mới của đợt này**: `models/egarch.py`, `inference/model_spec.py`
 (danh mục mô hình — nguồn sự thật duy nhất), `inference/bayes_single.py`,
 `evaluation/oos_single.py`, `simulation/run_egarch.py`,
-`dgp.simulate_egarch`, `scripts/pipeline_all_models.py`,
-`scripts/chay_mo_phong_egarch.py`, cùng `tests/test_egarch.py` và
+`dgp.simulate_egarch`, `scripts/pipeline/pipeline_all_models.py`,
+`scripts/pipeline/chay_mo_phong_egarch.py`, cùng `tests/test_egarch.py` và
 `tests/test_pipeline_parts.py`. **69 test pass.**
 
 ## Tiến trình chạy sắp tới (thứ tự khuyến nghị trên PC mới)
@@ -605,11 +633,71 @@ xong" và bỏ qua — một cái bẫy im lặng.
 | 2 | `pipeline_all_models.py` | **15 mục mới** (3 EGARCH MLE + 12 VB) rồi MCMC cho mô hình thắng | ✅ |
 | 3 | `chay_mo_phong_egarch.py --nhanh` | Thử PR-B | ✅ |
 | 4 | `chay_mo_phong_egarch.py` | **PR-B đầy đủ**: 3 kịch bản × 3 phương pháp × B=100 | ✅ |
-| 5 | PR-A với B=100, 3 kịch bản | Chưa có driver riêng — `run_full_study.py` hiện chạy cả 8 kịch bản | ⚠️ **còn thiếu** |
+| 5 | PR-A với B=100, 3 kịch bản | **XONG (900/900) trên máy PC, đã pull về** (11/2026) — `scripts/pipeline/chay_mo_phong_song_song.py` | ✅ |
 | 6 | Batch hóa bộ lọc tiến | Đo được 10–89× ngay trên CPU | ⚠️ **chưa làm** |
 
-Mục 5 và 6 là hai việc còn lại. Mục 6 nên làm **trước** mục 5 nếu có thời
-gian, vì nó rút ngắn chính mục 5.
+Mục 6 là việc còn lại duy nhất trong bảng này.
+
+## PR-A đã chạy xong — kết quả thật, đã pull về (11/2026)
+
+Máy PC chạy xong PR-A, hai đợt pull liên tiếp:
+1. Commit `87c84fe` ("Hoan tat PR-A (897/900) va sua loi khong sap nhan trang
+   thai truoc khi gop") — 897/900, thiếu `b=28` ở cả ba kịch bản (MLE phân kỳ
+   NaN cả ba điểm khởi tạo).
+2. Commit `3c44311` ("PR-A du 900/900: them quy tac thu lai diem khoi tao khi
+   ca ba deu phan ky") — thêm quy tắc: nếu cả ba điểm khởi tạo phân kỳ, thử
+   lại với bộ điểm khởi tạo khác (`seed + 1000`), **giữ nguyên dữ liệu**. Quy
+   tắc cố định trước, không nhìn vào kết quả — không phải chọn lọc kết quả.
+   Đã xác nhận thủ phạm là điểm khởi tạo (không phải dữ liệu):
+   `init_raw()` chỉ nhận `(config, seed)`, không dùng dữ liệu, nên seed
+   28/29/30 hỏng giống hệt ở cả ba kịch bản dù DGP khác nhau.
+
+**Kết quả cuối: PR-A đã 900/900, đầy đủ.** Cả hai lần đều xử lý theo cùng quy
+trình: `git stash` code cục bộ đang dở, `pull` sạch, `stash pop` rồi giải
+quyết xung đột (nếu có) — xem chi tiết bên dưới. Tóm tắt đầy đủ:
+`results/tom_tat_mo_phong.txt`.
+
+**Phát hiện quan trọng — cần biết trước khi diễn giải bất kỳ con số PR-A nào:**
+
+1. **Lỗi thứ hai, độc lập với lỗi $p_{11}$/$p_{22}$ đã ghi ở trên, được tìm ra
+   và sửa NGAY TRÊN máy PC**: đối xứng hoán vị nhãn (label-switching). Mỗi
+   lần lặp mô phỏng, bộ ước lượng có thể trả về "trạng thái 1"/"trạng thái 2"
+   theo thứ tự tùy ý (đổi nhãn cho ra đúng một hàm hợp lý) — gộp trực tiếp
+   $B=100$ lần lặp mà không sắp nhãn trước sẽ trộn $\omega_1$ với $\omega_2$
+   thành vô nghĩa. Đã sửa bằng `sap_nhan_trang_thai()` trong
+   `msgarchx/simulation/run_simulation.py` (tiêu chí: phương sai vô điều kiện
+   $\omega_s/(1-\alpha_s-\beta_s)$, quy ước trạng thái 1 = biến động thấp),
+   áp dụng trước khi gộp ở cả đường chạy song song lẫn `run_scenario()` tuần
+   tự. **VB đảo nhãn gần 50% số lần lặp** — tức gần như đúng bằng tung đồng
+   xu, một phát hiện khoa học độc lập đáng đưa vào bài (VB không phân biệt
+   được nhãn trạng thái tốt hơn ngẫu nhiên).
+2. **Coverage của VB-MF/VB-FR RẤT THẤP trên phần lớn tham số cấu trúc** —
+   nhiều tham số ($\omega,\alpha,\beta,p_{11},p_{22}$) có coverage $\approx
+   0{,}00$ (lý tưởng $0{,}95$), tệ hơn nhiều so với mức $\approx 0{,}33$ quan
+   sát được ở bộ 8 kịch bản cũ ($B=15$). Đây là bằng chứng mạnh hơn nhiều,
+   cần đối chiếu cẩn thận trước khi đưa vào kết luận bài — $B=100$ đáng tin
+   hơn hẳn $B=15$ về mặt sai số Monte Carlo.
+3. **MLE thiếu 1 lần lặp mỗi kịch bản** (99/100 ở cả S1, S2, S3) — do phân kỳ
+   NaN, không phải lỗi tính — ghi rõ khi báo cáo $n$.
+4. Số liệu $p_{11}$/$p_{22}$ trong PR-A **đã đúng ngay từ đầu** vì
+   `run_scenario()` sửa lỗi P0-placeholder trước khi máy PC chạy — không cần
+   sửa lại đại số như trường hợp S1-S8 cũ.
+
+**Xử lý xung đột hợp nhất (đáng biết nếu gặp lại tình huống tương tự)**:
+`chay_mo_phong_egarch.py` và `chay_mo_phong_song_song.py` bị xung đột "sửa ở
+xa / xóa (di chuyển) ở máy này" vì cùng lúc PC viết lại cả hai file (thêm hạ
+tầng song song theo từng lần lặp, dùng chung `_spawn`) trong khi máy này di
+chuyển chúng vào `scripts/pipeline/`. Đã lấy nội dung mới từ xa, đặt lại vào
+`scripts/pipeline/`, áp lại hai sửa đổi đường dẫn đã làm trước đó
+(`parents[1]`→`parents[2]`, sửa `from scripts.chay_mo_phong_song_song
+import` → `from scripts.pipeline.chay_mo_phong_song_song import`). File
+`run_simulation.py` tự động hợp nhất sạch (không xung đột) vì lỗi $p_{11}$/
+$p_{22}$ và lỗi sắp nhãn nằm ở hai vị trí khác nhau trong cùng file — cả hai
+sửa đổi cùng tồn tại đúng. `tests/test_simulation.py` xung đột nội dung do cả
+hai bên cùng thêm test mới ở cuối file — gộp thủ công, giữ cả hai bộ test
+(78 test tổng, đều pass). Ba script mới từ máy PC
+(`kiem_tra_hoi_tu_vb.py`, `tien_do_mo_phong.py`, `tom_tat_mo_phong.py`) đã
+được xếp vào `scripts/tien_ich/` theo đúng quy ước mới.
 
 **Đã kiểm chứng (2 phép, đều đối chiếu với kết quả cũ đã báo cáo)**:
 1. Tái cấu trúc `garch_mle.py` (thêm `family`) cho log-likelihood **trùng từng
@@ -721,7 +809,7 @@ Chi tiết cài đặt dễ mắc lỗi thầm lặng:
 `grep -rn "cuda\|torch.device" msgarchx/` trả về rỗng. Đừng nói với người dùng
 là "đã tối ưu GPU".
 
-Đã có sẵn `scripts/do_gpu_vs_cpu.py` (từ commit 9e42233) — script đo độc lập,
+Đã có sẵn `scripts/tien_ich/do_gpu_vs_cpu.py` (từ commit 9e42233) — script đo độc lập,
 chứa một bản `filter_batched` tham chiếu. Nó **chỉ để đo**, không được thư
 viện dùng.
 
@@ -748,6 +836,85 @@ $(2,)\to(B,2)$, giữ bản vô hướng gốc làm oracle → (2) đo lại CPU
 **Nơi batch hóa có tác dụng ngay**: $B=100$ lần lặp mô phỏng (PR-A và PR-B),
 và nhiều điểm khởi tạo MLE ở giai đoạn Adam. Giai đoạn L-BFGS khó batch vì mỗi
 điểm khởi tạo cần số bước tìm kiếm đường thẳng khác nhau.
+
+## Nghiên cứu "độ thiên vị hiệu chỉnh" (calibration bias) — 10/2026
+
+**Trạng thái: MS-GARCH-X đã code + smoke-test xong, sẵn sàng chạy thật.
+EGARCH-X CHỦ ĐỘNG hoãn** — người dùng yêu cầu chờ máy PC (GPU) chạy xong Bước
+1 vào ngày mai để có $\hat\theta$ EGARCH-X-t **thật** trước khi thêm vào
+nghiên cứu này ("để đảm bảo tính trung thực") — KHÔNG được tự chế số liệu
+EGARCH-X để chạy thử lưới này.
+
+**Giả thuyết kiểm định**: nếu chọn $\theta_0$ bằng đúng nghiệm MLE ước lượng
+từ dữ liệu thật, thì khi mô phỏng lại và ước lượng lại, bản thân MLE sẽ có vẻ
+"thắng" — không phải vì MLE tốt hơn, mà vì $\theta_0$ tình cờ nằm đúng ở điểm
+MLE dễ tìm lại nhất. Lặp lại tương tự với $\theta_0=$ nghiệm VB mean-field,
+và $\theta_0=$ nghiệm VB full-rank. Đây chính là mối lo circularity đã nêu
+khi người dùng từng đề xuất "chỉ cần 1 kịch bản hiệu chỉnh theo dữ liệu
+thật": *"nếu lấy $\hat\theta$ của MLE làm $\theta_0$, ta đã ngầm giả định MLE
+đúng trước khi bắt đầu thí nghiệm"*. Nghiên cứu này biến mối lo đó thành một
+giả thuyết **kiểm định được bằng số**.
+
+**Thiết kế đã chốt** (qua `AskUserQuestion`, 10/2026): lưới $3\times 3$ — 3
+điểm hiệu chỉnh (θ0 = nghiệm MLE / VB-MF / VB-FR thật trên MS-GARCH-X
+Student-t) × 3 phương pháp ước lượng lại (MLE/VB-MF/VB-FR, **không** MCMC).
+$T=2000$, $B=100$ — đồng bộ PR-A/PR-B. Đọc theo hàng: nếu đường chéo (phương
+pháp trùng nguồn hiệu chỉnh) luôn tốt hơn ngoài đường chéo, giả thuyết được
+xác nhận.
+
+**Code đã có**:
+- `msgarchx/simulation/calibration_bias.py` — `build_calibration_scenarios()`
+  dựng 3 `SimulationScenario` từ $\theta_0$ thật (KHÔNG tự đọc file — nhận
+  `dict[str, MSGARCHXParams]` làm đầu vào, giữ thư viện không gắn đường dẫn
+  dự án cụ thể, đúng quy ước của `run_egarch.py`).
+- `scripts/pipeline/chay_mo_phong_hieu_chinh.py` — script nạp $\theta_0$ thật từ
+  `results/02_mle.pt`/`03_vb.pt`, chạy song song nhiều tiến trình (mô phỏng
+  theo đúng kiến trúc đã kiểm chứng của `chay_mo_phong_song_song.py`: mỗi
+  lần lặp một checkpoint riêng trong `results/parts/hieu_chinh/`, ngắt giữa
+  chừng chạy lại tự bỏ qua phần đã xong), gộp kết quả vào
+  `results/08_hieu_chinh_CAL_<nguồn>.pt`, in bảng chẩn đoán $3\times3$.
+  - `--nhanh`: smoke test 1 lần lặp/ô, đã chạy thử thành công (không dùng để
+    báo cáo).
+  - Chạy thật: `python scripts/pipeline/chay_mo_phong_hieu_chinh.py --jobs N` rồi
+    `--combine`. Chi phí ước tính: 900 lần ước lượng (3×3×100) — cùng cấp độ
+    với S1-S4 đã hoàn thành trước đây bằng đúng hạ tầng song song này.
+- `tests/test_calibration_bias.py` (3 test) — 73 test tổng đều pass.
+- Rename `_params_from_summary_mean` → `params_from_summary_mean` (công khai)
+  trong `run_simulation.py` để tái dùng khi chuyển VB summary → `MSGARCHXParams`.
+
+**Việc còn thiếu**: (1) chạy thật lưới MS-GARCH-X ($B=100$) trên máy có nhiều
+lõi hơn — chưa chạy trên máy hiện tại; (2) khi Bước 1 EGARCH-X xong trên máy
+GPU, lặp lại đúng pattern này cho EGARCH-X-t (dùng `bayes_single.py` thay vì
+`bayes_model.py`, `run_egarch.py` làm tham chiếu thay vì `run_simulation.py`).
+
+## Đã dọn cấu trúc thư mục `scripts/` (10/2026)
+
+`code thuật toán/scripts/` trước có ~19 script rời ở cấp trên cùng, lẫn lộn
+demo / driver chính / tiện ích / sinh báo cáo. Đã chia thành 4 thư mục con —
+**từ nay script mới phải đặt đúng thư mục, đừng thả lại ở cấp trên cùng**:
+
+| Thư mục | Nội dung | Ví dụ |
+|---|---|---|
+| `scripts/demo/` | Minh họa quy mô nhỏ, KHÔNG phải nguồn kết quả chính thức | `01_run_preliminary_tests.py`…`04_run_simulation_demo.py` |
+| `scripts/pipeline/` | Driver chạy nghiên cứu thật, có checkpoint | `run_full_study.py`, `pipeline_all_models.py`, `run_one_model.py`, `run_models_parallel.py`, `chay_mo_phong_egarch.py`, `chay_mo_phong_hieu_chinh.py`, `chay_mo_phong_song_song.py`, `chay_do_nhay_prior.py` |
+| `scripts/bao_cao/` | Sinh báo cáo/hình/bảng cho bài báo (đã có sẵn, thêm 2 file) | `01_sinh_hinh.py`, `02_sinh_tex.py`, `appendix_gen.py`, `report_data.json`, `ve_hinh_bai_bao.py`, `cap_nhat_bai_bao.py` |
+| `scripts/tien_ich/` | Theo dõi tiến độ, tổng hợp, đo hiệu năng, xuất dữ liệu ngoài | `tien_do.py`, `tom_tat_ket_qua.py`, `build_html_report.py`, `do_gpu_vs_cpu.py`, `05_export_regime_signal_for_qp.py` |
+
+**Đã xử lý khi di chuyển** (để tránh đúng cái bẫy đã cảnh báo trước đây):
+- Mọi `Path(__file__).resolve().parents[1]` → `parents[2]` (thêm một cấp thư
+  mục) ở tất cả file vừa chuyển vào `demo/`, `pipeline/`, `tien_ich/`, và hai
+  file mới chuyển vào `bao_cao/` (`ve_hinh_bai_bao.py`, `cap_nhat_bai_bao.py`
+  — ba file gốc trong `bao_cao/` đã dùng đúng `parents[2]`/`parents[3]` từ
+  trước, không đổi).
+- `from scripts.run_full_study import ...` → `from scripts.pipeline.run_full_study import ...`
+  trong `chay_do_nhay_prior.py`, `chay_mo_phong_song_song.py`, `run_models_parallel.py`.
+- 3 file `.bat` (`cai_dat_va_chay_full.bat`, `chon_cach_chay.bat`,
+  `xem_bao_cao_html.bat`) và `README.md` đã cập nhật đường dẫn gọi lệnh.
+- Đã kiểm chứng: `pytest` 73/73 pass, `pipeline_all_models.py --kiem-ke`,
+  `run_one_model.py --list`, `run_models_parallel.py --list`,
+  `chay_mo_phong_hieu_chinh.py --bang`, và import trực tiếp
+  `scripts.pipeline.chay_do_nhay_prior` đều chạy đúng từ vị trí mới.
+- Chưa động tới `Bài báo/` — yêu cầu gốc chỉ nhắm vào `scripts/`.
 
 ## Sở thích & phản hồi của người dùng
 

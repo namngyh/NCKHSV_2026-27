@@ -25,15 +25,15 @@ buoc `oos` va `build_html_report.py` doc: `02_mle.pt`, `03_vb.pt`, `05_r1.pt`
 (cong them `09_timing.pt`). Tu do tro di, chay tiep MCMC va OOS bang
 run_full_study.py nhu binh thuong:
 
-    python scripts/run_full_study.py --preset full --only mcmc
-    python scripts/run_full_study.py --preset full --only oos simulation
+    python scripts/pipeline/run_full_study.py --preset full --only mcmc
+    python scripts/pipeline/run_full_study.py --preset full --only oos simulation
 
 Chay:
-    python scripts/run_models_parallel.py --list
-    python scripts/run_models_parallel.py --launch-all          # 8 tien trinh + tu gop
-    python scripts/run_models_parallel.py --launch-all --jobs 4
-    python scripts/run_models_parallel.py --model m1            # chay rieng 1 mo hinh
-    python scripts/run_models_parallel.py --merge               # gop thu cong
+    python scripts/pipeline/run_models_parallel.py --list
+    python scripts/pipeline/run_models_parallel.py --launch-all          # 8 tien trinh + tu gop
+    python scripts/pipeline/run_models_parallel.py --launch-all --jobs 4
+    python scripts/pipeline/run_models_parallel.py --model m1            # chay rieng 1 mo hinh
+    python scripts/pipeline/run_models_parallel.py --merge               # gop thu cong
 """
 from __future__ import annotations
 
@@ -45,7 +45,7 @@ import time
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 import torch
@@ -57,7 +57,7 @@ from msgarchx.inference.variational import fit_vb
 
 # Dung lai nguyen cau hinh, ham chuan bi du lieu va thu tu cot cua pipeline
 # chinh -- KHONG dinh nghia lai, de khong the lech nhau.
-from scripts.run_full_study import PRESETS, prepare_data  # noqa: E402
+from scripts.pipeline.run_full_study import PRESETS, prepare_data  # noqa: E402
 
 MLE_PARTS = ["b1", "b2", "b3", "b4", "m1"]
 VB_PARTS = ["m2", "m3"]
@@ -158,7 +158,7 @@ def load_data(cfg) -> dict:
     if not path.exists():
         raise SystemExit(
             f"[LOI] Chua co {path}. Chay truoc mot lan:\n"
-            f"      python scripts/run_models_parallel.py --prepare-data"
+            f"      python scripts/pipeline/run_models_parallel.py --prepare-data"
         )
     return torch.load(path, weights_only=False)
 

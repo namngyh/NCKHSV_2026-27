@@ -3,7 +3,7 @@ minh hoa quy trinh Bias/RMSE/Coverage/Brier. Ban thao chinh thuc can B lon
 hon nhieu (vd. 200+, xem scenarios.py) va nen chay ngoai tuyen/nhieu tien
 trinh do chi phi MLE/VB/MCMC tren nhieu lan lap.
 
-Chay: python scripts/04_run_simulation_demo.py
+Chay: python scripts/demo/04_run_simulation_demo.py
 """
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from msgarchx.inference.param_spec import ModelConfig
 from msgarchx.simulation.run_simulation import run_scenario

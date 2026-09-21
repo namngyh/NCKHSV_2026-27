@@ -1,7 +1,7 @@
 """Demo: nap du lieu VN30F1M that (ohlc_export.csv), gop ngay, tinh loi suat
 va RV_t, roi chay toan bo kiem dinh thong ke ban dau (Muc 5).
 
-Chay: python scripts/01_run_preliminary_tests.py [duong_dan_csv]
+Chay: python scripts/demo/01_run_preliminary_tests.py [duong_dan_csv]
 """
 from __future__ import annotations
 
@@ -10,14 +10,14 @@ from pathlib import Path
 
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from msgarchx.data.loader import load_vn30f1m_daily
 from msgarchx.stats_tests.preliminary_tests import run_all_preliminary_tests
 
 
 def main():
-    csv_path = sys.argv[1] if len(sys.argv) > 1 else str(Path(__file__).resolve().parents[1] / "ohlc_export.csv")
+    csv_path = sys.argv[1] if len(sys.argv) > 1 else str(Path(__file__).resolve().parents[2] / "ohlc_export.csv")
     print(f"Nap du lieu tu: {csv_path}")
 
     daily, report = load_vn30f1m_daily(csv_path)

@@ -1,10 +1,10 @@
 """Chay nghien cuu khoi phuc tham so cho EGARCH-X Student-t (PR-B).
 
 CACH CHAY
-    python scripts/chay_mo_phong_egarch.py                 # day du: 3 kich ban x B=100
-    python scripts/chay_mo_phong_egarch.py --nhanh         # B=3, T=400, de thu duong chay
-    python scripts/chay_mo_phong_egarch.py --kich-ban E2   # chi chay mot kich ban
-    python scripts/chay_mo_phong_egarch.py --combine       # chi gop lai, khong tinh
+    python scripts/pipeline/chay_mo_phong_egarch.py                 # day du: 3 kich ban x B=100
+    python scripts/pipeline/chay_mo_phong_egarch.py --nhanh         # B=3, T=400, de thu duong chay
+    python scripts/pipeline/chay_mo_phong_egarch.py --kich-ban E2   # chi chay mot kich ban
+    python scripts/pipeline/chay_mo_phong_egarch.py --combine       # chi gop lai, khong tinh
 
 BA KICH BAN (chi tiet trong msgarchx/simulation/run_egarch.py)
     E1  theta_0 = -0,10   co don bay  -> co phat hien ra khong?
@@ -34,7 +34,7 @@ try:
 except Exception:
     pass
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from msgarchx.inference import model_spec                      # noqa: E402
@@ -46,7 +46,7 @@ from msgarchx.simulation.run_egarch import (                   # noqa: E402
 )
 from msgarchx.simulation.run_simulation import _summarize_method  # noqa: E402
 # Dung chung vong dieu phoi song song cua PR-A thay vi viet ban thu hai.
-from scripts.chay_mo_phong_song_song import _spawn             # noqa: E402
+from scripts.pipeline.chay_mo_phong_song_song import _spawn             # noqa: E402
 
 PHUONG_PHAP = ("mle", "vb_mean_field", "vb_full_rank")
 

@@ -30,7 +30,7 @@ msgarchx/
     preliminary_tests.py  ADF, Phillips-Perron, KPSS, Ljung-Box, ARCH-LM, Jarque-Bera
   simulation/
     dgp.py                 Cơ chế sinh dữ liệu MS-GARCH-X Student-t
-    scenarios.py            4 kịch bản mô phỏng S1-S4 hiệu chỉnh từ tham số thực nghiệm VN30F1M
+    scenarios.py            8 kịch bản mô phỏng S1-S8 (tham số VÍ DỤ minh hoạ, CHƯA hiệu chỉnh theo VN30F1M thật)
     metrics.py               Bias, RMSE, Coverage 95%, Brier score
     run_simulation.py        Điều phối B lần lặp x {MLE, VB-MF, VB-FR}
   data/
@@ -41,14 +41,30 @@ msgarchx/
     exogenous.py               Bảng biến ngoại sinh X_{t-1}, chuẩn hóa chỉ theo tập huấn luyện
 
 scripts/
-  01_run_preliminary_tests.py        Demo: kiểm định sơ bộ trên VN30F1M thật
-  02_fit_mle_demo.py                  Demo: MLE cho B1, B2, M1 (cấu hình rút gọn)
-  03_fit_vb_demo.py                   Demo: VB (mean-field, full-rank) trên cửa sổ con
-  04_run_simulation_demo.py           Demo: nghiên cứu mô phỏng khôi phục tham số (S1)
-  05_export_regime_signal_for_qp.py   Xuất xác suất chế độ biến động ra CSV
-  run_full_study.py                   Điều phối pipeline chính thức (data->prelim->MLE->VB->R1->OOS->simulation)
-  run_one_model.py                    Chạy TỪNG MỘT trong 20 mô hình MLE của kế hoạch so sánh, tự chọn lúc nào chạy
-  build_html_report.py                Gộp mọi checkpoint trong results/ thành một báo cáo HTML
+  demo/                                Script minh họa quy mô nhỏ, không phải nguồn kết quả chính thức
+    01_run_preliminary_tests.py          Demo: kiểm định sơ bộ trên VN30F1M thật
+    02_fit_mle_demo.py                    Demo: MLE cho B1, B2, M1 (cấu hình rút gọn)
+    03_fit_vb_demo.py                     Demo: VB (mean-field, full-rank) trên cửa sổ con
+    04_run_simulation_demo.py             Demo: nghiên cứu mô phỏng khôi phục tham số (S1)
+  pipeline/                            Driver chạy nghiên cứu thật, có checkpoint
+    run_full_study.py                    Điều phối pipeline chính thức (data->prelim->MLE->VB->R1->OOS->simulation)
+    pipeline_all_models.py               Pipeline ba bước (thiết kế hiện hành) -- xem mục riêng bên dưới
+    run_models_parallel.py               Chạy song song 8 mô hình của pipeline chính thức cũ
+    run_one_model.py                     Chạy TỪNG MỘT trong 20 mô hình MLE của kế hoạch so sánh, tự chọn lúc nào chạy
+    chay_mo_phong_egarch.py              Khôi phục tham số EGARCH-X Student-t (PR-B)
+    chay_mo_phong_hieu_chinh.py          Nghiên cứu "độ thiên vị hiệu chỉnh" (calibration bias)
+    chay_mo_phong_song_song.py           Khôi phục tham số MS-GARCH-X song song nhiều tiến trình (PR-A: S1/S2/S3, B=100, T=2000 -- ĐÃ XONG 900/900)
+    chay_do_nhay_prior.py                Phân tích độ nhạy với tiên nghiệm (VB)
+  bao_cao/                             Sinh báo cáo/hình/bảng cho bài báo
+    01_sinh_hinh.py, 02_sinh_tex.py, appendix_gen.py, report_data.json
+    ve_hinh_bai_bao.py                   Vẽ hình cho bài báo từ kết quả đã có
+    cap_nhat_bai_bao.py                  Điền số liệu vào bảng kết quả của bài báo
+  tien_ich/                            Theo dõi tiến độ, tổng hợp, đo hiệu năng, xuất dữ liệu cho dự án khác
+    tien_do.py                           Bảng theo dõi tiến trình trực tiếp
+    tom_tat_ket_qua.py                   Xuất file text tổng hợp mọi kết quả đã có
+    build_html_report.py                 Gộp mọi checkpoint trong results/ thành một báo cáo HTML
+    do_gpu_vs_cpu.py                     Đo tốc độ CPU vs GPU cho bộ lọc tiến
+    05_export_regime_signal_for_qp.py    Xuất xác suất chế độ biến động ra CSV cho dự án QP
 
 chon_cach_chay.bat            Menu Windows: chọn chạy toàn bộ / từng bước / từng mô hình / tạo báo cáo
 cai_dat_va_chay_full.bat       Cài thư viện rồi chạy `run_full_study.py --preset full`
@@ -72,10 +88,10 @@ Windows ổn định sẵn trong môi trường này.
 python -m pytest tests/ -q                       # ~42 test nhanh (vài giây)
 python -m pytest tests/test_inference_smoke.py    # smoke test MLE/VB/MCMC (~2-3 phút)
 
-python scripts/01_run_preliminary_tests.py        # kiểm định sơ bộ trên VN30F1M thật
-python scripts/02_fit_mle_demo.py                 # MLE cho B1, B2, M1 (cấu hình demo rút gọn)
-python scripts/03_fit_vb_demo.py                  # VB (mean-field, full-rank), cấu hình demo
-python scripts/04_run_simulation_demo.py          # demo nghiên cứu mô phỏng (kịch bản S1)
+python scripts/demo/01_run_preliminary_tests.py        # kiểm định sơ bộ trên VN30F1M thật
+python scripts/demo/02_fit_mle_demo.py                 # MLE cho B1, B2, M1 (cấu hình demo rút gọn)
+python scripts/demo/03_fit_vb_demo.py                  # VB (mean-field, full-rank), cấu hình demo
+python scripts/demo/04_run_simulation_demo.py          # demo nghiên cứu mô phỏng (kịch bản S1)
 ```
 
 ## Pipeline thiết kế ba bước (MỚI): `pipeline_all_models.py`
@@ -85,16 +101,16 @@ bằng ba phương pháp, rồi chạy MCMC **một lần duy nhất** cho mô h
 Xem `CLAUDE.md` mục "Cấu trúc nghiên cứu ba bước".
 
 ```bash
-python scripts/pipeline_all_models.py --kiem-ke      # CHẠY LỆNH NÀY TRƯỚC: xem sẽ chạy gì, bỏ qua gì
-python scripts/pipeline_all_models.py                # chạy đầy đủ
-python scripts/pipeline_all_models.py --nhanh        # cấu hình nhỏ, thử đường chạy (~10 phút)
-python scripts/pipeline_all_models.py --bo-qua-mcmc  # dừng trước bước MCMC
-python scripts/pipeline_all_models.py --chi-bang     # chỉ in lại bảng từ checkpoint đã có
-python scripts/pipeline_all_models.py --tieu-chi nls # đổi tiêu chí chọn (qlike | nls | bic)
+python scripts/pipeline/pipeline_all_models.py --kiem-ke      # CHẠY LỆNH NÀY TRƯỚC: xem sẽ chạy gì, bỏ qua gì
+python scripts/pipeline/pipeline_all_models.py                # chạy đầy đủ
+python scripts/pipeline/pipeline_all_models.py --nhanh        # cấu hình nhỏ, thử đường chạy (~10 phút)
+python scripts/pipeline/pipeline_all_models.py --bo-qua-mcmc  # dừng trước bước MCMC
+python scripts/pipeline/pipeline_all_models.py --chi-bang     # chỉ in lại bảng từ checkpoint đã có
+python scripts/pipeline/pipeline_all_models.py --tieu-chi nls # đổi tiêu chí chọn (qlike | nls | bic)
 ```
 
 **Điều kiện tiên quyết**: phải có sẵn `results/00_data.pt`. Nếu chưa có:
-`python scripts/run_full_study.py --only data`.
+`python scripts/pipeline/run_full_study.py --only data`.
 
 **Pipeline chỉ tính phần MỚI.** Sáu mô hình một trạng thái (GARCH chuẩn,
 GARCH Student-t, GARCH-X Student-t, EGARCH chuẩn, EGARCH Student-t,
@@ -112,9 +128,9 @@ bị lần chạy thật coi là "đã xong" và bỏ qua.
 ### Khôi phục tham số cho EGARCH (PR-B): `chay_mo_phong_egarch.py`
 
 ```bash
-python scripts/chay_mo_phong_egarch.py --nhanh        # thử đường chạy (B=3, T=400)
-python scripts/chay_mo_phong_egarch.py                # đầy đủ: 3 kịch bản × 3 phương pháp × B=100
-python scripts/chay_mo_phong_egarch.py --kich-ban E2  # chỉ chạy kịch bản θ₀ = 0
+python scripts/pipeline/chay_mo_phong_egarch.py --nhanh        # thử đường chạy (B=3, T=400)
+python scripts/pipeline/chay_mo_phong_egarch.py                # đầy đủ: 3 kịch bản × 3 phương pháp × B=100
+python scripts/pipeline/chay_mo_phong_egarch.py --kich-ban E2  # chỉ chạy kịch bản θ₀ = 0
 ```
 
 Ba kịch bản: **E1** có đòn bẩy ($\theta_0=-0{,}10$), **E2** không đòn bẩy
@@ -129,7 +145,7 @@ chừng chạy lại sẽ tự bỏ qua phần đã xong.
 ### Trạng thái tối ưu tính toán
 
 **Chưa batch hóa, chưa hỗ trợ GPU** — thư viện chạy hoàn toàn tuần tự trên CPU.
-Đã đo bằng `scripts/do_gpu_vs_cpu.py` trên máy 12 lõi (không có GPU), float64,
+Đã đo bằng `scripts/tien_ich/do_gpu_vs_cpu.py` trên máy 12 lõi (không có GPU), float64,
 T=1735, forward+backward:
 
 | B (số bộ tham số cùng lúc) | Giây / mỗi bộ | Tăng tốc |
@@ -163,21 +179,21 @@ chính (PR-A, PR-B) đã chạy xong.
 
 ## Chạy ước lượng CHÍNH THỨC cho bản thảo: `run_full_study.py`
 
-`scripts/run_full_study.py` điều phối TOÀN BỘ quy trình (kiểm định sơ bộ ->
+`scripts/pipeline/run_full_study.py` điều phối TOÀN BỘ quy trình (kiểm định sơ bộ ->
 B1-B4/M1 MLE -> M2/M3 VB -> M4 MCMC -> R1 -> đánh giá ngoài mẫu -> mô phỏng
 S1-S8), mỗi bước được **checkpoint** vào thư mục `results/` (mặc định) — nếu
 dừng/tắt máy giữa chừng, chạy lại lệnh cũ sẽ bỏ qua các bước đã xong.
 
 ```
-python scripts/run_full_study.py --preset dry-run   # kiem tra pipeline chay dung trong vai phut
-python scripts/run_full_study.py --preset full       # chay that, xem canh bao thoi gian ben duoi
-python scripts/run_full_study.py --preset full --only simulation   # chi chay lai 1 buoc cu the
+python scripts/pipeline/run_full_study.py --preset dry-run   # kiem tra pipeline chay dung trong vai phut
+python scripts/pipeline/run_full_study.py --preset full       # chay that, xem canh bao thoi gian ben duoi
+python scripts/pipeline/run_full_study.py --preset full --only simulation   # chi chay lai 1 buoc cu the
 ```
 
 Sau khi (hoặc trong khi) `results/` có dữ liệu, tạo báo cáo HTML tổng hợp:
 
 ```
-python scripts/build_html_report.py --results-dir results --out report.html
+python scripts/tien_ich/build_html_report.py --results-dir results --out report.html
 ```
 
 Báo cáo đọc bất kỳ file `.pt` nào đã có trong `results/`, các bước chưa chạy
@@ -222,7 +238,7 @@ nên có thể trộn lẫn tùy ý (vd. chạy MLE bằng cách 2, rồi chạy
 ### Cách 1 — Chạy hết một lượt (`cai_dat_va_chay_full.bat` hoặc `--preset full`)
 
 ```
-python scripts/run_full_study.py --preset full
+python scripts/pipeline/run_full_study.py --preset full
 ```
 
 Chạy tuần tự `data -> prelim -> mle -> vb -> r1 -> oos -> simulation`.
@@ -230,8 +246,8 @@ Chạy tuần tự `data -> prelim -> mle -> vb -> r1 -> oos -> simulation`.
 ### Cách 2 — Chạy từng bước của pipeline chính, tự chọn thứ tự (`--only`)
 
 ```
-python scripts/run_full_study.py --preset full --only data prelim mle vb r1
-python scripts/run_full_study.py --preset full --only oos simulation
+python scripts/pipeline/run_full_study.py --preset full --only data prelim mle vb r1
+python scripts/pipeline/run_full_study.py --preset full --only oos simulation
 ```
 
 Lưu ý thứ tự 3 lệnh trên **không tùy tiện**:
@@ -253,10 +269,10 @@ terminal, và giữ lại lịch sử mọi lần chạy (không phải là `run
 mà là kế hoạch sàng lọc 20 đặc tả MLE riêng — xem bảng bên dưới):
 
 ```
-python scripts/run_one_model.py --list              # xem 20 mo hinh, cai nao chay duoc
-python scripts/run_one_model.py 5                    # chay mo hinh #05
-python scripts/run_one_model.py 12 --n-starts 6 --n-adam 500 --n-lbfgs 250
-python scripts/run_one_model.py 3 --force            # ep chay lai du da co checkpoint
+python scripts/pipeline/run_one_model.py --list              # xem 20 mo hinh, cai nao chay duoc
+python scripts/pipeline/run_one_model.py 5                    # chay mo hinh #05
+python scripts/pipeline/run_one_model.py 12 --n-starts 6 --n-adam 500 --n-lbfgs 250
+python scripts/pipeline/run_one_model.py 3 --force            # ep chay lai du da co checkpoint
 ```
 
 | # | Mô hình | Trạng thái |

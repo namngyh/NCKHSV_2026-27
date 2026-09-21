@@ -92,7 +92,7 @@ def _run_one_method(
     if method in ("vb_mean_field", "vb_full_rank"):
         guide_type = "mean_field" if method == "vb_mean_field" else "full_rank"
         res = fit_vb(r, X, config, guide_type=guide_type, seed=seed, **kwargs)
-        mean_params = _params_from_summary_mean(res.summary, config)
+        mean_params = params_from_summary_mean(res.summary, config)
         with torch.no_grad():
             out = ms_garch_forward_filter(mean_params, r, X)
         est = _summary_to_named(res.summary, key="mean", config=config)
@@ -106,7 +106,7 @@ def _run_one_method(
         # dang o dau va con bao lau.
         kwargs.setdefault("verbose", True)
         res = fit_mcmc(r, X, config, seed=seed, **kwargs)
-        mean_params = _params_from_summary_mean(res.summary, config)
+        mean_params = params_from_summary_mean(res.summary, config)
         with torch.no_grad():
             out = ms_garch_forward_filter(mean_params, r, X)
         est = _summary_to_named(res.summary, key="mean", config=config)
@@ -117,7 +117,7 @@ def _run_one_method(
     raise ValueError(f"Phuong phap khong ho tro: {method!r}")
 
 
-def _params_from_summary_mean(summary: dict, config: ModelConfig) -> MSGARCHXParams:
+def params_from_summary_mean(summary: dict, config: ModelConfig) -> MSGARCHXParams:
     p11, p22 = summary["p11"]["mean"], summary["p22"]["mean"]
     P = torch.stack([torch.stack([p11, 1 - p11]), torch.stack([1 - p22, p22])])
     nu = summary["nu_minus_2"]["mean"] + 2.0
@@ -160,7 +160,13 @@ def run_scenario(
     `method_kwargs`: vd. {"mcmc": {"n_chains": 4, "n_warmup": 100, "n_samples": 150}}
     de ghi de sieu tham so mac dinh (_DEFAULT_METHOD_KWARGS) theo tung phuong phap.
     """
+    # scenario.params.P chi la placeholder (eye(2)) -- P0 rieng moi la ma tran
+    # chuyen trang thai THAT dung de sinh du lieu (xem scenarios.py). Phai ghi
+    # de p11/p22 sau khi goi _named_params, neu khong Bias/RMSE se tinh nham
+    # so voi p11=p22=1.0.
     true_named = _named_params(scenario.params)
+    true_named["p11"] = float(scenario.P0[0, 0])
+    true_named["p22"] = float(scenario.P0[1, 1])
     results = {m: [] for m in methods}
     method_kwargs = method_kwargs or {}
 

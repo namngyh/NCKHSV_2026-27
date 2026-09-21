@@ -5,9 +5,9 @@ can gan vao tien trinh nao nen chay duoc bat cu luc nao, bao nhieu cua so cung
 duoc, va khong lam anh huong gi den cac tien trinh dang chay.
 
 Chay:
-    python scripts/tien_do.py            # in mot lan roi thoat
-    python scripts/tien_do.py --lap      # cap nhat lien tuc moi 30 giay
-    python scripts/tien_do.py --lap --moi 10
+    python scripts/tien_ich/tien_do.py            # in mot lan roi thoat
+    python scripts/tien_ich/tien_do.py --lap      # cap nhat lien tuc moi 30 giay
+    python scripts/tien_ich/tien_do.py --lap --moi 10
 Hoac double-click `xem_tien_do.bat`.
 """
 from __future__ import annotations
@@ -20,7 +20,7 @@ import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 LOGS = ROOT / "logs"
 RESULTS = ROOT / "results"
 

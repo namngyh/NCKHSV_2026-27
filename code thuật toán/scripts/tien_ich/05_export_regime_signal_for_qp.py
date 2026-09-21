@@ -22,8 +22,8 @@ Hai điểm point-in-time quan trọng:
    được biến động của cả validation/test.
 
 Chạy:
-    python scripts/05_export_regime_signal_for_qp.py
-    python scripts/05_export_regime_signal_for_qp.py --train-end 2022-12-02 --n-starts 4
+    python scripts/tien_ich/05_export_regime_signal_for_qp.py
+    python scripts/tien_ich/05_export_regime_signal_for_qp.py --train-end 2022-12-02 --n-starts 4
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ from pathlib import Path
 import pandas as pd
 import torch
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from msgarchx.data.exogenous import build_exogenous_matrix, standardize_with_train_stats
 from msgarchx.data.loader import load_vn30f1m_daily
@@ -61,7 +61,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument(
         "csv_path", nargs="?",
-        default=str(Path(__file__).resolve().parents[1] / "ohlc_export.csv"),
+        default=str(Path(__file__).resolve().parents[2] / "ohlc_export.csv"),
     )
     ap.add_argument(
         "--train-end", default=DEFAULT_TRAIN_END,
@@ -72,7 +72,7 @@ def main() -> int:
     ap.add_argument("--n-lbfgs", type=int, default=150)
     ap.add_argument(
         "--out",
-        default=str(Path(__file__).resolve().parents[1] / "regime_signal_vn30f1m.csv"),
+        default=str(Path(__file__).resolve().parents[2] / "regime_signal_vn30f1m.csv"),
     )
     args = ap.parse_args()
 

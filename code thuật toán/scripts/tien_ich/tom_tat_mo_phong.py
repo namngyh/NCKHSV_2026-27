@@ -7,7 +7,7 @@ Doc tu cac file da gop (`results/07_simulation_S*.pt`,
 Chay lai bat cu luc nao -- ke ca khi PR-B moi xong mot phan; phan chua co se
 duoc ghi ro la "chua chay" thay vi bo trong.
 
-    python scripts/tom_tat_mo_phong.py
+    python scripts/tien_ich/tom_tat_mo_phong.py
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 import torch  # noqa: E402
