@@ -34,6 +34,29 @@ plt.rcParams.update({
 C_MLE, C_MF, C_FR, C_MCMC = "#2E5A88", "#C77B30", "#7A9A5B", "#9B4B4B"
 
 
+# ---------------------------------------------------------- 0. Gia VN30F1M
+def hinh_gia():
+    from msgarchx.data.loader import load_vn30f1m_daily
+    daily, _ = load_vn30f1m_daily(str(ROOT / "ohlc_export.csv"))
+    daily = daily.iloc[1:]  # bo phien dau (log_return = NaN, khong nam trong r_all)
+    d = torch.load(ROOT / "results" / "00_data.pt", weights_only=False)
+    n_tr = int(d["n_train"])
+    dates = daily["date"].to_numpy()
+    close = daily["close"].to_numpy()
+
+    fig, ax = plt.subplots(figsize=(7.2, 2.8))
+    ax.plot(dates, close, color=C_MLE, lw=0.7)
+    ax.axvline(dates[n_tr], color="#9B4B4B", ls="--", lw=1,
+               label="Ranh giới huấn luyện / kiểm định")
+    ax.set_ylabel("Giá đóng cửa (điểm)")
+    ax.set_title("Giá hợp đồng tương lai VN30F1M (chuỗi hợp đồng liên tục, giá đóng cửa ngày)", fontsize=9.5)
+    ax.legend(frameon=False, fontsize=7.5, loc="upper left")
+    fig.autofmt_xdate()
+    fig.tight_layout()
+    fig.savefig(FIG / "gia_vn30f1m.pdf")
+    plt.close(fig)
+
+
 # ---------------------------------------------------------- 1. Du lieu
 def hinh_du_lieu():
     d = torch.load(ROOT / "results" / "00_data.pt", weights_only=False)
@@ -158,9 +181,10 @@ def hinh_rsd():
 
 
 if __name__ == "__main__":
+    hinh_gia()
     hinh_du_lieu()
     hinh_buoc1_aic()
     hinh_msgarch_coverage()
     hinh_egarch_theta()
     hinh_rsd()
-    print("-> hinh_tong_hop/: 5 file PDF")
+    print("-> hinh_tong_hop/: 6 file PDF")
