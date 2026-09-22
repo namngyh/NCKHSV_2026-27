@@ -168,9 +168,10 @@ def hinh_rsd():
     w = 0.35
     ax.bar(x - w / 2, r_mf, width=w, label="VB-MF", color=C_MF)
     ax.bar(x + w / 2, r_fr, width=w, label="VB-FR", color=C_FR)
-    ax.axhline(1.0, color="#333333", lw=1, label=r"$R_{sd}=1$ (khớp MCMC)")
+    ax.axhline(1.0, color="#9B4B4B", ls="--", lw=1, label=r"$R_{sd}=1$ (khớp MCMC)")
     ax.set_xticks(x)
     ax.set_xticklabels(tham)
+    ax.set_ylim(0, 1.15)
     ax.set_ylabel(r"$R_{sd}=\mathrm{sd}_{VB}/\mathrm{sd}_{MCMC}$")
     ax.set_title("Bước 3: VB đánh giá thấp bất định của $\\omega,\\beta$ rõ nhất "
                  "(dữ liệu VN30F1M thật, EGARCH-X Student-$t$)", fontsize=9.3)
