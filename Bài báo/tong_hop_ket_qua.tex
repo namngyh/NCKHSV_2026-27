@@ -12,6 +12,7 @@
 \usepackage{tabularx}
 \usepackage{array}
 \usepackage{float}
+\usepackage{graphicx}
 \usepackage{caption}
 \usepackage{microtype}
 \usepackage[hidelinks]{hyperref}
@@ -23,7 +24,7 @@
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{0.3em}
 
-\title{\vspace{-1.2cm}\textbf{Tổng hợp kết quả}\\[0.2em]\large Mô hình biến động VN30F1M: ước lượng, mô phỏng khôi phục tham số và MCMC}
+\title{\vspace{-1.2cm}\textbf{Tổng hợp kết quả}\\[0.2em]\large Mô hình biến động cho dữ liệu VN30F1M: Ước lượng mô hình, mô phỏng khôi phục tham số}
 \author{}
 \date{}
 
@@ -40,7 +41,7 @@
 \textbf{Ký hiệu} & \textbf{Ý nghĩa} \\
 \midrule
 MLE / VB-MF / VB-FR / MCMC & Hợp lý cực đại / Bayes biến phân mean-field / Bayes biến phân full-rank / MCMC (thuật toán NUTS) \\
-$d$, $\ell$ & Số tham số tự do; log-hợp-lý tại nghiệm \\
+$d$, $\ell$ & Số tham số; log-hợp-lý tại nghiệm \\
 QLIKE & $\dfrac1N\displaystyle\sum_t\Big[\log\hat h_t + \dfrac{RV_t}{\hat h_t}\Big]$ --- sai số dự báo phương sai, nhỏ hơn là tốt hơn \\[0.6em]
 NLS & $-\dfrac1N\displaystyle\sum_t\log\hat f_t(r_t)$ --- điểm log âm trung bình; với VB/MCMC dùng mật độ dự báo hỗn hợp qua mẫu hậu nghiệm \\[0.6em]
 Mean, Bias, RMSE, SE & Trung bình ước lượng $\bar\theta$; độ chệch $\bar\theta-\theta_0$; căn sai số toàn phương trung bình $\sqrt{\frac1B\sum(\hat\theta_b-\theta_0)^2}$; độ lệch chuẩn Monte Carlo $\sqrt{\text{RMSE}^2-\text{Bias}^2}$ \\
@@ -80,12 +81,17 @@ Tổng & 2017-11-07 & 2026-07-17 & 2170 & 100\% \\
 \end{tabular}
 \end{table}
 
-\section{Bước 1 --- tám mô hình, ba phương pháp, dữ liệu VN30F1M}
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{hinh_tong_hop/du_lieu_thoi_gian.pdf}
+\caption{Lợi suất ngày và biến động thực tế ($RV_t$) của VN30F1M theo thời gian, đường đứt nét đỏ đánh dấu ranh giới tập huấn luyện/kiểm định}
+\end{figure}
+
+\section{Tám mô hình, ba phương pháp, dữ liệu VN30F1M}
 \begin{table}[H]\centering\footnotesize
-\caption{Bước 1 --- khớp trong mẫu ($n_{\text{huấn luyện}}=1735$). $d$ = số tham số tự do; AIC $=2d-2\ell$, BIC $=d\ln n-2\ell$; ELBO chỉ có với VB}\label{tab:b1-trong-mau}
+\caption{Chạy mô hình trong tập train ($n_{\text{train}}=1735$). $d$: Số tham số; AIC $=2d-2\ell$, BIC $=d\ln n-2\ell$; ELBO chỉ có với VB}\label{tab:b1-trong-mau}
 \begin{tabular}{l l r r r r r}
 \toprule
-\textbf{Mô hình} & \textbf{PP} & $d$ & \textbf{log-lik} & \textbf{AIC} & \textbf{BIC} & \textbf{ELBO} \\
+\textbf{Mô hình} & \textbf{Phương pháp} & $d$ & \textbf{log-lik} & \textbf{AIC} & \textbf{BIC} & \textbf{ELBO} \\
 \midrule
 GARCH chuẩn & MLE & 4 & $-$2944,90 & 5897,80 & 5919,63 & -- \\
 GARCH chuẩn & VB-MF & 4 & -- & -- & -- & $-$2964,63 \\
@@ -115,10 +121,10 @@ MS-GARCH-X Student-t & VB-FR & 15 & -- & -- & -- & $-$2866,36 \\
 \end{tabular}
 \end{table}
 \begin{table}[H]\centering\footnotesize
-\caption{Bước 1 --- dự báo ngoài mẫu ($n_{\text{kiểm định}}=435$): MAE, RMSE, QLIKE so với $RV_t$; NLS = điểm log âm trung bình. Nhỏ hơn là tốt hơn}\label{tab:b1-ngoai-mau}
+\caption{Chạy mô hình trong tập test ($n_{\text{test}}=435$)}\label{tab:b1-ngoai-mau}
 \begin{tabular}{l l r r r r}
 \toprule
-\textbf{Mô hình} & \textbf{PP} & \textbf{MAE} & \textbf{RMSE} & \textbf{QLIKE} & \textbf{NLS} \\
+\textbf{Mô hình} & \textbf{Phương pháp} & \textbf{MAE} & \textbf{RMSE} & \textbf{QLIKE} & \textbf{NLS} \\
 \midrule
 GARCH chuẩn & MLE & 1,2769 & 2,2799 & 0,9836 & 1,6812 \\
 GARCH chuẩn & VB-MF & 1,2335 & 2,2485 & 0,9710 & 1,6680 \\
@@ -148,7 +154,7 @@ MS-GARCH-X Student-t & VB-FR & 1,9505 & 3,1874 & 1,1434 & 1,5392 \\
 \end{tabular}
 \end{table}
 \begin{table}[H]\centering\footnotesize
-\caption{Bước 1 --- kiểm định VaR ngoài mẫu ($n=435$; kỳ vọng 4,4 và 21,8 vi phạm). $p_{\text{UC}}$: Kupiec; $p_{\text{CC}}$: Christoffersen}\label{tab:b1-var}
+\caption{Kiểm định VaR ngoài mẫu ($n=435$; kỳ vọng 4,4 và 21,8 vi phạm). $p_{\text{UC}}$: Kupiec; $p_{\text{CC}}$: Christoffersen}\label{tab:b1-var}
 \begin{tabular}{l l r r r r r r}
 \toprule
 \textbf{Mô hình} & \textbf{PP} & $n_{1\%}$ & $p_{\text{UC}}$ & $p_{\text{CC}}$ & $n_{5\%}$ & $p_{\text{UC}}$ & $p_{\text{CC}}$ \\
@@ -181,10 +187,15 @@ MS-GARCH-X Student-t & VB-FR & 4 & 0,864 & 0,949 & 26 & 0,364 & 0,358 \\
 \end{tabular}
 \end{table}
 
-\section{Bước 2 --- Khôi phục tham số: MS-GARCH-X Student-$t$ (8 kịch bản)}
-\subsection{S1 --- \texorpdfstring{hai trạng thái phân biệt rõ, $\nu_0=8$}{hai trang thai phan biet ro, nu0=8}}
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{hinh_tong_hop/buoc1_aic.pdf}
+\caption{AIC trong mẫu (ước lượng MLE) của tám mô hình --- EGARCH-X Student-$t$ (xanh lá) thắng cuộc}
+\end{figure}
+
+\section{Khôi phục tham số: MS-GARCH-X Student-$t$ (8 trường hợp)}
+\subsection{S1: \texorpdfstring{hai trạng thái phân biệt rõ, $\nu_0=8$}{hai trang thai phan biet ro, nu0=8}}
 \begin{table}[H]\centering\normalsize
-\caption{S1: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S1}
+\caption{S1: Tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S1}
 \begin{tabular}{l r l r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Tham số} & $\theta_0$ \\
@@ -202,7 +213,7 @@ $\beta_2$ & 0,800 & & \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{S1 --- Hợp lý cực đại (MLE), $B=100$ lần lặp, Brier $=0,3969$; CP 95\% Wald trên 50/100 lần lặp có Hessian xác định dương}\label{tab:S1-mle}
+\caption{S1 --- Hợp lý cực đại (MLE), $B=100$ lần lặp, Brier $=0,3969$}\label{tab:S1-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -276,11 +287,10 @@ $\nu$ & 8,000 & 4,483 & $-$3,517 & 3,677 & 1,071 & 8\% \\
 \end{tabular}
 \end{table}
 
-\noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 23/100 ; VB-MF 48/100 ; VB-FR 49/100.\normalsize
 
-\subsection{S2 --- \texorpdfstring{hai trạng thái gần nhau, $\nu_0=8$}{hai trang thai gan nhau, nu0=8}}
+\subsection{S2: \texorpdfstring{hai trạng thái gần nhau, $\nu_0=8$}{hai trang thai gan nhau, nu0=8}}
 \begin{table}[H]\centering\normalsize
-\caption{S2: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S2}
+\caption{S2: Tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S2}
 \begin{tabular}{l r l r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Tham số} & $\theta_0$ \\
@@ -298,7 +308,7 @@ $\beta_2$ & 0,830 & & \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{S2 --- Hợp lý cực đại (MLE), $B=100$ lần lặp, Brier $=0,6611$; CP 95\% Wald trên 49/100 lần lặp có Hessian xác định dương}\label{tab:S2-mle}
+\caption{S2 --- Hợp lý cực đại (MLE), $B=100$ lần lặp, Brier $=0,6611$}\label{tab:S2-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -372,11 +382,9 @@ $\nu$ & 8,000 & 7,704 & $-$0,296 & 1,402 & 1,371 & 94\% \\
 \end{tabular}
 \end{table}
 
-\noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 30/100 ; VB-MF 52/100 ; VB-FR 47/100.\normalsize
-
-\subsection{S3 --- \texorpdfstring{đuôi rất dày, $\nu_0=4$}{duoi rat day, nu0=4}}
+\subsection{S3: \texorpdfstring{đuôi rất dày, $\nu_0=4$}{duoi rat day, nu0=4}}
 \begin{table}[H]\centering\normalsize
-\caption{S3: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S3}
+\caption{S3: Tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S3}
 \begin{tabular}{l r l r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Tham số} & $\theta_0$ \\
@@ -394,7 +402,7 @@ $\beta_2$ & 0,800 & & \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{S3 --- Hợp lý cực đại (MLE), $B=100$ lần lặp, Brier $=0,3992$; CP 95\% Wald trên 42/100 lần lặp có Hessian xác định dương}\label{tab:S3-mle}
+\caption{S3 --- Hợp lý cực đại (MLE), $B=100$ lần lặp, Brier $=0,3992$}\label{tab:S3-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -468,11 +476,9 @@ $\nu$ & 4,000 & 2,795 & $-$1,205 & 1,240 & 0,290 & 4\% \\
 \end{tabular}
 \end{table}
 
-\noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 28/100 ; VB-MF 48/100 ; VB-FR 53/100.\normalsize
-
-\subsection{S4 --- \texorpdfstring{$\nu_0=30$ (gần phân phối chuẩn)}{nu0=30 (gan phan phoi chuan)}}
+\subsection{S4: \texorpdfstring{$\nu_0=30$ (gần phân phối chuẩn)}{nu0=30 (gan phan phoi chuan)}}
 \begin{table}[H]\centering\normalsize
-\caption{S4: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S4}
+\caption{S4: Tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S4}
 \begin{tabular}{l r l r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Tham số} & $\theta_0$ \\
@@ -490,7 +496,7 @@ $\beta_2$ & 0,800 & & \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{S4 --- Hợp lý cực đại (MLE), $B=29$ lần lặp, Brier $=0,4535$; CP 95\% Wald trên 15/29 lần lặp có Hessian xác định dương}\label{tab:S4-mle}
+\caption{S4 --- Hợp lý cực đại (MLE), $B=29$ lần lặp, Brier $=0,4535$}\label{tab:S4-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -539,9 +545,7 @@ $\nu$ & 30,000 & 7,258 & $-$22,742 & 22,835 & 2,064 & 0\% \\
 \end{tabular}
 \end{table}
 
-\noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 6/29 ; VB-MF 5/15.\normalsize
-
-\subsection{S5 --- \texorpdfstring{trạng thái biến động cao hiếm, $p_{11}=0{,}99$, $p_{22}=0{,}85$}{trang thai bien dong cao hiem, p11=0,99, p22=0,85}}
+\subsection{S5: \texorpdfstring{trạng thái biến động cao hiếm, $p_{11}=0{,}99$, $p_{22}=0{,}85$}{trang thai bien dong cao hiem, p11=0,99, p22=0,85}}
 \begin{table}[H]\centering\normalsize
 \caption{S5: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-S5}
 \begin{tabular}{l r l r}
@@ -561,7 +565,7 @@ $\beta_2$ & 0,800 & & \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{S5 --- Hợp lý cực đại (MLE), $B=29$ lần lặp, Brier $=0,1688$; CP 95\% bỏ trống vì chỉ 3/29 lần lặp có Hessian xác định dương}\label{tab:S5-mle}
+\caption{S5 --- Hợp lý cực đại (MLE), $B=29$ lần lặp, Brier $=0,1688$}\label{tab:S5-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -610,11 +614,9 @@ $\nu$ & 8,000 & 3,339 & $-$4,661 & 4,697 & 0,582 & 0\% \\
 \end{tabular}
 \end{table}
 
-\noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 6/29 ; VB-MF 6/15.\normalsize
-
-\subsection{S6 --- \texorpdfstring{cỡ mẫu nhỏ, $T=500$}{co mau nho, T=500}}
+\subsection{S6: \texorpdfstring{cỡ mẫu nhỏ, $T=500$}{co mau nho, T=500}}
 \begin{table}[H]\centering\normalsize
-\caption{S6: tham số thật $\theta_0$; $T=500$, burn-in $=200$}\label{tab:theta0-S6}
+\caption{S6: Tham số thật $\theta_0$; $T=500$, burn-in $=200$}\label{tab:theta0-S6}
 \begin{tabular}{l r l r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Tham số} & $\theta_0$ \\
@@ -632,7 +634,7 @@ $\beta_2$ & 0,800 & & \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{S6 --- Hợp lý cực đại (MLE), $B=30$ lần lặp, Brier $=0,4338$; CP 95\% bỏ trống vì chỉ 8/30 lần lặp có Hessian xác định dương}\label{tab:S6-mle}
+\caption{S6 --- Hợp lý cực đại (MLE), $B=30$ lần lặp, Brier $=0,4338$}\label{tab:S6-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -681,9 +683,7 @@ $\nu$ & 8,000 & 3,085 & $-$4,915 & 4,946 & 0,554 & 0\% \\
 \end{tabular}
 \end{table}
 
-\noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 10/30 ; VB-MF 8/15.\normalsize
-
-\subsection{S7 --- \texorpdfstring{cỡ mẫu lớn, $T=5000$}{co mau lon, T=5000}}
+\subsection{S7: \texorpdfstring{cỡ mẫu lớn, $T=5000$}{co mau lon, T=5000}}
 \begin{table}[H]\centering\normalsize
 \caption{S7: tham số thật $\theta_0$; $T=5000$, burn-in $=200$}\label{tab:theta0-S7}
 \begin{tabular}{l r l r}
@@ -703,7 +703,7 @@ $\beta_2$ & 0,800 & & \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{S7 --- Hợp lý cực đại (MLE), $B=21$ lần lặp, Brier $=0,4019$; CP 95\% bỏ trống vì chỉ 8/21 lần lặp có Hessian xác định dương}\label{tab:S7-mle}
+\caption{S7 --- Hợp lý cực đại (MLE), $B=21$ lần lặp, Brier $=0,4019$}\label{tab:S7-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -752,9 +752,7 @@ $\nu$ & 8,000 & 3,628 & $-$4,372 & 4,418 & 0,637 & 0\% \\
 \end{tabular}
 \end{table}
 
-\noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 10/21 ; VB-MF 9/15.\normalsize
-
-\subsection{S8 --- \texorpdfstring{sai đặc tả: $r_t + 0{,}3\,r_{t-1}$}{sai dac ta: r_t + 0,3 r_(t-1)}}
+\subsection{S8: \texorpdfstring{sai đặc tả: $r_t + 0{,}3\,r_{t-1}$}{sai dac ta: r_t + 0,3 r_(t-1)}}
 \begin{table}[H]\centering\normalsize
 \caption{S8: tham số thật $\theta_0$; $T=2000$, burn-in $=200$; chuỗi ước lượng là $r_t+0{,}3\,r_{t-1}$}\label{tab:theta0-S8}
 \begin{tabular}{l r l r}
@@ -774,7 +772,7 @@ $\beta_2$ & 0,800 & & \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{S8 --- Hợp lý cực đại (MLE), $B=29$ lần lặp, Brier $=0,5419$; CP 95\% Wald trên 20/29 lần lặp có Hessian xác định dương}\label{tab:S8-mle}
+\caption{S8 --- Hợp lý cực đại (MLE), $B=29$ lần lặp, Brier $=0,5419$}\label{tab:S8-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -823,12 +821,15 @@ $\nu$ & 8,000 & 3,609 & $-$4,391 & 4,453 & 0,739 & 0\% \\
 \end{tabular}
 \end{table}
 
-\noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): MLE 8/29 ; VB-MF 10/15.\normalsize
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{hinh_tong_hop/msgarch_coverage.pdf}
+\caption{Coverage 95\% của $p_{11},p_{22}$ (kịch bản S1--S3, $B=100$) theo phương pháp}
+\end{figure}
 
-\section{Bước 2 --- Khôi phục tham số: EGARCH-X Student-$t$ (3 kịch bản)}
-\subsection{E1 --- \texorpdfstring{đòn bẩy rõ, $\theta_0=-0{,}10$, $\nu_0=8$}{don bay ro, theta0=-0,10, nu0=8}}
+\section{Khôi phục tham số: EGARCH-X Student-$t$ (3 trường hợp)}
+\subsection{E1: \texorpdfstring{Hiệu ứng đòn bẩy rõ ràng, $\theta_0=-0{,}10$, $\nu_0=8$}{don bay ro, theta0=-0,10, nu0=8}}
 \begin{table}[H]\centering\normalsize
-\caption{E1: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-E1}
+\caption{E1: Tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-E1}
 \begin{tabular}{l r l r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Tham số} & $\theta_0$ \\
@@ -842,7 +843,7 @@ $\theta$ & $-$0,100 & $\nu$ & 8,000 \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{E1 --- Hợp lý cực đại (MLE), $B=100$ lần lặp; CP 95\% Wald trên 100/100 lần lặp có Hessian xác định dương}\label{tab:E1-mle}
+\caption{E1 --- Hợp lý cực đại (MLE), $B=100$ lần lặp}\label{tab:E1-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -895,9 +896,9 @@ $\nu$ & 8,000 & 8,548 & 0,548 & 1,601 & 1,504 & 96\% \\
 \end{tabular}
 \end{table}
 
-\subsection{E2 --- \texorpdfstring{không đòn bẩy, $\theta_0=0$, $\nu_0=8$}{khong don bay, theta0=0, nu0=8}}
+\subsection{E2: \texorpdfstring{không có hiệu ứng đòn bẩy, $\theta_0=0$, $\nu_0=8$}{khong don bay, theta0=0, nu0=8}}
 \begin{table}[H]\centering\normalsize
-\caption{E2: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-E2}
+\caption{E2: Tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-E2}
 \begin{tabular}{l r l r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Tham số} & $\theta_0$ \\
@@ -911,7 +912,7 @@ $\theta$ & 0,000 & $\nu$ & 8,000 \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{E2 --- Hợp lý cực đại (MLE), $B=100$ lần lặp; CP 95\% Wald trên 100/100 lần lặp có Hessian xác định dương}\label{tab:E2-mle}
+\caption{E2 --- Hợp lý cực đại (MLE), $B=100$ lần lặp}\label{tab:E2-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -964,9 +965,9 @@ $\nu$ & 8,000 & 8,478 & 0,478 & 1,546 & 1,471 & 97\% \\
 \end{tabular}
 \end{table}
 
-\subsection{E3 --- \texorpdfstring{đuôi dày, $\theta_0=-0{,}10$, $\nu_0=4$}{duoi day, theta0=-0,10, nu0=4}}
+\subsection{E3: \texorpdfstring{đuôi dày, $\theta_0=-0{,}10$, $\nu_0=4$}{duoi day, theta0=-0,10, nu0=4}}
 \begin{table}[H]\centering\normalsize
-\caption{E3: tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-E3}
+\caption{E3: Tham số thật $\theta_0$; $T=2000$, burn-in $=200$}\label{tab:theta0-E3}
 \begin{tabular}{l r l r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Tham số} & $\theta_0$ \\
@@ -980,7 +981,7 @@ $\theta$ & $-$0,100 & $\nu$ & 4,000 \\
 \end{table}
 
 \begin{table}[H]\centering\footnotesize
-\caption{E3 --- Hợp lý cực đại (MLE), $B=100$ lần lặp; CP 95\% Wald trên 100/100 lần lặp có Hessian xác định dương}\label{tab:E3-mle}
+\caption{E3 --- Hợp lý cực đại (MLE), $B=100$ lần lặp}\label{tab:E3-mle}
 \begin{tabular}{l r r r r r r}
 \toprule
 \textbf{Tham số} & $\theta_0$ & \textbf{Mean} & \textbf{Bias} & \textbf{RMSE} & \textbf{SE} & \textbf{CP 95\%} \\
@@ -1033,9 +1034,14 @@ $\nu$ & 4,000 & 4,131 & 0,131 & 0,466 & 0,447 & 92\% \\
 \end{tabular}
 \end{table}
 
-\section{Bước 3 --- MCMC trên mô hình thắng cuộc}
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{hinh_tong_hop/egarch_theta.pdf}
+\caption{Khôi phục hệ số đòn bẩy $\theta$ (khoảng 95\%) theo kịch bản và phương pháp, EGARCH-X Student-$t$}
+\end{figure}
+
+\section{MCMC trên mô hình EGARCH-X-Student t}
 \begin{table}[H]\centering\normalsize
-\caption{Bước 3 --- MCMC (NUTS) trên EGARCH-X Student-$t$, dữ liệu huấn luyện: 4 chuỗi $\times$ 400 mẫu, $\max\hat R=1,0125$, $\min$ ESS $=1340$, 0 phân kỳ, 8.1 giờ}\label{tab:b3-mcmc}
+\caption{MCMC (NUTS) trên EGARCH-X Student-$t$, dữ liệu huấn luyện: 4 chuỗi $\times$ 400 mẫu, $\max\hat R=1,0125$, $\min$ ESS $=1340$, 0 phân kỳ, 8.1 giờ}\label{tab:b3-mcmc}
 \begin{tabular}{l r r r c}
 \toprule
 \textbf{Tham số} & \textbf{MLE} & \textbf{TB hậu nghiệm} & \textbf{SD} & \textbf{KTC 95\%} \\
@@ -1052,7 +1058,7 @@ $\nu$ & 4,2910 & 4,3644 & 0,4809 & [3,5544; 5,4315] \\
 \end{tabular}
 \end{table}
 \begin{table}[H]\centering\normalsize
-\caption{Bước 3 --- $R_{sd}=\mathrm{sd}_{\text{VB}}/\mathrm{sd}_{\text{MCMC}}$ (độ lệch chuẩn hậu nghiệm VB so với MCMC, cùng dữ liệu)}\label{tab:b3-rsd}
+\caption{ $R_{sd}=\mathrm{sd}_{\text{VB}}/\mathrm{sd}_{\text{MCMC}}$ (độ lệch chuẩn hậu nghiệm VB so với MCMC, cùng dữ liệu)}\label{tab:b3-rsd}
 \begin{tabular}{l r r r}
 \toprule
 \textbf{Tham số} & $\mathrm{sd}_{\text{MCMC}}$ & $R_{sd}$ VB-MF & $R_{sd}$ VB-FR \\
@@ -1069,26 +1075,9 @@ $\nu$ & 0,4809 & 0,63 & 0,97 \\
 \end{tabular}
 \end{table}
 
-\section{Đếm số tham số có RMSE nhỏ nhất theo phương pháp}
-\begin{table}[H]\centering\normalsize
-\caption{Số tham số mà mỗi phương pháp đạt RMSE nhỏ nhất, theo kịch bản. Kịch bản không có VB-FR ghi $--$}\label{tab:dem-thang}
-\begin{tabular}{l r l r r r}
-\toprule
-\textbf{Kịch bản} & \textbf{Số tham số} & $B$ (MLE/MF/FR) & \textbf{MLE} & \textbf{VB-MF} & \textbf{VB-FR} \\
-\midrule
-S1 & 15 & 100/100/100 & 10 & 5 & 0 \\
-S2 & 15 & 100/100/100 & 6 & 6 & 3 \\
-S3 & 15 & 100/100/100 & 9 & 6 & 0 \\
-S4 & 15 & 29/15 & 10 & 5 & -- \\
-S5 & 15 & 29/15 & 11 & 4 & -- \\
-S6 & 15 & 30/15 & 9 & 6 & -- \\
-S7 & 15 & 21/15 & 11 & 4 & -- \\
-S8 & 15 & 29/15 & 8 & 7 & -- \\
-E1 & 8 & 100/100/100 & 6 & 2 & 0 \\
-E2 & 8 & 100/100/100 & 7 & 1 & 0 \\
-E3 & 8 & 100/100/100 & 7 & 1 & 0 \\
-\bottomrule
-\end{tabular}
-\end{table}
+\begin{figure}[H]\centering
+\includegraphics[width=\textwidth]{hinh_tong_hop/rsd_bar.pdf}
+\caption{$R_{sd}$ theo tham số: VB đánh giá thấp bất định của $\omega,\beta$ rõ nhất, dữ liệu VN30F1M thật}
+\end{figure}
 
 \end{document}
