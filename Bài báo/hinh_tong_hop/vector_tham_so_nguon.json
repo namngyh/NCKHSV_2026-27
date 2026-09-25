@@ -1,0 +1,123 @@
+[
+  {
+    "code": "S1",
+    "n": {
+      "MLE": 100,
+      "VB-MF": 100,
+      "VB-FR": 100
+    },
+    "parameters": 15,
+    "source": "individual replication checkpoints",
+    "label_correction": true
+  },
+  {
+    "code": "S2",
+    "n": {
+      "MLE": 100,
+      "VB-MF": 100,
+      "VB-FR": 100
+    },
+    "parameters": 15,
+    "source": "individual replication checkpoints",
+    "label_correction": true
+  },
+  {
+    "code": "S3",
+    "n": {
+      "MLE": 100,
+      "VB-MF": 100,
+      "VB-FR": 100
+    },
+    "parameters": 15,
+    "source": "individual replication checkpoints",
+    "label_correction": true
+  },
+  {
+    "code": "S4",
+    "n": {
+      "MLE": 29,
+      "VB-MF": 15,
+      "VB-FR": 0
+    },
+    "parameters": 15,
+    "source": "individual replication checkpoints",
+    "label_correction": true
+  },
+  {
+    "code": "S5",
+    "n": {
+      "MLE": 29,
+      "VB-MF": 15,
+      "VB-FR": 0
+    },
+    "parameters": 15,
+    "source": "individual replication checkpoints",
+    "label_correction": true
+  },
+  {
+    "code": "S6",
+    "n": {
+      "MLE": 30,
+      "VB-MF": 15,
+      "VB-FR": 0
+    },
+    "parameters": 15,
+    "source": "individual replication checkpoints",
+    "label_correction": true
+  },
+  {
+    "code": "S7",
+    "n": {
+      "MLE": 21,
+      "VB-MF": 15,
+      "VB-FR": 0
+    },
+    "parameters": 15,
+    "source": "individual replication checkpoints",
+    "label_correction": true
+  },
+  {
+    "code": "S8",
+    "n": {
+      "MLE": 29,
+      "VB-MF": 15,
+      "VB-FR": 0
+    },
+    "parameters": 15,
+    "source": "individual replication checkpoints",
+    "label_correction": true
+  },
+  {
+    "code": "E1",
+    "n": {
+      "MLE": 100,
+      "VB-MF": 100,
+      "VB-FR": 100
+    },
+    "parameters": 8,
+    "source": "individual replication checkpoints",
+    "label_correction": false
+  },
+  {
+    "code": "E2",
+    "n": {
+      "MLE": 100,
+      "VB-MF": 100,
+      "VB-FR": 100
+    },
+    "parameters": 8,
+    "source": "individual replication checkpoints",
+    "label_correction": false
+  },
+  {
+    "code": "E3",
+    "n": {
+      "MLE": 100,
+      "VB-MF": 100,
+      "VB-FR": 100
+    },
+    "parameters": 8,
+    "source": "individual replication checkpoints",
+    "label_correction": false
+  }
+]
