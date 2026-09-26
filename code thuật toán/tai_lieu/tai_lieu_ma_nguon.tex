@@ -1,0 +1,602 @@
+% !TeX program = xelatex
+% !TeX encoding = UTF-8
+% Tai lieu ma nguon va co so ly thuyet -- bien dich: xelatex tai_lieu_ma_nguon.tex (2 lan)
+\documentclass[11pt,a4paper]{article}
+\usepackage{fontspec}
+\usepackage{amsmath,amssymb}
+\usepackage{unicode-math}
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Liberation Serif}}
+\IfFontExistsTF{Cambria Math}{\setmathfont{Cambria Math}}{\setmathfont{Latin Modern Math}}
+\IfFontExistsTF{Consolas}{\setmonofont[Scale=0.88]{Consolas}}{}
+\usepackage[a4paper,top=2.3cm,bottom=2.3cm,left=2.2cm,right=2.2cm]{geometry}
+\usepackage{booktabs,longtable,tabularx,array,float,caption,enumitem,microtype}
+\usepackage{fancyvrb}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[colorlinks=true,linkcolor=MidnightBlue,citecolor=MidnightBlue,urlcolor=MidnightBlue]{hyperref}
+\emergencystretch=3em
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\captionsetup{font=small,labelfont=bf,skip=4pt}
+\renewcommand{\tablename}{Bảng}
+\renewcommand{\contentsname}{Mục lục}
+\renewcommand{\refname}{Tài liệu tham khảo}
+\renewcommand{\abstractname}{Tóm tắt}
+\setlist{itemsep=2pt,topsep=3pt}
+\setlength{\parskip}{0.35em}
+\let\gachduoi\_
+\renewcommand{\_}{\gachduoi\allowbreak}
+\newcommand{\tep}[1]{\texttt{#1}}
+\newcommand{\ham}[1]{\texttt{#1}}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator{\Var}{Var}
+\DeclareMathOperator{\VaR}{VaR}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\bgamma}{\boldsymbol\gamma}
+\newcommand{\btheta}{\boldsymbol\vartheta}
+
+\title{\textbf{Tài liệu mã nguồn và cơ sở lý thuyết}\\[0.3em]
+\large Dự án GARCH-VN30F1M-MLE-VB-MCMC: so sánh họ mô hình GARCH trên hợp đồng tương lai VN30F1M\\
+bằng ước lượng hợp lý cực đại, Bayes biến phân và MCMC}
+\author{Nguyễn Hoài Nam và cộng sự}
+\date{Tháng 9 năm 2026}
+
+\begin{document}
+\maketitle
+\begin{abstract}
+\noindent
+Tài liệu mô tả mã nguồn của đề tài: cách cài đặt và chạy, các thư viện được dùng, cấu trúc thư mục, vai trò của từng tệp và từng hàm, cùng cơ sở toán học của mọi kỹ thuật được cài đặt. Mã nguồn gồm thư viện Python \tep{garch\_vn30} và các script điều phối ba bước nghiên cứu: (1) so sánh sáu mô hình GARCH/EGARCH một trạng thái bằng ba phương pháp suy diễn trên dữ liệu VN30F1M; (2) nghiên cứu mô phỏng khôi phục tham số cho EGARCH-X Student-$t$; (3) lấy mẫu MCMC cho mô hình thắng cuộc. Ba phương pháp suy diễn dùng chung một hàm log-hợp lý, nên khác biệt giữa kết quả chỉ đến từ phương pháp và tiên nghiệm, không đến từ cách viết mô hình.
+\end{abstract}
+\tableofcontents
+\clearpage
+
+% =====================================================================
+\section{Tổng quan}
+% =====================================================================
+\subsection{Mục tiêu và thiết kế ba bước}
+Đề tài mô hình hóa biến động của lợi suất ngày hợp đồng tương lai chỉ số VN30 kỳ hạn gần nhất (VN30F1M). Mã nguồn thực hiện ba bước:
+
+\begin{enumerate}
+\item \textbf{Bước 1 — so sánh mô hình trên dữ liệu thật.} Sáu mô hình (Bảng~\ref{tab:danh-muc}) được ước lượng trên tập huấn luyện bằng ba phương pháp: ước lượng hợp lý cực đại (MLE), Bayes biến phân mean-field (VB-MF) và Bayes biến phân full-rank (VB-FR). Chất lượng trong mẫu được đo bằng log-hợp lý, AIC, BIC; chất lượng ngoài mẫu đo bằng QLIKE, điểm log âm (NLS) và kiểm định VaR.
+\item \textbf{Bước 2 — mô phỏng khôi phục tham số.} Dữ liệu được sinh từ EGARCH-X Student-$t$ với tham số đã biết, rồi ước lượng lại $B=100$ lần ở mỗi trường hợp E1--E3. Bước này kiểm tra bộ ước lượng có khôi phục đúng tham số, nhất là hệ số đòn bẩy $\theta$, hay không.
+\item \textbf{Bước 3 — MCMC.} Thuật toán NUTS lấy mẫu phân phối hậu nghiệm của mô hình thắng cuộc ở Bước 1. Mẫu MCMC là chuẩn tham chiếu để đánh giá độ rộng hậu nghiệm mà VB báo cáo.
+\end{enumerate}
+
+\subsection{Nguyên tắc cài đặt}
+\begin{itemize}
+\item \textbf{Một hàm log-hợp lý cho ba phương pháp.} Các hàm \ham{garch\_loglik} và \ham{egarch\_loglik} được MLE tối ưu trực tiếp và được đưa vào mô hình Bayes qua \ham{pyro.factor}.
+\item \textbf{Một nguồn sự thật cho danh mục mô hình.} Tệp \tep{mo\_hinh/danh\_muc.py} định nghĩa sáu mô hình; script, báo cáo và kiểm thử đều đọc từ đây.
+\item \textbf{Mọi con số trong báo cáo đọc từ tệp kết quả.} Bảng và hình được sinh bằng script từ thư mục \tep{results/}; script \tep{kiem\_toan\_ket\_qua.py} tính lại toàn bộ để đối chiếu.
+\item \textbf{Chạy lại được và ngắt được.} Mỗi cặp (mô hình, phương pháp) và mỗi lần lặp mô phỏng được lưu thành một tệp riêng; chạy lại sẽ bỏ qua phần đã có. Số ngẫu nhiên được cố định bằng hạt giống (seed); mọi phép tính dùng số thực 64 bit.
+\end{itemize}
+
+% =====================================================================
+\section{Cài đặt và cách chạy}
+% =====================================================================
+\subsection{Yêu cầu phần mềm và thư viện}
+Mã nguồn chạy trên Python 3.11 trở lên. Bảng~\ref{tab:thu-vien} liệt kê các thư viện (tệp \tep{requirements.txt}) và vai trò của chúng.
+
+\begin{table}[H]\centering\small
+\caption{Thư viện sử dụng}\label{tab:thu-vien}
+\begin{tabularx}{\textwidth}{@{}l l L@{}}
+\toprule
+\textbf{Thư viện} & \textbf{Phiên bản} & \textbf{Vai trò trong dự án} \\
+\midrule
+PyTorch (\tep{torch}) & $\ge$ 2.0 & Tính toán tensor số thực 64 bit, vi phân tự động (autograd) cho gradient và Hessian của log-hợp lý, bộ tối ưu Adam và L-BFGS. \\
+Pyro (\tep{pyro-ppl}) & $\ge$ 1.9 & Ngôn ngữ lập trình xác suất trên PyTorch \cite{bingham2019pyro}: khai báo mô hình Bayes, suy diễn biến phân ngẫu nhiên (SVI) với \ham{AutoNormal}/\ham{AutoMultivariateNormal}, lấy mẫu NUTS. \\
+NumPy, pandas & $\ge$ 1.26, 2.0 & Đọc và gộp dữ liệu phút thành dữ liệu ngày, tính biến ngoại sinh, thống kê trên mảng. \\
+SciPy & $\ge$ 1.11 & Phân vị và hàm phân phối $t$, chuẩn, $\chi^2$ cho VaR và các kiểm định. \\
+statsmodels, arch & $\ge$ 0.14, 6.0 & Kiểm định ban đầu: ADF, KPSS, Ljung-Box, ARCH-LM, Jarque-Bera (statsmodels), Phillips-Perron (arch). \\
+ArviZ & $\ge$ 0.16 & Chẩn đoán hội tụ MCMC: $\hat R$ và cỡ mẫu hiệu dụng (ESS). \\
+Matplotlib & $\ge$ 3.7 & Vẽ hình cho báo cáo. \\
+pytest & $\ge$ 7.0 & Kiểm thử tự động. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Cài đặt}
+\begin{Verbatim}[frame=single,fontsize=\small]
+conda create -n garch python=3.11
+conda activate garch
+cd "code thuật toán"
+pip install -r requirements.txt
+python -m pytest tests -q               # 43 kiểm thử, khoảng 1 phút
+python scripts/kiem_toan_ket_qua.py     # đối chiếu 380 con số, vài phút
+\end{Verbatim}
+Trên Windows có thể mở tệp \tep{chay.bat}: tệp này tự tìm trình thông dịch Python có \tep{torch} và \tep{pyro}, rồi hiện một bảng chọn cho các thao tác ở Mục~\ref{sec:chay}. Thư viện tự chuyển đầu ra cửa sổ lệnh sang UTF-8 khi được nạp để in được tiếng Việt.
+
+\subsection{Chạy từng bước}\label{sec:chay}
+Mọi lệnh chạy từ thư mục \tep{code thuật toán}. Mỗi script có cờ \tep{--nhanh} dùng cấu hình rất nhỏ để thử đường chạy trong vài phút; kết quả của cờ này ghi vào thư mục riêng (\tep{results/pipeline\_nhanh/}, \tep{results/mo\_phong\_egarch\_nhanh/}) nên không lẫn với kết quả thật.
+
+\begin{table}[H]\centering\small
+\caption{Các lệnh chạy chính; mỗi tệp chạy bằng \tep{python scripts/<tệp>}}\label{tab:lenh}
+\begin{tabularx}{\textwidth}{@{}p{0.36\textwidth} L@{}}
+\toprule
+\textbf{Tệp (và tùy chọn)} & \textbf{Tác dụng và đầu ra} \\
+\midrule
+\tep{chay\_buoc1\_so\_sanh\_mo\_hinh.py} & Bước 1. Tạo \tep{results/00\_data.pt}, \tep{01\_preliminary\_tests.pt}; với mỗi mô hình và phương pháp tạo \tep{results/pipeline/<mô hình>\_<phương pháp>.pt}; in bảng so sánh và lưu \tep{bang\_so\_sanh.pt}. Tùy chọn: \tep{--kiem-ke} (chỉ liệt kê việc sẽ chạy), \tep{--chi-bang} (chỉ in bảng). \\
+\tep{chay\_buoc2\_mo\_phong.py}\newline\tep{--jobs 8} & Bước 2. Chạy song song 900 lần ước lượng (3 trường hợp $\times$ 3 phương pháp $\times$ 100 lần lặp), mỗi lần lặp một tệp trong \tep{results/mo\_phong\_egarch/parts/}; gộp thành \tep{E1.pt}, \tep{E2.pt}, \tep{E3.pt}. Tùy chọn: \tep{--truong-hop E2}, \tep{--B}, \tep{--gop}. \\
+\tep{chay\_buoc3\_mcmc.py} & Bước 3. Chọn mô hình có QLIKE nhỏ nhất trong \tep{bang\_so\_sanh.pt} (hoặc chỉ định bằng \tep{--mo-hinh egarch\_x\_t}), chạy 4 chuỗi NUTS, lưu \tep{results/pipeline/mcmc\_<mô hình>.pt}. \\
+\tep{kiem\_toan\_ket\_qua.py} & Tính lại mọi con số từ nguồn thô và đối chiếu với tệp kết quả. \\
+\tep{bao\_cao/ve\_vector\_tham\_so.py} & Vẽ hình trung bình tích lũy của ước lượng qua các lần lặp mô phỏng. \\
+\tep{bao\_cao/sinh\_hinh\_tong\_hop.py} & Vẽ các hình minh họa (giá, lợi suất, AIC, $\theta$, $R_{sd}$). \\
+\tep{bao\_cao/sinh\_tong\_hop\_ket\_qua.py} & Sinh \tep{Bài báo/tong\_hop\_ket\_qua.tex}; biên dịch bằng \tep{xelatex} hai lần. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Thời gian chạy ở cấu hình đầy đủ, ghi trong trường \tep{giay} của các tệp kết quả, được liệt kê ở Bảng~\ref{tab:thoi-gian}. Phần lớn thời gian nằm ở vòng lặp phương sai: mỗi lần đánh giá log-hợp lý là một vòng lặp tuần tự qua 1.735 quan sát, và mỗi bước tối ưu hoặc mỗi bước leapfrog của NUTS cần một lần tính xuôi và một lần lan truyền ngược qua vòng lặp đó.
+
+\begin{table}[H]\centering\small
+\caption{Thời gian chạy ghi trong các tệp kết quả}\label{tab:thoi-gian}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Mô hình} & \textbf{MLE (phút)} & \textbf{VB-MF (phút)} & \textbf{VB-FR (phút)} \\
+\midrule
+GARCH chuẩn & 13,6 & 8,2 & 11,1 \\
+GARCH Student-$t$ & 13,7 & 8,3 & 11,0 \\
+GARCH-X Student-$t$ & 14,6 & 10,1 & 12,7 \\
+EGARCH chuẩn & 33,2 & 18,8 & 23,5 \\
+EGARCH Student-$t$ & 39,7 & 24,0 & 27,5 \\
+EGARCH-X Student-$t$ & 34,0 & 20,0 & 25,0 \\
+\midrule
+\multicolumn{4}{@{}l}{Bước 2: tổng 357 giờ tính toán (một nhân) cho 900 lần ước lượng, khoảng 30 giờ trên 12 tiến trình.}\\
+\multicolumn{4}{@{}l}{Bước 3: 8,1 giờ cho 4 chuỗi NUTS chạy tuần tự trên EGARCH-X Student-$t$.}\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Cấu trúc thư mục và luồng dữ liệu}
+% =====================================================================
+\begin{Verbatim}[frame=single,fontsize=\small]
+code thuật toán/
+  ohlc_export.csv            dữ liệu phút VN30F1M (đầu vào duy nhất)
+  requirements.txt           danh sách thư viện
+  chay.bat                   bảng chọn thao tác trên Windows
+  garch_vn30/                THƯ VIỆN
+    du_lieu/                 doc_du_lieu.py, chuan_bi.py
+    kiem_dinh/               kiem_dinh_so_bo.py
+    mo_hinh/                 phan_phoi.py, garch.py, egarch.py, danh_muc.py
+    suy_dien/                mle.py, bayes.py, vb.py, mcmc.py
+    danh_gia/                ham_mat_mat.py, kiem_dinh_var.py,
+                             kiem_dinh_dm.py, ngoai_mau.py
+    mo_phong/                sinh_du_lieu.py, truong_hop.py, khoi_phuc.py
+  scripts/                   ĐIỀU PHỐI
+    chung.py                 đường dẫn, lưu checkpoint, chạy song song
+    chay_buoc1_so_sanh_mo_hinh.py, chay_buoc2_mo_phong.py,
+    chay_buoc3_mcmc.py, kiem_toan_ket_qua.py
+    bao_cao/                 sinh_tong_hop_ket_qua.py, sinh_hinh_tong_hop.py,
+                             ve_vector_tham_so.py
+  tests/                     kiểm thử (pytest)
+  results/                   kết quả (xem Mục 6)
+  tai_lieu/                  tài liệu này
+\end{Verbatim}
+
+Luồng dữ liệu đi theo một chiều: \tep{ohlc\_export.csv} $\to$ \tep{du\_lieu} tạo chuỗi $r_t$, $RV_t$, $X_{t-1}$ $\to$ \tep{suy\_dien} ước lượng tham số trên tập huấn luyện $\to$ \tep{danh\_gia} tính chỉ tiêu ngoài mẫu $\to$ tệp \tep{.pt} trong \tep{results/} $\to$ \tep{scripts/bao\_cao} sinh bảng và hình. Nhánh mô phỏng thay bước đọc dữ liệu thật bằng \tep{mo\_phong/sinh\_du\_lieu.py}. Thư viện không đọc hay ghi tệp kết quả nào; mọi thao tác với tệp nằm trong \tep{scripts/}, nhờ vậy các hàm của thư viện được kiểm thử độc lập.
+
+% =====================================================================
+\section{Cơ sở lý thuyết}
+% =====================================================================
+Mục này trình bày các công thức được cài đặt theo đúng thứ tự xử lý. Tên hàm cài đặt được ghi trong ngoặc.
+
+\subsection{Dữ liệu và biến số}\label{sec:du-lieu}
+Tệp nguồn chứa nến 1 phút của chuỗi hợp đồng liên tục VN30F1M do nhà cung cấp ghép sẵn. Gọi $P_{t,j}$ là giá đóng cửa của nến phút thứ $j$ trong ngày $t$ và $P_t$ là giá đóng cửa của nến cuối ngày. Lợi suất log ngày tính theo phần trăm và biến động thực tế (realized volatility) là
+\begin{equation}\label{eq:rv}
+r_t = 100\,(\log P_t-\log P_{t-1}),\qquad
+RV_t = 100^2\sum_{j\ge 2}\bigl(\log P_{t,j}-\log P_{t,j-1}\bigr)^2 .
+\end{equation}
+$RV_t$ chỉ cộng lợi suất giữa các nến trong cùng một ngày, không gồm khoảng qua đêm; nó là đại diện quan sát được cho phương sai ngày, cùng đơn vị $\%^2$ với phương sai có điều kiện $h_t$ (\ham{load\_vn30f1m\_daily}).
+
+Vector biến ngoại sinh gồm hai biến trễ một phiên, tức chỉ dùng thông tin đã biết trước ngày $t$:
+\begin{equation}
+X_{t-1} = \bigl(\log(1+VOL_{t-1}),\ \log(RV_{t-1}+10^{-6})\bigr)^{\!\top},
+\end{equation}
+với $VOL$ là tổng khối lượng giao dịch trong ngày. Mỗi biến được chuẩn hóa $\tilde x=(x-\bar x_{\rm train})/s_{\rm train}$, trong đó trung bình và độ lệch chuẩn chỉ tính trên tập huấn luyện để thông tin của tập kiểm định không rò rỉ vào mô hình (\ham{standardize\_with\_train\_stats}). Dữ liệu được chia theo thời gian, không xáo trộn: 80\% phiên đầu làm tập huấn luyện (1.735 quan sát), phần còn lại làm tập kiểm định (435 quan sát) (\ham{chuan\_bi\_du\_lieu}).
+
+\subsection{Phân phối sai số}\label{sec:phan-phoi}
+Mọi mô hình có dạng $r_t=\mu+\varepsilon_t$, $\varepsilon_t=\sqrt{h_t}\,z_t$, với $z_t$ độc lập cùng phân phối, $\E z_t=0$ và $\Var z_t=1$. Hai lựa chọn cho $z_t$ là phân phối chuẩn $N(0,1)$ và phân phối Student-$t$ chuẩn hóa $t^*_\nu$ với mật độ
+\begin{equation}\label{eq:student}
+f(z\mid\nu)=\frac{\Gamma\!\left(\frac{\nu+1}{2}\right)}{\Gamma\!\left(\frac{\nu}{2}\right)\sqrt{\pi(\nu-2)}}
+\left(1+\frac{z^2}{\nu-2}\right)^{-\frac{\nu+1}{2}},\qquad \nu>2 .
+\end{equation}
+So với Student-$t$ thông thường, $t^*_\nu$ được co tỷ lệ bởi $\sqrt{(\nu-2)/\nu}$ để có phương sai bằng 1; nhờ đó $h_t$ luôn là phương sai có điều kiện của $r_t$ với cả hai phân phối. Bậc tự do $\nu$ càng nhỏ thì đuôi càng dày; khi $\nu\to\infty$, $t^*_\nu$ hội tụ về $N(0,1)$. Hằng số chuẩn hóa được tính qua hàm $\log\Gamma$ để không tràn số (\ham{std\_t\_logpdf}, \ham{std\_t\_log\_const}).
+
+EGARCH cần kỳ vọng của $|z|$:
+\begin{equation}\label{eq:eabsz}
+\E|z| = \sqrt{2/\pi}\ \text{(chuẩn)},\qquad
+\E|z| = \frac{2\sqrt{\nu-2}\;\Gamma\!\left(\frac{\nu+1}{2}\right)}{(\nu-1)\sqrt{\pi}\;\Gamma\!\left(\frac{\nu}{2}\right)}\ \text{(Student-$t$ chuẩn hóa)} .
+\end{equation}
+Công thức thứ hai suy từ $\E|T|=2\sqrt\nu\,\Gamma(\frac{\nu+1}{2})/[(\nu-1)\sqrt\pi\,\Gamma(\frac\nu2)]$ của biến $T\sim t_\nu$ và $z=T\sqrt{(\nu-2)/\nu}$ (\ham{expected\_abs\_std\_t}). Một kiểm thử riêng xác nhận giá trị này hội tụ về $\sqrt{2/\pi}\approx0{,}7979$ khi $\nu$ lớn.
+
+Để mô phỏng, $z\sim t^*_\nu$ được sinh bằng $z=\dfrac{Z}{\sqrt{V/\nu}}\sqrt{\dfrac{\nu-2}{\nu}}$ với $Z\sim N(0,1)$ và $V\sim\chi^2_\nu$ độc lập (\ham{std\_t\_sample}).
+
+\subsection{Mô hình GARCH(1,1) và GARCH-X}
+Phương sai có điều kiện theo Bollerslev \cite{bollerslev1986}, bổ sung biến ngoại sinh:
+\begin{equation}\label{eq:garch}
+h_t=\omega+\alpha\,\varepsilon_{t-1}^2+\beta\,h_{t-1}+\bgamma^{\!\top}X_{t-1},\qquad \omega>0,\ \alpha,\beta\ge0 .
+\end{equation}
+$\alpha$ đo phản ứng của phương sai với cú sốc mới; $\beta$ đo độ dai dẳng. Khi $\bgamma=0$ và $\alpha+\beta<1$, phương sai dài hạn là $\omega/(1-\alpha-\beta)$. Do $\bgamma^{\!\top}X_{t-1}$ có thể âm, vế phải có thể âm, nên mã nguồn cắt dưới $h_t\ge10^{-8}$ (hằng số \tep{H\_MIN}). Điều kiện đầu $h_0$ là phương sai mẫu của chuỗi dùng để ước lượng. Các số hạng $\varepsilon_{t-1}^2$ và $\bgamma^{\!\top}X_{t-1}$ không phụ thuộc $h$ nên được tính một lần ngoài vòng lặp (\ham{garch\_forward}).
+
+\subsection{Mô hình EGARCH(1,1) và EGARCH-X}
+EGARCH của Nelson \cite{nelson1991} viết phương trình cho logarit phương sai:
+\begin{equation}\label{eq:egarch}
+\log h_t=\omega+\alpha\bigl(|z_{t-1}|-\E|z|\bigr)+\theta\,z_{t-1}+\beta\log h_{t-1}+\bgamma^{\!\top}X_{t-1},\qquad z_{t-1}=\frac{\varepsilon_{t-1}}{\sqrt{h_{t-1}}} .
+\end{equation}
+\begin{itemize}
+\item $\alpha$ là hiệu ứng độ lớn: cú sốc có trị tuyệt đối lớn hơn kỳ vọng làm tăng biến động.
+\item $\theta$ là hiệu ứng dấu, hay hiệu ứng đòn bẩy: với $\theta<0$, cú sốc âm $z_{t-1}=-c$ làm $\log h_t$ tăng thêm $(\alpha-\theta)c$, lớn hơn mức $(\alpha+\theta)c$ của cú sốc dương cùng độ lớn.
+\item $\beta$ là độ dai dẳng; quá trình $\log h_t$ dừng khi $|\beta|<1$, và khi đó $\E\log h_t=\omega/(1-\beta)$ nếu $\E X=0$.
+\end{itemize}
+Vì $h_t=\exp(\cdot)$ nên $h_t>0$ theo cấu trúc, không cần ràng buộc dấu cho $\omega,\alpha,\theta,\bgamma$. Mã nguồn chặn $\log h_t\in[-30,30]$ chỉ để hàm mũ không tràn số; đây là lưới an toàn số học, không phải ràng buộc mô hình. Khác với GARCH, $z_{t-1}$ phụ thuộc $h_{t-1}$ vừa tính nên mọi số hạng phải tính trong vòng lặp (\ham{egarch\_forward}). Đề tài quy ước $\beta\in(0,1)$ cho cả ba phương pháp vì tiên nghiệm Bayes của $\beta$ là phân phối Beta trên $(0,1)$; như vậy ba phương pháp làm việc trên cùng một không gian tham số.
+
+\subsection{Hàm log-hợp lý có điều kiện}
+Với vector tham số $\btheta$ và $f_z$ là mật độ chuẩn hoặc~\eqref{eq:student}, đổi biến $z_t=(r_t-\mu)/\sqrt{h_t}$ cho log-hợp lý có điều kiện
+\begin{equation}\label{eq:loglik}
+\ell(\btheta)=\sum_{t=1}^{T-1}\Bigl[\log f_z\!\Bigl(\frac{r_t-\mu}{\sqrt{h_t(\btheta)}}\Bigr)-\tfrac12\log h_t(\btheta)\Bigr],
+\end{equation}
+trong đó $-\frac12\log h_t$ là Jacobian của phép đổi biến và quan sát $t=0$ chỉ dùng làm điều kiện đầu (\ham{log\_mat\_do}, \ham{garch\_loglik}, \ham{egarch\_loglik}). Mọi phép tính viết bằng tensor PyTorch nên gradient $\nabla\ell$ và Hessian $\nabla^2\ell$ được tính chính xác bằng vi phân tự động, không dùng sai phân hữu hạn.
+
+\subsection{Danh mục mô hình}
+\begin{table}[H]\centering\small
+\caption{Sáu mô hình so sánh; $d$ là số tham số tự do với $k=2$ biến ngoại sinh}\label{tab:danh-muc}
+\begin{tabular}{@{}lllcccr@{}}
+\toprule
+\textbf{Mã (\tep{code})} & \textbf{Tên} & \textbf{Họ} & \textbf{Phân phối} & \textbf{Có $X$} & \textbf{$\theta$} & $d$ \\
+\midrule
+\tep{garch\_n} & GARCH chuẩn & GARCH & chuẩn & không & không & 4 \\
+\tep{garch\_t} & GARCH Student-$t$ & GARCH & Student-$t$ & không & không & 5 \\
+\tep{garch\_x\_t} & GARCH-X Student-$t$ & GARCH & Student-$t$ & có & không & 7 \\
+\tep{egarch\_n} & EGARCH chuẩn & EGARCH & chuẩn & không & có & 5 \\
+\tep{egarch\_t} & EGARCH Student-$t$ & EGARCH & Student-$t$ & không & có & 6 \\
+\tep{egarch\_x\_t} & EGARCH-X Student-$t$ & EGARCH & Student-$t$ & có & có & 8 \\
+\bottomrule
+\end{tabular}
+\end{table}
+Hai mô hình kề nhau trong danh mục chỉ khác đúng một yếu tố (phân phối, biến ngoại sinh, hoặc họ phương trình), nên chênh lệch chỉ tiêu giữa chúng cho biết đóng góp của yếu tố đó. Công thức $d=4+\mathbf 1_{\rm EGARCH}+k\,\mathbf 1_X+\mathbf 1_{t}$ nằm trong \ham{ModelSpec.n\_params}.
+
+\subsection{Ước lượng hợp lý cực đại}\label{sec:mle}
+\paragraph{Tham số hóa không ràng buộc.} MLE tìm $\hat{\btheta}=\argmax\ell(\btheta)$ trên miền hợp lệ. Để dùng thuật toán tối ưu không ràng buộc, mỗi tham số được viết qua một biến $\eta\in\R$ (\ham{unpack}, \ham{pack}):
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{GARCH} & \textbf{EGARCH} \\
+\midrule
+$\omega=e^{\eta_\omega}$,\quad $\alpha=\mathrm{softplus}(\eta_\alpha)$,\quad $\beta=\mathrm{softplus}(\eta_\beta)$ &
+$\omega,\alpha,\theta$ tự do,\quad $\beta=\sigma(\eta_\beta)=1/(1+e^{-\eta_\beta})$ \\
+\multicolumn{2}{@{}l}{Cả hai họ: $\mu,\bgamma$ tự do;\quad $\nu=2+\mathrm{softplus}(\eta_\nu)$,\quad $\mathrm{softplus}(x)=\log(1+e^x)$.} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Nhiều điểm khởi tạo.} Log-hợp lý của mô hình GARCH có thể có nhiều cực đại địa phương. Hàm \ham{fit\_mle} chạy từ \tep{n\_starts} điểm khởi tạo ngẫu nhiên (seed $0,1,2,\dots$) quanh một cấu hình hợp lý: với EGARCH, $\beta\approx0{,}9$ và $\omega\approx(1-\beta)\log h_0$ để mức nền của $\log h$ khớp dữ liệu; $\theta$ khởi tạo quanh 0 để không giả định trước dấu đòn bẩy. Nghiệm được chọn là nghiệm có log-hợp lý hữu hạn lớn nhất. Cấu hình mặc định của Bước 1 là 10 điểm khởi tạo; kết quả đang lưu của ba mô hình GARCH được tính ở một lần chạy trước với 6 điểm khởi tạo (số điểm khởi tạo thực tế lưu trong trường \tep{runs}).
+
+\paragraph{Giai đoạn 1: Adam.} Từ mỗi điểm khởi tạo, thuật toán Adam \cite{kingma2015adam} giảm $L(\eta)=-\ell$ với cập nhật
+\begin{equation}
+m_k=\beta_1m_{k-1}+(1-\beta_1)g_k,\quad v_k=\beta_2v_{k-1}+(1-\beta_2)g_k^2,\quad
+\eta_{k+1}=\eta_k-\lambda\,\frac{m_k/(1-\beta_1^k)}{\sqrt{v_k/(1-\beta_2^k)}+\epsilon},
+\end{equation}
+với $g_k=\nabla L(\eta_k)$, tốc độ học $\lambda=0{,}02$ và các hằng số mặc định của PyTorch ($\beta_1=0{,}9$, $\beta_2=0{,}999$). Chuẩn gradient được cắt ở 50 để một bước lớn không đẩy tham số ra vùng số học bất ổn. Adam ổn định khi điểm hiện tại còn xa nghiệm.
+
+\paragraph{Giai đoạn 2: L-BFGS.} Gần nghiệm, thuật toán tựa Newton L-BFGS \cite{liu1989lbfgs,nocedal2006} dùng hướng $p_k=-H_k\nabla L(\eta_k)$, trong đó $H_k$ xấp xỉ nghịch đảo Hessian từ các cặp $(s_i,y_i)=(\eta_{i+1}-\eta_i,\nabla L_{i+1}-\nabla L_i)$ gần nhất, và độ dài bước $a$ thỏa điều kiện Wolfe mạnh
+\begin{equation}
+L(\eta_k+a p_k)\le L(\eta_k)+c_1a\,\nabla L_k^{\!\top}p_k,\qquad
+|\nabla L(\eta_k+ap_k)^{\!\top}p_k|\le c_2|\nabla L_k^{\!\top}p_k| .
+\end{equation}
+Nếu L-BFGS gặp giá trị không hữu hạn trong lúc tìm kiếm đường, mã nguồn quay về nghiệm của giai đoạn Adam. Một điểm khởi tạo được đánh dấu hội tụ khi log-hợp lý hữu hạn và $\|\nabla L\|<1$ (lớp \tep{LanChay}).
+
+\paragraph{Tiêu chí thông tin.} Với $n$ quan sát huấn luyện và $d$ tham số:
+\begin{equation}
+\mathrm{AIC}=2d-2\ell(\hat{\btheta}),\qquad \mathrm{BIC}=d\log n-2\ell(\hat{\btheta});
+\end{equation}
+giá trị nhỏ hơn là tốt hơn. BIC phạt số tham số nặng hơn AIC khi $\log n>2$.
+
+\paragraph{Sai số chuẩn và khoảng Wald.} Theo lý thuyết tiệm cận của MLE, $\hat\eta$ xấp xỉ phân phối chuẩn với hiệp phương sai bằng nghịch đảo Hessian quan sát $\mathcal H=\nabla^2L(\hat\eta)$. Phương pháp delta chuyển sang thang tự nhiên $\btheta=g(\eta)$ (\ham{standard\_errors}):
+\begin{equation}\label{eq:delta}
+\widehat{\operatorname{Cov}}(\hat{\btheta})=J\,\mathcal H^{-1}J^{\!\top},\qquad J=\frac{\partial g}{\partial\eta}\Big|_{\hat\eta},\qquad
+\mathrm{SE}_j=\sqrt{\bigl[J\mathcal H^{-1}J^{\!\top}\bigr]_{jj}} .
+\end{equation}
+Cả $\mathcal H$ và $J$ đều tính bằng vi phân tự động. Nếu $\mathcal H$ không khả nghịch hoặc cho phương sai âm, nghiệm không phải cực đại trong (thường do nằm sát biên), tiệm cận chuẩn không áp dụng và hàm trả về \tep{None}. Khoảng tin cậy Wald 95\% là $\hat\theta_j\pm1{,}96\,\mathrm{SE}_j$.
+
+\subsection{Mô hình Bayes và tiên nghiệm}
+Suy diễn Bayes dựa trên định lý Bayes, $p(\btheta\mid r)\propto p(r\mid\btheta)\,p(\btheta)$, với $p(r\mid\btheta)=\exp\ell(\btheta)$ là cùng hàm hợp lý~\eqref{eq:loglik}. Trong Pyro, mỗi tham số là một \emph{site} lấy mẫu từ tiên nghiệm và log-hợp lý được cộng vào mật độ bằng \ham{pyro.factor} (\ham{bayes.model}). Tiên nghiệm (lớp \tep{PriorConfig}) là tiên nghiệm yếu:
+\begin{center}\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Tham số} & \textbf{Tiên nghiệm} & \textbf{Ghi chú} \\
+\midrule
+$\mu$ & $N(0,1)$ & \\
+$\omega$ (GARCH) & $\mathrm{LogNormal}(0,1)$ & bảo đảm $\omega>0$ \\
+$\omega$ (EGARCH) & $N(0,1)$ & không cần dương \\
+$\alpha,\ \beta$ & $\mathrm{Beta}(2,2)$ trên $(0,1)$ & \\
+$\theta$ (EGARCH) & $N(0,1)$ & đối xứng quanh 0, không giả định dấu đòn bẩy \\
+$\gamma_j$ & $N(0,1)$ & \\
+$\nu-2$ & $\mathrm{Gamma}(2;\,0{,}2)$ & kỳ vọng của $\nu$ bằng 12 \\
+\bottomrule
+\end{tabular}
+\end{center}
+Pyro tự biến đổi mỗi site có miền giới hạn về $\R$ (log, logit, \dots) và cộng log-Jacobian của phép biến đổi vào mật độ; VB và NUTS làm việc trên không gian đã biến đổi này.
+
+\subsection{Bayes biến phân}\label{sec:vb}
+VB xấp xỉ hậu nghiệm bằng một phân phối $q_\phi$ trong một họ cho trước, chọn tham số $\phi$ để cực đại cận dưới bằng chứng (ELBO) \cite{blei2017vi}:
+\begin{equation}
+\mathrm{ELBO}(\phi)=\E_{q_\phi}\bigl[\log p(r,\btheta)-\log q_\phi(\btheta)\bigr]=\log p(r)-\mathrm{KL}\bigl(q_\phi\,\|\,p(\cdot\mid r)\bigr)\le\log p(r).
+\end{equation}
+Cực đại ELBO tương đương cực tiểu độ phân kỳ Kullback–Leibler từ $q_\phi$ tới hậu nghiệm. Gọi $\tilde{\btheta}\in\R^d$ là tham số sau biến đổi. Hai họ xấp xỉ được cài đặt (\ham{fit\_vb}):
+\begin{itemize}
+\item \textbf{Mean-field} (\ham{AutoNormal}): $q(\tilde{\btheta})=\prod_{j}N(m_j,s_j^2)$, bỏ qua mọi tương quan hậu nghiệm giữa các tham số.
+\item \textbf{Full-rank} (\ham{AutoMultivariateNormal}): $q(\tilde{\btheta})=N(m,LL^{\!\top})$ với $L$ tam giác dưới, nắm được tương quan tuyến tính giữa các tham số.
+\end{itemize}
+Gradient của ELBO được ước lượng bằng mẹo tham số hóa lại \cite{kingma2014vae}: $\tilde{\btheta}=m+L\epsilon$, $\epsilon\sim N(0,I)$, nên $\nabla_\phi\mathrm{ELBO}=\E_\epsilon\nabla_\phi[\log p(r,\tilde{\btheta}(\epsilon))-\log q_\phi(\tilde{\btheta}(\epsilon))]$ được xấp xỉ bằng một mẫu $\epsilon$ mỗi bước (\ham{Trace\_ELBO}). Bộ tối ưu Adam với tốc độ học $0{,}01$ chạy 3.000 bước ở Bước 1 và 1.500 bước ở Bước 2; quy trình này gọi là suy diễn biến phân ngẫu nhiên (SVI). ELBO báo cáo là trung bình 50 bước cuối. Sau khi khớp, mã nguồn rút 1.000 mẫu từ $q$ (\ham{Predictive}) để tính trung bình, độ lệch chuẩn và khoảng hậu nghiệm 2,5\%--97,5\% (\ham{posterior\_summary}). ELBO chỉ so sánh được giữa các lần khớp của cùng một mô hình; nó không thay AIC/BIC khi so sánh các mô hình khác nhau.
+
+\subsection{MCMC bằng NUTS}\label{sec:mcmc}
+\paragraph{Hamiltonian Monte Carlo.} HMC \cite{neal2011hmc} coi $U(\tilde{\btheta})=-\log p(\tilde{\btheta}\mid r)$ là thế năng, thêm biến động lượng $p\sim N(0,M)$ và mô phỏng hệ Hamilton $H=U(\tilde{\btheta})+\tfrac12p^{\!\top}M^{-1}p$ bằng tích phân leapfrog với bước $\varepsilon$:
+\begin{equation}
+p\leftarrow p-\tfrac{\varepsilon}{2}\nabla U(\tilde{\btheta}),\qquad
+\tilde{\btheta}\leftarrow\tilde{\btheta}+\varepsilon M^{-1}p,\qquad
+p\leftarrow p-\tfrac{\varepsilon}{2}\nabla U(\tilde{\btheta}).
+\end{equation}
+Điểm cuối quỹ đạo được chấp nhận với xác suất Metropolis $\min\{1,e^{-\Delta H}\}$. Nhờ dùng gradient, HMC di chuyển xa trong không gian tham số mà vẫn giữ xác suất chấp nhận cao.
+
+\paragraph{NUTS.} Thuật toán No-U-Turn Sampler \cite{hoffman2014nuts} tự chọn độ dài quỹ đạo: quỹ đạo được nhân đôi dần cho tới khi bắt đầu quay đầu, tức $(\tilde{\btheta}^+-\tilde{\btheta}^-)^{\!\top}p^{\pm}<0$, hoặc đạt độ sâu cây tối đa (tối đa $2^{\text{độ sâu}}$ bước leapfrog mỗi mẫu). Trong giai đoạn khởi động (warmup), $\varepsilon$ được thích nghi bằng trung bình kép (dual averaging) để xác suất chấp nhận trung bình đạt 0,85, và ma trận khối lượng $M$ được ước lượng từ mẫu khởi động. Bước 3 dùng $M$ đặc (\tep{full\_mass}) để nắm tương quan giữa các tham số, 4 chuỗi, mỗi chuỗi 1.000 vòng khởi động và 400 mẫu, độ sâu cây tối đa 7 (\ham{fit\_mcmc}). Số bước leapfrog phân kỳ (năng lượng tăng vọt) được đếm để báo cáo.
+
+\paragraph{Khởi tạo chuỗi.} Chuỗi 0 bắt đầu đúng tại nghiệm MLE; ba chuỗi còn lại được nhiễu loạn hai sai số chuẩn~\eqref{eq:delta} quanh nghiệm này (\ham{khoi\_tao\_tu\_mle}). Tham số dương được nhiễu loạn trên thang log với độ lớn $\mathrm{SE}/x$, tham số trong $(0,1)$ trên thang logit với độ lớn $\mathrm{SE}/[x(1-x)]$ (phương pháp delta), có trần 1,0 trên thang đã biến đổi. Các điểm xuất phát như vậy đủ phân tán để chẩn đoán $\hat R$ có ý nghĩa nhưng không đẩy chuỗi sang một vùng xa của không gian tham số.
+
+\paragraph{Chẩn đoán hội tụ.} Với $m$ chuỗi, mỗi chuỗi tách đôi thành hai nửa độ dài $n$, gọi $W$ là trung bình phương sai trong chuỗi và $B$ là $n$ lần phương sai giữa các trung bình chuỗi. Thống kê Gelman–Rubin \cite{gelman1992}
+\begin{equation}
+\hat R=\sqrt{\frac{\frac{n-1}{n}W+\frac1nB}{W}}
+\end{equation}
+gần 1 khi các chuỗi trộn tốt. ArviZ tính phiên bản chuẩn hóa xếp hạng của $\hat R$ và cỡ mẫu hiệu dụng khối $\mathrm{ESS}=mn/(1+2\sum_{k}\hat\rho_k)$ theo Vehtari và cộng sự \cite{vehtari2021rhat}; ngưỡng thường dùng là $\hat R<1{,}01$. Để đánh giá VB, tỷ số độ lệch chuẩn hậu nghiệm
+\begin{equation}
+R_{sd,j}=\mathrm{sd}_{\rm VB}(\theta_j)/\mathrm{sd}_{\rm MCMC}(\theta_j)
+\end{equation}
+nhỏ hơn 1 cho thấy VB báo bất định thấp hơn MCMC (\ham{sd\_ratio}).
+
+\subsection{Đánh giá ngoài mẫu}\label{sec:ngoai-mau}
+\paragraph{Thiết kế.} Tham số được ước lượng một lần trên tập huấn luyện. Vòng lặp phương sai sau đó chạy tiếp qua tập kiểm định với tham số cố định, điều kiện đầu là phương sai mẫu của tập huấn luyện. Tại mỗi $t$ của tập kiểm định, $\hat h_t$ chỉ dùng thông tin đến $t-1$, nên là dự báo một bước ngoài mẫu (\ham{duong\_h\_va\_logf}).
+
+\paragraph{Hàm mất mát.} Với $n$ quan sát kiểm định (\tep{ham\_mat\_mat.py}):
+\begin{gather}
+\mathrm{MAE}=\frac1n\sum_t|RV_t-\hat h_t|,\qquad
+\mathrm{RMSE}=\sqrt{\frac1n\sum_t(RV_t-\hat h_t)^2},\\
+\mathrm{QLIKE}=\frac1n\sum_t\Bigl(\log\hat h_t+\frac{RV_t}{\hat h_t}\Bigr),\qquad
+\mathrm{NLS}=-\frac1n\sum_t\log\hat f_t(r_t).
+\end{gather}
+QLIKE giữ nguyên thứ tự xếp hạng các mô hình khi $RV_t$ là đại diện không chệch nhưng có nhiễu của phương sai thật \cite{patton2011}. NLS đánh giá toàn bộ mật độ dự báo, gồm cả đuôi.
+
+\paragraph{Dự báo từ hậu nghiệm.} Với $S=200$ bộ tham số $\btheta^{(s)}$ rút cách đều từ mẫu hậu nghiệm VB (\ham{rut\_bo\_tham\_so}), dự báo phương sai là $\bar h_t=S^{-1}\sum_s h_t^{(s)}$, và mật độ dự báo là hỗn hợp
+\begin{equation}
+\hat f_t(r)=\frac1S\sum_{s=1}^{S}f\bigl(r\mid\btheta^{(s)}\bigr),\qquad
+\log\hat f_t(r)=\operatorname{logsumexp}_s\log f(r\mid\btheta^{(s)})-\log S,
+\end{equation}
+tính ổn định bằng logsumexp (\ham{danh\_gia\_hau\_nghiem}). Qua kênh này, bất định tham số đi vào dự báo mật độ.
+
+\paragraph{Giá trị chịu rủi ro.} VaR mức $a\in\{1\%,5\%\}$ của vị thế mua và chỉ báo vi phạm là
+\begin{equation}
+\VaR_t(a)=-\bigl(\mu+\sqrt{\hat h_t}\,q_a\bigr),\qquad I_t=\mathbf 1\{r_t<-\VaR_t(a)\},
+\end{equation}
+với $q_a$ là phân vị mức $a$ của $z$: $\Phi^{-1}(a)$ cho phân phối chuẩn, $t_\nu^{-1}(a)\sqrt{(\nu-2)/\nu}$ cho Student-$t$ chuẩn hóa (\ham{phan\_vi\_z}). Với dự báo hậu nghiệm, VaR là trung bình phân vị của các thành phần.
+
+\paragraph{Kiểm định Kupiec.} Với $x$ vi phạm trong $n$ phiên và $\hat\pi=x/n$, kiểm định bao phủ vô điều kiện \cite{kupiec1995} có giả thuyết $H_0:\Pr(I_t=1)=a$ và thống kê
+\begin{equation}
+\mathrm{LR}_{uc}=-2\bigl[(n-x)\log(1-a)+x\log a-(n-x)\log(1-\hat\pi)-x\log\hat\pi\bigr]\ \sim\ \chi^2_1 .
+\end{equation}
+
+\paragraph{Kiểm định Christoffersen.} Gọi $n_{ij}$ là số lần chuyển từ trạng thái $i$ sang $j$ của chuỗi $I_t$, $\hat\pi_{01}=n_{01}/(n_{00}+n_{01})$, $\hat\pi_{11}=n_{11}/(n_{10}+n_{11})$ và $\hat\pi$ là tỷ lệ vi phạm chung. Kiểm định độc lập \cite{christoffersen1998} so sánh xích Markov bậc một với mô hình độc lập:
+\begin{equation}
+\mathrm{LR}_{ind}=-2\log\frac{(1-\hat\pi)^{n_{00}+n_{10}}\hat\pi^{n_{01}+n_{11}}}{(1-\hat\pi_{01})^{n_{00}}\hat\pi_{01}^{n_{01}}(1-\hat\pi_{11})^{n_{10}}\hat\pi_{11}^{n_{11}}}\sim\chi^2_1,\qquad
+\mathrm{LR}_{cc}=\mathrm{LR}_{uc}+\mathrm{LR}_{ind}\sim\chi^2_2 .
+\end{equation}
+Bác bỏ $H_0$ của $\mathrm{LR}_{ind}$ nghĩa là các vi phạm có xu hướng xảy ra thành cụm.
+
+\paragraph{Kiểm định Diebold–Mariano.} Để so sánh hai mô hình theo một hàm mất mát, với $d_t=L_{1t}-L_{2t}$ \cite{diebold1995}:
+\begin{equation}
+\mathrm{DM}=\frac{\bar d}{\sqrt{\hat S/n}},\qquad
+\hat S=\hat\gamma_0+2\sum_{k=1}^{h-1}\Bigl(1-\frac{k}{h}\Bigr)\hat\gamma_k,
+\end{equation}
+với $\hat\gamma_k$ là hiệp phương sai trễ $k$ của $d_t$ (trọng số Newey–West \cite{neweywest1987}); hiệu chỉnh mẫu nhỏ của Harvey, Leybourne và Newbold \cite{hln1997} nhân DM với $\sqrt{[n+1-2h+h(h-1)/n]/n}$ và so với phân phối $t_{n-1}$ (\ham{diebold\_mariano\_test}). $\mathrm{DM}>0$ cho thấy mô hình 1 có mất mát trung bình lớn hơn. Hàm này được cài đặt và kiểm thử nhưng chưa dùng trong các bảng hiện có.
+
+\subsection{Kiểm định thống kê ban đầu}
+Trước khi mô hình hóa, chuỗi $r_t$ được kiểm tra bằng các kiểm định sau (\tep{kiem\_dinh\_so\_bo.py}):
+\begin{itemize}
+\item \textbf{ADF} \cite{dickeyfuller1979} và \textbf{Phillips–Perron} \cite{phillipsperron1988}: hồi quy $\Delta r_t=c+\rho r_{t-1}+\dots$; $H_0$: $\rho=0$ (có nghiệm đơn vị). PP hiệu chỉnh tự tương quan và phương sai thay đổi bằng phương pháp phi tham số.
+\item \textbf{KPSS} \cite{kpss1992}: đảo chiều giả thuyết, $H_0$: chuỗi dừng quanh mức.
+\item \textbf{Ljung–Box} \cite{ljungbox1978}: $Q(m)=n(n+2)\sum_{k=1}^m\hat\rho_k^2/(n-k)\sim\chi^2_m$ trên $r_t$ (tự tương quan của lợi suất) và trên $r_t^2$ (tự tương quan của biến động).
+\item \textbf{ARCH-LM} \cite{engle1982}: hồi quy $e_t^2$ lên $e_{t-1}^2,\dots,e_{t-q}^2$; $\mathrm{LM}=nR^2\sim\chi^2_q$; bác bỏ $H_0$ nghĩa là có hiệu ứng ARCH, cơ sở để dùng mô hình GARCH.
+\item \textbf{Jarque–Bera} \cite{jarquebera1980}: $\mathrm{JB}=\frac n6\bigl[S^2+\frac14(K-3)^2\bigr]\sim\chi^2_2$ với độ lệch $S$ và độ nhọn $K$; bác bỏ $H_0$ phân phối chuẩn gợi ý dùng sai số đuôi dày.
+\end{itemize}
+
+\subsection{Nghiên cứu mô phỏng khôi phục tham số}\label{sec:mo-phong}
+\paragraph{Cơ chế sinh dữ liệu.} Với tham số thật $\btheta_0$, hàm \ham{simulate\_egarch} sinh $X_t\sim N(0,I_2)$ độc lập, $z_t\sim t^*_{\nu_0}$, đặt $\log h_0=\omega/(1-\beta)$, rồi lặp~\eqref{eq:egarch} và $r_t=\mu+\sqrt{h_t}z_t$. Mô phỏng sinh $T+200$ quan sát và bỏ 200 quan sát đầu (burn-in) để xóa ảnh hưởng của điều kiện đầu. Lần lặp $b$ dùng hạt giống $b$ cho cả sinh dữ liệu và ước lượng, nên từng lần lặp tái lập được, không phụ thuộc thứ tự chạy song song.
+
+\paragraph{Ba trường hợp.} Các tham số chung là $\mu=0{,}05$, $\omega=0{,}04$, $\alpha=0{,}15$, $\beta=0{,}95$, $\bgamma=(0{,}05;0{,}05)$; khi đó $\omega/(1-\beta)=0{,}8$, tức $h\approx2{,}2$, cùng bậc với phương sai mẫu của VN30F1M. Các trường hợp khác nhau ở $\theta_0$ và $\nu_0$ (\ham{truong\_hop\_mac\_dinh}):
+\begin{center}\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Trường hợp} & $\theta_0$ & $\nu_0$ & \textbf{Câu hỏi kiểm tra} \\
+\midrule
+E1 & $-0{,}10$ & 8 & Bộ ước lượng có khôi phục được hiệu ứng đòn bẩy không? \\
+E2 & $0$ & 8 & Khi dữ liệu không có đòn bẩy, $\hat\theta$ có lệch khỏi 0 một cách hệ thống không? \\
+E3 & $-0{,}10$ & 4 & Khôi phục có còn đúng khi đuôi rất dày, gần vùng $\hat\nu$ của VN30F1M? \\
+\bottomrule
+\end{tabular}
+\end{center}
+Mỗi trường hợp có $B=100$ lần lặp với $T=2000$. MLE dùng 3 điểm khởi tạo, VB dùng 1.500 bước (\tep{CAU\_HINH\_MAC\_DINH}).
+
+\paragraph{Chỉ tiêu.} Với tham số $j$ và ước lượng $\hat\theta_{j,b}$ (\ham{tong\_hop}):
+\begin{equation}
+\mathrm{Bias}_j=\frac1B\sum_b(\hat\theta_{j,b}-\theta_{0j}),\quad
+\mathrm{RMSE}_j=\sqrt{\frac1B\sum_b(\hat\theta_{j,b}-\theta_{0j})^2},\quad
+\mathrm{SE}_{MC,j}=\sqrt{\mathrm{RMSE}_j^2-\mathrm{Bias}_j^2},
+\end{equation}
+\begin{equation}
+\mathrm{Coverage}_j=\frac1{B'}\sum_{b}\mathbf 1\{L_{j,b}\le\theta_{0j}\le U_{j,b}\}.
+\end{equation}
+$[L,U]$ là khoảng hậu nghiệm 2,5\%--97,5\% với VB và khoảng Wald với MLE; với MLE chỉ tính trên $B'\le B$ lần lặp có Hessian xác định dương. Coverage gần 0,95 cho thấy khoảng 95\% được hiệu chỉnh tốt. Sai số Monte Carlo của coverage ở $B=100$ vào khoảng $\sqrt{0{,}95\cdot0{,}05/100}\approx0{,}022$.
+
+% =====================================================================
+\section{Mô tả chi tiết từng tệp và hàm}
+% =====================================================================
+Mỗi bảng dưới đây liệt kê các hàm công khai của một tệp; hàm có tên bắt đầu bằng dấu gạch dưới là hàm phụ trợ nội bộ.
+
+\newcommand{\bangham}[1]{%
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}p{0.65\textwidth}@{}}
+\toprule \textbf{Hàm / lớp} & \textbf{Tác dụng và kỹ thuật} \\ \midrule \endhead
+#1
+\bottomrule
+\end{longtable}}
+
+\subsection{Gói \tep{garch\_vn30} (\tep{\_\_init\_\_.py})}
+Đặt kiểu số thực mặc định của PyTorch là 64 bit (vòng lặp qua 1.700 quan sát và phép nghịch đảo Hessian cần độ chính xác cao) và chuyển đầu ra sang UTF-8. Mỗi gói con có \tep{\_\_init\_\_.py} xuất lại các hàm chính.
+
+\subsection{\tep{du\_lieu/doc\_du\_lieu.py} — đọc dữ liệu phút}
+\bangham{%
+\ham{load\_intraday\_csv(path)} & Đọc CSV, ghép cột thời gian từ ngày và giờ, đổi tên cột giá và khối lượng, sắp xếp theo thời gian. \\
+\ham{data\_quality\_report(df)} & Báo cáo chất lượng: số dòng trùng thời điểm, giá trị thiếu, giá hoặc khối lượng không dương, nến vi phạm $Low\le\min(O,C)\le\max(O,C)\le High$, số nến mỗi ngày. \\
+\ham{build\_daily\_bars(df)} & Gộp nến phút thành nến ngày: mở cửa đầu ngày, cao nhất, thấp nhất, đóng cửa cuối ngày, tổng khối lượng, số nến. \\
+\ham{compute\_daily\_log\_returns} & $r_t=100\log(P_t/P_{t-1})$; ngày đầu là NaN. \\
+\ham{compute\_intraday\_log\_returns} & Lợi suất log giữa hai nến phút liên tiếp trong cùng ngày; nến đầu ngày là NaN để không nối qua đêm. \\
+\ham{load\_vn30f1m\_daily(path)} & Hàm tổng hợp: trả về bảng ngày có cột \tep{log\_return} và \tep{RV} theo~\eqref{eq:rv}, kèm báo cáo chất lượng. \\}
+
+\subsection{\tep{du\_lieu/chuan\_bi.py} — chuẩn bị dữ liệu mô hình}
+\bangham{%
+\ham{build\_exogenous\_matrix(daily)} & Hai biến ngoại sinh trễ một phiên: $\log(1+VOL_{t-1})$, $\log(RV_{t-1}+10^{-6})$ (phép \tep{shift(1)} của pandas). \\
+\ham{standardize\_with\_train\_stats} & Chuẩn hóa $(x-\bar x)/s$ với $\bar x,s$ chỉ tính trên các dòng của tập huấn luyện. \\
+\ham{chuan\_bi\_du\_lieu(csv, train\_frac)} & Toàn bộ khâu chuẩn bị: đọc, tạo biến, đặt mặt nạ huấn luyện 80\% trên các phiên gốc rồi mới lọc dòng thiếu; trả về dict \tep{r\_all}, \tep{X\_all}, \tep{rv\_all}, \tep{dates\_all}, \tep{n\_train} (nội dung \tep{00\_data.pt}). \\}
+
+\subsection{\tep{kiem\_dinh/kiem\_dinh\_so\_bo.py} — kiểm định ban đầu}
+\bangham{%
+\ham{adf\_test}, \ham{pp\_test}, \ham{kpss\_test} & Kiểm định nghiệm đơn vị và tính dừng (gọi statsmodels và arch); trả về thống kê, $p$-value và kết luận ở mức 5\%. \\
+\ham{ljung\_box\_test(x, lags)} & Thống kê $Q(m)$ của Ljung–Box đến độ trễ $m$. \\
+\ham{arch\_lm\_test(resid, nlags)} & Kiểm định ARCH-LM của Engle. \\
+\ham{jarque\_bera\_test(x)} & Kiểm định phân phối chuẩn, kèm độ lệch và độ nhọn. \\
+\ham{run\_all\_preliminary\_tests(r)} & Chạy toàn bộ: ADF, PP, KPSS, Ljung-Box trên $r$ và $r^2$, ARCH-LM, JB (nội dung \tep{01\_preliminary\_tests.pt}). \\}
+
+\subsection{\tep{mo\_hinh/phan\_phoi.py} — phân phối sai số}
+\bangham{%
+\ham{std\_t\_log\_const(nu)}, \ham{std\_t\_logpdf(z, nu)} & Hằng số chuẩn hóa và log-mật độ của $t^*_\nu$ theo~\eqref{eq:student}, qua \ham{lgamma} và \ham{log1p} để ổn định số học; hỗ trợ broadcasting. \\
+\ham{normal\_logpdf(z)} & Log-mật độ $N(0,1)$. \\
+\ham{expected\_abs\_normal()}, \ham{expected\_abs\_std\_t(nu)} & $\E|z|$ theo~\eqref{eq:eabsz}, dùng trong EGARCH. \\
+\ham{std\_t\_sample(nu)} & Sinh mẫu $t^*_\nu$ từ thương giữa biến chuẩn và căn biến khi bình phương. \\}
+
+\subsection{\tep{mo\_hinh/garch.py} và \tep{mo\_hinh/egarch.py} — phương trình mô hình}
+\bangham{%
+\ham{GARCHParams}, \ham{EGARCHParams} & Bộ tham số dạng \tep{NamedTuple} bất biến: \tep{mu, omega, alpha, (theta,) beta, gamma, nu}; \tep{nu=None} nghĩa là phân phối chuẩn. \\
+\ham{garch\_forward(params, r, X, h0)} & Đường phương sai~\eqref{eq:garch} với cắt dưới $10^{-8}$; các số hạng không phụ thuộc $h$ tính trước vòng lặp. \\
+\ham{egarch\_forward(params, r, X, h0)} & Đường phương sai~\eqref{eq:egarch}, chặn $\log h\in[-30,30]$; trả về $h$ (không phải $\log h$) để dùng chung giao diện với GARCH. \\
+\ham{log\_mat\_do(r, mu, h, nu)} & Log-mật độ có điều kiện từng quan sát, gồm số hạng Jacobian $-\frac12\log h_t$; dùng chung cho hai họ và cho đánh giá ngoài mẫu. \\
+\ham{garch\_loglik}, \ham{egarch\_loglik} & Log-hợp lý~\eqref{eq:loglik}, khả vi theo mọi tham số. \\
+\ham{expected\_abs\_z(nu)} & Chọn công thức $\E|z|$ theo phân phối. \\}
+
+\subsection{\tep{mo\_hinh/danh\_muc.py} — danh mục mô hình}
+\bangham{%
+\ham{ModelSpec} & Đặc tả một mô hình: tên, mã, họ, phân phối, có dùng $X$ hay không; phương thức \ham{n\_params(k)} trả về $d$. \\
+\ham{CATALOGUE}, \ham{get(code)} & Bộ sáu mô hình (Bảng~\ref{tab:danh-muc}) và hàm tra theo mã, báo lỗi rõ khi sai tên. \\
+\ham{lay\_X(spec, X\_all)} & Ma trận ngoại sinh cho mô hình; mô hình không dùng $X$ nhận ma trận 0 cột (khi đó $\bgamma$ là vector rỗng). \\
+\ham{forward\_cua}, \ham{loglik\_cua} & Chọn hàm tính theo họ mô hình. \\
+\ham{tham\_so\_sang\_dict}, \ham{tham\_so\_tu\_dict} & Chuyển bộ tham số sang dict tensor để lưu tệp và ngược lại; nhờ đó tệp kết quả không phụ thuộc tên lớp Python. \\}
+
+\subsection{\tep{suy\_dien/mle.py} — ước lượng hợp lý cực đại}
+\bangham{%
+\ham{unpack(raw, dist, family)}, \ham{pack} & Biến đổi giữa không gian không ràng buộc và miền hợp lệ (Mục~\ref{sec:mle}). \\
+\ham{fit\_mle(r, X, dist, family, n\_starts, ...)} & MLE nhiều điểm khởi tạo: Adam (cắt chuẩn gradient) rồi L-BFGS với tìm kiếm đường Wolfe mạnh; chọn nghiệm có log-hợp lý lớn nhất; trả về \ham{MLEResult} gồm tham số, log-hợp lý, AIC, BIC, $d$ và chẩn đoán từng điểm khởi tạo (\ham{LanChay}). \\
+\ham{standard\_errors(params, r, X, ...)} & Sai số chuẩn theo~\eqref{eq:delta}: Hessian quan sát và Jacobian bằng \ham{torch.autograd.functional}; trả về \tep{None} nếu Hessian không hợp lệ. \\}
+
+\subsection{\tep{suy\_dien/bayes.py} — mô hình Bayes}
+\bangham{%
+\ham{PriorConfig} & Siêu tham số tiên nghiệm (bảng ở Mục~4.8). \\
+\ham{model(r, X, spec, prior)} & Mô hình sinh Pyro: lấy mẫu các site theo tiên nghiệm, cộng log-hợp lý bằng \ham{pyro.factor}. VB và NUTS đều gọi hàm này. \\
+\ham{params\_tu\_mau}, \ham{rut\_bo\_tham\_so} & Chuyển mẫu hậu nghiệm thành danh sách bộ tham số (rút cách đều $S$ bộ) cho đánh giá ngoài mẫu. \\
+\ham{posterior\_summary(samples)} & Trung bình, độ lệch chuẩn, phân vị 2,5\% và 97,5\% của từng site. \\
+\ham{sd\_ratio} & Tỷ số $R_{sd}$ giữa VB và MCMC. \\}
+
+\subsection{\tep{suy\_dien/vb.py} và \tep{suy\_dien/mcmc.py}}
+\bangham{%
+\ham{fit\_vb(r, X, spec, guide\_type, ...)} & SVI với guide mean-field hoặc full-rank (Mục~\ref{sec:vb}); trả về \ham{VBResult}: ELBO theo bước, ELBO cuối, mẫu và tóm tắt hậu nghiệm. \\
+\ham{fit\_mcmc(r, X, spec, n\_chains, ...)} & NUTS (Mục~\ref{sec:mcmc}); các chuỗi chạy tuần tự để tránh lỗi tạo tiến trình trên Windows; tính $\hat R$, ESS, số phân kỳ; có thể lưu tiến độ định kỳ vào tệp vì một chuỗi có thể chạy nhiều giờ. \\
+\ham{khoi\_tao\_tu\_mle(params, spec, chain, se)} & Điểm xuất phát của chuỗi quanh nghiệm MLE theo sai số chuẩn. \\
+\ham{inference\_data(post)} & Đóng gói mẫu cho ArviZ, chọn cú pháp theo phiên bản ArviZ. \\}
+
+\subsection{\tep{danh\_gia/} — đánh giá ngoài mẫu}
+\bangham{%
+\ham{mae\_vol}, \ham{rmse\_vol}, \ham{qlike}, \ham{negative\_log\_score} & Các hàm mất mát ở Mục~\ref{sec:ngoai-mau} (\tep{ham\_mat\_mat.py}). \\
+\ham{phan\_vi\_z}, \ham{kupiec\_test}, \ham{christoffersen\_test} & Phân vị VaR và hai kiểm định hậu kiểm (\tep{kiem\_dinh\_var.py}). \\
+\ham{diebold\_mariano\_test} & Kiểm định DM với phương sai Newey–West và hiệu chỉnh HLN (\tep{kiem\_dinh\_dm.py}). \\
+\ham{duong\_h\_va\_logf} & $\hat h_t$ và $\log\hat f_t(r_t)$ trên tập kiểm định cho một bộ tham số (\tep{ngoai\_mau.py}). \\
+\ham{danh\_gia\_mot\_diem} & Đánh giá dự báo từ một bộ tham số (MLE): MAE, RMSE, QLIKE, NLS, số vi phạm và kiểm định VaR 1\%, 5\%. \\
+\ham{danh\_gia\_hau\_nghiem} & Đánh giá từ $S$ bộ tham số hậu nghiệm với mật độ hỗn hợp. \\}
+
+\subsection{\tep{mo\_phong/} — nghiên cứu mô phỏng}
+\bangham{%
+\ham{generate\_exogenous}, \ham{simulate\_egarch} & Sinh biến ngoại sinh và dữ liệu EGARCH-X với burn-in (\tep{sinh\_du\_lieu.py}). \\
+\ham{TruongHop}, \ham{truong\_hop\_mac\_dinh}, \ham{tham\_so\_that}, \ham{THU\_TU} & Định nghĩa ba trường hợp E1--E3 và danh sách tên tham số (\tep{truong\_hop.py}). \\
+\ham{chay\_mot\_lan\_lap(method, r, X, spec, seed)} & Ước lượng một bộ dữ liệu mô phỏng bằng một phương pháp; trả về ước lượng điểm và khoảng 95\% (hậu nghiệm với VB, Wald với MLE) (\tep{khoi\_phuc.py}). \\
+\ham{tong\_hop(lan\_lap, that)} & Gộp các lần lặp thành Bias, RMSE, Coverage. \\}
+
+\subsection{Các script trong \tep{scripts/}}
+\bangham{%
+\tep{chung.py} & Đường dẫn chung; \ham{luu} ghi tệp nguyên tử (ghi tệp tạm rồi đổi tên, mất điện giữa chừng không để lại tệp hỏng); \ham{checkpoint} bỏ qua phần đã tính; \ham{chay\_song\_song} chạy mỗi tác vụ trong một tiến trình con, mỗi tiến trình một luồng BLAS, ghi nhật ký vào \tep{logs/}. \\
+\tep{chay\_buoc1\_so\_sanh\_mo\_hinh.py} & \ham{nap\_du\_lieu}, \ham{chay\_mle}, \ham{chay\_vb}, \ham{uoc\_luong\_tat\_ca}, \ham{bang\_so\_sanh}, \ham{in\_bang}; cấu hình trong lớp \ham{CauHinh} (MLE 10 điểm khởi tạo, 500 bước Adam, 250 bước L-BFGS; VB 3.000 bước, 1.000 mẫu, 200 bộ tham số cho đánh giá ngoài mẫu). \\
+\tep{chay\_buoc2\_mo\_phong.py} & \ham{worker} chạy một lần lặp; \ham{gop} gộp các lần lặp và in tóm tắt $\theta$; \ham{main} lập danh sách lần lặp còn thiếu và điều phối song song. \\
+\tep{chay\_buoc3\_mcmc.py} & \ham{chon\_mo\_hinh} theo QLIKE, \ham{chay\_mcmc} với khởi tạo quanh MLE. \\
+\tep{kiem\_toan\_ket\_qua.py} & Tính lại log-hợp lý, AIC, BIC, chỉ tiêu ngoài mẫu từ tham số và mẫu đã lưu; tính lại Bias, RMSE, Coverage từ từng lần lặp; tính lại tóm tắt và $\hat R$ của MCMC; báo \tep{DAT}/\tep{HONG}. \\
+\tep{bao\_cao/*.py} & Sinh \tep{tong\_hop\_ket\_qua.tex} và các hình từ \tep{results/}; hình vector được đối chiếu với cột Bias trước khi lưu. \\}
+
+% =====================================================================
+\section{Định dạng tệp kết quả}\label{sec:ket-qua}
+% =====================================================================
+Mọi tệp là tệp \tep{torch.save} chứa dict, tensor và số Python; đọc bằng \ham{torch.load(path, weights\_only=False)}. Tệp không chứa đối tượng của lớp tự định nghĩa nên đọc được mà không phụ thuộc cấu trúc mã nguồn.
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.36\textwidth}>{\raggedright\arraybackslash}p{0.59\textwidth}@{}}
+\toprule \textbf{Tệp} & \textbf{Nội dung (khóa)} \\ \midrule \endhead
+\tep{results/00\_data.pt} & \tep{r\_all} ($T$), \tep{X\_all} ($T\times2$), \tep{rv\_all}, \tep{dates\_all}, \tep{n\_train}, \tep{quality\_report}, \tep{exog\_mean}, \tep{exog\_std}. \\
+\tep{results/01\_preliminary\_tests.pt} & Kết quả \ham{run\_all\_preliminary\_tests}. \\
+\tep{pipeline/<mô hình>\_mle.pt} & \tep{params} (dict tensor), \tep{loglik}, \tep{aic}, \tep{bic}, \tep{n\_params}, \tep{runs} (chẩn đoán từng điểm khởi tạo), \tep{oos}, \tep{giay}. \\
+\tep{pipeline/<mô hình>\_vb\_<guide>.pt} & \tep{final\_elbo}, \tep{summary}, \tep{samples} (1.000 mẫu mỗi site), \tep{oos}, \tep{giay}. \\
+\tep{oos} (trong hai loại trên) & \tep{mae}, \tep{rmse}, \tep{qlike}, \tep{nls}, \tep{h\_hat}, \tep{n\_test}, \tep{kupiec\_1pct}, \tep{christoffersen\_1pct}, \tep{n\_violations\_1pct} và tương tự cho 5\%. \\
+\tep{pipeline/bang\_so\_sanh.pt} & Bảng so sánh Bước 1 (danh sách dòng). \\
+\tep{pipeline/mcmc\_egarch\_x\_t.pt} & \tep{samples} (1.600 mẫu: 4 chuỗi nối tiếp), \tep{summary}, \tep{max\_rhat}, \tep{min\_ess}, \tep{n\_divergences}, \tep{giay}. \\
+\tep{mo\_phong\_egarch/parts/<TH>\_<pp>\_<b>.pt} & Một lần lặp: \tep{uoc\_luong}, \tep{can\_duoi}, \tep{can\_tren} (\tep{None} nếu MLE không có Hessian hợp lệ), \tep{b}, \tep{giay}. \\
+\tep{mo\_phong\_egarch/<TH>.pt} & Với mỗi phương pháp: \tep{bias}, \tep{rmse}, \tep{coverage}, \tep{n\_replications}, \tep{n\_co\_khoang}, \tep{tham\_so\_that}. \\
+\bottomrule
+\end{longtable}
+
+% =====================================================================
+\section{Tính tái lập và kiểm chứng}
+% =====================================================================
+\begin{itemize}
+\item \textbf{Hạt giống cố định.} MLE dùng seed $0,1,\dots$ cho các điểm khởi tạo; VB và MCMC đặt \ham{pyro.set\_rng\_seed}; mô phỏng dùng seed bằng chỉ số lần lặp. Chạy lại cùng lệnh cho cùng kết quả trên cùng phiên bản thư viện.
+\item \textbf{Kiểm thử tự động.} 43 kiểm thử trong \tep{tests/} kiểm tra: mật độ $t^*_\nu$ khớp SciPy; $\E|z|$ hội tụ về $\sqrt{2/\pi}$ và khớp Monte Carlo; log-hợp lý GARCH khớp một cài đặt NumPy viết tay; hiệu ứng đòn bẩy đúng dấu; tính dương của $h_t$ trong EGARCH; \ham{pack}/\ham{unpack} là nghịch đảo của nhau; AIC, BIC đúng công thức; VB tạo đúng các site cho cả sáu mô hình; MCMC chạy và cho $\hat R$ hữu hạn; đánh giá hậu nghiệm với một mẫu trùng đánh giá một điểm; Kupiec, Christoffersen, DM đúng hướng; biến ngoại sinh được dịch trễ và chuẩn hóa chỉ bằng tập huấn luyện; mô phỏng tái lập theo seed; Bias, RMSE, Coverage đúng công thức.
+\item \textbf{Kiểm toán kết quả.} \tep{kiem\_toan\_ket\_qua.py} tính lại 380 con số của cả ba bước từ nguồn thô; lần chạy gần nhất cho 380 đạt, 0 hỏng.
+\item \textbf{Đối chiếu với phiên bản trước.} Thư viện hiện tại là bản viết lại sau khi bỏ phần mô hình chuyển trạng thái MS-GARCH-X. Trước khi thay thế, bản mới được chạy song song với bản cũ trên cùng dữ liệu và cùng seed: dữ liệu chuẩn bị, log-hợp lý, chỉ tiêu ngoài mẫu, nghiệm MLE, sai số chuẩn, mẫu VB, mẫu MCMC, dữ liệu mô phỏng và kết quả từng lần lặp đều trùng khớp (chênh lệch lớn nhất $4{,}4\times10^{-16}$, mức làm tròn số thực). Bản cũ, gồm cả phần MS-GARCH-X và kết quả của nó, được lưu ở nhánh \tep{luu-tru/ms-garch-x} và thẻ \tep{luu-tru-ms-garch-x} trên kho GitHub của dự án.
+\end{itemize}
+
+\section{Tóm tắt kết quả hiện có}
+Chi tiết nằm trong \tep{Bài báo/tong\_hop\_ket\_qua.pdf}. Trên tập huấn luyện VN30F1M, EGARCH-X Student-$t$ ước lượng bằng MLE có AIC 5606,87 và BIC 5650,54, thấp nhất trong sáu mô hình; trên tập kiểm định, cặp này cũng có QLIKE (0,9234) và NLS (1,5203) thấp nhất. NUTS trên mô hình này có $\max\hat R=1{,}0125$, ESS nhỏ nhất 1.340 trên 1.600 mẫu và không có bước phân kỳ. Các kết luận này giới hạn ở chuỗi VN30F1M, sáu đặc tả và cách chia mẫu đã dùng.
+
+\begin{thebibliography}{99}\small
+\bibitem{bollerslev1986} T. Bollerslev (1986). Generalized autoregressive conditional heteroskedasticity. \emph{Journal of Econometrics}, 31(3), 307--327.
+\bibitem{nelson1991} D. B. Nelson (1991). Conditional heteroskedasticity in asset returns: A new approach. \emph{Econometrica}, 59(2), 347--370.
+\bibitem{engle1982} R. F. Engle (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation. \emph{Econometrica}, 50(4), 987--1007.
+\bibitem{kingma2015adam} D. P. Kingma, J. Ba (2015). Adam: A method for stochastic optimization. \emph{ICLR}.
+\bibitem{liu1989lbfgs} D. C. Liu, J. Nocedal (1989). On the limited memory BFGS method for large scale optimization. \emph{Mathematical Programming}, 45, 503--528.
+\bibitem{nocedal2006} J. Nocedal, S. J. Wright (2006). \emph{Numerical Optimization}, 2nd ed. Springer.
+\bibitem{blei2017vi} D. M. Blei, A. Kucukelbir, J. D. McAuliffe (2017). Variational inference: A review for statisticians. \emph{Journal of the American Statistical Association}, 112(518), 859--877.
+\bibitem{kingma2014vae} D. P. Kingma, M. Welling (2014). Auto-encoding variational Bayes. \emph{ICLR}.
+\bibitem{neal2011hmc} R. M. Neal (2011). MCMC using Hamiltonian dynamics. In \emph{Handbook of Markov Chain Monte Carlo}, Chapman \& Hall/CRC.
+\bibitem{hoffman2014nuts} M. D. Hoffman, A. Gelman (2014). The No-U-Turn Sampler: Adaptively setting path lengths in Hamiltonian Monte Carlo. \emph{Journal of Machine Learning Research}, 15, 1593--1623.
+\bibitem{gelman1992} A. Gelman, D. B. Rubin (1992). Inference from iterative simulation using multiple sequences. \emph{Statistical Science}, 7(4), 457--472.
+\bibitem{vehtari2021rhat} A. Vehtari, A. Gelman, D. Simpson, B. Carpenter, P.-C. Bürkner (2021). Rank-normalization, folding, and localization: An improved $\hat R$ for assessing convergence of MCMC. \emph{Bayesian Analysis}, 16(2), 667--718.
+\bibitem{patton2011} A. J. Patton (2011). Volatility forecast comparison using imperfect volatility proxies. \emph{Journal of Econometrics}, 160(1), 246--256.
+\bibitem{kupiec1995} P. H. Kupiec (1995). Techniques for verifying the accuracy of risk measurement models. \emph{Journal of Derivatives}, 3(2), 73--84.
+\bibitem{christoffersen1998} P. F. Christoffersen (1998). Evaluating interval forecasts. \emph{International Economic Review}, 39(4), 841--862.
+\bibitem{diebold1995} F. X. Diebold, R. S. Mariano (1995). Comparing predictive accuracy. \emph{Journal of Business \& Economic Statistics}, 13(3), 253--263.
+\bibitem{hln1997} D. Harvey, S. Leybourne, P. Newbold (1997). Testing the equality of prediction mean squared errors. \emph{International Journal of Forecasting}, 13(2), 281--291.
+\bibitem{neweywest1987} W. K. Newey, K. D. West (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \emph{Econometrica}, 55(3), 703--708.
+\bibitem{dickeyfuller1979} D. A. Dickey, W. A. Fuller (1979). Distribution of the estimators for autoregressive time series with a unit root. \emph{Journal of the American Statistical Association}, 74(366), 427--431.
+\bibitem{phillipsperron1988} P. C. B. Phillips, P. Perron (1988). Testing for a unit root in time series regression. \emph{Biometrika}, 75(2), 335--346.
+\bibitem{kpss1992} D. Kwiatkowski, P. C. B. Phillips, P. Schmidt, Y. Shin (1992). Testing the null hypothesis of stationarity against the alternative of a unit root. \emph{Journal of Econometrics}, 54, 159--178.
+\bibitem{ljungbox1978} G. M. Ljung, G. E. P. Box (1978). On a measure of lack of fit in time series models. \emph{Biometrika}, 65(2), 297--303.
+\bibitem{jarquebera1980} C. M. Jarque, A. K. Bera (1980). Efficient tests for normality, homoscedasticity and serial independence of regression residuals. \emph{Economics Letters}, 6(3), 255--259.
+\bibitem{bingham2019pyro} E. Bingham và cộng sự (2019). Pyro: Deep universal probabilistic programming. \emph{Journal of Machine Learning Research}, 20(28), 1--6.
+\end{thebibliography}
+\end{document}

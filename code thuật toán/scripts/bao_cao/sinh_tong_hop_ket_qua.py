@@ -1,18 +1,17 @@
-"""Sinh bao cao ket qua co phuong trinh, dien giai va hinh vector tham so.
+"""Sinh "Bai bao/tong_hop_ket_qua.tex": bang, phuong trinh va dien giai ket qua.
 
-So lieu bang va nhan xet duoc lay tu checkpoint/tap ket qua da luu; khong
-uoc luong lai. Hinh vector duoc ve boi ve_vector_tham_so.py tu tung lan lap.
-Cac file nguon deu da qua `scripts/tien_ich/kiem_toan_ket_qua.py`.
+Moi con so doc thang tu results/ (khong uoc luong lai, khong nhap tay).
+Hinh vector tham so do ve_vector_tham_so.py ve tu tung lan lap mo phong.
 
 Noi dung:
   1. Du lieu va cach chia.
-  2. So sanh cac mo hinh GARCH/EGARCH mot trang thai tren VN30F1M.
-  3. Mo phong EGARCH-X, ba kich ban E1-E3.
-  4. MCMC tren EGARCH-X-t, hau nghiem va R_sd.
+  2. Buoc 1: so sanh 6 mo hinh GARCH/EGARCH x 3 phuong phap tren VN30F1M.
+  3. Buoc 2: mo phong khoi phuc tham so EGARCH-X, truong hop E1-E3.
+  4. Buoc 3: MCMC tren EGARCH-X Student-t, hau nghiem va R_sd.
   5. Bang dem thang RMSE va ket luan.
 
-Chay (tu `code thuat toan`):  py scripts/bao_cao/sinh_tong_hop_ket_qua.py
-Bien dich:                     xelatex "Bai bao/tong_hop_ket_qua.tex"  (chay 2 lan)
+Chay (tu "code thuật toán"):  python scripts/bao_cao/sinh_tong_hop_ket_qua.py
+Bien dich:                     xelatex tong_hop_ket_qua.tex  (trong "Bài báo", chay 2 lan)
 """
 from __future__ import annotations
 
@@ -23,17 +22,11 @@ from pathlib import Path
 import numpy as np
 import torch
 
-try:
-    sys.stdout.reconfigure(encoding="utf-8")
-except Exception:
-    pass
-
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from msgarchx.inference import model_spec                    # noqa: E402
-from msgarchx.simulation.scenarios import default_scenarios  # noqa: E402
-from msgarchx.simulation.run_egarch import default_egarch_scenarios  # noqa: E402
+from garch_vn30.mo_hinh import danh_muc                          # noqa: E402
+from garch_vn30.mo_phong import THU_TU, truong_hop_mac_dinh     # noqa: E402
 
 RES = ROOT / "results"
 OUT = ROOT.parent / "Bài báo" / "tong_hop_ket_qua.tex"
@@ -44,41 +37,12 @@ TEN_PP = {"mle": "MLE", "vb_mean_field": "VB-MF", "vb_full_rank": "VB-FR", "mcmc
 TEN_PP_DAI = {"mle": "Hợp lý cực đại (MLE)", "vb_mean_field": "Bayes biến phân mean-field (VB-MF)",
               "vb_full_rank": "Bayes biến phân full-rank (VB-FR)", "mcmc": "MCMC (NUTS)"}
 
-NHAN_A = {"mu1": r"$\mu_1$", "mu2": r"$\mu_2$", "omega1": r"$\omega_1$", "omega2": r"$\omega_2$",
-          "alpha1": r"$\alpha_1$", "alpha2": r"$\alpha_2$", "beta1": r"$\beta_1$", "beta2": r"$\beta_2$",
-          "gamma1_0": r"$\gamma_{1,1}$", "gamma1_1": r"$\gamma_{1,2}$",
-          "gamma2_0": r"$\gamma_{2,1}$", "gamma2_1": r"$\gamma_{2,2}$",
-          "p11": r"$p_{11}$", "p22": r"$p_{22}$", "nu": r"$\nu$"}
-THU_TU_A = ["mu1", "mu2", "omega1", "omega2", "alpha1", "alpha2", "beta1", "beta2",
-            "gamma1_0", "gamma1_1", "gamma2_0", "gamma2_1", "p11", "p22", "nu"]
 NHAN_B = {"mu": r"$\mu$", "omega": r"$\omega$", "alpha": r"$\alpha$", "theta": r"$\theta$",
           "beta": r"$\beta$", "gamma_0": r"$\gamma_1$", "gamma_1": r"$\gamma_2$", "nu": r"$\nu$"}
-THU_TU_B = ["mu", "omega", "alpha", "theta", "beta", "gamma_0", "gamma_1", "nu"]
+THU_TU_B = THU_TU
 
-MO_TA_S = {
-    "S1": r"hai trạng thái phân biệt rõ, $\nu_0=8$",
-    "S2": r"hai trạng thái gần nhau, $\nu_0=8$",
-    "S3": r"đuôi rất dày, $\nu_0=4$",
-    "S4": r"$\nu_0=30$ (gần phân phối chuẩn)",
-    "S5": r"trạng thái biến động cao hiếm, $p_{11}=0{,}99$, $p_{22}=0{,}85$",
-    "S6": r"cỡ mẫu nhỏ, $T=500$",
-    "S7": r"cỡ mẫu lớn, $T=5000$",
-    "S8": r"sai đặc tả: $r_t + 0{,}3\,r_{t-1}$",
-}
-# Ban chu (khong toan) dung lam nhan dau trang PDF cho tieu de o tren. XeLaTeX +
-# unicode-math bi loi "Improper alphabetic constant" khi hyperref co gang doc
-# ky tu \nu (\mitnu) trong tieu de \subsection de sinh bookmark -- phai boc
-# \texorpdfstring{toan}{chu} thay vi de toan tho trong \subsection{}.
-MO_TA_S_CHU = {
-    "S1": "hai trang thai phan biet ro, nu0=8",
-    "S2": "hai trang thai gan nhau, nu0=8",
-    "S3": "duoi rat day, nu0=4",
-    "S4": "nu0=30 (gan phan phoi chuan)",
-    "S5": "trang thai bien dong cao hiem, p11=0,99, p22=0,85",
-    "S6": "co mau nho, T=500",
-    "S7": "co mau lon, T=5000",
-    "S8": "sai dac ta: r_t + 0,3 r_(t-1)",
-}
+# XeLaTeX + unicode-math loi khi hyperref doc ky tu toan trong tieu de
+# \subsection de sinh bookmark: boc \texorpdfstring{toan}{chu}.
 MO_TA_E = {
     "E1": r"đòn bẩy rõ, $\theta_0=-0{,}10$, $\nu_0=8$",
     "E2": r"không đòn bẩy, $\theta_0=0$, $\nu_0=8$",
@@ -175,32 +139,12 @@ def phan_du_lieu() -> str:
 
 
 # ------------------------------------------------------------------ 2. buoc 1
-MA_CU = {"garch_n": "b1", "garch_t": "b2", "garch_x_t": "b3", "ms_garch_n": "b4", "ms_garch_x_t": "m1"}
-MO_HINH_BAO_CAO = (
-    model_spec.get("garch_n"), model_spec.get("garch_t"),
-    model_spec.get("garch_x_t"), model_spec.get("egarch_n"),
-    model_spec.get("egarch_t"), model_spec.get("egarch_x_t"),
-)
+MO_HINH_BAO_CAO = danh_muc.CATALOGUE
 
 
 def _nap_o(code: str, pp: str) -> dict | None:
     p = RES / "pipeline" / f"{code}_{pp}.pt"
-    if p.exists():
-        return torch.load(p, weights_only=False)
-    ma = MA_CU.get(code)
-    if ma is None:
-        return None
-    o = torch.load(RES / "06_oos.pt", weights_only=False)
-    if pp == "mle":
-        m = torch.load(RES / "02_mle.pt", weights_only=False)
-        if ma not in m:
-            return None
-        return {"loglik": m[ma].loglik, "aic": m[ma].aic, "bic": m[ma].bic, "oos": o.get(ma, {})}
-    if code == "ms_garch_x_t":
-        v = torch.load(RES / "03_vb.pt", weights_only=False)
-        kho = {"vb_mean_field": "m2", "vb_full_rank": "m3"}[pp]
-        return {"final_elbo": v[kho].final_elbo, "oos": o.get(kho, {})} if kho in v else None
-    return None
+    return torch.load(p, weights_only=False) if p.exists() else None
 
 
 def phan_buoc_1() -> str:
@@ -229,13 +173,13 @@ def phan_buoc_1() -> str:
         if not found:
             raise FileNotFoundError(f"Thiếu kết quả cho mô hình {spec.name}")
     t1 = bang("l l r r r r r",
-              r"\textbf{Mô hình} & \textbf{PP} & $d$ & \textbf{log-lik} & \textbf{AIC} & \textbf{BIC} & \textbf{ELBO}",
+              r"\textbf{Mô hình} & \textbf{Phương pháp} & $d$ & \textbf{Log Likelihood} & \textbf{AIC} & \textbf{BIC} & \textbf{ELBO}",
               hang1, r"Bước 1: Khớp trong mẫu ($n_{\text{huấn luyện}}=1735$)", "tab:b1-trong-mau")
     t2 = bang("l l r r r r",
-              r"\textbf{Mô hình} & \textbf{PP} & \textbf{MAE} & \textbf{RMSE} & \textbf{QLIKE} & \textbf{NLS}",
+              r"\textbf{Mô hình} & \textbf{Phương pháp} & \textbf{MAE} & \textbf{RMSE} & \textbf{QLIKE} & \textbf{NLS}",
               hang2, rf"Bước 1: Dự báo ngoài mẫu ($n_{{\text{{kiểm định}}}}={n_te}$)", "tab:b1-ngoai-mau")
     t3 = bang("l l r r r r r r",
-              r"\textbf{Mô hình} & \textbf{PP} & $n_{1\%}$ & $p_{\text{UC}}$ & $p_{\text{CC}}$ & $n_{5\%}$ & $p_{\text{UC}}$ & $p_{\text{CC}}$",
+              r"\textbf{Mô hình} & \textbf{Phương pháp} & $n_{1\%}$ & $p_{\text{UC}}$ & $p_{\text{CC}}$ & $n_{5\%}$ & $p_{\text{UC}}$ & $p_{\text{CC}}$",
               hang3, rf"Bước 1: Kiểm định VaR ngoài mẫu ($n={n_te}$)",
               "tab:b1-var")
     g_n = _nap_o("garch_n", "mle")
@@ -261,32 +205,7 @@ def phan_buoc_1() -> str:
     return lead + t1 + t2 + t3 + note + "\n"
 
 
-# ------------------------------------------------------------------ 3. PR-A
-def _that_A(scn) -> dict:
-    p = scn.params
-    d = {}
-    for t in ("mu", "omega", "alpha", "beta"):
-        v = getattr(p, t)
-        d[f"{t}1"], d[f"{t}2"] = float(v[0]), float(v[1])
-    for s in range(2):
-        for j in range(p.gamma.shape[1]):
-            d[f"gamma{s + 1}_{j}"] = float(p.gamma[s, j])
-    d["p11"], d["p22"] = float(scn.P0[0, 0]), float(scn.P0[1, 1])
-    d["nu"] = float(p.nu)
-    return d
-
-
-def _mo_ta_theta_a(that: dict) -> str:
-    """Mot cau van ban, khong tao bang theta_0."""
-    pair = lambda stem: rf"\{stem}_0=({so_math(that[stem+'1'])};{so_math(that[stem+'2'])})"
-    return (r"Vector tham số sinh dữ liệu được đặt là $\boldsymbol\theta_0$ với "
-            + "$" + ",\\;".join([pair("mu"), pair("omega"), pair("alpha"), pair("beta")]) + "$; "
-            + rf"$\gamma_{{1,0}}=({so_math(that['gamma1_0'])};{so_math(that['gamma1_1'])})$, "
-            + rf"$\gamma_{{2,0}}=({so_math(that['gamma2_0'])};{so_math(that['gamma2_1'])})$, "
-            + rf"$p_{{11,0}}={so_math(that['p11'])}$, $p_{{22,0}}={so_math(that['p22'])}$ "
-            + rf"và $\nu_0={so_math(that['nu'])}$." )
-
-
+# ------------------------------------------------------------------ 3. mo phong
 def _mo_ta_theta_b(that: dict) -> str:
     return (r"Vector tham số sinh dữ liệu $\boldsymbol\theta_0$ được khai báo bằng "
             + ", ".join(rf"${NHAN_B[key][1:-1]}={so_math(that[key])}$" for key in THU_TU_B)
@@ -297,7 +216,7 @@ def _bang_khoi_phuc(code: str, pp: str, m: dict, that: dict, thu_tu: list, nhan:
                     T: int, burn_in: int) -> str:
     cov = m.get("coverage") or {}
     n = m["n_replications"]
-    n_ok = m.get("n_se_ok")
+    n_ok = m.get("n_co_khoang")
     # MLE: CP Wald chi co nghia khi du lan lap co Hessian xac dinh duong
     if pp == "mle" and n_ok is not None and n_ok < TOI_THIEU_SE:
         cov = {}
@@ -309,8 +228,6 @@ def _bang_khoi_phuc(code: str, pp: str, m: dict, that: dict, thu_tu: list, nhan:
         hang.append(f"{nhan[kk]} & {so(that[kk] + b)} & {so(b)} & {so(r_)} & {so(se)} & {pct(c)}")
     cap = rf"{code} --- {TEN_PP_DAI[pp]}: khôi phục tham số"
     ghi = rf"Số lần lặp hợp lệ $N={n}$; mỗi chuỗi có $T={T}$ quan sát sau burn-in $={burn_in}$. "
-    if m.get("mean_brier") is not None:
-        ghi += rf"Brier trung bình $={so(m['mean_brier'], 4)}$. "
     if pp == "mle" and n_ok is not None:
         if cov:
             ghi += rf"CP 95\% Wald chỉ tính trên {n_ok}/{n} lần lặp có Hessian xác định dương."
@@ -321,52 +238,9 @@ def _bang_khoi_phuc(code: str, pp: str, m: dict, that: dict, thu_tu: list, nhan:
                 hang, cap, f"tab:{code}-{pp}", ghi_chu=ghi)
 
 
-def phan_pr_a() -> tuple[str, dict]:
-    scns = default_scenarios()
-    out = [r"\section{Khôi phục tham số MS-GARCH-X Student-$t$}",
-           r"Các trường hợp S1--S3 có 100 lần lặp cho mỗi phương pháp; S4--S8 là kiểm tra thăm dò với số lần lặp khác nhau. "
-           r"Ước lượng của từng lần lặp được sắp nhãn sao cho trạng thái 1 có phương sai dài hạn thấp hơn trước khi gộp. "
-           r"Do đó các đường trong hình và các cột Bias, RMSE, CP cùng dùng một quy ước trạng thái."]
-    ket_qua = {}
-    for code, scn in scns.items():
-        f = RES / f"07_simulation_{code}.pt"
-        if not f.exists():
-            continue
-        d = torch.load(f, weights_only=False)
-        that = _that_A(scn)
-        ket_qua[code] = d
-        out.append(rf"\subsection{{{code} --- \texorpdfstring{{{MO_TA_S[code]}}}{{{MO_TA_S_CHU[code]}}}}}")
-        out.append(_mo_ta_theta_a(that))
-        if scn.misspecified:
-            out.append(r"Riêng S8, chuỗi đưa vào ước lượng là $r_t+0{,}3r_{t-1}$, "
-                       r"trong khi mô hình khớp không chứa thành phần tự hồi quy này.")
-        for pp in PP:
-            if pp in d:
-                out.append(_bang_khoi_phuc(code, pp, d[pp], that, THU_TU_A, NHAN_A,
-                                          scn.T, scn.burn_in))
-        pps = [pp for pp in PP if pp in d]
-        wins = {pp: 0 for pp in pps}
-        for name in THU_TU_A:
-            wins[min(pps, key=lambda pp: d[pp]["rmse"][name])] += 1
-        win_text = ", ".join(f"{TEN_PP[pp]} {wins[pp]}/{len(THU_TU_A)}" for pp in pps)
-        out.append(rf"Theo RMSE từng tọa độ của vector tham số, số tọa độ đạt thấp nhất là {win_text}. "
-                   r"Bảng và Hình dưới đây cho biết sai lệch nào còn duy trì khi tăng số lần lặp; "
-                   r"các trường hợp thăm dò với $N$ thấp cần được đọc thận trọng hơn.")
-        out.append(rf"\begin{{figure}}[H]\centering\includegraphics[width=\textwidth]{{hinh_tong_hop/vector_{code}.pdf}}"
-                   rf"\caption{{{code}: Trung bình tích lũy $\bar\theta_{{j,n}}=n^{{-1}}\sum_{{b=1}}^n\hat\theta_{{j,b}}$ "
-                   r"của từng tham số qua các lần lặp. Đường đứt nét là giá trị sinh dữ liệu. "
-                   r"Mỗi phương pháp dừng tại số lần lặp hợp lệ thực có; MS-GARCH-X đã sắp nhãn trạng thái trước khi lấy trung bình.}"
-                   rf"\label{{fig:vector-{code}}}\end{{figure}}")
-        n_dao = " ; ".join(f"{TEN_PP[pp]} {d[pp].get('n_dao_nhan', '--')}/{d[pp]['n_replications']}"
-                           for pp in PP if pp in d)
-        out.append(rf"\noindent\scriptsize Số lần lặp đảo nhãn trạng thái (đã hoán vị trước khi gộp): {n_dao}.\normalsize")
-        out.append("")
-    return "\n".join(out), ket_qua
-
-
-# ------------------------------------------------------------------ 4. PR-B
+# ------------------------------------------------------------------ 4. buoc 2
 def phan_pr_b() -> tuple[str, dict]:
-    scns = default_egarch_scenarios()
+    scns = truong_hop_mac_dinh()
     out = [r"\section{Khôi phục tham số EGARCH-X Student-$t$}",
            r"Ba trường hợp E1--E3 cùng dùng 100 lần lặp cho mỗi phương pháp. "
            r"E2 đặt hệ số đòn bẩy thật bằng 0 để kiểm tra khả năng xuất hiện tín hiệu đòn bẩy giả; "
@@ -410,9 +284,9 @@ def phan_buoc_3() -> str:
     nhan = {"mu": r"$\mu$", "omega": r"$\omega$", "alpha": r"$\alpha$", "theta": r"$\theta$",
             "beta": r"$\beta$", "gamma0": r"$\gamma_1$", "gamma1": r"$\gamma_2$", "nu": r"$\nu$"}
     mle = torch.load(RES / "pipeline" / "egarch_x_t_mle.pt", weights_only=False)["params"]
-    mle_v = {"mu": float(mle.mu), "omega": float(mle.omega), "alpha": float(mle.alpha),
-             "theta": float(mle.theta), "beta": float(mle.beta),
-             "gamma0": float(mle.gamma[0]), "gamma1": float(mle.gamma[1]), "nu": float(mle.nu)}
+    mle_v = {"mu": float(mle["mu"]), "omega": float(mle["omega"]), "alpha": float(mle["alpha"]),
+             "theta": float(mle["theta"]), "beta": float(mle["beta"]),
+             "gamma0": float(mle["gamma"][0]), "gamma1": float(mle["gamma"][1]), "nu": float(mle["nu"])}
     vb = {pp: torch.load(RES / "pipeline" / f"egarch_x_t_{pp}.pt", weights_only=False)["samples"]
           for pp in ("vb_mean_field", "vb_full_rank")}
 
@@ -472,8 +346,8 @@ def phan_dem_thang(kq_b: dict) -> str:
             str(dem[pp]) if pp in dem else "--" for pp in PP))
     return r"\section{Tổng hợp thứ hạng RMSE}" + "\n" + bang(
         "l r l r r r",
-        r"\textbf{Kịch bản} & \textbf{Số tham số} & $B$ (MLE/MF/FR) & \textbf{MLE} & \textbf{VB-MF} & \textbf{VB-FR}",
-        hang, "Số tham số EGARCH-X mà mỗi phương pháp đạt RMSE nhỏ nhất, theo kịch bản E1--E3.",
+        r"\textbf{Trường hợp} & \textbf{Số tham số} & $B$ (MLE/MF/FR) & \textbf{MLE} & \textbf{VB-MF} & \textbf{VB-FR}",
+        hang, "Số tham số EGARCH-X mà mỗi phương pháp đạt RMSE nhỏ nhất, theo trường hợp E1--E3.",
         "tab:dem-thang", co=r"\normalsize")
 
 
@@ -488,7 +362,7 @@ hội tụ và cho thấy hiệu ứng đòn bẩy âm; VB mean-field đánh gi�
 tán hậu nghiệm của một số hệ số dai dẳng. Những kết luận này giới hạn ở
 chuỗi VN30F1M, sáu đặc tả và cách chia mẫu đã dùng.
 
-Mô phỏng EGARCH-X Student-$t$ ở ba kịch bản E1--E3 đánh giá khả năng khôi
+Mô phỏng EGARCH-X Student-$t$ ở ba trường hợp E1--E3 đánh giá khả năng khôi
 phục tham số, nhưng không thay thế kiểm chứng ngoài mẫu trên dữ liệu khác.
 Chuỗi hợp đồng liên tục do nhà cung cấp ghép sẵn nên nghiên cứu chưa tách
 riêng được ảnh hưởng của ngày chuyển hợp đồng lên các quan sát cực trị.
@@ -607,8 +481,8 @@ ESS & Cỡ mẫu hiệu dụng của chuỗi MCMC. \\
 PHUONG_TRINH = r"""
 \section{Mô hình và cách đọc kết quả}
 \subsection{Dữ liệu, phương sai và phân phối sai số}
-Lợi suất ngày được đo theo phần trăm, $r_t=100(\log P_t-\log P_{t-1})$.
-Biến động thực tế $RV_t=10^4\sum_j(\log P_{t,j}-\log P_{t,j-1})^2$
+Lợi suất ngày được đo theo phần trăm: $r_t=100(\log P_t-\log P_{t-1})$.
+Biến động thực tế: $$RV_t=10^4\sum_j(\log P_{t,j}-\log P_{t,j-1})^2,$$
 được tính từ các nến nội phiên và làm đại diện quan sát cho phương sai ngày.
 Vector ngoại sinh $X_{t-1}$ gồm $\log(1+VOL_{t-1})$ và
 $\log(RV_{t-1}+10^{-6})$; cả hai được chuẩn hóa bằng thống kê của tập huấn luyện.
@@ -630,7 +504,7 @@ Hệ số $\theta<0$ biểu thị cú sốc âm làm tăng biến động mạnh
 cùng độ lớn. Dạng mũ bảo đảm $h_t>0$ theo cấu trúc. Các biến thể không có X
 đặt $\boldsymbol\gamma=0$.
 
-Sai số Student-$t$ được chuẩn hóa để $\mathbb E z_t=0$ và
+Sai số Student-$t$ được chuẩn hóa để $\mathbb E(z_t)=0$ và
 $\operatorname{Var}(z_t)=1$ khi $\nu>2$:
 \begin{equation}\label{eq:student}
 f(z\mid\nu)=\frac{\Gamma((\nu+1)/2)}
