@@ -1,14 +1,42 @@
-"""Uoc luong hop ly cuc dai (MLE) cho GARCH/EGARCH mot trang thai.
+"""Ước lượng hợp lý cực đại (MLE) cho GARCH/EGARCH một trạng thái.
 
-Toi uu tren khong gian KHONG rang buoc, roi bien doi ve mien hop le:
+LÝ THUYẾT
+    MLE chọn tham số làm cho dữ liệu quan sát "hợp lý nhất":
+        theta_hat = argmax_theta  l(theta),    l = log-hợp lý (mo_hinh/garch.py, egarch.py).
+    Tương đương: cực tiểu hàm mất mát L(theta) = -l(theta).
 
-    GARCH : omega = exp(log_omega), alpha = softplus(eta_alpha), beta = softplus(eta_beta)
-    EGARCH: omega, alpha, theta tu do;  beta = sigmoid(eta_beta) trong (0, 1)
-    ca hai: nu = 2 + softplus(eta_nu)  (neu Student-t)
+    1) THAM SỐ HÓA KHÔNG RÀNG BUỘC. Thuật toán tối ưu làm việc trên R^d, nhưng
+       tham số có miền giới hạn (omega > 0, nu > 2, ...). Vì vậy mỗi tham số được
+       viết qua một biến tự do eta ∈ R:
+           GARCH : omega = exp(log_omega), alpha = softplus(eta_alpha), beta = softplus(eta_beta)
+           EGARCH: omega, alpha, theta tự do;   beta = sigmoid(eta_beta) ∈ (0, 1)
+           cả hai: mu, gamma tự do;   nu = 2 + softplus(eta_nu)
+       với softplus(x) = log(1 + e^x) > 0 và sigmoid(x) = 1 / (1 + e^-x) ∈ (0, 1).
 
-Moi diem khoi tao chay Adam (buoc tho, co cat chuan gradient) roi L-BFGS voi
-tim kiem duong strong-Wolfe (buoc tinh); chon nghiem co log-hop-ly lon nhat.
-Sai so chuan lay tu Hessian quan sat qua phuong phap delta.
+    2) NHIỀU ĐIỂM KHỞI TẠO. l có thể có nhiều cực đại địa phương, nên chạy từ
+       n_starts điểm xuất phát ngẫu nhiên và giữ nghiệm có l lớn nhất.
+
+    3) HAI GIAI ĐOẠN TỐI ƯU cho mỗi điểm khởi tạo:
+       - Adam (thuật toán gradient thích nghi, Kingma & Ba 2015): ổn định khi còn
+         xa nghiệm; chuẩn gradient được cắt ở 50 để một bước lớn không đẩy tham
+         số ra vùng số học bất ổn.
+       - L-BFGS (tựa Newton, dùng đường cong bậc hai xấp xỉ từ lịch sử gradient)
+         với tìm kiếm đường Wolfe mạnh: hội tụ nhanh và chính xác khi đã gần nghiệm.
+
+    4) SAI SỐ CHUẨN. Theo lý thuyết tiệm cận, Cov(eta_hat) ≈ H^{-1} với H là
+       Hessian (ma trận đạo hàm bậc hai) của -l tại nghiệm. Phương pháp delta đưa
+       về thang tự nhiên: Cov(theta_hat) ≈ J H^{-1} J^T, J = d theta / d eta.
+       Khoảng tin cậy Wald 95%: theta_hat ± 1,96 SE.
+
+    5) TIÊU CHÍ THÔNG TIN: AIC = 2d - 2l, BIC = d log(n) - 2l (nhỏ hơn là tốt hơn).
+
+THƯ VIỆN
+    torch.optim.Adam, torch.optim.LBFGS  : hai bộ tối ưu nói trên.
+    loss.backward()                      : vi phân tự động, tính gradient của L theo eta.
+    torch.nn.utils.clip_grad_norm_       : cắt chuẩn gradient.
+    torch.autograd.functional.hessian    : Hessian chính xác (không dùng sai phân hữu hạn).
+    torch.autograd.functional.jacobian   : ma trận Jacobian J cho phương pháp delta.
+    torch.linalg.inv                     : nghịch đảo ma trận.
 """
 from __future__ import annotations
 
@@ -23,8 +51,8 @@ from garch_vn30.mo_hinh.garch import GARCHParams
 
 _softplus = torch.nn.functional.softplus
 
-# Thu tu cac bien khong rang buoc (dung khi phang hoa de tinh Hessian) va
-# ten tham so tu nhien tuong ung, theo dung thu tu.
+# Thứ tự các biến không ràng buộc khi "phẳng hóa" thành một vector để tính
+# Hessian, và tên tham số tự nhiên tương ứng theo đúng thứ tự đó.
 _BIEN_RAW = {
     "garch": ["mu", "log_omega", "eta_alpha", "eta_beta", "gamma"],
     "egarch": ["mu", "omega", "alpha", "theta", "eta_beta", "gamma"],
@@ -37,26 +65,31 @@ _TEN_TU_NHIEN = {
 
 @dataclass
 class LanChay:
-    """Chan doan cua mot diem khoi tao."""
-    seed: int
-    loglik: float
-    converged: bool      # log-hop-ly huu han va ||gradient|| < 1 tai diem dung
-    grad_norm: float
+    """Chẩn đoán của một điểm khởi tạo."""
+    seed: int            # hạt giống sinh điểm khởi tạo
+    loglik: float        # log-hợp lý tại điểm dừng
+    converged: bool      # log-hợp lý hữu hạn và ||gradient|| < 1 tại điểm dừng
+    grad_norm: float     # chuẩn gradient tại điểm dừng
 
 
 @dataclass
 class MLEResult:
-    params: GARCHParams | EGARCHParams
-    loglik: float
+    """Kết quả MLE: nghiệm tốt nhất và các chỉ tiêu đi kèm."""
+    params: GARCHParams | EGARCHParams   # tham số ước lượng (thang tự nhiên)
+    loglik: float                         # log-hợp lý tại nghiệm
     aic: float
     bic: float
-    n_params: int
-    runs: list[LanChay] = field(default_factory=list)
+    n_params: int                         # số tham số tự do d
+    runs: list[LanChay] = field(default_factory=list)   # chẩn đoán từng điểm khởi tạo
 
 
-# ------------------------------------------------------------ bien doi tham so
+# ------------------------------------------------------------ biến đổi tham số
 def unpack(raw: dict, dist: str, family: str):
-    """Bien khong rang buoc -> bo tham so tren mien hop le."""
+    """Biến không ràng buộc (dict tên -> tensor) -> bộ tham số trên miền hợp lệ.
+
+    Xem mục 1 ở đầu tệp. Mọi phép biến đổi đều khả vi, nên gradient theo eta
+    được PyTorch tính tự động qua các phép biến đổi này.
+    """
     nu = 2.0 + _softplus(raw["eta_nu"]) if dist == "student_t" else None
     if family == "garch":
         return GARCHParams(
@@ -68,9 +101,9 @@ def unpack(raw: dict, dist: str, family: str):
             nu=nu,
         )
     if family == "egarch":
-        # beta trong (0,1) chu khong phai (-1,1): tien nghiem Bayes cua beta la
-        # Beta(a,a) tren (0,1), nen MLE cung tim tren (0,1) de ba phuong phap
-        # lam viec tren CUNG mot khong gian tham so.
+        # beta ∈ (0,1) chứ không phải (-1,1): tiên nghiệm Bayes của beta là
+        # Beta(a,a) trên (0,1), nên MLE cũng tìm trên (0,1) để ba phương pháp
+        # làm việc trên CÙNG một không gian tham số.
         return EGARCHParams(
             mu=raw["mu"],
             omega=raw["omega"],
@@ -84,11 +117,16 @@ def unpack(raw: dict, dist: str, family: str):
 
 
 def _inv_softplus(y: torch.Tensor) -> torch.Tensor:
+    """Nghịch đảo softplus: x = log(e^y - 1); torch.expm1(y) = e^y - 1 chính xác khi y nhỏ."""
     return torch.log(torch.expm1(y))
 
 
 def pack(params, dist: str, family: str) -> dict:
-    """Chieu nguoc cua unpack: bo tham so tu nhien -> bien khong rang buoc."""
+    """Chiều ngược của unpack: bộ tham số tự nhiên -> biến không ràng buộc.
+
+    Cần khi tính Hessian tại một nghiệm đã lưu (Hessian phải lấy trên không gian
+    mà việc tối ưu thực sự diễn ra).
+    """
     if family == "garch":
         raw = {"mu": params.mu, "log_omega": torch.log(params.omega),
                "eta_alpha": _inv_softplus(params.alpha),
@@ -96,7 +134,7 @@ def pack(params, dist: str, family: str) -> dict:
     else:
         raw = {"mu": params.mu, "omega": params.omega, "alpha": params.alpha,
                "theta": params.theta,
-               "eta_beta": torch.log(params.beta / (1.0 - params.beta)),
+               "eta_beta": torch.log(params.beta / (1.0 - params.beta)),   # logit = nghịch đảo sigmoid
                "gamma": params.gamma}
     if dist == "student_t":
         raw["eta_nu"] = _inv_softplus(params.nu - 2.0)
@@ -104,7 +142,13 @@ def pack(params, dist: str, family: str) -> dict:
 
 
 def _khoi_tao(dist: str, family: str, k: int, h0: torch.Tensor) -> dict:
-    """Diem khoi tao ngau nhien quanh mot cau hinh hop ly (dat seed truoc khi goi)."""
+    """Điểm khởi tạo ngẫu nhiên quanh một cấu hình hợp lý (đặt seed trước khi gọi).
+
+    GARCH : omega ≈ 0,1 h0, alpha ≈ softplus(-1,5) ≈ 0,20, beta ≈ softplus(1) ≈ 1,31.
+    EGARCH: beta ≈ 0,9 và omega ≈ (1 - beta) log h0 để mức nền của log h khớp dữ
+            liệu; theta quanh 0 để KHÔNG giả định trước dấu đòn bẩy.
+    Thứ tự các lệnh torch.randn cố định để cùng seed luôn cho cùng điểm khởi tạo.
+    """
     if family == "garch":
         raw = {
             "mu": torch.zeros(()),
@@ -114,46 +158,49 @@ def _khoi_tao(dist: str, family: str, k: int, h0: torch.Tensor) -> dict:
             "gamma": 0.01 * torch.randn(k),
         }
     else:
-        # Nham vao trang thai dung: beta ~ 0,9 va omega ~ (1 - beta) log h0.
         beta0 = 0.9
         raw = {
             "mu": torch.zeros(()),
             "omega": (1.0 - beta0) * torch.log(h0) + 0.05 * torch.randn(()),
             "alpha": torch.tensor(0.10) + 0.02 * torch.randn(()),
-            "theta": torch.tensor(0.0) + 0.02 * torch.randn(()),  # khong gia dinh dau don bay
+            "theta": torch.tensor(0.0) + 0.02 * torch.randn(()),
             "eta_beta": torch.log(torch.tensor(beta0 / (1.0 - beta0))) + 0.1 * torch.randn(()),
             "gamma": 0.01 * torch.randn(k),
         }
     if dist == "student_t":
-        raw["eta_nu"] = torch.tensor(1.5) + 0.2 * torch.randn(())
+        raw["eta_nu"] = torch.tensor(1.5) + 0.2 * torch.randn(())   # nu ≈ 2 + softplus(1,5) ≈ 3,7
     return raw
 
 
-# ------------------------------------------------------------------ toi uu
+# ------------------------------------------------------------------ tối ưu
 def _mot_diem_khoi_tao(seed, r, X, dist, family, h0, n_adam, n_lbfgs, lr_adam, verbose):
+    """Tối ưu từ MỘT điểm khởi tạo: Adam rồi L-BFGS. Trả về (params, loglik, LanChay)."""
     torch.manual_seed(seed)
     loglik = loglik_cua(family)
     raw = _khoi_tao(dist, family, X.shape[1], h0)
+    # requires_grad_(True): yêu cầu PyTorch theo dõi để tính gradient theo các biến này.
     vars_ = {ten: v.clone().requires_grad_(True) for ten, v in raw.items()}
     ds_bien = list(vars_.values())
 
     def nll():
+        """Hàm mất mát L = -l (negative log-likelihood)."""
         return -loglik(unpack(vars_, dist, family), r, X, h0=h0)
 
-    # Giai doan 1 -- Adam: on dinh khi con xa nghiem; cat chuan gradient o 50.
+    # Giai đoạn 1 -- Adam.
     opt = torch.optim.Adam(ds_bien, lr=lr_adam)
     for it in range(n_adam):
-        opt.zero_grad()
+        opt.zero_grad()                  # xóa gradient của bước trước
         loss = nll()
-        if torch.isnan(loss):
+        if torch.isnan(loss):            # tham số rơi vào vùng không hợp lệ: dừng Adam
             break
-        loss.backward()
+        loss.backward()                  # vi phân tự động: tính dL/d(eta)
         torch.nn.utils.clip_grad_norm_(ds_bien, 50.0)
-        opt.step()
+        opt.step()                       # cập nhật eta theo quy tắc Adam
         if verbose and it % 200 == 0:
             print(f"  [seed={seed}] adam {it}: nll={loss.item():.4f}")
 
-    # Giai doan 2 -- L-BFGS (tua Newton) voi tim kiem duong strong-Wolfe.
+    # Giai đoạn 2 -- L-BFGS với tìm kiếm đường Wolfe mạnh. LBFGS của PyTorch cần
+    # một hàm "closure" tính lại loss và gradient mỗi khi nó thử một điểm mới.
     lbfgs = torch.optim.LBFGS(ds_bien, lr=0.5, max_iter=n_lbfgs, line_search_fn="strong_wolfe")
 
     def closure():
@@ -168,8 +215,8 @@ def _mot_diem_khoi_tao(seed, r, X, dist, family, h0, n_adam, n_lbfgs, lr_adam, v
     try:
         lbfgs.step(closure)
     except (IndexError, RuntimeError) as exc:
-        # L-BFGS cua torch co the vo khi mot buoc tim kiem duong cho NaN: quay
-        # ve nghiem cua giai doan Adam thay vi lam hong ca qua trinh.
+        # L-BFGS của torch có thể vỡ khi một bước tìm kiếm đường cho NaN: quay
+        # về nghiệm của giai đoạn Adam thay vì làm hỏng cả quá trình.
         print(f"  [seed={seed}] L-BFGS that bai ({type(exc).__name__}); giu nghiem Adam.")
         with torch.no_grad():
             for ten, v in vars_.items():
@@ -179,7 +226,8 @@ def _mot_diem_khoi_tao(seed, r, X, dist, family, h0, n_adam, n_lbfgs, lr_adam, v
         if torch.isfinite(lai):
             lai.backward()
 
-    with torch.no_grad():
+    # Chẩn đoán tại điểm dừng: giá trị hàm mục tiêu và chuẩn gradient.
+    with torch.no_grad():                # no_grad: chỉ tính giá trị, không theo dõi đạo hàm
         final_loss = nll()
     grad_norm = float(sum((v.grad.norm() ** 2 for v in ds_bien if v.grad is not None),
                           torch.tensor(0.0)).sqrt())
@@ -193,10 +241,19 @@ def fit_mle(r: torch.Tensor, X: torch.Tensor, dist: str = "student_t", family: s
             n_starts: int = 5, base_seed: int = 0, n_adam: int = 400, n_lbfgs: int = 200,
             lr_adam: float = 0.02, h0: torch.Tensor | None = None,
             verbose: bool = False) -> MLEResult:
-    """MLE voi `n_starts` diem khoi tao (seed = base_seed, base_seed+1, ...).
+    """Ước lượng hợp lý cực đại với nhiều điểm khởi tạo.
 
-    Tra ve nghiem co log-hop-ly HUU HAN lon nhat, kem AIC = 2d - 2l va
-    BIC = d log n - 2l. Mo hinh khong co bien ngoai sinh: truyen X co 0 cot.
+    Tham số:
+        r, X     : chuỗi lợi suất (T,) và ma trận ngoại sinh (T, k); không dùng X thì k = 0.
+        dist     : "normal" hoặc "student_t".
+        family   : "garch" hoặc "egarch".
+        n_starts : số điểm khởi tạo; điểm thứ i dùng seed = base_seed + i.
+        n_adam, n_lbfgs, lr_adam: số bước Adam, số vòng L-BFGS, tốc độ học Adam.
+        h0       : điều kiện đầu của phương sai (mặc định: phương sai mẫu của r).
+        verbose  : in tiến độ Adam.
+    Trả về:
+        MLEResult với nghiệm có log-hợp lý HỮU HẠN lớn nhất, AIC, BIC, d và chẩn
+        đoán từng điểm khởi tạo.
     """
     if h0 is None:
         h0 = torch.var(r).detach()
@@ -217,13 +274,15 @@ def fit_mle(r: torch.Tensor, X: torch.Tensor, dist: str = "student_t", family: s
     return MLEResult(params=params, loglik=ll, aic=aic, bic=bic, n_params=d, runs=runs)
 
 
-# ------------------------------------------------------------ sai so chuan
+# ------------------------------------------------------------ sai số chuẩn
 def _phang(raw: dict, dist: str, family: str) -> torch.Tensor:
+    """Ghép các biến không ràng buộc thành MỘT vector (để tính Hessian)."""
     ten = _BIEN_RAW[family] + (["eta_nu"] if dist == "student_t" else [])
     return torch.cat([raw[t].reshape(-1) for t in ten])
 
 
 def _dung_lai(vec: torch.Tensor, k: int, dist: str, family: str) -> dict:
+    """Chiều ngược của _phang: tách vector trở lại dict theo tên."""
     ten = _BIEN_RAW[family] + (["eta_nu"] if dist == "student_t" else [])
     raw, pos = {}, 0
     for t in ten:
@@ -236,14 +295,16 @@ def _dung_lai(vec: torch.Tensor, k: int, dist: str, family: str) -> dict:
 def standard_errors(params, r: torch.Tensor, X: torch.Tensor, dist: str = "student_t",
                     family: str = "garch", h0: torch.Tensor | None = None
                     ) -> dict[str, torch.Tensor] | None:
-    """Sai so chuan tren thang TU NHIEN bang Hessian quan sat + phuong phap delta.
+    """Sai số chuẩn của tham số trên thang TỰ NHIÊN, bằng Hessian quan sát + phương pháp delta.
 
-        Cov(eta_hat) ~ H^{-1},  H = Hessian cua -l theo bien khong rang buoc eta
-        Cov(theta_hat) ~ J H^{-1} J^T,  J = d theta / d eta
+        H  = d^2(-l) / d eta^2      tại nghiệm (Hessian quan sát)
+        J  = d theta / d eta        (Jacobian của phép biến đổi unpack)
+        Cov(theta_hat) ≈ J H^{-1} J^T,   SE_j = căn bậc hai phần tử đường chéo thứ j
 
-    Tra ve None khi Hessian khong kha nghich hoac cho phuong sai am (nghiem
-    khong phai cuc dai trong, vd. sat bien): khi do tiem can chuan khong ap
-    dung va khoang Wald khong hop le.
+    Tham số: params (nghiệm MLE), r, X, dist, family như fit_mle.
+    Trả về: dict {tên tham số: SE} (gamma là vector), hoặc None khi Hessian không
+    khả nghịch hay cho phương sai âm -- nghiệm khi đó không phải cực đại trong
+    (thường do nằm sát biên), tiệm cận chuẩn không áp dụng, khoảng Wald không hợp lệ.
     """
     k = X.shape[1]
     if h0 is None:
@@ -263,6 +324,7 @@ def standard_errors(params, r: torch.Tensor, X: torch.Tensor, dist: str = "stude
         return None
 
     def sang_tu_nhien(v):
+        """eta -> vector tham số tự nhiên, để lấy Jacobian J."""
         p = unpack(_dung_lai(v, k, dist, family), dist, family)
         phan = [p.mu.reshape(-1), p.omega.reshape(-1), p.alpha.reshape(-1)]
         if family == "egarch":

@@ -1,12 +1,35 @@
-"""MCMC bang NUTS (No-U-Turn Sampler, Hoffman & Gelman 2014) va chan doan hoi tu.
+"""MCMC bằng NUTS (No-U-Turn Sampler) và chẩn đoán hội tụ.
 
-NUTS la Hamiltonian Monte Carlo tu dong chon do dai quy dao: coi -log hau
-nghiem la the nang U(theta), them dong luong p ~ N(0, M), mo phong phuong
-trinh Hamilton bang tich phan leapfrog va dung khi quy dao bat dau quay dau.
-Buoc tich phan va ma tran khoi luong M duoc thich nghi trong giai doan warmup.
+LÝ THUYẾT
+    MCMC (Markov Chain Monte Carlo) tạo một chuỗi Markov có phân phối dừng là
+    hậu nghiệm p(theta | r); sau giai đoạn khởi động, các trạng thái của chuỗi
+    được dùng như mẫu từ hậu nghiệm. Khác VB, MCMC không giả định dạng của hậu
+    nghiệm, nên được dùng làm CHUẨN THAM CHIẾU để đánh giá VB (tỷ số R_sd).
 
-Chan doan: R-hat tach doi (Gelman-Rubin) va ESS khoi (bulk) tinh bang arviz
-tren >= 4 chuoi khoi tao PHAN TAN.
+    Hamiltonian Monte Carlo (HMC): coi U(theta) = -log p(theta | r) là thế năng,
+    thêm động lượng p ~ N(0, M) và mô phỏng chuyển động Hamilton bằng tích phân
+    leapfrog với bước eps:
+        p <- p - (eps/2) grad U(theta);  theta <- theta + eps M^{-1} p;  p <- p - (eps/2) grad U(theta)
+    Điểm cuối quỹ đạo được chấp nhận với xác suất Metropolis min(1, exp(-dH)).
+    Nhờ dùng gradient, HMC đi xa trong không gian tham số mà vẫn chấp nhận cao.
+
+    NUTS (Hoffman & Gelman, 2014) tự chọn độ dài quỹ đạo: nhân đôi quỹ đạo cho
+    tới khi nó bắt đầu "quay đầu" (U-turn) hoặc đạt độ sâu cây tối đa (tối đa
+    2^depth bước leapfrog mỗi mẫu). Trong giai đoạn khởi động (warmup), bước eps
+    được thích nghi để xác suất chấp nhận trung bình đạt 0,85, và ma trận khối
+    lượng M được ước lượng từ mẫu (full_mass = True: M đặc, nắm tương quan).
+
+    Chẩn đoán hội tụ (thư viện arviz):
+    - R-hat (Gelman-Rubin, bản chuẩn hóa xếp hạng của Vehtari và cs. 2021): so
+      sánh phương sai giữa các chuỗi với trong chuỗi; gần 1 khi các chuỗi trộn
+      tốt. Ngưỡng thường dùng: R-hat < 1,01.
+    - ESS (cỡ mẫu hiệu dụng): số mẫu độc lập tương đương, tính đến tự tương quan.
+    - Số bước phân kỳ (divergence): dấu hiệu hình học hậu nghiệm khó lấy mẫu.
+
+THƯ VIỆN
+    pyro.infer.NUTS, pyro.infer.MCMC : bộ lấy mẫu và vòng chạy chuỗi.
+    arviz.rhat, arviz.ess            : chẩn đoán hội tụ.
+    torch.Generator                  : bộ sinh số ngẫu nhiên riêng cho điểm khởi tạo.
 """
 from __future__ import annotations
 
@@ -22,18 +45,19 @@ from pyro.infer import MCMC, NUTS
 from garch_vn30.mo_hinh.danh_muc import ModelSpec
 from garch_vn30.suy_dien.bayes import SITES, PriorConfig, model, posterior_summary
 
-# Tran do lon nhieu loan tren thang log/logit: phuong phap delta phong dai vo
-# ly khi tham so gan bien (x hoac x(1-x) rat nho).
+# Trần độ lớn nhiễu loạn trên thang log/logit: phương pháp delta phóng đại vô
+# lý khi tham số gần biên (x hoặc x(1-x) rất nhỏ).
 TRAN_NHIEU = 1.0
 
 
 @dataclass
 class MCMCResult:
-    samples: dict[str, torch.Tensor]           # gop cac chuoi: (n_chains*n_samples, ...)
-    samples_by_chain: dict[str, torch.Tensor]  # (n_chains, n_samples, ...)
-    summary: dict[str, dict[str, torch.Tensor]]
-    rhat: dict[str, float]
-    ess_bulk: dict[str, float]
+    """Kết quả MCMC."""
+    samples: dict[str, torch.Tensor]           # mẫu gộp các chuỗi: (n_chains*n_samples, ...)
+    samples_by_chain: dict[str, torch.Tensor]  # mẫu theo chuỗi: (n_chains, n_samples, ...)
+    summary: dict[str, dict[str, torch.Tensor]]   # mean, sd, q2.5, q97.5
+    rhat: dict[str, float]                     # R-hat lớn nhất của từng site
+    ess_bulk: dict[str, float]                 # ESS nhỏ nhất của từng site
     max_rhat: float
     min_ess: float
     n_divergences: int
@@ -42,21 +66,25 @@ class MCMCResult:
 def khoi_tao_tu_mle(params, spec: ModelSpec, chain: int, se: dict | None = None,
                     base_seed: int = 5000, k_se: float = 2.0,
                     scale_du_phong: float = 0.1) -> dict:
-    """Diem xuat phat cua chuoi `chain`, dat quanh nghiem MLE.
+    """Điểm xuất phát của chuỗi `chain`, đặt quanh nghiệm MLE.
 
-    Chuoi 0 dat DUNG tai nghiem MLE; cac chuoi khac nhieu loan k_se = 2 sai so
-    chuan (tu mle.standard_errors) -- du phan tan de R-hat co y nghia, nhung
-    khong nem chuoi sang vung khac cua khong gian tham so. Neu khong co sai so
-    chuan thi nhieu loan 10% gia tri tham so.
+    - Chuỗi 0 đặt ĐÚNG tại nghiệm MLE.
+    - Các chuỗi khác nhiễu loạn k_se = 2 sai số chuẩn (từ mle.standard_errors):
+      đủ phân tán để R-hat có ý nghĩa chẩn đoán (Gelman-Rubin cần điểm xuất phát
+      phân tán hơn hậu nghiệm), nhưng không đẩy chuỗi sang vùng xa của không gian
+      tham số. Không có sai số chuẩn thì nhiễu loạn 10% giá trị tham số.
+    - Nhiễu loạn tôn trọng miền của từng tham số: tham số dương nhiễu trên thang
+      log (độ lớn SE/x), tham số trong (0,1) nhiễu trên thang logit (độ lớn
+      SE/(x(1-x))) -- quy đổi theo phương pháp delta.
 
-    Nhieu loan ton trong mien cua tung tham so: tham so duong nhieu tren thang
-    log (do lon SE/x), tham so trong (0,1) nhieu tren thang logit (SE/(x(1-x))).
-    Tra ve dict tren MIEN HOP LE; Pyro tu doi sang khong gian khong rang buoc.
+    Trả về dict {tên site: giá trị} trên MIỀN HỢP LỆ; Pyro tự đổi sang không gian
+    không ràng buộc.
     """
     g = torch.Generator().manual_seed(base_seed + chain)
     tai_mle = chain == 0
 
     def do_lon(ten, x):
+        """Độ lớn nhiễu loạn trên thang tự nhiên (tensor, vì gamma là vector)."""
         x = torch.as_tensor(x, dtype=torch.float64)
         if tai_mle:
             return torch.zeros_like(x)
@@ -65,15 +93,18 @@ def khoi_tao_tu_mle(params, spec: ModelSpec, chain: int, se: dict | None = None,
         return scale_du_phong * x.abs().clamp(min=1e-3)
 
     def cong(ten, x):
+        """Tham số tự do: cộng nhiễu chuẩn."""
         x = torch.as_tensor(x, dtype=torch.float64)
         return x + do_lon(ten, x) * torch.randn(x.shape, generator=g, dtype=torch.float64)
 
     def qua_log(ten, x):
+        """Tham số dương: nhiễu trên thang log."""
         x = torch.as_tensor(x, dtype=torch.float64)
         s = (do_lon(ten, x) / x.abs().clamp(min=1e-8)).clamp(max=TRAN_NHIEU)
         return x * torch.exp(s * torch.randn(x.shape, generator=g, dtype=torch.float64))
 
     def qua_logit(ten, x):
+        """Tham số trong (0,1): nhiễu trên thang logit."""
         x = torch.as_tensor(x, dtype=torch.float64).clamp(1e-4, 1 - 1e-4)
         s = (do_lon(ten, x) / (x * (1 - x)).clamp(max=1.0, min=1e-8)).clamp(max=TRAN_NHIEU)
         return torch.sigmoid(torch.log(x) - torch.log1p(-x)
@@ -82,7 +113,7 @@ def khoi_tao_tu_mle(params, spec: ModelSpec, chain: int, se: dict | None = None,
     ra = {"mu": cong("mu", params.mu),
           "alpha": qua_logit("alpha", params.alpha),
           "beta": qua_logit("beta", params.beta)}
-    # omega: tu do voi EGARCH (log h), duong voi GARCH.
+    # omega: tự do với EGARCH (phương trình cho log h), dương với GARCH.
     ra["omega"] = (cong("omega", params.omega) if spec.family == "egarch"
                    else qua_log("omega", params.omega))
     if spec.family == "egarch":
@@ -95,11 +126,11 @@ def khoi_tao_tu_mle(params, spec: ModelSpec, chain: int, se: dict | None = None,
 
 
 def inference_data(post: dict):
-    """Dong goi mau {ten: mang (n_chuoi, n_mau, ...)} thanh InferenceData cua arviz.
+    """Đóng gói mẫu {tên: mảng (n_chuỗi, n_mẫu, ...)} thành InferenceData của arviz.
 
-    Cu phap from_dict doi o arviz 1.0: ban < 1.0 nhan posterior=..., ban >= 1.0
-    nhan dict {"posterior": ...}. Truyen sai dang KHONG bao loi ma tao du lieu
-    rac, nen chon theo phien ban.
+    Cú pháp arviz.from_dict đổi ở phiên bản 1.0: bản < 1.0 nhận posterior=...,
+    bản >= 1.0 nhận dict {"posterior": ...}. Truyền sai dạng KHÔNG báo lỗi mà tạo
+    dữ liệu rác (R-hat thành NaN), nên chọn cú pháp theo phiên bản.
     """
     if int(az.__version__.split(".")[0]) >= 1:
         return az.from_dict({"posterior": post})
@@ -107,7 +138,8 @@ def inference_data(post: dict):
 
 
 def _luu_tien_do(checkpoint_path, moi: int):
-    """Hook ghi trang thai sampler dinh ky (mot chuoi NUTS co the chay nhieu gio)."""
+    """Tạo hàm "hook" mà Pyro gọi sau mỗi vòng lấy mẫu; cứ `moi` vòng thì ghi
+    trạng thái sampler ra tệp (một chuỗi NUTS có thể chạy nhiều giờ)."""
     if checkpoint_path is None:
         return None
     cp = Path(checkpoint_path)
@@ -122,7 +154,7 @@ def _luu_tien_do(checkpoint_path, moi: int):
                         "tham_so": {k: v.detach().clone() for k, v in (mau or {}).items()},
                         "thoi_diem": time.time()}, cp)
         except Exception:
-            pass          # viec luu tien do khong duoc lam hong lan chay
+            pass          # việc lưu tiến độ không được làm hỏng lần chạy
     return hook
 
 
@@ -131,13 +163,20 @@ def fit_mcmc(r: torch.Tensor, X: torch.Tensor, spec: ModelSpec,
              n_samples: int = 1000, seed: int = 0, max_tree_depth: int = 8,
              full_mass: bool = False, initial_params=None, checkpoint_path=None,
              checkpoint_moi: int = 25, verbose: bool = False) -> MCMCResult:
-    """Chay `n_chains` chuoi NUTS TUAN TU (tranh loi spawn tien trinh tren Windows).
+    """Lấy mẫu hậu nghiệm bằng NUTS; các chuỗi chạy TUẦN TỰ (tránh lỗi tạo tiến trình trên Windows).
 
-    initial_params: None (Pyro tu khoi tao), dict (dung chung), list (phan tu
-    thu c cho chuoi c) hoac ham c -> dict (vd. lambda c: khoi_tao_tu_mle(...)).
-    max_tree_depth: toi da 2^depth buoc leapfrog moi mau -- moi buoc la mot
-    lan forward+backward qua ca chuoi du lieu, nen day la nut chi phi chinh.
-    full_mass: ma tran khoi luong DAC (nam duoc tuong quan giua cac tham so).
+    Tham số:
+        n_chains, n_warmup, n_samples: số chuỗi, số vòng khởi động, số mẫu giữ lại mỗi chuỗi.
+        seed          : chuỗi c dùng hạt giống seed + c.
+        max_tree_depth: tối đa 2^depth bước leapfrog mỗi mẫu -- mỗi bước là một
+                        lần tính xuôi + lan truyền ngược qua cả chuỗi dữ liệu, nên
+                        đây là nút chi phí chính.
+        full_mass     : dùng ma trận khối lượng đặc.
+        initial_params: None (Pyro tự khởi tạo), dict (dùng chung), list (phần tử
+                        thứ c cho chuỗi c), hoặc hàm c -> dict (vd. khoi_tao_tu_mle).
+        checkpoint_path, checkpoint_moi: tệp và tần suất lưu tiến độ.
+    Trả về:
+        MCMCResult với mẫu, tóm tắt, R-hat, ESS và số bước phân kỳ.
     """
     theo_chuoi: dict[str, list[torch.Tensor]] = {name: [] for name in SITES}
     n_div = 0
@@ -155,13 +194,13 @@ def fit_mcmc(r: torch.Tensor, X: torch.Tensor, spec: ModelSpec,
                     initial_params=init_c,
                     hook_fn=_luu_tien_do(checkpoint_path, checkpoint_moi),
                     disable_progbar=not verbose)
-        mcmc.run(r, X, spec, prior)
+        mcmc.run(r, X, spec, prior)          # tham số truyền tiếp cho hàm bayes.model
         mau = mcmc.get_samples()
         for name in SITES:
             if name in mau:
                 theo_chuoi[name].append(mau[name])
         try:
-            # diagnostics() can >= 4 mau; chi dung de dem so buoc phan ky.
+            # diagnostics() cần >= 4 mẫu; ở đây chỉ dùng để đếm số bước phân kỳ.
             diag = mcmc.diagnostics()
             for d in diag.get("divergences", {}).values():
                 n_div += len(d) if hasattr(d, "__len__") else int(d)
@@ -177,7 +216,7 @@ def fit_mcmc(r: torch.Tensor, X: torch.Tensor, spec: ModelSpec,
         rhat = {name: float(rhat_ds[name].values.max()) for name in by_chain}
         ess = {name: float(ess_ds[name].values.min()) for name in by_chain}
     except Exception:
-        # Cau hinh qua nho (vd. 1 chuoi, it mau) thi khong tinh duoc R-hat.
+        # Cấu hình quá nhỏ (vd. 1 chuỗi, ít mẫu) thì không tính được R-hat.
         rhat = {name: float("nan") for name in by_chain}
         ess = {name: float("nan") for name in by_chain}
 

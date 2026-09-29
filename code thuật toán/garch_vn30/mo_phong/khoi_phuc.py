@@ -1,15 +1,19 @@
-"""Nghien cuu khoi phuc tham so: uoc luong tren MOT bo du lieu mo phong, va gop
-B lan lap thanh Bias / RMSE / Coverage.
+"""Nghiên cứu khôi phục tham số: ước lượng trên MỘT bộ dữ liệu mô phỏng, và gộp
+B lần lặp thành các chỉ tiêu Bias / RMSE / Coverage.
 
-Voi tham so thu j, gia tri that theta_0j va uoc luong theta_hat_{j,b}, b = 1..B:
+LÝ THUYẾT
+    Với tham số thứ j, giá trị thật theta_0j và ước lượng theta_hat_{j,b} ở lần lặp b = 1..B:
 
-    Bias_j     = (1/B) sum_b (theta_hat_{j,b} - theta_0j)
-    RMSE_j     = sqrt( (1/B) sum_b (theta_hat_{j,b} - theta_0j)^2 )
-    Coverage_j = (1/B') sum_b 1{ L_{j,b} <= theta_0j <= U_{j,b} }
+        Bias_j     = (1/B) sum_b (theta_hat_{j,b} - theta_0j)             độ chệch trung bình
+        RMSE_j     = sqrt( (1/B) sum_b (theta_hat_{j,b} - theta_0j)^2 )   sai số tổng (chệch + phương sai)
+        Coverage_j = (1/B') sum_b 1{ L_{j,b} <= theta_0j <= U_{j,b} }    tỷ lệ khoảng 95% chứa giá trị thật
 
-[L, U] la khoang 95%: phan vi 2,5%-97,5% cua hau nghiem (VB), hoac khoang
-Wald theta_hat +- 1,96 SE (MLE, SE tu Hessian). Voi MLE chi dem nhung lan lap
-co Hessian xac dinh duong (B' <= B).
+    [L, U] là khoảng 95%:
+    - VB : phân vị 2,5% và 97,5% của mẫu hậu nghiệm;
+    - MLE: khoảng Wald theta_hat ± 1,96 SE, SE từ Hessian (suy_dien/mle.standard_errors).
+      Chỉ tính trên B' <= B lần lặp có Hessian xác định dương.
+    Coverage gần 0,95 nghĩa là khoảng tin cậy được hiệu chỉnh tốt; nhỏ hơn nhiều
+    nghĩa là phương pháp báo bất định thấp hơn thực tế.
 """
 from __future__ import annotations
 
@@ -21,9 +25,9 @@ from garch_vn30.mo_phong.truong_hop import tham_so_that
 from garch_vn30.suy_dien.mle import fit_mle, standard_errors
 from garch_vn30.suy_dien.vb import fit_vb
 
-Z_95 = 1.96
+Z_95 = 1.96   # phân vị 97,5% của N(0,1)
 
-# Cau hinh uoc luong trong mo phong (nhe hon Buoc 1 vi phai lap 900 lan).
+# Cấu hình ước lượng trong mô phỏng (nhẹ hơn Bước 1 vì phải lặp 900 lần).
 CAU_HINH_MAC_DINH = {
     "mle": {"n_starts": 3},
     "vb_mean_field": {"n_steps": 1500},
@@ -32,7 +36,7 @@ CAU_HINH_MAC_DINH = {
 
 
 def _tu_summary(summary: dict, key: str, spec: ModelSpec, k: int) -> dict[str, float]:
-    """Doc mot thong ke (mean / q2.5 / q97.5) cua VB thanh dict co ten."""
+    """Đọc một thống kê (mean / q2.5 / q97.5) từ tóm tắt hậu nghiệm VB thành dict có tên."""
     d = {ten: float(summary[ten][key]) for ten in ["mu", "omega", "alpha", "theta", "beta"]}
     if spec.use_exog:
         for j in range(k):
@@ -43,6 +47,7 @@ def _tu_summary(summary: dict, key: str, spec: ModelSpec, k: int) -> dict[str, f
 
 
 def _se_theo_ten(se: dict, ten: str) -> float:
+    """Sai số chuẩn theo tên phẳng (gamma_0 -> se["gamma"][0])."""
     if ten.startswith("gamma_"):
         return float(se["gamma"][int(ten.split("_")[1])])
     return float(se[ten])
@@ -50,13 +55,24 @@ def _se_theo_ten(se: dict, ten: str) -> float:
 
 def chay_mot_lan_lap(method: str, r: torch.Tensor, X: torch.Tensor, spec: ModelSpec,
                      seed: int, kwargs: dict | None = None) -> dict:
-    """Uoc luong EGARCH bang `method` tren (r, X); tra ve uoc luong diem va khoang 95%."""
+    """Ước lượng EGARCH trên MỘT bộ dữ liệu mô phỏng (r, X) bằng `method`.
+
+    Tham số:
+        method: "mle", "vb_mean_field" hoặc "vb_full_rank".
+        spec  : mô hình ước lượng (egarch_x_t).
+        seed  : hạt giống cho bộ ước lượng.
+        kwargs: ghi đè cấu hình (vd. {"n_starts": 1} khi chạy thử).
+    Trả về dict:
+        uoc_luong: {tên: ước lượng điểm};
+        can_duoi, can_tren: {tên: cận khoảng 95%}, hoặc None nếu MLE không có
+                            Hessian hợp lệ.
+    """
     kw = {**CAU_HINH_MAC_DINH.get(method, {}), **(kwargs or {})}
     if method == "mle":
         res = fit_mle(r, X, dist=spec.dist, family=spec.family, base_seed=seed, **kw)
         uoc_luong = tham_so_that(res.params)
         se = standard_errors(res.params, r, X, dist=spec.dist, family=spec.family)
-        if se is None:            # Hessian khong xac dinh duong -> khong co khoang Wald
+        if se is None:            # Hessian không xác định dương -> không có khoảng Wald
             return {"uoc_luong": uoc_luong, "can_duoi": None, "can_tren": None}
         return {"uoc_luong": uoc_luong,
                 "can_duoi": {t: v - Z_95 * _se_theo_ten(se, t) for t, v in uoc_luong.items()},
@@ -74,7 +90,14 @@ def chay_mot_lan_lap(method: str, r: torch.Tensor, X: torch.Tensor, spec: ModelS
 
 
 def tong_hop(lan_lap: list[dict], that: dict[str, float]) -> dict:
-    """Gop cac lan lap cua MOT phuong phap thanh Bias, RMSE, Coverage theo tham so."""
+    """Gộp các lần lặp của MỘT phương pháp thành Bias, RMSE, Coverage theo từng tham số.
+
+    Tham số:
+        lan_lap: danh sách kết quả chay_mot_lan_lap.
+        that   : giá trị thật {tên: số} (từ truong_hop.tham_so_that).
+    Trả về dict: bias, rmse, coverage (dict theo tên tham số), n_replications (B),
+    n_co_khoang (B', số lần lặp có khoảng 95%), tham_so_that.
+    """
     co_khoang = [x for x in lan_lap if x["can_duoi"] is not None]
     ra = {"bias": {}, "rmse": {}, "coverage": {}, "n_replications": len(lan_lap),
           "n_co_khoang": len(co_khoang), "tham_so_that": that}

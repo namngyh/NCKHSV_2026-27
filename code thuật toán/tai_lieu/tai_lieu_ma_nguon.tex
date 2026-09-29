@@ -542,6 +542,110 @@ Mỗi bảng dưới đây liệt kê các hàm công khai của một tệp; h�
 \tep{bao\_cao/*.py} & Sinh \tep{tong\_hop\_ket\_qua.tex} và các hình từ \tep{results/}; hình vector được đối chiếu với cột Bias trước khi lưu. \\}
 
 % =====================================================================
+\section{Hướng dẫn đọc mã nguồn}\label{sec:doc-ma}
+% =====================================================================
+\subsection{Quy ước chú thích trong mã}
+Mỗi tệp của thư viện mở đầu bằng một chuỗi mô tả (docstring) gồm các phần:
+\begin{itemize}
+\item \textbf{LÝ THUYẾT / MỤC ĐÍCH}: tệp làm gì, công thức toán nào được cài đặt, ý nghĩa của từng tham số;
+\item \textbf{THƯ VIỆN}: các hàm của thư viện bên ngoài được dùng trong tệp và vai trò của chúng.
+\end{itemize}
+Mỗi hàm có docstring nêu tác dụng, công thức (nếu có), \textbf{Tham số} (ý nghĩa, kiểu, kích thước tensor) và \textbf{Trả về}. Các dòng quan trọng có chú thích ngắn ở cuối dòng, ví dụ\par\noindent\verb|loss.backward()  # vi phân tự động: tính dL/d(eta)|.\par\noindent  Công thức trong chú thích viết bằng ký tự thường (ví dụ \verb|h_t = omega + ...|) và trùng với công thức ở Mục~4 của tài liệu này. Có thể xem docstring ngay trong Python bằng \verb|help(ten_ham)|.
+
+\subsection{Thứ tự đọc đề nghị}
+\begin{enumerate}
+\item \tep{mo\_hinh/phan\_phoi.py} $\to$ \tep{garch.py} $\to$ \tep{egarch.py}: phân phối sai số, phương trình phương sai và hàm log-hợp lý — lõi toán học của đề tài.
+\item \tep{mo\_hinh/danh\_muc.py}: sáu mô hình và các hàm tiện ích dùng chung.
+\item \tep{suy\_dien/mle.py}: tham số hóa không ràng buộc, tối ưu Adam + L-BFGS, sai số chuẩn.
+\item \tep{suy\_dien/bayes.py} $\to$ \tep{vb.py} $\to$ \tep{mcmc.py}: mô hình Bayes và hai cách suy diễn Bayes.
+\item \tep{danh\_gia/ngoai\_mau.py} (cùng \tep{ham\_mat\_mat.py}, \tep{kiem\_dinh\_var.py}): đánh giá ngoài mẫu.
+\item \tep{mo\_phong/}: nghiên cứu mô phỏng.
+\item \tep{scripts/chay\_buoc1\_so\_sanh\_mo\_hinh.py}: xem các hàm trên được ghép thành quy trình thế nào.
+\end{enumerate}
+Các tệp trong \tep{du\_lieu/} và \tep{kiem\_dinh/} là tiền xử lý và kiểm định chuẩn, có thể đọc sau.
+
+% =====================================================================
+\section{Các hàm thư viện bên ngoài được sử dụng}\label{sec:api}
+% =====================================================================
+Bảng dưới đây giải thích từng hàm của thư viện bên ngoài xuất hiện trong mã, để người đọc không cần tra tài liệu của thư viện.
+
+\begin{longtable}{@{}>{\raggedright\arraybackslash}p{0.34\textwidth}>{\raggedright\arraybackslash}p{0.61\textwidth}@{}}
+\toprule \textbf{Hàm (thư viện)} & \textbf{Tác dụng trong dự án} \\ \midrule \endhead
+\multicolumn{2}{@{}l}{\textbf{PyTorch} (\tep{torch}) — tính toán tensor và vi phân tự động} \\
+\ham{torch.tensor}, \ham{torch.zeros}, \ham{torch.stack}, \ham{torch.cat} & Tạo tensor (mảng số), ghép danh sách tensor thành một tensor. \\
+\ham{torch.set\_default\_dtype(torch.float64)} & Dùng số thực 64 bit cho mọi phép tính (đặt trong \tep{garch\_vn30/\_\_init\_\_.py}). \\
+\ham{x.requires\_grad\_(True)}, \ham{loss.backward()}, \ham{x.grad} & Vi phân tự động: đánh dấu biến cần đạo hàm; \ham{backward} tính gradient của hàm mất mát theo các biến đó bằng quy tắc dây chuyền qua mọi phép toán đã thực hiện (kể cả vòng lặp phương sai); gradient lưu ở \ham{x.grad}. \\
+\ham{torch.no\_grad()}, \ham{x.detach()} & Tắt việc theo dõi đạo hàm khi chỉ cần giá trị (đánh giá ngoài mẫu, lưu kết quả). \\
+\ham{torch.optim.Adam} & Bộ tối ưu Adam (Mục~\ref{sec:mle}); \ham{opt.zero\_grad()} xóa gradient cũ, \ham{opt.step()} cập nhật tham số. \\
+\ham{torch.optim.LBFGS(..., line\_search\_fn="strong\_wolfe")} & Bộ tối ưu tựa Newton L-BFGS với tìm kiếm đường Wolfe mạnh; cần hàm \ham{closure} tính lại hàm mất mát và gradient. \\
+\ham{torch.nn.utils.clip\_grad\_norm\_} & Cắt chuẩn gradient về tối đa một ngưỡng (50) để tránh bước nhảy quá lớn. \\
+\ham{torch.nn.functional.softplus}, \ham{torch.sigmoid}, \ham{torch.exp} & Các phép biến đổi đưa tham số về miền hợp lệ. \\
+\ham{torch.autograd.}\allowbreak\ham{functional.}\allowbreak\ham{hessian} & Ma trận đạo hàm bậc hai chính xác của $-\ell$ (dùng cho sai số chuẩn). \\
+\ham{torch.autograd.}\allowbreak\ham{functional.}\allowbreak\ham{jacobian} & Ma trận Jacobian của phép biến đổi tham số (phương pháp delta). \\
+\ham{torch.linalg.inv} & Nghịch đảo ma trận Hessian. \\
+\ham{torch.lgamma}, \ham{torch.log1p}, \ham{torch.expm1} & $\log\Gamma(x)$, $\log(1+x)$, $e^x-1$ — các dạng ổn định số học. \\
+\ham{torch.clamp} & Chặn giá trị trong một khoảng ($h_t\ge10^{-8}$; $\log h_t\in[-30,30]$). \\
+\ham{torch.logsumexp} & $\log\sum_s e^{a_s}$ tính ổn định; dùng cho mật độ dự báo hỗn hợp. \\
+\ham{torch.manual\_seed}, \ham{torch.Generator} & Cố định hạt giống ngẫu nhiên để tái lập. \\
+\ham{torch.distributions.Chi2} & Sinh biến khi bình phương khi mô phỏng Student-$t$. \\
+\ham{torch.save}, \ham{torch.load} & Ghi và đọc tệp kết quả \tep{.pt}. \\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{Pyro} (\tep{pyro-ppl}) — lập trình xác suất} \\
+\ham{pyro.sample("ten", phân phối)} & Khai báo một tham số ngẫu nhiên (site) với tiên nghiệm cho trước. \\
+\ham{pyro.factor("loglik", l)} & Cộng log-hợp lý $\ell$ vào log-mật độ của mô hình. \\
+\ham{pyro.distributions}: \ham{Normal}, \ham{LogNormal}, \ham{Beta}, \ham{Gamma} & Các phân phối tiên nghiệm; \ham{.expand([k]).to\_event(1)} tạo vector $k$ chiều độc lập. \\
+\ham{AutoNormal}, \ham{AutoMultivariateNormal} & Tự tạo phân phối xấp xỉ $q$ mean-field và full-rank cho VB. \\
+\ham{SVI(model, guide, optim, loss)}, \ham{svi.step} & Vòng tối ưu ELBO; mỗi lần gọi \ham{step} thực hiện một bước gradient và trả về $-$ELBO. \\
+\ham{Trace\_ELBO} & Ước lượng ELBO và gradient bằng mẫu Monte Carlo với mẹo tham số hóa lại. \\
+\ham{pyro.optim.Adam} & Adam dùng trong SVI. \\
+\ham{Predictive(model, guide, num\_samples)} & Rút mẫu tham số từ $q$ sau khi khớp. \\
+\ham{NUTS}, \ham{MCMC}, \ham{mcmc.run}, \ham{mcmc.get\_samples} & Bộ lấy mẫu No-U-Turn và vòng chạy chuỗi Markov; lấy mẫu hậu nghiệm. \\
+\ham{pyro.set\_rng\_seed}, \ham{pyro.clear\_param\_store} & Cố định hạt giống; xóa tham số của lần khớp trước. \\
+\midrule
+\multicolumn{2}{@{}l}{\textbf{ArviZ, SciPy, statsmodels, arch, pandas, NumPy}} \\
+\ham{arviz.from\_dict}, \ham{arviz.rhat}, \ham{arviz.ess} & Đóng gói mẫu MCMC; tính $\hat R$ và cỡ mẫu hiệu dụng. \\
+\ham{scipy.stats.norm.ppf}, \ham{t.ppf}, \ham{chi2.cdf} & Phân vị chuẩn và Student-$t$ (VaR), hàm phân phối $\chi^2$ (giá trị $p$ của Kupiec, Christoffersen). \\
+\ham{adfuller}, \ham{kpss}, \ham{acorr\_ljungbox}, \ham{het\_arch}, \ham{jarque\_bera} (statsmodels); \ham{PhillipsPerron} (arch) & Các kiểm định ban đầu. \\
+\ham{pandas.read\_csv}, \ham{to\_datetime}, \ham{groupby().agg}, \ham{shift}, \ham{merge} & Đọc dữ liệu phút, gộp theo ngày, dịch trễ một phiên, ghép bảng. \\
+\ham{numpy.log}, \ham{mean}, \ham{sqrt} & Tính toán trên mảng trong phần đánh giá và mô phỏng. \\
+\ham{matplotlib.pyplot} & Vẽ hình cho báo cáo. \\
+\bottomrule
+\end{longtable}
+
+% =====================================================================
+\section{Ví dụ: một lần chạy từ dữ liệu đến kết quả}\label{sec:vi-du}
+% =====================================================================
+Đoạn mã sau (chạy từ thư mục \tep{code thuật toán}) dùng trực tiếp thư viện để ước lượng EGARCH-X Student-$t$ bằng MLE và VB rồi đánh giá ngoài mẫu. Các script trong \tep{scripts/} thực hiện đúng các bước này cho cả sáu mô hình, kèm lưu kết quả.
+
+\begin{Verbatim}[frame=single,fontsize=\small]
+import torch
+from garch_vn30.du_lieu import chuan_bi_du_lieu
+from garch_vn30.mo_hinh import danh_muc
+from garch_vn30.suy_dien import fit_mle, standard_errors, fit_vb
+from garch_vn30.danh_gia import danh_gia_mot_diem
+
+d = chuan_bi_du_lieu("ohlc_export.csv")         # 1. dữ liệu: r, X, RV, chia 80/20
+n = d["n_train"]
+spec = danh_muc.get("egarch_x_t")                # 2. chọn mô hình trong danh mục
+X = danh_muc.lay_X(spec, d["X_all"])
+
+res = fit_mle(d["r_all"][:n], X[:n], dist=spec.dist,      # 3. MLE trên tập huấn luyện
+              family=spec.family, n_starts=10)
+print(res.params.theta, res.aic, res.bic)        #    hệ số đòn bẩy, AIC, BIC
+se = standard_errors(res.params, d["r_all"][:n], X[:n],
+                     dist=spec.dist, family=spec.family)  # 4. sai số chuẩn
+oos = danh_gia_mot_diem(res.params, spec.family, spec.dist,
+                        d["r_all"], X, d["rv_all"], n)    # 5. ngoài mẫu
+print(oos["qlike"], oos["nls"], oos["n_violations_1pct"])
+
+vb = fit_vb(d["r_all"][:n], X[:n], spec,          # 6. VB mean-field
+            guide_type="mean_field", n_steps=3000)
+print(vb.summary["theta"])                       #    trung bình, sd, khoảng 95%
+\end{Verbatim}
+
+Diễn giải từng bước: (1) \ham{chuan\_bi\_du\_lieu} đọc 41 MB dữ liệu phút, trả về 2.170 lợi suất ngày cùng $RV_t$ và hai biến ngoại sinh đã chuẩn hóa; (2) \ham{get} lấy đặc tả mô hình, \ham{lay\_X} trả về ma trận ngoại sinh phù hợp; (3) \ham{fit\_mle} chạy 10 điểm khởi tạo, mỗi điểm Adam rồi L-BFGS, giữ nghiệm có log-hợp lý lớn nhất; (4) \ham{standard\_errors} tính Hessian bằng vi phân tự động và áp dụng phương pháp delta; (5) \ham{danh\_gia\_mot\_diem} chạy tiếp vòng lặp phương sai qua 435 phiên kiểm định và tính QLIKE, NLS, kiểm định VaR; (6) \ham{fit\_vb} khớp phân phối xấp xỉ mean-field và trả về mẫu hậu nghiệm. Với cấu hình như trên, bước (3) mất khoảng nửa giờ trên một nhân CPU.
+
+% =====================================================================
 \section{Định dạng tệp kết quả}\label{sec:ket-qua}
 % =====================================================================
 Mọi tệp là tệp \tep{torch.save} chứa dict, tensor và số Python; đọc bằng \ham{torch.load(path, weights\_only=False)}. Tệp không chứa đối tượng của lớp tự định nghĩa nên đọc được mà không phụ thuộc cấu trúc mã nguồn.

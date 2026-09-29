@@ -69,8 +69,14 @@ Ba mô hình GARCH MLE được tính với 6 điểm khởi tạo (lần chạy
 - Dùng "trường hợp", không dùng "kịch bản". Sau dấu hai chấm viết hoa.
 - Phân biệt rõ: bằng chứng cho thấy gì / chưa thể kết luận gì. Không bịa số liệu;
   mọi con số phải truy được về `results/`.
-- Code đơn giản, dễ đọc để người dùng tự kiểm tra; chú thích tiếng Việt (không dấu
-  trong code). Thay đổi tối ưu hóa phải giữ bản gốc làm đối chứng và có test so khớp.
+- Code đơn giản, dễ đọc để người dùng tự kiểm tra. GVHD yêu cầu mỗi tệp/hàm có
+  giải thích lý thuyết, thư viện, tác dụng: docstring tiếng Việt CÓ DẤU theo mẫu
+  "LÝ THUYẾT / THƯ VIỆN / Tham số / Trả về" (chuỗi in ra console vẫn không dấu).
+  Sửa code thì sửa docstring và `tai_lieu/tai_lieu_ma_nguon.tex` cùng lúc.
+  Thay đổi tối ưu hóa phải giữ bản gốc làm đối chứng và có test so khớp.
+- Thư mục nộp GVHD: `D:\Hoai Nam Ng\Project\GARCH-VN30F1M_Nop_GVHD\` (bản sao code,
+  results, .bat, tài liệu PDF, `ĐỌC TRƯỚC.md`; ngoài git). Cập nhật lại bằng cách
+  chép lại khi code thay đổi.
 - `tong_hop_ket_qua.tex` có chỉnh sửa tay của người dùng đã được đưa vào generator;
   khi sửa generator, đối chiếu diff để không làm mất chỉnh sửa đó.
 - Không động vào `Bài báo chính.tex` / `document.tex` cho tới khi người dùng yêu cầu

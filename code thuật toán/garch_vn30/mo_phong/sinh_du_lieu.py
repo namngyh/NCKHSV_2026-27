@@ -1,8 +1,20 @@
-"""Co che sinh du lieu (DGP) tu EGARCH-X mot trang thai.
+"""Cơ chế sinh dữ liệu (data generating process, DGP) từ EGARCH-X một trạng thái.
 
-Cung phuong trinh voi mo_hinh/egarch.py, nhung chay "xuoi": rut z_t roi tinh
-h_t, r_t. Bien ngoai sinh sinh iid N(0,1) (mac dinh ar_coef = 0). Loai bo
-`burn_in` quan sat dau de xoa anh huong cua dieu kien dau.
+MỤC ĐÍCH
+    Nghiên cứu mô phỏng cần dữ liệu mà ta BIẾT tham số thật theta_0: sinh dữ liệu
+    từ theta_0, ước lượng lại, rồi so ước lượng với theta_0 để đo độ chệch, RMSE
+    và độ phủ của khoảng tin cậy.
+
+CÁCH SINH (cùng phương trình với mo_hinh/egarch.py nhưng chạy "xuôi")
+    1. X_t ~ N(0, I_k) độc lập (hoặc AR(1) nếu ar_coef != 0).
+    2. z_t ~ N(0,1) hoặc t*_nu (Student-t chuẩn hóa).
+    3. Điều kiện đầu log h_0 = omega / (1 - beta): trung bình vô điều kiện của
+       log-phương sai khi E[X] = 0.
+    4. Lặp: log h_t theo phương trình EGARCH với z_{t-1} là giá trị vừa rút,
+       r_t = mu + sqrt(h_t) z_t.
+    5. Bỏ `burn_in` quan sát đầu để xóa ảnh hưởng của điều kiện đầu.
+    Thứ tự rút số ngẫu nhiên cố định (X trước, z sau), nên cùng seed luôn cho
+    cùng một bộ dữ liệu.
 """
 from __future__ import annotations
 
@@ -16,14 +28,16 @@ from garch_vn30.mo_hinh.phan_phoi import std_t_sample
 
 @dataclass
 class DuLieuMoPhong:
-    r: torch.Tensor   # (T,) loi suat
-    h: torch.Tensor   # (T,) phuong sai co dieu kien that
-    X: torch.Tensor   # (T, k) bien ngoai sinh
+    """Một bộ dữ liệu mô phỏng (sau khi đã bỏ burn-in)."""
+    r: torch.Tensor   # (T,) lợi suất
+    h: torch.Tensor   # (T,) phương sai có điều kiện THẬT
+    X: torch.Tensor   # (T, k) biến ngoại sinh
 
 
 def generate_exogenous(total_T: int, n_exog: int, ar_coef: float = 0.0,
                        scale: float = 1.0) -> torch.Tensor:
-    """X_t = ar_coef X_{t-1} + e_t, e_t ~ N(0, scale^2) (iid khi ar_coef = 0)."""
+    """Sinh ma trận ngoại sinh X_t = ar_coef X_{t-1} + e_t, e_t ~ N(0, scale^2 I)
+    (độc lập theo thời gian khi ar_coef = 0, mặc định). Trả về tensor (total_T, n_exog)."""
     X = torch.zeros(total_T, n_exog)
     eps = torch.randn(total_T, n_exog) * scale
     X[0] = eps[0]
@@ -35,11 +49,17 @@ def generate_exogenous(total_T: int, n_exog: int, ar_coef: float = 0.0,
 def simulate_egarch(params: EGARCHParams, T: int, dist: str = "student_t",
                     n_exog: int | None = None, X: torch.Tensor | None = None,
                     burn_in: int = 200, seed: int | None = None) -> DuLieuMoPhong:
-    """Sinh T quan sat (sau burn_in) tu EGARCH-X.
+    """Sinh T quan sát từ EGARCH-X với tham số thật `params`.
 
-    Dieu kien dau: log h_0 = omega / (1 - beta), trung binh vo dieu kien cua
-    log-phuong sai khi E[X] = 0. Thu tu rut so ngau nhien co dinh (X truoc,
-    z sau) de cung seed luon cho cung du lieu.
+    Tham số:
+        params : tham số thật theta_0 (EGARCHParams).
+        T      : số quan sát giữ lại sau burn-in.
+        dist   : "normal" hoặc "student_t" (khi đó dùng params.nu).
+        n_exog : số biến ngoại sinh (mặc định = độ dài params.gamma).
+        X      : có thể truyền sẵn ma trận ngoại sinh độ dài T + burn_in.
+        burn_in: số quan sát đầu bị bỏ.
+        seed   : hạt giống (torch.manual_seed) để tái lập.
+    Trả về: DuLieuMoPhong(r, h, X).
     """
     if seed is not None:
         torch.manual_seed(seed)

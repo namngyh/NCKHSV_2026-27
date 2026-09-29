@@ -1,8 +1,21 @@
-"""Kiem dinh Diebold-Mariano (1995) so sanh do chinh xac du bao cua hai mo hinh.
+"""Kiểm định Diebold-Mariano (1995): hai mô hình có độ chính xác dự báo như nhau không?
 
-d_t = L_1t - L_2t (chenh lech mat mat), H0: E[d_t] = 0.
-DM = mean(d) / sqrt(S / n), S la phuong sai dai han Newey-West voi do tre h-1;
-hieu chinh mau nho Harvey-Leybourne-Newbold (1997), so voi t(n-1).
+LÝ THUYẾT
+    Với hàm mất mát L (vd. QLIKE từng ngày) của hai mô hình, đặt d_t = L_1t - L_2t.
+    H0: E[d_t] = 0 (hai mô hình dự báo tốt như nhau).
+
+        DM = mean(d) / sqrt(S / n),
+        S  = gamma_0 + 2 sum_{k=1}^{h-1} (1 - k/h) gamma_k       (Newey-West)
+
+    với gamma_k là hiệp phương sai trễ k của d_t; h là tầm dự báo (h = 1 cho dự
+    báo một bước). Hiệu chỉnh mẫu nhỏ Harvey-Leybourne-Newbold (1997): nhân DM
+    với sqrt([n + 1 - 2h + h(h-1)/n] / n) và so với phân phối t(n-1).
+    DM > 0: mô hình 1 có mất mát trung bình lớn hơn (tệ hơn) mô hình 2.
+
+    Hàm đã được cài đặt và kiểm thử; chưa được dùng trong các bảng hiện có.
+
+THƯ VIỆN
+    numpy (trung bình, hiệp phương sai), scipy.stats (phân phối t và chuẩn).
 """
 from __future__ import annotations
 
@@ -11,6 +24,7 @@ from scipy import stats
 
 
 def _newey_west(d: np.ndarray, lag: int) -> float:
+    """Phương sai dài hạn Newey-West của chuỗi d với trọng số Bartlett (1 - k/(lag+1))."""
     d_c = d - d.mean()
     var = np.mean(d_c ** 2)
     for k in range(1, lag + 1):
@@ -20,7 +34,10 @@ def _newey_west(d: np.ndarray, lag: int) -> float:
 
 def diebold_mariano_test(loss_1: np.ndarray, loss_2: np.ndarray, h: int = 1,
                          small_sample_correction: bool = True) -> dict:
-    """DM > 0: mo hinh 1 co mat mat trung binh lon hon (te hon) mo hinh 2."""
+    """Kiểm định DM giữa hai chuỗi mất mát cùng độ dài.
+
+    Trả về dict: DM_stat, p_value (hai phía), mean_loss_diff, n_obs.
+    """
     d = np.asarray(loss_1, dtype=float) - np.asarray(loss_2, dtype=float)
     n = len(d)
     dm = d.mean() / np.sqrt(_newey_west(d, max(h - 1, 0)) / n)

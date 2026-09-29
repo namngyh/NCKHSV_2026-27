@@ -1,15 +1,25 @@
-"""Doc du lieu phut VN30F1M tu "ohlc_export.csv" va dung chuoi ngay.
+"""Đọc dữ liệu phút VN30F1M từ "ohlc_export.csv" và dựng chuỗi ngày.
 
-Dinh dang nguon (moi dong mot nen 1 phut cua ky hieu lien tuc VN30F1M do nha
-cung cap ghep san):
-    SYMBOL, TRADING_DATE (YYYYMMDD), OPEN_PX, HIGH_PX, LOW_PX, CLOSE_PX, VOL,
-    TRADING_TIME (HH:MM:SS), BUY_VOL, BUY_VAL, SELL_VOL, SELL_VAL
+DỮ LIỆU NGUỒN
+    Mỗi dòng là một nến 1 phút của chuỗi hợp đồng liên tục VN30F1M (nhà cung cấp
+    đã ghép sẵn hợp đồng gần nhất). Các cột:
+        SYMBOL, TRADING_DATE (YYYYMMDD), OPEN_PX, HIGH_PX, LOW_PX, CLOSE_PX, VOL,
+        TRADING_TIME (HH:MM:SS), BUY_VOL, BUY_VAL, SELL_VOL, SELL_VAL
+    Ví dụ (giá trị giả định): VN30F1M, 20171107, 850.1, 850.5, 849.9, 850.3, 120, 09:01:00, ...
 
-Tu du lieu phut tinh:
-    r_t  = 100 (log P_t - log P_{t-1})            loi suat log ngay (%)
-    RV_t = 100^2 sum_j (log P_{t,j} - log P_{t,j-1})^2   bien dong thuc te (%^2)
-voi P_t la gia dong cua cua nen cuoi ngay t, P_{t,j} la gia dong cua nen phut
-thu j trong ngay t (khong noi loi suat qua dem vao RV).
+CÔNG THỨC
+    Gọi P_t là giá đóng cửa của nến cuối ngày t, P_{t,j} là giá đóng cửa nến phút
+    thứ j trong ngày t:
+        lợi suất log ngày (%):         r_t  = 100 (log P_t - log P_{t-1})
+        biến động thực tế (%^2):       RV_t = 100^2 sum_j (log P_{t,j} - log P_{t,j-1})^2
+    RV_t chỉ cộng lợi suất giữa hai nến TRONG CÙNG một ngày (không gồm khoảng qua
+    đêm); nó là đại diện quan sát được cho phương sai ngày, dùng để đánh giá dự
+    báo phương sai h_t.
+
+THƯ VIỆN
+    pandas: đọc CSV (read_csv), chuyển chuỗi thành ngày giờ (to_datetime), gom
+            nhóm theo ngày (groupby ... agg), dịch dữ liệu (shift), ghép bảng (merge).
+    numpy : log, tổng bình phương.
 """
 from __future__ import annotations
 
@@ -18,7 +28,11 @@ import pandas as pd
 
 
 def load_intraday_csv(path: str) -> pd.DataFrame:
-    """Doc file, ghep cot `datetime`, doi ten cot gia/khoi luong, sap xep theo thoi gian."""
+    """Đọc tệp CSV phút, tạo cột `date` và `datetime`, đổi tên cột giá/khối lượng,
+    sắp xếp theo thời gian tăng dần.
+
+    Trả về DataFrame với các cột: date, datetime, SYMBOL, open, high, low, close, volume.
+    """
     df = pd.read_csv(path, dtype={"TRADING_DATE": str})
     df["date"] = pd.to_datetime(df["TRADING_DATE"], format="%Y%m%d")
     df["datetime"] = pd.to_datetime(df["TRADING_DATE"] + " " + df["TRADING_TIME"],
@@ -30,8 +44,9 @@ def load_intraday_csv(path: str) -> pd.DataFrame:
 
 
 def data_quality_report(df: pd.DataFrame) -> dict:
-    """Bao cao chat luong du lieu phut: trung lap, gia tri thieu, gia/khoi luong khong duong,
-    nen vi pham Low <= min(Open, Close) <= max(Open, Close) <= High."""
+    """Báo cáo chất lượng dữ liệu phút: số dòng trùng thời điểm, giá trị thiếu,
+    giá hoặc khối lượng không dương, nến vi phạm Low <= min(Open, Close) <=
+    max(Open, Close) <= High, số nến mỗi ngày. Chỉ báo cáo, không xóa dòng nào."""
     ohlc_bad = ~((df["low"] <= df[["open", "close"]].min(axis=1))
                  & (df[["open", "close"]].max(axis=1) <= df["high"]))
     so_nen = df.groupby("date").size()
@@ -51,7 +66,8 @@ def data_quality_report(df: pd.DataFrame) -> dict:
 
 
 def build_daily_bars(df_intraday: pd.DataFrame) -> pd.DataFrame:
-    """Gop nen phut thanh nen ngay: open dau, high max, low min, close cuoi, volume tong."""
+    """Gộp nến phút thành nến ngày: open = nến đầu ngày, high = cao nhất, low = thấp
+    nhất, close = nến cuối ngày, volume = tổng khối lượng, n_bars = số nến."""
     return (df_intraday.sort_values("datetime")
             .groupby("date")
             .agg(open=("open", "first"), high=("high", "max"), low=("low", "min"),
@@ -62,21 +78,28 @@ def build_daily_bars(df_intraday: pd.DataFrame) -> pd.DataFrame:
 
 def compute_daily_log_returns(daily: pd.DataFrame, close_col: str = "close",
                               scale: float = 100.0) -> pd.DataFrame:
-    """r_t = scale * log(P_t / P_{t-1}); ngay dau tien la NaN."""
+    """Thêm cột log_return: r_t = scale * log(P_t / P_{t-1}); ngày đầu là NaN
+    (shift(1) lấy giá của hàng phía trên, tức ngày trước)."""
     out = daily.copy()
     out["log_return"] = scale * np.log(out[close_col] / out[close_col].shift(1))
     return out
 
 
 def compute_intraday_log_returns(df_intraday: pd.DataFrame, close_col: str = "close") -> pd.DataFrame:
-    """Loi suat log giua hai nen phut lien tiep TRONG CUNG MOT NGAY (nen dau ngay = NaN)."""
+    """Thêm cột intraday_log_return = log lợi suất giữa hai nến phút liên tiếp TRONG
+    CÙNG NGÀY. groupby("date").shift(1) chỉ dịch trong từng ngày, nên nến đầu ngày
+    nhận NaN và lợi suất qua đêm không bị tính vào RV."""
     out = df_intraday.sort_values("datetime").copy()
     out["intraday_log_return"] = np.log(out[close_col] / out.groupby("date")[close_col].shift(1))
     return out
 
 
 def load_vn30f1m_daily(path: str, scale: float = 100.0) -> tuple[pd.DataFrame, dict]:
-    """Nap file -> (DataFrame ngay co cot log_return va RV, bao cao chat luong)."""
+    """Hàm tổng hợp: đọc tệp phút -> bảng ngày có cột log_return và RV, kèm báo cáo chất lượng.
+
+    Trả về (daily, report); daily có các cột date, open, high, low, close, volume,
+    n_bars, log_return, RV.
+    """
     raw = load_intraday_csv(path)
     report = data_quality_report(raw)
     daily = compute_daily_log_returns(build_daily_bars(raw), scale=scale)
