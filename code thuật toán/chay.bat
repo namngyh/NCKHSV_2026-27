@@ -4,19 +4,53 @@ chcp 65001 >nul
 cd /d "%~dp0"
 set "PYTHONIOENCODING=utf-8"
 set "PYTHONUNBUFFERED=1"
-
-rem Chon Python CO torch (co the co nhieu ban Python tren may).
 set "PYEXE="
-for %%P in (python py) do (
-    if not defined PYEXE (
-        %%P -c "import torch, pyro" >nul 2>nul && set "PYEXE=%%P"
-    )
-)
-if not defined PYEXE (
-    echo [LOI] Khong tim thay Python co torch va pyro. Chay: pip install -r requirements.txt
+set "KIEM_TRA_THU_VIEN=import torch, pyro, numpy, pandas, scipy, statsmodels, arch, arviz, matplotlib, pytest"
+
+rem ---- Buoc 1: tim Python 3.10 tro len; neu chua co thi cai bang winget ----
+call :tim_python
+if defined PYEXE goto :co_python
+
+echo [INFO] Chua thay Python 3.10+ tren may.
+where winget >nul 2>nul
+if errorlevel 1 (
+    echo [LOI] Khong co winget. Hay cai Python 3.11 tu https://www.python.org/downloads/
+    echo       ^(nho tick "Add python.exe to PATH"^) roi mo lai chay.bat.
     pause
     exit /b 1
 )
+echo [INFO] Dang cai Python 3.11 bang winget ^(can Internet, vai phut^)...
+winget install --id Python.Python.3.11 -e --silent --accept-package-agreements --accept-source-agreements
+call :tim_python
+if not defined PYEXE (
+    echo [INFO] Da cai xong Python. Hay DONG cua so nay va mo lai chay.bat de nhan Python moi.
+    pause
+    exit /b 0
+)
+
+:co_python
+rem ---- Buoc 2: kiem tra thu vien; chi cai neu con thieu ----
+%PYEXE% -c "%KIEM_TRA_THU_VIEN%" >nul 2>nul
+if not errorlevel 1 goto :menu
+echo [INFO] Thieu thu vien. Dang cai tu requirements.txt ^(torch kha nang, co the lau^)...
+%PYEXE% -m pip install --upgrade pip
+%PYEXE% -m pip install -r requirements.txt
+%PYEXE% -c "%KIEM_TRA_THU_VIEN%" >nul 2>nul
+if errorlevel 1 (
+    echo [LOI] Cai thu vien chua thanh cong. Xem thong bao loi o tren.
+    pause
+    exit /b 1
+)
+echo [OK] Da cai du thu vien.
+goto :menu
+
+:tim_python
+for %%P in (python py) do (
+    if not defined PYEXE (
+        %%P -c "import sys; sys.exit(0 if sys.version_info[:2] >= (3, 10) else 1)" >nul 2>nul && set "PYEXE=%%P"
+    )
+)
+exit /b 0
 
 :menu
 echo.
