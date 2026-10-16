@@ -11,6 +11,10 @@ Thiết kế ba bước:
 2. **Mô phỏng khôi phục tham số** — EGARCH-X Student-t, ba trường hợp E1–E3, 100 lần lặp mỗi trường hợp.
 3. **MCMC** cho mô hình thắng cuộc (EGARCH-X Student-t).
 
+## Mở rộng EGARCH-X và xử lý đáo hạn
+
+Phần mở rộng ước lượng thêm skewed-t và GED bằng MLE, Bayes biến phân mean-field và full-rank trên dữ liệu gốc. Nhánh phân tích MLE tiếp theo tính RV của khoảng nghỉ trưa và qua đêm, nối giá giữa F1M/F2M, rồi loại cửa sổ đáo hạn khỏi hàm hợp lý khi nghiên cứu các ngày giao dịch thông thường. Kết quả, bộ tham số, giới hạn so sánh, nguồn dữ liệu và lệnh chạy lại nằm trong [hướng dẫn mở rộng EGARCH-X](code%20thuật%20toán/EGARCH_X_MO_RONG.md). Các kết quả này được lưu riêng, không thay thế bảng sáu mô hình của nghiên cứu gốc.
+
 ## Thư mục
 
 | Thư mục | Nội dung |

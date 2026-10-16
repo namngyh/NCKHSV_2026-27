@@ -1,0 +1,247 @@
+{
+  "sample": {
+    "n_total": 2170,
+    "n_train": 1735,
+    "n_test": 435
+  },
+  "baseline": {
+    "model": "EGARCH-X Student-t",
+    "params": {
+      "mu": 0.07962614073498507,
+      "omega": 0.15988713155781153,
+      "alpha": 0.07214380507547707,
+      "theta": -0.145170911052291,
+      "beta": 0.683154458845788,
+      "gamma_volume": -0.06918497070298472,
+      "gamma_rv": 0.29859610265769865,
+      "nu": 4.290964943972977
+    },
+    "e_abs_z": 0.7174914154965415,
+    "loglik": -2795.4339738098115,
+    "aic": 5606.867947619623,
+    "bic": 5650.538049158671,
+    "oos": {
+      "mae": 1.0076417253917103,
+      "rmse": 1.8918805424674272,
+      "qlike": 0.923440389217836,
+      "nls": 1.5203132912901687,
+      "var_1pct_violations": 6,
+      "var_5pct_violations": 23
+    }
+  },
+  "models": {
+    "skewt": {
+      "model": "EGARCH-X skewt",
+      "params": {
+        "mu": 0.03297764916681096,
+        "omega": 0.15901887532744935,
+        "alpha": 0.07322164061259474,
+        "theta": -0.13062358592795734,
+        "beta": 0.6920047155005835,
+        "gamma_volume": -0.06748417522635922,
+        "gamma_rv": 0.28558830837682486,
+        "eta": 4.467929656499391,
+        "lambda_skew": -0.13193175662349357
+      },
+      "e_abs_z": 0.722823713718809,
+      "loglik": -2787.1818939716104,
+      "n_params": 9,
+      "aic": 5592.363787943221,
+      "bic": 5641.492652174649,
+      "oos": {
+        "mae": 0.9798644465293941,
+        "rmse": 1.857924715916582,
+        "qlike": 0.9182313257958772,
+        "nls": 1.523476461575809,
+        "n_test": 435,
+        "var_1pct_quantile_z": -2.87161803903408,
+        "var_1pct_violations": 6,
+        "var_5pct_quantile_z": -1.624478593755719,
+        "var_5pct_violations": 20
+      },
+      "optimization": {
+        "runs": [
+          {
+            "start": 0,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.1818939923214,
+            "iterations": 29
+          },
+          {
+            "start": 1,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.181893980126,
+            "iterations": 30
+          },
+          {
+            "start": 2,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.18189397225,
+            "iterations": 31
+          },
+          {
+            "start": 3,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.181893990368,
+            "iterations": 37
+          },
+          {
+            "start": 4,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.181893976976,
+            "iterations": 32
+          },
+          {
+            "start": 5,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.181893972469,
+            "iterations": 34
+          },
+          {
+            "start": 6,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.1818939749155,
+            "iterations": 41
+          },
+          {
+            "start": 7,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.1818940041976,
+            "iterations": 38
+          },
+          {
+            "start": 8,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.1818939716104,
+            "iterations": 32
+          },
+          {
+            "start": 9,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2787.181893979351,
+            "iterations": 37
+          }
+        ],
+        "optimizer_success": true,
+        "optimizer_message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "nll": 2787.1818939716104
+      }
+    },
+    "ged": {
+      "model": "EGARCH-X ged",
+      "params": {
+        "mu": 0.07776054284574342,
+        "omega": 0.14238657336265248,
+        "alpha": 0.06516440046999716,
+        "theta": -0.11743072503114492,
+        "beta": 0.6967021639851013,
+        "gamma_volume": -0.06321056336566676,
+        "gamma_rv": 0.2839081054767656,
+        "ged_shape": 1.1319555257220504
+      },
+      "e_abs_z": 0.7279082631046145,
+      "loglik": -2804.425752684534,
+      "n_params": 8,
+      "aic": 5624.851505369068,
+      "bic": 5668.521606908116,
+      "oos": {
+        "mae": 0.9503966359855603,
+        "rmse": 1.84050507488202,
+        "qlike": 0.9089338917352467,
+        "nls": 1.5358375418827455,
+        "n_test": 435,
+        "var_1pct_quantile_z": -2.683048004905621,
+        "var_1pct_violations": 7,
+        "var_5pct_quantile_z": -1.6419460434975361,
+        "var_5pct_violations": 20
+      },
+      "optimization": {
+        "runs": [
+          {
+            "start": 0,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.425752684534,
+            "iterations": 21
+          },
+          {
+            "start": 1,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.425752686935,
+            "iterations": 24
+          },
+          {
+            "start": 2,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.425752684596,
+            "iterations": 25
+          },
+          {
+            "start": 3,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.425752711044,
+            "iterations": 19
+          },
+          {
+            "start": 4,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.425752684627,
+            "iterations": 23
+          },
+          {
+            "start": 5,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.4257526884194,
+            "iterations": 25
+          },
+          {
+            "start": 6,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.4257526886204,
+            "iterations": 22
+          },
+          {
+            "start": 7,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.425752684774,
+            "iterations": 26
+          },
+          {
+            "start": 8,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.4257526897463,
+            "iterations": 26
+          },
+          {
+            "start": 9,
+            "success": true,
+            "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+            "loglik": -2804.4257526849565,
+            "iterations": 27
+          }
+        ],
+        "optimizer_success": true,
+        "optimizer_message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "nll": 2804.425752684534
+      }
+    }
+  }
+}

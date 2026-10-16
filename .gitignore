@@ -33,6 +33,10 @@ code thuật toán/results/pipeline_nhanh/
 Thumbs.db
 .DS_Store
 
+# Raw external F2M 5-minute data. Reports and SHA-256 audit are tracked;
+# readers supply their own copy with --import-source --source <path>.
+**/results/phan_phoi_moi/dao_han_f2m_5m/source_vn30f2m_5m.csv
+
 # File tam sinh khi bien dich LaTeX (giu lai .tex va .pdf, bo phan con lai)
 Bài báo/*.aux
 Bài báo/*.log

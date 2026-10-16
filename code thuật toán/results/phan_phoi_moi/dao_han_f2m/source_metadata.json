@@ -1,0 +1,12 @@
+{
+  "source": "https://dchart-api.vndirect.com.vn/dchart/history",
+  "resolution": "D",
+  "symbols": [
+    "VN30F1M",
+    "VN30F2M"
+  ],
+  "from": "2017-10-30",
+  "to": "2026-07-20",
+  "retrieved_utc": "2026-10-16T03:14:45.030079+00:00",
+  "rows": 2176
+}

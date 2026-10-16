@@ -8,6 +8,10 @@ full-rank) và MCMC (NUTS).
 Tài liệu đầy đủ (cách chạy, thư viện, công thức toán, mô tả từng tệp và từng hàm):
 **[`tai_lieu/tai_lieu_ma_nguon.pdf`](tai_lieu/tai_lieu_ma_nguon.pdf)**.
 
+## Kết quả mở rộng EGARCH-X
+
+Xem [hướng dẫn mở rộng EGARCH-X](EGARCH_X_MO_RONG.md) để hiểu ba phân phối Student-t, skewed-t và GED, cách tính khoảng nghỉ trưa/qua đêm, nối hợp đồng F1M/F2M, lựa chọn loại cửa sổ đáo hạn, toàn bộ kết quả MLE/VB và lệnh tái lập. Bản được dùng cho ngày giao dịch thông thường trên toàn kỳ là MLE có điều kiện theo đoạn, với 30 điểm khởi tạo cho mỗi phân phối; VB hiện chỉ áp dụng cho dữ liệu gốc.
+
 ## Cài đặt và kiểm tra
 
 ```

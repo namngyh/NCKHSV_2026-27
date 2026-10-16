@@ -38,7 +38,7 @@
 \large Dự án GARCH-VN30F1M-MLE-VB-MCMC: so sánh họ mô hình GARCH trên hợp đồng tương lai VN30F1M\\
 bằng ước lượng hợp lý cực đại, Bayes biến phân và MCMC}
 \author{Nguyễn Hoài Nam và cộng sự}
-\date{Tháng 9 năm 2026}
+\date{Tháng 10 năm 2026}
 
 \begin{document}
 \maketitle
@@ -676,6 +676,55 @@ Mọi tệp là tệp \tep{torch.save} chứa dict, tensor và số Python; đ�
 
 \section{Tóm tắt kết quả hiện có}
 Chi tiết nằm trong \tep{Bài báo/tong\_hop\_ket\_qua.pdf}. Trên tập huấn luyện VN30F1M, EGARCH-X Student-$t$ ước lượng bằng MLE có AIC 5606,87 và BIC 5650,54, thấp nhất trong sáu mô hình; trên tập kiểm định, cặp này cũng có QLIKE (0,9234) và NLS (1,5203) thấp nhất. NUTS trên mô hình này có $\max\hat R=1{,}0125$, ESS nhỏ nhất 1.340 trên 1.600 mẫu và không có bước phân kỳ. Các kết luận này giới hạn ở chuỗi VN30F1M, sáu đặc tả và cách chia mẫu đã dùng.
+
+% =====================================================================
+\section{Mở rộng EGARCH-X: phân phối nhiễu và xử lý đáo hạn}
+% =====================================================================
+Phần mở rộng có tài liệu, lệnh chạy lại, tham số và nguồn số liệu tại
+\tep{EGARCH\_X\_MO\_RONG.md} và \tep{results/phan\_phoi\_moi/}.
+Kết quả sáu mô hình ở phần trên dùng dữ liệu gốc; các kết quả dưới đây
+được lưu riêng để tránh so sánh các hàm mục tiêu trên tập quan sát khác nhau.
+
+Trên dữ liệu gốc, hai lựa chọn mới cho nhiễu chuẩn hóa của EGARCH-X là
+skewed-$t$ Hansen (tham số bậc tự do và độ lệch) và GED (tham số hình dạng).
+\tep{scripts/uoc\_luong\_egarch\_x\_phan\_phoi\_moi.py} ước lượng MLE;
+\tep{scripts/uoc\_luong\_vb\_egarch\_x\_phan\_phoi\_moi.py} ước lượng
+VB mean-field và full-rank. Các kết quả VB này chỉ thuộc chuỗi dữ liệu gốc.
+
+Để đánh giá ngày giao dịch thông thường, chuỗi mới cộng bình phương bước
+nhảy qua nghỉ trưa và qua đêm vào $RV_t$. Vào phiên đầu sau đáo hạn,
+lợi suất qua đêm dùng giá đóng cửa F2M của phiên trước thay cho giá đóng cửa
+F1M cũ. Ngày đáo hạn được bỏ khỏi hàm hợp lý; phiên đầu sau đó chỉ dùng
+khởi tạo lại phương sai, và từ phiên tiếp theo mới ước lượng hoặc chấm điểm.
+Đây là hàm hợp lý có điều kiện trên từng đoạn, không phải xử lý quan sát thiếu
+trong một đường EGARCH liên tục. Biến ngoại sinh và phương sai ban đầu được
+chuẩn hóa hoặc khởi tạo từ các quan sát huấn luyện được giữ lại.
+
+\tep{scripts/uoc\_luong\_mle\_khoang\_nghi.py} kiểm tra cách tính $RV_t$;
+\tep{scripts/uoc\_luong\_mle\_roll\_f2m.py} tạo chuỗi nối hợp đồng từ
+giá F2M theo ngày; và
+\tep{scripts/uoc\_luong\_mle\_loai\_ngay\_dao\_han.py} chạy MLE
+đa điểm cho bản loại cửa sổ. Trong 105 kỳ đáo hạn, 83 thuộc huấn luyện
+và 22 thuộc kiểm định. Còn 1.568 quan sát đóng góp vào hàm hợp lý huấn luyện
+và 391 ngày ngoài mẫu được chấm. Mỗi phân phối dùng 30 điểm khởi tạo.
+
+\begin{center}
+\begin{tabular}{lrrrr}
+\toprule
+Phân phối & AIC & BIC & QLIKE ngoài mẫu & NLS ngoài mẫu \\
+\midrule
+Student-$t$ & 5035,724 & 5078,585 & 1,159331 & \textbf{1,520979} \\
+Skewed-$t$ & \textbf{5024,098} & \textbf{5072,316} & 1,155516 & 1,522792 \\
+GED & 5045,817 & 5088,677 & \textbf{1,154070} & 1,537779 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Chênh lệch QLIKE ngoài mẫu chưa được kiểm định ý nghĩa thống kê. Bản chuyển
+hợp đồng sớm dùng F2M 5 phút từ năm 2024 nằm trong
+\tep{scripts/uoc\_luong\_mle\_roll\_som\_5m.py}; dữ liệu F2M 5 phút
+gốc do người dùng cung cấp không được lưu trong kho công khai. Kết quả,
+bảng ngày đã xử lý và mã SHA-256 của tệp nguồn được lưu để kiểm tra.
 
 \begin{thebibliography}{99}\small
 \bibitem{bollerslev1986} T. Bollerslev (1986). Generalized autoregressive conditional heteroskedasticity. \emph{Journal of Econometrics}, 31(3), 307--327.
