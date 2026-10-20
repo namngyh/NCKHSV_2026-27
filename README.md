@@ -17,7 +17,7 @@ Mở **`chay.bat`** và chọn trong bảng:
 
 Dừng lúc nào cũng được (Ctrl+C, tắt máy); chạy lại sẽ tiếp tục từ điểm kiểm tra.
 
-**Colab:** mở `colab/chay_tren_colab.ipynb` trên Colab (File → Open notebook → GitHub), lưu token GitHub vào mục Secrets với tên `GITHUB_TOKEN`, chọn môi trường CPU, rồi Run all. Mỗi phiên Colab dùng một tên máy khác nhau (`colab_1`, `colab_2`). Hai nơi không làm trùng việc: mỗi nhóm đơn vị có đúng một máy sở hữu (xem `THIET_KE_CODE.md` mục 6c).
+**Colab:** mở `colab/chay_tren_colab.ipynb` trên Colab (File → Open notebook → GitHub), lưu token GitHub vào mục Secrets với tên `GITHUB_TOKEN`, chọn môi trường CPU, rồi Run all. Chỉ dùng một phiên Colab (`colab_1`), nhận khoảng 1/10 phần việc; máy mạnh (`may_manh`) nhận 9/10 và làm mọi phần tổng hợp. Hai nơi không làm trùng việc: mỗi nhóm đơn vị có đúng một máy sở hữu (xem `THIET_KE_CODE.md` mục 6c). Nếu Colab vắng mặt quá 6 giờ, máy mạnh tự làm thay phần của Colab.
 
 `chay.bat` tự cài Python 3.11 và thư viện nếu máy chưa có. Muốn dùng một môi trường Python có sẵn, ghi đường dẫn `python.exe` vào `cau_hinh\python.txt`.
 

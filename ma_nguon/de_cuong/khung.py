@@ -132,6 +132,40 @@ def commit_git() -> str:
         return "khong_ro"
 
 
+def ram_trong_gb() -> float | None:
+    """RAM còn trống (GB) trên Windows hoặc Linux; None nếu không đọc được."""
+    try:
+        if os.name == "nt":
+            import ctypes
+
+            class _M(ctypes.Structure):
+                _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong),
+                            ("ullTotalPhys", ctypes.c_ulonglong), ("ullAvailPhys", ctypes.c_ulonglong),
+                            ("ullTotalPageFile", ctypes.c_ulonglong), ("ullAvailPageFile", ctypes.c_ulonglong),
+                            ("ullTotalVirtual", ctypes.c_ulonglong), ("ullAvailVirtual", ctypes.c_ulonglong),
+                            ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+            m = _M()
+            m.dwLength = ctypes.sizeof(_M)
+            ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(m))
+            return min(m.ullAvailPhys, m.ullAvailPageFile) / 2 ** 30
+        with open("/proc/meminfo") as f:
+            for dong in f:
+                if dong.startswith("MemAvailable:"):
+                    return int(dong.split()[1]) / 2 ** 20
+    except (OSError, AttributeError, ValueError):
+        return None
+    return None
+
+
+def so_tien_trinh_tu_dong(cfg) -> int:
+    """min(số lõi - 1, RAM trống / bộ nhớ ước tính mỗi tiến trình), giảm một nửa sau mỗi lần tiến trình con chết."""
+    n = cfg["chung"]["so_tien_trinh"] or max(1, (os.cpu_count() or 2) - 1)
+    ram = ram_trong_gb()
+    if ram is not None and not cfg["chung"]["so_tien_trinh"]:
+        n = min(n, max(1, int(ram // cfg["chung"].get("bo_nho_moi_tien_trinh_gb", 1.5))))
+    return max(1, n >> THONG_KE.get("giam", 0))
+
+
 def thong_tin_may() -> dict:
     return {"host": socket.gethostname(), "he_dieu_hanh": platform.platform(), "python": sys.version.split()[0],
             "so_loi": os.cpu_count(), "bo_xu_ly": platform.processor()}
@@ -318,7 +352,10 @@ def _bam_vao(ctx: NguCanh, b: Buoc) -> str:
             raise ChuaXongPhuThuoc(f"Buoc {b.ma} can buoc {m} xong truoc")
         dep[m] = hs["h_ra"]
     tep = [b.tep] + [THU_VIEN / f"{m}.py" for m in b.thu_vien]      # khung không ảnh hưởng con số nên không băm
-    return bam({"ho_so": ctx.ho_so, "cfg": {s: ctx.cfg[s] for s in b.cau_hinh}, "dep": dep, "tep": bam_tep(tep),
+    # chỉ băm phần cấu hình ảnh hưởng con số; số tiến trình, bộ nhớ, phân tán không làm bước phải chạy lại
+    chon = {s: ({k: ctx.cfg[s][k] for k in ("hat_giong", "du_lieu_goc")} if s == "chung" else ctx.cfg[s])
+            for s in b.cau_hinh}
+    return bam({"ho_so": ctx.ho_so, "cfg": chon, "dep": dep, "tep": bam_tep(tep),
                 "du_lieu": bam_du_lieu(ctx.cfg)})
 
 
@@ -364,7 +401,7 @@ def _chay_nhom(mo_dun: str, ma: str, ho_so: str, khoa_list: list[str], dk: str, 
 
 def chay_buoc(ma: str, ho_so: str = "day_du", chay_lai: bool = False, chap_nhan_cong: bool = False,
               so_tien_trinh: int | None = None, may: str | None = None, vai_tro: str = "mot_minh",
-              han: float | None = None) -> str:
+              han: float | None = None, nhan_thay: tuple = ()) -> str:
     """Chạy một bước. Trả về: xong, bo_qua, cong_khong_dat, cho_don_vi (chủ trì chờ máy khác), xong_phan_minh,
     bo_qua_chu_tri (máy đơn vị gặp bước chỉ chủ trì), cho_buoc_truoc, het_gio."""
     b = DANH_MUC[ma]
@@ -399,7 +436,10 @@ def chay_buoc(ma: str, ho_so: str = "day_du", chay_lai: bool = False, chap_nhan_
     nhom: dict[str, list[str]] = {}
     for k in don_vi:
         nhom.setdefault(k.split("::")[0], []).append(k)
-    cua_toi = {n: ks for n, ks in nhom.items() if vai_tro == "mot_minh" or chu_so_huu(n, ctx.cfg) == may}
+    # máy chủ trì làm thay phần việc của máy vắng mặt (nhan_thay), để đường ống không bị kẹt
+    cua_toi = {n: ks for n, ks in nhom.items()
+               if vai_tro == "mot_minh" or chu_so_huu(n, ctx.cfg) == may
+               or (vai_tro == "chu_tri" and chu_so_huu(n, ctx.cfg) in nhan_thay)}
     dk = ctx.ket_qua / "_diem_kiem_tra" / ma / h_vao[:12]
     dk.mkdir(parents=True, exist_ok=True)
     co = lambda k: (dk / f"{ten_tep(k)}.pkl").exists()
@@ -415,14 +455,22 @@ def chay_buoc(ma: str, ho_so: str = "day_du", chay_lai: bool = False, chap_nhan_
     if han is not None:
         os.environ["NCKHSV_HAN"] = str(min(han, float(han_cu)) if han_cu else han)
     try:
-        nmax = so_tien_trinh or ctx.cfg["chung"]["so_tien_trinh"] or max(1, (os.cpu_count() or 2) - 1)
+        nmax = so_tien_trinh or so_tien_trinh_tu_dong(ctx.cfg)
         mo_dun = b.lam.__module__
         if b.song_song and nmax > 1 and len(thieu) > 1:
-            with ProcessPoolExecutor(max_workers=min(nmax, len(thieu)), initializer=_khoi_tao_tien_trinh,
-                                     mp_context=mp.get_context("spawn")) as ex:
-                fut = {ex.submit(_chay_nhom, mo_dun, ma, ho_so, nhom[n], str(dk), may): n for n in thieu}
-                for f in as_completed(fut):
-                    THONG_KE["don_vi_moi"] += f.result()
+            from concurrent.futures.process import BrokenProcessPool
+            try:
+                with ProcessPoolExecutor(max_workers=min(nmax, len(thieu)), initializer=_khoi_tao_tien_trinh,
+                                         mp_context=mp.get_context("spawn")) as ex:
+                    fut = {ex.submit(_chay_nhom, mo_dun, ma, ho_so, nhom[n], str(dk), may): n for n in thieu}
+                    for f in as_completed(fut):
+                        THONG_KE["don_vi_moi"] += f.result()
+            except BrokenProcessPool:
+                THONG_KE["giam"] = THONG_KE.get("giam", 0) + 1
+                ctx.log(f"TIEN TRINH CON BI DUNG DOT NGOT (thuong do thieu bo nho). Don vi da xong van duoc giu; "
+                        f"lan sau dung {so_tien_trinh_tu_dong(ctx.cfg)} tien trinh. Neu lap lai, dat chung.so_tien_trinh "
+                        f"nho hon trong cau hinh.")
+                return "het_gio"
         else:
             for n in thieu:
                 if not con_thoi_gian():

@@ -71,7 +71,31 @@ def vong_lap(a, K, DB) -> int:
     DB.ghi_moi_truong(ten_may, ctx0.ket_qua)
     ma0 = DB.bam_ma()
     kw = dict(ho_so=a.ho_so, chap_nhan_cong=a.chap_nhan_cong, so_tien_trinh=a.so_tien_trinh, may=may, vai_tro=a.vai_tro)
+    bat_dau = time.time()
+    nguong = ctx0.cfg["phan_tan"].get("nhan_thay_sau_gio", 6) * 3600
+
+    def may_vang() -> tuple:
+        """Máy khác không gửi nhịp tim quá ngưỡng (hoặc chưa từng đăng ký sau khi chủ trì đã chạy quá ngưỡng)."""
+        if a.vai_tro != "chu_tri":
+            return ()
+        import json
+        vang = []
+        for m in ctx0.cfg["phan_tan"]["may"]:
+            if m == a.may:
+                continue
+            p = ctx0.ket_qua / "_may" / f"{m}.json"
+            try:
+                nhip = float(json.loads(p.read_text(encoding="utf-8"))["nhip"]) if p.exists() else None
+            except (ValueError, OSError, KeyError):
+                nhip = None
+            if (nhip is not None and time.time() - nhip > nguong) or (nhip is None and time.time() - bat_dau > nguong):
+                vang.append(m)
+        if vang:
+            print(f"[nhan thay] may vang mat qua {nguong / 3600:.0f} gio: {vang}; may chu tri lam thay phan viec cua chung")
+        return tuple(vang)
+
     while K.con_thoi_gian():
+        kw["nhan_thay"] = may_vang()
         if a.git:
             DB.keo()
             if DB.bam_ma() != ma0:
@@ -151,7 +175,11 @@ def main() -> int:
         in_tien_do(K, a.ho_so)
     try:
         if a.buoc == ["tat_ca"]:
-            return vong_lap(a, K, DB)
+            try:
+                return vong_lap(a, K, DB)
+            finally:
+                if a.git:      # kể cả khi gặp lỗi bất ngờ: đẩy những đơn vị đã xong để máy khác thấy
+                    DB.day(a.may or "mot_minh", K.NguCanh(a.ho_so).ket_qua)
         for ma in a.buoc:
             if ma not in K.DANH_MUC:
                 print(f"[loi] khong co buoc {ma}")

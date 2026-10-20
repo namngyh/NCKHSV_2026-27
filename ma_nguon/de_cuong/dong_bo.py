@@ -50,8 +50,15 @@ def keo(log=print) -> bool:
 
 def day(may: str, thu_muc_ket_qua: Path, log=print) -> bool:
     """git add ket_qua + commit + push (thử lại khi bị từ chối). Trả về True nếu không có gì để đẩy hoặc đẩy được."""
-    rel = os.path.relpath(thu_muc_ket_qua, GOC)
-    _git("add", "-A", rel)
+    try:   # chuẩn hóa tên đầy đủ (Windows có thể trả tên ngắn 8.3 cho cùng một thư mục)
+        rel = Path(thu_muc_ket_qua).resolve().relative_to(GOC.resolve())
+    except ValueError:
+        log(f"[git] LOI: thu muc ket qua {thu_muc_ket_qua} nam ngoai repo {GOC}; khong the dong bo")
+        return False
+    r = _git("add", "-A", str(rel))
+    if r.returncode != 0:
+        log(f"[git] LOI git add: {_che(r.stderr.strip())[:300]}")
+        return False
     if _git("diff", "--cached", "--quiet").returncode == 0:
         return True
     r = _git("commit", "-q", "-m", f"ket qua {may} {time.strftime('%Y-%m-%d %H:%M:%S')}")
