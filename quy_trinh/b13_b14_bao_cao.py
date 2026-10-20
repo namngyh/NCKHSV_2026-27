@@ -196,9 +196,13 @@ def _th_b13(ctx, kq):
     ctx.ghi("bao_cao_ket_qua.md", kq["tat_ca::0"]["md"])
     ctx.ghi("phu_luc_sai_lech.md", kq["tat_ca::0"]["phu_luc"])
     dich = GOC / "bao_cao" / ctx.ho_so
-    if dich.exists():
-        shutil.rmtree(dich)
-    shutil.copytree(ctx.thu_muc(), dich)
+    if dich.exists():       # OneDrive/Explorer có thể giữ thư mục: xóa tệp con, không xóa chính thư mục, rồi ghi đè
+        for p in sorted(dich.rglob("*"), key=lambda q: len(q.parts), reverse=True):
+            try:
+                p.unlink() if p.is_file() or p.is_symlink() else p.rmdir()
+            except OSError:
+                pass
+    shutil.copytree(ctx.thu_muc(), dich, dirs_exist_ok=True)
 
 
 Buoc("b13", "bao_cao", "8.3", TEP, _lam_b13, _th_b13, phu_thuoc=("b12", "b02k", "b04b", "b08b"), cau_hinh=(),
