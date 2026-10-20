@@ -57,7 +57,7 @@ echo ==============================================================
 echo   EGARCH-X ky quy dong VN30F1M          Python: %PYEXE%
 echo ==============================================================
 echo   1. Kiem tra moi truong ^(phien ban thu vien, so loi CPU, git^)
-echo   2. Chay CHU TRI ^(may manh + Colab, dong bo GitHub^)   ^<- dung khi chay chinh thuc
+echo   2. Chay CHINH THUC ^(may manh, dong bo GitHub^)   ^<- dung khi chay chinh thuc
 echo   3. Chay MOT MAY ^(khong Colab, khong dong bo^)
 echo   4. Chay LAM DON VI ^(may phu khac, neu co^)
 echo   5. Xem tien do ^(lay ket qua moi nhat tu GitHub truoc^)
