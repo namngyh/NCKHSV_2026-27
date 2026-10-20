@@ -129,6 +129,7 @@ goto :xong
 
 :m7
 rem Thu muc tam rieng trong repo: tranh loi "Access is denied" o thu muc TEMP\pytest-of-ten_may tren mot so may Windows
+if not exist "%~dp0ket_qua_nhanh" mkdir "%~dp0ket_qua_nhanh"
 %PYEXE% -m pytest kiem_thu -q -p no:cacheprovider --basetemp="%~dp0ket_qua_nhanh\_pytest_tam"
 goto :xong
 

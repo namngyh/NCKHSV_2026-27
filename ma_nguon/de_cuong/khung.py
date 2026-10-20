@@ -117,7 +117,14 @@ def ghi_nguyen_tu(path: Path, du_lieu: bytes):
     path.parent.mkdir(parents=True, exist_ok=True)
     tam = path.with_name(path.name + f".tam{os.getpid()}")
     tam.write_bytes(du_lieu)
-    os.replace(tam, path)
+    for i in range(10):     # Windows: OneDrive, trình diệt virus hoặc trình chỉ mục có thể giữ tệp trong giây lát
+        try:
+            os.replace(tam, path)
+            return
+        except PermissionError:
+            if i == 9:
+                raise
+            time.sleep(0.5 * (i + 1))
 
 
 def ten_tep(khoa: str) -> str:
