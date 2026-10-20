@@ -1,6 +1,6 @@
 # Thiết kế mã nguồn: đường ống chạy bằng `.bat`, có điểm kiểm tra, bám đề cương
 
-Bản nháp thiết kế ngày 20/10/2026, **chưa viết code theo thiết kế này**. Nguồn chuẩn: `de_cuong_EGARCH-X_ky_quy_dong.md` (bản tháng 10/2026). Mục nào trong tài liệu này ghi "[CẦN QUYẾT]" thì chưa chốt.
+Thiết kế ngày 20/10/2026; **mã đã được triển khai** theo thiết kế này (xem mục 0 của GHI_CHU_DU_AN.md cho tiến độ). Ma trận ở mục 6 phản ánh trạng thái TRƯỚC khi triển khai; trạng thái hiện tại ở mục 6b. Nguồn chuẩn: `de_cuong_EGARCH-X_ky_quy_dong.md` (bản tháng 10/2026). Mục nào trong tài liệu này ghi "[CẦN QUYẾT]" thì chưa chốt.
 
 ## 1. Nguyên tắc
 
@@ -23,19 +23,24 @@ NCKHSV_2026-27/
 ├─ du_lieu/
 │   ├─ goc/ohlc_export.csv       Dữ liệu nến phút (chỉ đọc)
 │   └─ ngoai/                    Chuỗi ký quỹ lịch sử nếu thu thập được (mục 7.5, đối chứng 5)
-├─ ma_nguon/de_cuong/            Thư viện (không đọc/ghi tệp kết quả)
-│   ├─ du_lieu/        nen_phut, ngay, lich (đáo hạn, nghỉ), dac_trung, khoi (có khóa KT)
-│   ├─ mo_hinh/        phan_phoi (chuẩn, t*, SkT, GED), egarch_x, uoc_luong_mle
-│   ├─ suy_dien/       mle, bayes_mo_hinh, vb (mean-field, full-rank), nuts, chan_doan_bayes
-│   ├─ danh_gia/       diem_so, var_es, kiem_dinh, so_sanh (DM, MCS, SPA), chan_doan_mau
-│   ├─ mo_phong/       khoi_phuc (E1–E4), sbc, du_bao_H_phien
-│   ├─ ky_quy/         quy_tac_5_buoc, doi_chung, danh_gia_ky_quy
-│   └─ quy_trinh/      diem_kiem_tra, buoc (lớp cơ sở), cong, ho_so
-├─ quy_trinh/                    Các bước, mỗi bước một tệp mỏng gọi thư viện
-│   b00_the_che   b01_du_lieu   b02_kiem_tra_cai_dat   b03_mo_phong_khoi_phuc
-│   b04_mle_ban_dau   b05_chon_bien   b06_chon_phan_phoi   b07_chot_cau_hinh
-│   b08_suy_dien_bayes   b09_danh_gia_KT   b10_du_bao_H_phien   b11_ky_quy
-│   b12_do_ben   b13_bao_cao   b14_dong_goi
+├─ ma_nguon/de_cuong/            Thư viện (không tự đọc/ghi tệp kết quả, trừ khung)
+│   ├─ khung.py        cấu hình theo hồ sơ, Buoc, điểm kiểm tra, hồ sơ băm, khóa KT, cổng
+│   ├─ du_lieu.py      bảng ngày, lịch đáo hạn/nghỉ, rho^P/GK/RS, biến ngoại sinh không rò rỉ
+│   ├─ mo_hinh_jax.py  hàm hợp lý (16) bằng JAX, bốn phân phối, đổi biến (18), tiên nghiệm + Jacobian (20)
+│   ├─ phan_phoi.py    NumPy/SciPy: cdf, phân vị, ES (Phụ lục A), lấy mẫu
+│   ├─ uoc_luong.py    MLE >= 20 điểm, SE Hessian/bánh kẹp, khả nghịch, bootstrap, VB-MF/FR, NUTS, dự báo
+│   ├─ danh_gia.py     điểm số, kiểm định VaR/ES, DM, Giacomini-White, MCS, SPA, VIF, chẩn đoán 4.2
+│   ├─ mo_phong.py     E1–E4 (Bảng 6), SBC
+│   ├─ ky_quy.py       mô phỏng H phiên (MLE/hậu nghiệm/FHS), quy tắc 5 bước, đối chứng, chỉ tiêu, đường biên
+│   └─ mo_hinh.py      bản numba độc lập, chỉ dùng để đối chiếu số ở b02
+├─ quy_trinh/                    Các bước, gộp theo giai đoạn (mỗi bước vẫn có hồ sơ và điểm kiểm tra riêng)
+│   chay.py (điểm vào)   _chung.py
+│   b00_b02_chuan_bi.py      b00 the_che, b01 du_lieu, b02 kiem_tra_cai_dat
+│   b03_mo_phong.py          b03 mo_phong_khoi_phuc (+ SBC)
+│   b04_b07_giai_doan_1.py   b04 mle_ban_dau, b05 chon_bien, b06 chon_phan_phoi, b07 chot_cau_hinh
+│   b08_b09_ngoai_mau.py     b08 cuon_chieu_bon_phuong_phap, b09 danh_gia_KT
+│   b10_b12_ky_quy.py        b10 du_bao_H_phien, b11 ky_quy, b12 do_ben
+│   b13_b14_bao_cao.py       b13 bao_cao, b14 dong_goi
 ├─ ket_qua/
 │   ├─ b01_du_lieu/ … b14_…/     Đầu ra cuối của từng bước (json, csv, pt)
 │   ├─ _diem_kiem_tra/<bước>/    Tệp từng đơn vị công việc
@@ -157,6 +162,104 @@ Trạng thái: ✔ đã có và đúng, ◐ có nhưng lệch/thiếu, ✘ chưa
 | Phụ lục A | Công thức VaR/ES, Bảng 11 | kiem_thu | ◐ cần kiểm thử khớp Bảng 11 |
 | Phụ lục B | GED (phương án thay thế) | b06 (tùy chọn) | ◐ có trong mã cũ, chưa tích hợp |
 | Phụ lục C | Danh mục kiểm tra | cổng | ✘ chuyển thành cổng tự động |
+
+## 6b. Trạng thái sau khi triển khai (20/10/2026)
+
+Đã có mã cho mọi mục của ma trận trên. Các mục đã chuyển từ ✘/◐ sang có mã:
+- 2.4: tính cả ρ^P, ρ^RS (báo cáo tương quan với r²); ρ* theo (6).
+- 3.3.5: kiểm tra khả nghịch.
+- 4.1: đổi biến sigmoid, softplus, tanh.
+- 4.2:
+  - gradient vi phân tự động (JAX);
+  - ≥ 20 điểm khởi tạo ở MỌI lần ước lượng, kể cả cuốn chiếu;
+  - điểm khởi tạo từ mô hình lồng chuẩn/γ = 0;
+  - bootstrap khi β > 0,98.
+- 4.3:
+  - tiên nghiệm Bảng 5 với Jacobian (20);
+  - VB-MF, VB-FR (nhiều lần khởi tạo, Pareto k̂);
+  - NUTS 4 chuỗi, ma trận khối lượng đầy đủ, R̂/ESS/phân kỳ;
+  - so sánh bốn phương pháp ở mọi mốc.
+- 4.4: E1–E4 cho ba phân phối × bốn phương pháp, cộng SBC.
+- 5.3: mật độ dự báo hậu nghiệm và PIT/Berkowitz ngoài mẫu.
+- 5.5: Giacomini–White và MCS.
+- 6: VIF.
+- 7.4: đường biên.
+- 7.6: độ bền theo w, η và so sánh MLE với hậu nghiệm.
+- 8.1: cổng tự động.
+- C.8: tệp cấu hình duy nhất và hạt giống theo đơn vị.
+- Phụ lục B: GED chạy song song để báo cáo.
+
+Còn lại:
+1. **Bảng 3 và chuỗi ký quỹ lịch sử:** người dùng cung cấp. Hồ sơ `day_du` dừng ở b00 khi thiếu nguồn.
+2. **Điểm gãy phương sai:** đang dùng Inclan–Tiao, cần đối chiếu với tài liệu [31] của đề cương.
+3. **Chi phí tính toán của hồ sơ đầy đủ:** rất lớn, chủ yếu là NUTS ở b03 (4.800 lần lặp + 900 SBC) và b08 (68 mốc × 4 chuỗi). Cần ước tính trên máy mạnh trước khi chạy hết.
+4. **Hồ sơ `nhanh`:** chỉ kiểm tra đường ống; con số của nó không có giá trị nghiên cứu.
+
+## 6c. Thiết kế cho Google Colab, mức minh bạch cho bài Scopus (ĐÃ TRIỂN KHAI 20/10/2026)
+
+Trạng thái: các mục A–C dưới đây đã có mã. Đã kiểm chứng:
+- Chuỗi chính b00 → b15 chạy trọn ở hồ sơ nhanh.
+- Kiểm thử phân mảnh rời nhau, khóa KT, điểm kiểm tra, NUTS/VB chạy tiếp qua tiến trình khác.
+- b02 khớp gói `arch`: EGARCH chênh 0,0004; MCS trùng tập; SPA cùng kết luận.
+
+Phát hiện nhờ b02k: bản đầu của kiểm định phân vị động với HAC (ước lượng vững kiểu White) bác bỏ 37–99% dưới H0, do biến hồi quy là chỉ thị hiếm. Đã thay bằng phương sai dưới H0, gồm α(1−α) cộng tự hiệp phương sai của chỉ thị tới bậc H − 1. Cỡ thực tế sau khi sửa (1.000 lần lặp, N = 940):
+- α = 5%: khoảng 6–7%.
+- α = 2,5%: khoảng 7–9%.
+- α = 1%: khoảng 12%. Đây là đặc tính cỡ mẫu nhỏ của kiểm định phân vị động; b02k đo và đưa vào báo cáo.
+
+Vai trò và chia việc: `[phan_tan]` trong cấu hình; điểm vào `quy_trinh/chay.py --vai_tro`; đồng bộ `ma_nguon/de_cuong/dong_bo.py`; Colab `colab/chay_tren_colab.ipynb`. b03 đã tách thành b03a (MLE, chặn cổng) và b03b (Bayes + SBC, chạy nền). Bước mới: b02k, b04b, b08b, b15.
+
+Yêu cầu của người dùng: chạy mọi thứ trên Colab (gói miễn phí); không giới hạn thời gian huấn luyện; đúng cấu hình
+đầy đủ của đề cương (không cắt giảm theo mục 8.4); kiểm tra thật kỹ, rõ ràng, minh bạch.
+
+### A. Lỗ hổng điểm kiểm tra phải vá trước khi chạy trên Colab
+
+| Chỗ | Hiện trạng | Hệ quả trên Colab | Sửa |
+|---|---|---|---|
+| b03 Bayes trong mô phỏng | 1 đơn vị = 1 lần lặp chứa trọn 4 chuỗi NUTS nối tiếp (khoảng 17 giờ với T = 2000) | Vượt thời lượng phiên, **không bao giờ xong** | Tách thành đơn vị (lần lặp, chuỗi); MLE khởi tạo là đơn vị riêng; tổng hợp lần lặp khi đủ 4 chuỗi |
+| Chuỗi NUTS (b03, b08) | Một khối khoảng 2,4–4 giờ | Mất phiên là mất trắng | **Tầng điểm kiểm tra thứ ba**: lưu trạng thái sau khởi động (bước nhảy, ma trận khối lượng) rồi lấy mẫu theo đoạn 100 vòng, lưu trạng thái và mẫu sau mỗi đoạn (`MCMC.post_warmup_state`/`last_state` của NumPyro); khởi động cũng chia đoạn |
+| VB | 3 lần khởi tạo × 20.000 bước trong một đơn vị | Có thể mất khoảng 30 phút | Mỗi lần khởi tạo là một đơn vị; lưu trạng thái tối ưu mỗi 2.000 bước |
+| Phần tổng hợp | So sánh bốn phương pháp (b08), MCS (b09), SPA (b05), MLE trong cổng b07 chạy trong `tong_hop`, không có điểm kiểm tra | Mất phiên là tính lại | Chuyển thành đơn vị có điểm kiểm tra |
+| Nhiều phiên Colab cùng chạy | Không có cơ chế giữ chỗ | Hai phiên có thể làm trùng một đơn vị | Tệp giữ chỗ có hạn (ghi giờ và nhịp tim); giữ chỗ quá hạn (phiên chết) được phiên khác lấy lại |
+| Hết thời lượng phiên | Bị cắt ngang | Mất đoạn đang dở | `--gio_toi_da`: hết giờ thì hoàn tất đoạn đang dở, ghi điểm kiểm tra, thoát |
+
+### B. Cách chạy trên Colab
+
+- **Mã:** clone từ GitHub (`namngyh/NCKHSV_2026-27`); bản đang dùng được ghi lại bằng mã commit.
+- **Kết quả, điểm kiểm tra, nhật ký:** nằm trên Google Drive (`MyDrive/NCKHSV_ket_qua/`). Mất phiên không mất dữ liệu.
+- **Notebook `colab/chay_tren_colab.ipynb`:**
+  1. Gắn Drive.
+  2. Clone hoặc cập nhật repo và ghi mã commit.
+  3. Cài `numpyro` (dùng `jax` CPU có sẵn).
+  4. In phiên bản thư viện, số lõi, thông tin máy.
+  5. Chạy `quy_trinh/chay.py --buoc tat_ca --ket_qua <Drive> --gio_toi_da 11 --phan_manh i/k`.
+  6. Xem bảng tiến độ.
+  7. Đóng gói kết quả.
+- **Chia việc:** mở nhiều notebook cùng lúc, mỗi notebook một phân mảnh `i/k`. Phân mảnh và giữ chỗ bảo đảm không làm trùng.
+- **Môi trường:** chọn CPU, không dùng GPU/TPU (đệ quy tuần tự và số thực 64 bit không hợp với GPU/TPU phổ thông). Đặt `spawn` cho tiến trình con.
+- **Khi phiên bị ngắt:** mở lại notebook, chạy lại các ô; đường ống tự tiếp tục.
+
+### C. Kiểm chứng và minh bạch (mức nộp tạp chí)
+
+1. **Đối chiếu độc lập các thủ tục thống kê:**
+   - MCS và SPA so với gói `arch`.
+   - EGARCH phân phối chuẩn và Student-t không biến ngoại sinh so với `arch.arch_model`.
+   - Kupiec, Christoffersen, DM so với giá trị tính tay hoặc ví dụ đã công bố.
+   - FZ0: kiểm tra tính nhất quán bằng mô phỏng (kỳ vọng nhỏ nhất tại VaR, ES thật).
+2. **Kiểm tra cỡ và lực của các kiểm định** (Kupiec, Christoffersen, phân vị động, DM, Berkowitz) bằng mô phỏng dưới H0 với cỡ mẫu bằng khối KT, để biết các kiểm định có đúng mức 5% không.
+3. **Nguồn gốc của mọi con số:** mỗi tệp kết quả ghi mã commit, băm mã nguồn, băm cấu hình, băm dữ liệu gốc, `pip freeze`, thông tin máy, hạt giống, thời điểm.
+4. **Kiểm toán:** một bước tính lại mọi con số trong báo cáo từ tệp điểm kiểm tra; khác nhau là báo lỗi.
+5. **Nhật ký sai lệch so với đề cương:** tự động thu mọi lần chấp nhận khi cổng không đạt, mọi tham số khác giá trị đề cương, mọi đơn vị thất bại; xuất thành phụ lục.
+6. **Khóa trước khi xem KT:** giữ nguyên cơ chế khóa cấu hình. Tệp khóa ghi lại toàn bộ lựa chọn và băm của chúng; lựa chọn nào làm sau khóa đều bị đánh dấu.
+7. **Rà soát mã độc lập** trước khi chạy đầy đủ.
+8. Bổ sung bốn chỗ còn thiếu so với đề cương: kiểm tra dự báo tiên nghiệm và độ nhạy tiên nghiệm (4.3.1), kiểm định phân vị động với HAC (Nhận xét 3), khóa phiên bản (8.5), băm dữ liệu.
+
+### D. Thời gian dự kiến (đúng cấu hình đề cương)
+
+Khoảng 27.000 giờ-lõi theo số đo hiện tại, sai số có thể 2–3 lần.
+- Colab miễn phí khoảng 2 vCPU mỗi phiên: một phiên mất khoảng 13.500 giờ chạy; 5 phiên song song mất khoảng 110 ngày chạy liên tục.
+- Gói miễn phí có hạn mức sử dụng và không bảo đảm tài nguyên. Thời gian thực tế phụ thuộc vào việc Colab cấp phiên.
+- Tăng tốc mà không đổi đề cương: đo lại NUTS khởi tạo từ MLE ở độ sâu cây 10, tối ưu đệ quy JAX. Tham số hóa lại theo mục 8.4 là thay đổi đề cương, chỉ làm khi người dùng đồng ý.
 
 ## 7. Lộ trình triển khai (nếu thiết kế được chấp nhận)
 

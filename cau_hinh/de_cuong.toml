@@ -1,0 +1,170 @@
+# Cấu hình duy nhất của đường ống, bám đề cương EGARCH-X ký quỹ động (bản 10/2026).
+# Mọi bước đọc tham số từ đây (Phụ lục C.8). Ghi chú "(mục x.y)" chỉ nguồn trong đề cương.
+# Hồ sơ "nhanh" ở cuối tệp ghi đè một số giá trị để chạy thử đường ống trên máy yếu.
+
+[chung]
+hat_giong = 20261020
+du_lieu_goc = "du_lieu/goc/ohlc_export.csv"
+so_tien_trinh = 0               # 0 = số lõi - 1
+
+[du_lieu]                       # mục 2
+n_V = 60                        # cửa sổ khối lượng trung bình (2.6)
+eps = 1e-6                      # hằng số tránh log(0) (Bảng 4)
+bo_qua_dau = 61                 # phiên đầu thiếu lịch sử 60 phiên cho biến ngoại sinh
+nghi_dai_toi_thieu = 3          # ngày làm việc liên tiếp không giao dịch (2.5)
+nguong_r_bat_thuong = 7.0       # |r| > 7% sau khi loại phiên chuyển (2.8)
+
+[khoi]                          # mục 5.1, Bảng 7 (đã chốt 20/10/2026)
+UL = 750
+XT = 420                        # KT = phần còn lại
+buoc_uoc_luong_lai = 21
+
+[mo_hinh]                       # mục 3
+phan_phoi = ["chuan", "student", "skewt"]
+phan_phoi_thay_the = "ged"      # Phụ lục B, chỉ báo cáo bổ sung
+bien_ung_vien = ["A", "G", "F", "B", "O"]
+cau_hinh_chinh = ["A", "G"]     # luôn báo cáo (mục 6)
+so_lp_khoi_tao_lnh = 20         # ln h_1 = log phương sai 20 lợi suất đầu (3.3)
+can_lnh = 20.0                  # chặn |ln h| (3.3, bảo vệ số học)
+lech_khoi_tao_kha_nghich = 2.0  # kiểm tra khả nghịch: lọc từ ln h_1 và ln h_1 + 2 (3.3.5)
+
+[mle]                           # mục 4.2
+so_diem_khoi_tao = 20           # "ít nhất 20", gồm nghiệm mô hình lồng và điểm ngẫu nhiên quanh đó
+do_tan_khoi_tao = 0.3           # độ lệch chuẩn nhiễu quanh nghiệm lồng (không gian không ràng buộc)
+nguong_beta_bien = 0.98         # beta > ngưỡng -> bổ sung bootstrap tham số
+so_lan_bootstrap = 200
+
+[bayes]                         # mục 4.3
+phuong_phap = ["vb_mf", "vb_fr", "nuts"]
+vb_so_buoc = 20000
+vb_toc_do_hoc = 0.005
+vb_so_lan_khoi_tao = 3          # độ ổn định ELBO qua nhiều lần khởi tạo (4.3.3)
+so_mau_hau_nghiem = 1000
+nuts_so_chuoi = 4               # 4.3.4
+nuts_khoi_dong = 1000
+nuts_so_mau = 1000
+nuts_dich_chap_nhan = 0.8
+nuts_do_sau_cay = 10
+nuts_vong_moi_doan = 100        # điểm kiểm tra tầng 3: lưu trạng thái chuỗi sau mỗi 100 vòng lấy mẫu
+vb_buoc_moi_doan = 2000         # điểm kiểm tra tầng 3 của VB
+rhat_toi_da = 1.01
+ess_toi_thieu = 400
+k_hat_toi_da = 0.7
+
+[mo_phong]                      # mục 4.4, Bảng 6
+B = 100
+T = 2000
+khoi_dong = 200
+phuong_phap = ["mle", "vb_mf", "vb_fr", "nuts"]
+sbc_so_lan = 100                # hiệu chuẩn dựa trên mô phỏng cho suy diễn Bayes
+sbc_kich_ban = "E1"
+
+[danh_gia]                      # mục 5
+alphas = [0.01, 0.025, 0.05]
+so_lan_bootstrap = 2000         # SPA, MCS (bootstrap dừng)
+do_dai_khoi_tb = 5
+muc_mcs = 0.10                  # tập mô hình tin cậy 90%
+tre_phan_vi_dong = 4
+mau_du_bao_hau_nghiem = 10000   # số mẫu cho VaR/ES hậu nghiệm một phiên
+
+[chon_bien]                     # mục 6
+phan_phoi = "student"
+muc_y_nghia = 0.05
+tuong_quan_toi_da = 0.8
+alpha_fz = 0.025
+
+[ky_quy]                        # mục 7
+H = [1, 2, 3]
+alpha = [0.05, 0.025, 0.01]
+w = [0.0, 0.5, 1.0]
+b = [0.0, 0.1, 0.25]
+phi = [0.5, 0.75, 1.0]
+eta = [0.0, 0.8, 0.95]
+S = 10000
+lambda_ewma = 0.94
+cua_so_lich_su = 250
+trinh_bay_H = 2                 # cặp thiết kế trình bày chính (chưa được người dùng chốt)
+trinh_bay_alpha = 0.01
+
+[kiem_dinh_co_luc]              # b02k: cỡ và lực của các kiểm định bằng mô phỏng, cỡ mẫu = khối KT
+so_lan = 5000
+
+[do_nhay_tien_nghiem]           # mục 4.3.1: kiểm tra dự báo tiên nghiệm và phân tích độ nhạy
+so_lan_du_bao_tien_nghiem = 1000
+# mỗi phương án: nhân độ lệch chuẩn của các tiên nghiệm chuẩn; Beta(a, b) cho beta; tốc độ Gamma cho nu - 2
+[do_nhay_tien_nghiem.phuong_an.rong]
+he_so_sd = 2.0
+beta_a = 10.0
+beta_b = 1.5
+nu_toc_do = 0.05
+[do_nhay_tien_nghiem.phuong_an.hep]
+he_so_sd = 0.5
+beta_a = 40.0
+beta_b = 1.5
+nu_toc_do = 0.2
+
+[phan_tan]                      # chạy song song nhiều máy (THIET_KE_CODE.md mục 6c)
+chu_tri = "may_manh"            # máy duy nhất được tổng hợp, kiểm tra cổng, khóa cấu hình, viết báo cáo
+may_nuts = ["may_manh"]         # các máy nhận nhóm đơn vị NUTS (chuỗi dài)
+phut_dong_bo = 30               # chu kỳ git pull / push khi chạy với --git
+[phan_tan.may]                  # phân mảnh của từng máy (tổng 10); đổi được bất kỳ lúc nào khi máy liên quan đã dừng
+may_manh = [0, 1, 2, 3, 4, 5, 6, 7]
+colab_1 = [8]
+colab_2 = [9]
+
+[de_cuong_goc]                  # giá trị đề cương quy định; khác đi sẽ tự ghi vào nhật ký sai lệch (b13)
+"khoi.UL" = 750
+"khoi.XT" = 420
+"khoi.buoc_uoc_luong_lai" = 21
+"mle.so_diem_khoi_tao" = 20
+"bayes.nuts_so_chuoi" = 4
+"bayes.nuts_khoi_dong" = 1000
+"bayes.nuts_so_mau" = 1000
+"bayes.rhat_toi_da" = 1.01
+"bayes.ess_toi_thieu" = 400
+"bayes.k_hat_toi_da" = 0.7
+"mo_phong.B" = 100
+"mo_phong.T" = 2000
+"mo_phong.khoi_dong" = 200
+"ky_quy.S" = 10000
+"ky_quy.H" = [1, 2, 3]
+"ky_quy.alpha" = [0.05, 0.025, 0.01]
+"ky_quy.w" = [0.0, 0.5, 1.0]
+"ky_quy.b" = [0.0, 0.1, 0.25]
+"ky_quy.phi" = [0.5, 0.75, 1.0]
+"ky_quy.eta" = [0.0, 0.8, 0.95]
+"ky_quy.lambda_ewma" = 0.94
+"ky_quy.cua_so_lich_su" = 250
+"chon_bien.tuong_quan_toi_da" = 0.8
+"chon_bien.muc_y_nghia" = 0.05
+
+[cong]                          # mục 8.1 điều kiện chuyển giai đoạn
+do_phu_min = 0.90               # độ phủ khoảng 95% (B = 100 -> sai số chuẩn ~ 0,022)
+do_phu_max = 0.99
+bac_bo_sai_max = 0.10           # E2, E4: tỷ lệ bác bỏ sai gần 5%
+p_tau = 0.05                    # trung bình z^2 theo nhóm tau không khác 1
+p_var_xt = 0.05                 # VaR một phiên không bị bác bỏ trên XT
+
+# ----------------------------------------------------------------------------------------
+# Hồ sơ chạy thử nhanh: chỉ để kiểm tra đường ống, KHÔNG phải kết quả nghiên cứu.
+[ho_so.nhanh]
+"khoi.buoc_uoc_luong_lai" = 210
+"mle.so_diem_khoi_tao" = 4
+"mle.so_lan_bootstrap" = 4
+"bayes.vb_so_buoc" = 500
+"bayes.vb_so_lan_khoi_tao" = 1
+"bayes.so_mau_hau_nghiem" = 200
+"bayes.nuts_so_chuoi" = 2
+"bayes.nuts_khoi_dong" = 30
+"bayes.nuts_so_mau" = 30
+"bayes.nuts_do_sau_cay" = 5
+"mo_phong.B" = 3
+"mo_phong.T" = 800
+"mo_phong.sbc_so_lan" = 3
+"danh_gia.so_lan_bootstrap" = 100
+"danh_gia.mau_du_bao_hau_nghiem" = 1000
+"ky_quy.S" = 1000
+"kiem_dinh_co_luc.so_lan" = 100
+"do_nhay_tien_nghiem.so_lan_du_bao_tien_nghiem" = 100
+"bayes.nuts_vong_moi_doan" = 10
+"bayes.vb_buoc_moi_doan" = 200

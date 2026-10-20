@@ -1,0 +1,45 @@
+# Bảng 3 của đề cương: thông số thể chế dùng trong tính toán (mục 2.2, Phụ lục C.1).
+# NGƯỜI DÙNG ĐIỀN: nguồn (văn bản/quyết định của HNX, VSDC), ngày xác minh, và thời kỳ áp dụng.
+# Bước b00 dừng hồ sơ "day_du" khi còn thông số chưa có nguồn; hồ sơ "nhanh" chỉ cảnh báo.
+# Nếu thông số thay đổi trong mẫu, thêm bảng [[thong_so.<ten>.thoi_ky]] cho từng giai đoạn.
+
+[thong_so.ngay_giao_dich_cuoi]
+gia_tri = "thứ Năm thứ ba của tháng đáo hạn; nếu nghỉ thì phiên liền trước"
+dung_cho = "J_t, tau_t, D_dh (mục 2.3, 2.5)"
+nguon = ""
+ngay_xac_minh = ""
+
+[thong_so.bien_do_gia_ngay]
+gia_tri = 0.07
+don_vi = "tỷ lệ so với giá tham chiếu"
+dung_cho = "phiên chạm biên (Nhận xét 1), đối chứng mốc trên H x biên độ (mục 7.5)"
+nguon = ""
+ngay_xac_minh = ""
+
+[thong_so.he_so_nhan]
+gia_tri = 100000
+don_vi = "đồng / điểm chỉ số"
+dung_cho = "quy đổi ký quỹ ra tiền (mục 7.1)"
+nguon = ""
+ngay_xac_minh = ""
+
+[thong_so.buoc_lam_tron_ky_quy]
+gia_tri = 0.005
+don_vi = "tỷ lệ giá trị hợp đồng (g)"
+dung_cho = "bước 5 của quy tắc ký quỹ (mục 7.3)"
+nguon = ""
+ngay_xac_minh = ""
+
+[thong_so.gioi_han_giam_moi_phien]
+gia_tri = 0.01
+don_vi = "tỷ lệ giá trị hợp đồng mỗi phiên (Delta giảm)"
+dung_cho = "bước 5 của quy tắc ký quỹ (mục 7.3)"
+nguon = ""
+ngay_xac_minh = ""
+
+[thong_so.ty_le_ky_quy_vsdc]
+gia_tri = 0.13
+don_vi = "tỷ lệ giá trị hợp đồng"
+dung_cho = "đối chứng thực tế (mục 7.5, mục 5). Nếu có chuỗi lịch sử, đặt tệp tại du_lieu/ngoai/ky_quy_lich_su.csv (cột: ngay, ty_le)"
+nguon = ""
+ngay_xac_minh = ""

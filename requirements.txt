@@ -1,0 +1,17 @@
+# Thư viện cho đường ống (Python >= 3.11). Phiên bản được GHIM CHÍNH XÁC để máy mạnh và Colab cho cùng kết quả
+# (mục 8.5 của đề cương: môi trường phần mềm được khóa phiên bản). Mã cũ trong luu_tru/ có requirements.txt riêng.
+numpy==2.4.6
+pandas==2.3.3
+scipy==1.17.1
+numba==0.65.1
+llvmlite==0.47.0
+statsmodels==0.14.6
+arviz==0.23.4
+matplotlib==3.11.1
+jax==0.10.2
+jaxlib==0.10.2
+ml_dtypes==0.6.0
+opt_einsum==3.4.0
+numpyro==0.22.0
+arch==8.0.0
+pytest==9.1.1

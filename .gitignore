@@ -21,10 +21,10 @@ results_dryrun/
 results_mergetest/
 # Thu muc chay thu cua mo phong EGARCH (--nhanh): cau hinh nho, khong phai
 # ket qua nghien cuu. Cung ly do nhu results_dryrun/.
-code thuật toán/results/mo_phong_egarch_nhanh/
+luu_tru/code thuật toán/results/mo_phong_egarch_nhanh/
 # Thu muc chay thu cua pipeline Buoc 1 (--nhanh): cau hinh bi cat xen nang,
 # khong phai ket qua nghien cuu. Cung ly do nhu results_dryrun/.
-code thuật toán/results/pipeline_nhanh/
+luu_tru/code thuật toán/results/pipeline_nhanh/
 .venv_gpu_test/
 
 # Trình soạn thảo và hệ điều hành
@@ -38,15 +38,15 @@ Thumbs.db
 **/results/phan_phoi_moi/dao_han_f2m_5m/source_vn30f2m_5m.csv
 
 # File tam sinh khi bien dich LaTeX (giu lai .tex va .pdf, bo phan con lai)
-Bài báo/*.aux
-Bài báo/*.log
-Bài báo/*.lof
-Bài báo/*.lot
-Bài báo/*.toc
-Bài báo/*.synctex.gz
-Bài báo/*.out
-Bài báo/*.bbl
-Bài báo/*.blg
+luu_tru/Bài báo/*.aux
+luu_tru/Bài báo/*.log
+luu_tru/Bài báo/*.lof
+luu_tru/Bài báo/*.lot
+luu_tru/Bài báo/*.toc
+luu_tru/Bài báo/*.synctex.gz
+luu_tru/Bài báo/*.out
+luu_tru/Bài báo/*.bbl
+luu_tru/Bài báo/*.blg
 
 # Thu muc chi dung de kiem chung tinh tai lap (chay lai mot diem khoi tao da co)
 results_tailap/
@@ -54,4 +54,17 @@ results_tailap/
 # Nhat ky tung tac vu (hang nghin file nho): giu tren dia, khong theo doi
 # trong git tu 21/09/2026 -- moi con so trong bai deu tai lap duoc tu
 # results/parts/ va results/*.pt, khong can log de kiem chung.
-code thuật toán/logs/
+luu_tru/code thuật toán/logs/
+
+# Cấu trúc mới (THIET_KE_CODE.md mục 6c): TOÀN BỘ ket_qua/ được theo dõi, kể cả điểm kiểm tra (_diem_kiem_tra/)
+# và nhật ký (_nhat_ky/), vì máy mạnh và Colab đồng bộ kết quả qua git. Kết quả chạy thử nhanh không theo dõi.
+ket_qua_nhanh/
+bao_cao/nhanh/
+# tệp tạm khi ghi nguyên tử (ghi tạm rồi đổi tên)
+*.tam[0-9]*
+
+# Duong dan Python rieng cua tung may
+cau_hinh/python.txt
+cau_hinh/ten_may.txt
+dong_goi/
+ket_qua_nhanh_*.log

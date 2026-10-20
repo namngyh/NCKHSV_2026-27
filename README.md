@@ -1,33 +1,57 @@
-# GARCH-VN30F1M-MLE-VB-MCMC
+# Dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
-So sánh họ mô hình GARCH trên lợi suất ngày hợp đồng tương lai VN30F1M bằng ba
-phương pháp suy diễn dùng chung một hàm log-hợp lý: ước lượng hợp lý cực đại
-(MLE), Bayes biến phân (mean-field, full-rank) và MCMC (NUTS).
+Đường ống thực hiện đúng đề cương nghiên cứu (bản tháng 10/2026, `tai_lieu/de_cuong/`): EGARCH-X với ba phân phối sai số, bốn phương pháp suy diễn (MLE, VB mean-field, VB full-rank, NUTS), đánh giá ngoài mẫu theo ba khối thời gian, và cơ chế ký quỹ động.
 
-Thiết kế ba bước:
+## Chạy
 
-1. **So sánh mô hình** — sáu mô hình một trạng thái (GARCH, EGARCH; phân phối chuẩn,
-   Student-t, Student-t kèm biến ngoại sinh) × ba phương pháp, trên dữ liệu thật.
-2. **Mô phỏng khôi phục tham số** — EGARCH-X Student-t, ba trường hợp E1–E3, 100 lần lặp mỗi trường hợp.
-3. **MCMC** cho mô hình thắng cuộc (EGARCH-X Student-t).
+Mở **`chay.bat`** và chọn trong bảng:
 
-## Mở rộng EGARCH-X và xử lý đáo hạn
+| Mục | Việc |
+|---|---|
+| 2 | **Chạy chủ trì** (máy mạnh, cùng Colab, đồng bộ qua GitHub): dùng khi chạy chính thức |
+| 3 | Chạy một máy (không Colab, không đồng bộ) |
+| 4 | Chạy làm đơn vị (máy phụ khác, nếu có) |
+| 5 | Xem tiến độ (lấy kết quả mới nhất từ GitHub trước) |
+| 6 | Chạy thử nhanh toàn bộ để kiểm tra đường ống (kết quả không có giá trị nghiên cứu) |
+| 7–11 | Kiểm thử; chạy vài bước; xóa và chạy lại một bước; sinh lại báo cáo và kiểm toán; đóng gói nộp GVHD |
 
-Phần mở rộng ước lượng thêm skewed-t và GED bằng MLE, Bayes biến phân mean-field và full-rank trên dữ liệu gốc. Nhánh phân tích MLE tiếp theo tính RV của khoảng nghỉ trưa và qua đêm, nối giá giữa F1M/F2M, rồi loại cửa sổ đáo hạn khỏi hàm hợp lý khi nghiên cứu các ngày giao dịch thông thường. Kết quả, bộ tham số, giới hạn so sánh, nguồn dữ liệu và lệnh chạy lại nằm trong [hướng dẫn mở rộng EGARCH-X](code%20thuật%20toán/EGARCH_X_MO_RONG.md). Các kết quả này được lưu riêng, không thay thế bảng sáu mô hình của nghiên cứu gốc.
+Dừng lúc nào cũng được (Ctrl+C, tắt máy); chạy lại sẽ tiếp tục từ điểm kiểm tra.
+
+**Colab:** mở `colab/chay_tren_colab.ipynb` trên Colab (File → Open notebook → GitHub), lưu token GitHub vào mục Secrets với tên `GITHUB_TOKEN`, chọn môi trường CPU, rồi Run all. Mỗi phiên Colab dùng một tên máy khác nhau (`colab_1`, `colab_2`). Hai nơi không làm trùng việc: mỗi nhóm đơn vị có đúng một máy sở hữu (xem `THIET_KE_CODE.md` mục 6c).
+
+`chay.bat` tự cài Python 3.11 và thư viện nếu máy chưa có. Muốn dùng một môi trường Python có sẵn, ghi đường dẫn `python.exe` vào `cau_hinh\python.txt`.
+
+Dòng lệnh tương đương: `python quy_trinh/chay.py --buoc tat_ca [--ho_so nhanh]`, `--tien_do`, `--xoa b05`.
+
+**Trước khi chạy hồ sơ đầy đủ:** điền nguồn xác minh cho Bảng 3 trong `cau_hinh/the_che.toml` (bước b00 dừng nếu còn trống). Nếu có chuỗi ký quỹ lịch sử của VSDC, đặt tại `du_lieu/ngoai/ky_quy_lich_su.csv` (cột `ngay`, `ty_le`).
 
 ## Thư mục
 
 | Thư mục | Nội dung |
 |---|---|
-| [`code thuật toán/`](code%20thuật%20toán/) | Thư viện `garch_vn30`, script chạy, kiểm thử, kết quả |
-| [`code thuật toán/tai_lieu/tai_lieu_ma_nguon.pdf`](code%20thuật%20toán/tai_lieu/tai_lieu_ma_nguon.pdf) | Tài liệu mã nguồn: cách chạy, thư viện, công thức toán, mô tả từng tệp và hàm |
-| [`Bài báo/tong_hop_ket_qua.pdf`](Bài%20báo/tong_hop_ket_qua.pdf) | Toàn bộ bảng và hình kết quả (sinh tự động từ `results/`) |
-| `Bài báo/` | Bản thảo bài báo |
-| `Tài liệu tham khảo/` | Tài liệu tham khảo |
+| `cau_hinh/` | `de_cuong.toml`: mọi tham số (một nguồn duy nhất, hai hồ sơ `day_du`, `nhanh`); `the_che.toml`: Bảng 3 |
+| `du_lieu/goc/` | `ohlc_export.csv`: nến phút VN30F1M 06/11/2017 – 17/07/2026 |
+| `ma_nguon/de_cuong/` | Thư viện: khung điểm kiểm tra, dữ liệu, mô hình JAX, suy diễn, đánh giá, mô phỏng, ký quỹ |
+| `quy_trinh/` | 15 bước b00 – b14 gộp trong 6 tệp, điểm vào `chay.py` |
+| `ket_qua/` | Đầu ra của từng bước (`bNN_ten/`), hồ sơ (`_ho_so/`), khóa cấu hình; `ket_qua_nhanh/` cho hồ sơ nhanh |
+| `bao_cao/` | Báo cáo và hình sinh tự động (b13) |
+| `kiem_thu/` | pytest: Bảng 11, phân phối, khóa khối kiểm tra, điểm kiểm tra |
+| `tai_lieu/` | Đề cương (md/tex/pdf), tài liệu tham khảo |
+| `luu_tru/` | Chỉ đọc: thiết kế sáu mô hình cũ (`code thuật toán/`), bản thảo cũ (`Bài báo/`) |
 
-Cách cài đặt và chạy: xem [`code thuật toán/README.md`](code%20thuật%20toán/README.md).
+Thiết kế chi tiết: [`THIET_KE_CODE.md`](THIET_KE_CODE.md). Ngữ cảnh, tiến độ, việc đang làm: [`GHI_CHU_DU_AN.md`](GHI_CHU_DU_AN.md).
 
-Phiên bản trước, gồm mô hình chuyển trạng thái MS-GARCH-X và kết quả của nó, được
-lưu ở nhánh `luu-tru/ms-garch-x` và thẻ `luu-tru-ms-garch-x`.
+## Các bước
 
-Tác giả: Nguyễn Hoài Nam (namngyh@gmail.com) và cộng sự.
+| Bước | Nội dung | Mục đề cương |
+|---|---|---|
+| b00 – b02 | Thông số thể chế; dữ liệu và kiểm tra chất lượng; kiểm tra cài đặt | 2, C.1 – C.5 |
+| b03 | Mô phỏng khôi phục tham số E1 – E4, SBC | 4.4 |
+| b04 | MLE trên khối UL, sai số chuẩn, chẩn đoán, LR | 3.6, 4.2 |
+| b05 – b06 | Chọn biến ngoại sinh, chọn phân phối trên khối XT | 5, 6 |
+| b07 | Kiểm tra điều kiện chuyển giai đoạn, khóa cấu hình (từ đây mới thấy khối KT) | 8.1, C.7 |
+| b08 – b09 | Dự báo cuốn chiếu bốn phương pháp; đánh giá ngoài mẫu trên KT | 4.3, 5 |
+| b10 – b12 | Dự báo rủi ro H phiên; quy tắc ký quỹ và đối chứng; độ bền | 7 |
+| b13 – b14 | Báo cáo; đóng gói | 8.3 |
+
+Tác giả: Nguyễn Hoài Nam, Nguyễn Thuận Hiếu, Đặng Chí Hiếu (Khoa Toán – Thống kê, ĐH Tôn Đức Thắng). Phiên bản trước khi cấu trúc lại: thẻ git `truoc-cau-truc-lai`; mô hình MS-GARCH-X: thẻ `luu-tru-ms-garch-x`.

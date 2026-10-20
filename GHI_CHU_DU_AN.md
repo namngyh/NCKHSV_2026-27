@@ -1,5 +1,93 @@
 # Ghi chú dự án: dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
+## 00. ĐANG LÀM (20/10/2026 chiều): triển khai chạy song song máy mạnh + Colab, rồi push GitHub
+
+Người dùng chốt:
+- Mục tiêu bài Scopus: kiểm tra thật kỹ, minh bạch, không ngại thời gian; cấu hình ĐẦY ĐỦ theo đề cương (phương án 1).
+- 1 máy mạnh (Windows, dưới 16 lõi, chủ trì) + Colab (gói miễn phí, chỉ làm đơn vị).
+- Đồng bộ qua GitHub (repo CÔNG KHAI `namngyh/NCKHSV_2026-27`), push kết quả tuần tự; giữ dữ liệu trong repo.
+- Đồng ý tách b03 thành b03a (MLE, chặn cổng) và b03b (Bayes + SBC, chạy nền).
+- Người dùng đã yêu cầu push ("OK bắt đầu thiết kế và push lên git đi").
+
+Đã làm trong lượt này:
+- `khung.py` viết lại: vai trò mot_minh/chu_tri/don_vi; chủ sở hữu nhóm theo băm (`chu_so_huu`, NUTS chỉ cho `may_nuts`); `HetGio`/`con_thoi_gian` (biến NCKHSV_HAN); tham số `han` (hộp thời gian); `ctx.thu_muc_doan` (điểm kiểm tra tầng 3); băm dữ liệu gốc trong h_vao; `nguon_goc.json`; nhật ký theo máy; tiến trình con dùng spawn; NCKHSV_KET_QUA đổi thư mục kết quả.
+- `de_cuong.toml`: thêm [do_nhay_tien_nghiem], [phan_tan], [de_cuong_goc], `nuts_vong_moi_doan`, `vb_buoc_moi_doan`.
+- `mo_hinh_jax.py`: phương án tiên nghiệm `pa` (TIEN_NGHIEM_GOC = Bảng 5). `uoc_luong.py`: `vb` và `nuts_chuoi` chia đoạn, chạy tiếp được (đã thử chạy tiếp qua 2 tiến trình: đạt).
+- `danh_gia.phan_vi_dong_hac` + `ky_quy.kiem_dinh_vuot` có `dq_hac_p`.
+- `mo_phong.py` viết lại (du_lieu_lan, don_vi_mle, don_vi_bayes, gop_bayes, hang_sbc). `quy_trinh/b03_mo_phong.py` thành b03a + b03b.
+
+CẬP NHẬT (20/10 tối): ĐÃ XONG các mục 1–6 dưới đây.
+- Mục 1–4: đã thêm b02 đối chiếu arch (đạt: EGARCH chênh 0,0004; MCS trùng; SPA cùng kết luận), b02k, b04b, b08b, b13 có phụ lục sai lệch, b15 kiểm toán.
+- Mục 5: `dong_bo.py` và `chay.py` vòng lặp.
+- Mục 6: chay.bat mới, notebook `colab/chay_tren_colab.ipynb`, requirements ghim, .gitignore theo dõi ket_qua/.
+- 15/15 kiểm thử đạt.
+
+PHÁT HIỆN QUAN TRỌNG: b02k cho thấy kiểm định phân vị động với HAC (`danh_gia.phan_vi_dong_hac`) bác bỏ 39–95% dưới H0. Nghi do mô phỏng dùng VaR gần như hằng số (gần trùng hằng số chặn). Đã sửa mô phỏng (biến hồi quy độc lập) và đang chạy lại kiểm tra cỡ 2.000 lần. Nếu vẫn sai cỡ thì phải sửa chính kiểm định trước khi chạy thật.
+
+ĐANG CHẠY: thử nhanh toàn bộ (log `ket_qua_nhanh_chay.log`).
+
+CÒN LẠI:
+- Xem kết quả 2 việc đang chạy.
+- Giả lập 2 máy với repo git trần cục bộ.
+- Cập nhật THIET_KE_CODE 6c thành "đã triển khai".
+- Commit, push.
+
+CÒN PHẢI LÀM (danh sách gốc, mục 1–6 đã xong):
+1. `b04_b07`: b07 phụ thuộc b03a (thay b03); đặt `chi_chu_tri=True` cho b00, b01, b02, b04, b07, b11–b14; thêm b04b (kiểm tra dự báo tiên nghiệm, UL); đọc `mo_phong_khoi_phuc.json` từ b03a.
+2. `b08_b09`:
+   - VB mỗi lần khởi tạo là 1 đơn vị (`vb_mf|kkk|l#`); NUTS dùng `thu_muc_doan`.
+   - `_so_sanh_bon` và MCS thành đơn vị; thêm b08b (độ nhạy tiên nghiệm bằng NUTS tại mốc đầu KT, các phương án trong cấu hình).
+3. `b00_b02`: thêm đối chiếu `arch` (MCS, SPA, EGARCH chuẩn) vào b02; thêm b02k (cỡ và lực kiểm định bằng mô phỏng).
+4. Thêm b15 kiểm toán; nhật ký sai lệch (so với [de_cuong_goc]) trong b13; b13 không phụ thuộc b03b, làm lại khi b03b xong.
+5. `chay.py`:
+   - Thêm `--vai_tro --may --gio_toi_da --git --phut_dong_bo`.
+   - Vòng lặp chủ trì/đơn vị: chuỗi chính rồi b03b làm việc lấp chỗ trống; push định kỳ.
+   - Phát hiện mã đổi sau pull thì dừng.
+   - Thêm `dong_bo.py` (git pull/push có thử lại; đăng ký máy `ket_qua/_may/<may>.json`) và ghi `pip freeze` vào `ket_qua/_moi_truong/<may>.txt`.
+6. `chay.bat`: mục "Chạy chủ trì", "Chạy làm đơn vị". Notebook `colab/chay_tren_colab.ipynb` (token trong Colab Secrets). `requirements.txt` ghim `==`. `.gitignore` theo dõi `ket_qua/` (gồm `_diem_kiem_tra`, `_nhat_ky`), vẫn bỏ `ket_qua_nhanh/`.
+7. Kiểm thử: phân mảnh rời nhau và phủ đủ; chạy tiếp NUTS/VB; DQ-HAC; arch. Chạy nhanh toàn bộ; giả lập 2 máy với repo git trần cục bộ.
+8. Cập nhật README, THIET_KE_CODE (6c đã triển khai), GHI_CHU; commit; push.
+
+## 0. (cũ) ĐANG LÀM DỞ (tạm dừng 20/10/2026 khoảng 11:50)
+
+**Mục tiêu đang làm:** triển khai `THIET_KE_CODE.md`: đường ống chạy bằng `chay.bat`, có điểm kiểm tra, bám đề cương; trên máy này chỉ chạy thử hồ sơ `nhanh`, bản đầy đủ chạy trên máy khác mạnh hơn.
+
+**Quyết định đã chốt:**
+- Đủ bốn phương pháp (MLE, VB-MF, VB-FR, NUTS) ở mọi mốc ước lượng lại.
+- Khối UL/XT/KT = 750/420/940.
+- Đã commit `b2294ef`, gắn thẻ `truoc-cau-truc-lai`, rồi `git mv`. Các thay đổi sau thẻ CHƯA commit; hoàn tác bằng `git reset --hard truoc-cau-truc-lai && git clean -fd`.
+- Đã cài `jax` 0.10.2 và `numpyro` 0.22.0 vào môi trường `quant311`.
+
+**Đã xong:**
+- **Cấu trúc thư mục mới:**
+  - `cau_hinh/`: `de_cuong.toml`, `the_che.toml`, `python.txt` (python.txt không theo dõi bằng git).
+  - `du_lieu/goc/ohlc_export.csv`.
+  - `ma_nguon/de_cuong/`: khung, du_lieu, mo_hinh_jax, phan_phoi, uoc_luong, danh_gia, ky_quy, mo_phong; `mo_hinh.py` (numba) chỉ giữ để đối chiếu ở b02.
+  - `quy_trinh/`: `chay.py`, `_chung.py` và các tệp bước b00_b02, b03, b04_b07, b08_b09, b10_b12, b13_b14.
+  - `kiem_thu/test_duong_ong.py`, `chay.bat` ở gốc, `requirements.txt` mới.
+  - `luu_tru/`: `code thuật toán/`, `Bài báo/`, chỉ đọc.
+  - `tai_lieu/de_cuong/`, `tai_lieu/tham_khao/`.
+- **Đã kiểm chứng:**
+  - Bảng 11 khớp đến 3 chữ số; ES của SkT theo công thức đóng khớp cầu phương.
+  - JAX khớp numba: log-hợp lý chênh 1,4e-12, MLE chênh 5e-8, sai số chuẩn trùng mọi chữ số.
+  - Khả nghịch: chênh lệch tắt dưới 1e-6 sau 37 phiên.
+  - b00–b02 chạy được ở hồ sơ nhanh.
+  - b03 nhanh chạy được 170/171 đơn vị. Đơn vị lỗi (SBC student VB-MF, β làm tròn thành 1 làm log tiên nghiệm = −∞) đã sửa trong `mo_hinh_jax.log_tien_nghiem` (tính theo ξ), và b03 nay ghi nhận đơn vị thất bại.
+- **Đo tốc độ NUTS:** 7,3 ms mỗi gradient, mọi vòng chạm trần 1.023 bước leapfrog khi khởi tạo ngẫu nhiên, khoảng 9,5 giờ một mốc nếu 4 chuỗi chạy tuần tự. Khởi tạo từ MLE thì khoảng 29 bước ở độ sâu 5.
+
+**Đang chạy lúc dừng:** `quy_trinh/chay.py --ho_so nhanh --buoc tat_ca --chap_nhan_cong`, nhật ký ở `ket_qua_nhanh_chay.log` (thư mục gốc). Đây là lần chạy thử đầu tiên của b04–b14, CHƯA biết kết quả. Có thể đang lỗi hoặc đã xong.
+
+**Việc tiếp theo, theo thứ tự:**
+1. Đọc `ket_qua_nhanh_chay.log` và `python quy_trinh/chay.py --tien_do --ho_so nhanh`; sửa lỗi của b04–b14 cho tới khi hồ sơ nhanh chạy hết b14.
+2. `python -m pytest kiem_thu -q` (chưa chạy lần nào).
+3. Chạy thử `chay.bat` (mục 4 và 5) trên máy này.
+4. Cập nhật `THIET_KE_CODE.md`: các bước nay gộp theo giai đoạn trong 6 tệp, không phải 15 tệp. Cập nhật `README.md` và `CLAUDE.md` theo cấu trúc mới, và ma trận đối chiếu (nhiều mục ✘ nay đã có mã).
+5. Dọn tệp thừa: `ma_nguon/de_cuong/jax_mo_hinh.py` (đã thay bằng `mo_hinh_jax.py`), `quy_trinh/do_toc_do_nuts_tam.py`, các tệp `ket_qua_nhanh_*.log`. Bản chụp `jax_mo_hinh.py` trong `luu_tru/` vô hại.
+6. Commit sau khi người dùng đồng ý.
+7. Ước tính giờ chạy cho máy mạnh và báo người dùng. b03 đầy đủ có 3 phân phối × 4 phương pháp × 4 kịch bản × 100 = 4.800 đơn vị cộng 900 đơn vị SBC, trong đó có NUTS, nên rất nặng. Đề cương mục 8.4 cho phép giảm nếu cần, nhưng phải ghi là thay đổi và người dùng quyết.
+
+**Còn phải người dùng cung cấp:** nguồn xác minh Bảng 3 (`cau_hinh/the_che.toml`). Hồ sơ `day_du` sẽ dừng ở b00 nếu còn trống. Chuỗi ký quỹ lịch sử VSDC nếu có, đặt ở `du_lieu/ngoai/ky_quy_lich_su.csv` (cột ngay, ty_le).
+
 Cập nhật: 20/10/2026. Tệp này tổng hợp ngữ cảnh, tiến trình và các điểm cần lưu ý. Quy ước vận hành chi tiết cho Claude nằm ở `CLAUDE.md`; số liệu chính thức nằm ở `Bài báo/tong_hop_ket_qua.tex` và `code thuật toán/results/`.
 
 ## 1. Ngữ cảnh
