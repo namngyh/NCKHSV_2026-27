@@ -1,6 +1,20 @@
 # Ghi chú dự án: dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
-## 00. ĐANG LÀM (20/10/2026 chiều): triển khai chạy song song máy mạnh + Colab, rồi push GitHub
+## 000. TRẠNG THÁI MỚI NHẤT (20/10/2026 khoảng 21:30) — ĐÃ PUSH GitHub, commit 39c13b2
+
+- Đã triển khai và push toàn bộ đường ống chạy song song **1 máy mạnh (chủ trì, 9/10 việc) + 1 phiên Colab (`colab_1`, 1/10)**. Hướng dẫn chạy: README.md và mục "Cách chạy" trong cuộc trao đổi ngày 20/10 (A–F).
+- Người dùng yêu cầu bỏ phép thử giả lập nhiều máy và push luôn. Vì vậy **đồng bộ git giữa hai máy CHƯA được kiểm chứng trọn vòng**. Phép thử dở cho thấy:
+  - Máy làm đơn vị chờ đúng khi máy chủ trì chưa xong.
+  - Lỗi `dong_bo.day` không push (tên đường dẫn ngắn 8.3) đã được sửa nhưng chưa chạy lại.
+  - Lần chạy chính thức đầu tiên cần theo dõi: sau khoảng 30 phút, kiểm tra trên GitHub có commit "ket qua may_manh ..." và "ket qua colab_1 ..."; `chay.bat` mục 5 phải thấy đơn vị của cả hai máy.
+- Kiểm thử 15/15 đạt. Chạy thử nhanh một máy trọn b00–b15 đạt (trước các sửa đổi cuối về nhận thay, bộ nhớ và đồng bộ).
+- Việc người dùng phải làm trước khi chạy chính thức:
+  1. Nguồn xác minh Bảng 3 (`cau_hinh/the_che.toml`).
+  2. Token GitHub (quyền Contents read/write) lưu trong Colab Secrets với tên `GITHUB_TOKEN`.
+  3. Cân nhắc chuyển repo sang riêng tư (kết quả sẽ công khai khi push).
+- Thẻ `truoc-cau-truc-lai` chỉ có ở máy này (chưa push thẻ).
+
+## 00. (cũ) ĐANG LÀM (20/10/2026 chiều): triển khai chạy song song máy mạnh + Colab, rồi push GitHub
 
 Người dùng chốt:
 - Mục tiêu bài Scopus: kiểm tra thật kỹ, minh bạch, không ngại thời gian; cấu hình ĐẦY ĐỦ theo đề cương (phương án 1).
