@@ -1,0 +1,94 @@
+{
+ "so_phien": 2171,
+ "tu": "2017-11-06",
+ "den": "2026-07-17",
+ "OHLC_vi_pham": 0,
+ "phien_trung": 0,
+ "V_lech_buy_sell_tren_1pct": 882,
+ "V_lech_buy_sell_ngay": [
+  "2018-08-02"
+ ],
+ "phien_chuyen_hop_dong": 105,
+ "phien_dao_han": 105,
+ "phien_sau_nghi_dai": 13,
+ "phien_cham_bien_khoa": 0,
+ "|r|>7_ngoai_phien_chuyen": [
+  {
+   "ngay": "2020-03-09",
+   "r": -7.249188854138164
+  },
+  {
+   "ngay": "2020-03-12",
+   "r": -7.0912257872755
+  },
+  {
+   "ngay": "2020-03-23",
+   "r": -7.249550203815347
+  },
+  {
+   "ngay": "2020-07-27",
+   "r": -7.235987803485577
+  },
+  {
+   "ngay": "2021-01-28",
+   "r": -7.251704012878873
+  },
+  {
+   "ngay": "2025-04-03",
+   "r": -7.256128545286268
+  },
+  {
+   "ngay": "2025-04-08",
+   "r": -7.248838142867673
+  },
+  {
+   "ngay": "2026-03-09",
+   "r": -7.255766896746578
+  }
+ ],
+ "khoang_trong_ngay_lam_viec_(so_khoang)": 43,
+ "khoang_trong_dai_nhat": 5,
+ "|qua_dem|_trung_vi_phien_chuyen": 0.6438046320135149,
+ "|qua_dem|_trung_vi_phien_thuong": 0.21367529497352197,
+ "r_mo_ta": {
+  "n": 2065,
+  "trung_binh": 0.0502639501559782,
+  "phuong_sai": 2.1907861127640986,
+  "lech": -0.6117766994761784,
+  "nhon": 7.859802031711394
+ },
+ "khoi": {
+  "UL": {
+   "chi_so": [
+    61,
+    761
+   ],
+   "tu": "2018-01-31",
+   "den": "2020-11-18",
+   "so_phien": 700,
+   "so_phien_chuyen": 33
+  },
+  "XT": {
+   "chi_so": [
+    761,
+    1181
+   ],
+   "tu": "2020-11-19",
+   "den": "2022-07-27",
+   "so_phien": 420,
+   "so_phien_chuyen": 21
+  },
+  "KT": {
+   "chi_so": [
+    1181,
+    2171
+   ],
+   "tu": "2022-07-28",
+   "den": "2026-07-17",
+   "so_phien": 990,
+   "so_phien_chuyen": 48
+  }
+ },
+ "bo_qua_dau": 61,
+ "ghi_chu": "Phiên chuyển hợp đồng xác định theo lịch (thứ Năm thứ ba); không thể đối chiếu lịch giao dịch chính thức nên các khoảng trống ngày làm việc (lễ, nghỉ bù) chưa được phân biệt với phiên thiếu."
+}
