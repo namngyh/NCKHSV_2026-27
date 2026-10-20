@@ -128,7 +128,8 @@ call :bao_ma
 goto :xong
 
 :m7
-%PYEXE% -m pytest kiem_thu -q
+rem Thu muc tam rieng trong repo: tranh loi "Access is denied" o thu muc TEMP\pytest-of-ten_may tren mot so may Windows
+%PYEXE% -m pytest kiem_thu -q -p no:cacheprovider --basetemp="%~dp0ket_qua_nhanh\_pytest_tam"
 goto :xong
 
 :m8
