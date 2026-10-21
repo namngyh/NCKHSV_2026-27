@@ -53,8 +53,8 @@ ess_toi_thieu = 400
 k_hat_toi_da = 0.7
 
 [mo_phong]                      # mục 4.4, Bảng 6
-B = 100                         # số lần lặp của mô phỏng Bayes (b03b), đúng đề cương
-B_mle = 500                     # số lần lặp của mô phỏng MLE (b03a); tăng từ 100 vì độ phủ kappa (E2) = 0,89 sát ngưỡng 0,90 (21/10/2026)
+B = 1000                        # số lần lặp của mô phỏng Bayes (b03b); tăng từ 100 theo yêu cầu "mức mô phỏng cao nhất" (21/10/2026)
+B_mle = 1000                    # số lần lặp của mô phỏng MLE (b03a); tăng từ 100 vì độ phủ kappa (E2) = 0,89 sát ngưỡng 0,90 (21/10/2026)
 T = 2000
 khoi_dong = 200
 phuong_phap = ["mle", "vb_mf", "vb_fr", "nuts"]
