@@ -112,11 +112,6 @@ def vong_lap(a, K, DB) -> int:
             if st == "cong_khong_dat":
                 if a.git:
                     DB.day(ten_may, ctx0.ket_qua)
-                if a.tu_chap_nhan_cong and not kw["chap_nhan_cong"]:
-                    print(f"[CONG] {ma} khong dat; che do TU CHAY: tiep tuc va ghi 'chap nhan cong' vao ho so va phu luc sai lech")
-                    kw["chap_nhan_cong"] = True
-                    con_viec_chinh = True
-                    break
                 return 3
             if st == "het_gio":
                 con_viec_chinh = True
@@ -161,8 +156,6 @@ def main() -> int:
     ap.add_argument("--chay_lai", action="store_true", help="bo qua kiem tra 'da xong' (diem kiem tra van duoc dung lai)")
     ap.add_argument("--xoa", nargs="*", default=[])
     ap.add_argument("--chap_nhan_cong", action="store_true", help="chu dong chay tiep khi cong khong dat (ghi vao ho so)")
-    ap.add_argument("--tu_chap_nhan_cong", action="store_true",
-                    help="vong tat_ca: cong khong dat thi KHONG dung ma tiep tuc (ghi chap nhan vao ho so); mac dinh la dung")
     ap.add_argument("--so_tien_trinh", type=int, default=None)
     ap.add_argument("--vai_tro", default="mot_minh", choices=["mot_minh", "chu_tri", "don_vi"])
     ap.add_argument("--may", default=None, help="ten may trong [phan_tan.may]")

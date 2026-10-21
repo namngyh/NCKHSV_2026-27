@@ -93,24 +93,11 @@ goto :xong
 
 :m2
 echo [INFO] May nay chay vai tro CHU TRI ^(ten may: may_manh^). Dong cua so nay se dung; mo lai va chon 2 de tiep tuc.
-set "TUCHAP="
-set "XN2="
-set /p XN2="Cong khong dat thi TU DONG chap nhan va chay tiep (ghi vao phu luc sai lech; nen hoi GVHD truoc)? (y/N): "
-if /i "%XN2%"=="y" set "TUCHAP=--tu_chap_nhan_cong"
-set "SO_LOI=0"
 :lap_chu_tri
-%PYEXE% quy_trinh\chay.py --buoc tat_ca --vai_tro chu_tri --may may_manh --git %TUCHAP%
+%PYEXE% quy_trinh\chay.py --buoc tat_ca --vai_tro chu_tri --may may_manh --git
 if "%ERRORLEVEL%"=="4" (
     echo [INFO] Ma nguon tren GitHub vua thay doi: khoi dong lai voi ban moi...
     goto :lap_chu_tri
-)
-if "%ERRORLEVEL%"=="1" (
-    set /a SO_LOI+=1
-    if !SO_LOI! LEQ 10 (
-        echo [LOI] Co loi. Se tu chay lai sau 5 phut, tiep tuc tu diem kiem tra ^(lan !SO_LOI!/10^)...
-        timeout /t 300 /nobreak >nul
-        goto :lap_chu_tri
-    )
 )
 call :bao_ma
 goto :xong
