@@ -1,10 +1,10 @@
 {
  "dat": false,
  "i_mo_phong": {
-  "do_phu_min": 0.89,
-  "do_phu_max": 0.98,
-  "bac_bo_sai_E2_theta": 0.06,
-  "bac_bo_sai_E4_gamma": 0.04,
+  "do_phu_min": 0.892,
+  "do_phu_max": 0.96,
+  "bac_bo_sai_E2_theta": 0.058,
+  "bac_bo_sai_E4_gamma": 0.07,
   "so_that_bai": 0,
   "dat": false
  },

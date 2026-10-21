@@ -1,13 +1,13 @@
 {
  "trang_thai": "cong_khong_dat",
- "h_vao": "f551e8bc93a3413615124a71ad984f95b198c96c6e5376316955396e1970e50c",
+ "h_vao": "cc2b2dd9bc139aceea01ccdfea7a4a4c80427c98be8ef189d10c4dd5c2df1b0a",
  "cong": {
   "dat": false,
   "i_mo_phong": {
-   "do_phu_min": 0.89,
-   "do_phu_max": 0.98,
-   "bac_bo_sai_E2_theta": 0.06,
-   "bac_bo_sai_E4_gamma": 0.04,
+   "do_phu_min": 0.892,
+   "do_phu_max": 0.96,
+   "bac_bo_sai_E2_theta": 0.058,
+   "bac_bo_sai_E4_gamma": 0.07,
    "so_that_bai": 0,
    "dat": false
   },
