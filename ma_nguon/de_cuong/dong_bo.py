@@ -70,7 +70,7 @@ def day(may: str, thu_muc_ket_qua: Path, log=print) -> bool:
         if r.returncode == 0:
             log("[git] da push ket qua")
             return True
-        log(f"[git] push bi tu choi (lan {i + 1}), pull --rebase roi thu lai")
+        log(f"[git] push bi tu choi (lan {i + 1}): {_che(r.stderr.strip())[-300:]}")
         keo(log)
         time.sleep(10 * (i + 1))
     log("[git] KHONG push duoc; ket qua van an toan tren may nay, lan dong bo sau se thu lai")
