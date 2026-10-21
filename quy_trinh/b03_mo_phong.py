@@ -31,7 +31,7 @@ def _hat_giong(ctx, *k) -> int:
 def _dv_b03a(ctx):
     c = ctx.cfg
     return [f"mp|{pp}|mle|{kb}|{b:03d}::0" for pp in c["mo_hinh"]["phan_phoi"] for kb in MP.KICH_BAN
-            for b in range(c["mo_phong"]["B"])]
+            for b in range(c["mo_phong"]["B_mle"])]
 
 
 def _lam_b03a(ctx, khoa, truoc):
@@ -65,7 +65,7 @@ def _th_b03a(ctx, kq):
                          "so_that_bai": sum(len(v) for k, v in that_bai.items() if k.startswith(pp + "|")),
                          "dat": bool(phu and bb and cg["do_phu_min"] <= min(phu) and max(phu) <= cg["do_phu_max"]
                                      and max(bb) <= cg["bac_bo_sai_max"])}
-    ctx.ghi("mo_phong_khoi_phuc.json", {"B": ctx.cfg["mo_phong"]["B"], "T": ctx.cfg["mo_phong"]["T"],
+    ctx.ghi("mo_phong_khoi_phuc.json", {"B": ctx.cfg["mo_phong"]["B_mle"], "T": ctx.cfg["mo_phong"]["T"],
                                         "kich_ban": {k: list(v) for k, v in MP.KICH_BAN.items()}, "bang": bang,
                                         "dieu_kien_8_1_i": dieu_kien, "tham_so_xet_cong": THAM_SO_CONG,
                                         "so_lan_that_bai": {k: len(v) for k, v in that_bai.items()},

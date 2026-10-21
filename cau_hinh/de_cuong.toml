@@ -53,7 +53,8 @@ ess_toi_thieu = 400
 k_hat_toi_da = 0.7
 
 [mo_phong]                      # mục 4.4, Bảng 6
-B = 100
+B = 100                         # số lần lặp của mô phỏng Bayes (b03b), đúng đề cương
+B_mle = 500                     # số lần lặp của mô phỏng MLE (b03a); tăng từ 100 vì độ phủ kappa (E2) = 0,89 sát ngưỡng 0,90 (21/10/2026)
 T = 2000
 khoi_dong = 200
 phuong_phap = ["mle", "vb_mf", "vb_fr", "nuts"]
@@ -125,6 +126,7 @@ may_manh = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 "bayes.ess_toi_thieu" = 400
 "bayes.k_hat_toi_da" = 0.7
 "mo_phong.B" = 100
+"mo_phong.B_mle" = 100
 "mo_phong.T" = 2000
 "mo_phong.khoi_dong" = 200
 "ky_quy.S" = 10000
@@ -160,6 +162,7 @@ p_var_xt = 0.05                 # VaR một phiên không bị bác bỏ trên X
 "bayes.nuts_so_mau" = 30
 "bayes.nuts_do_sau_cay" = 5
 "mo_phong.B" = 3
+"mo_phong.B_mle" = 3
 "mo_phong.T" = 800
 "mo_phong.sbc_so_lan" = 3
 "danh_gia.so_lan_bootstrap" = 100
