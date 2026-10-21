@@ -1,288 +1,288 @@
 {
  "kupiec|a0.01|co": {
   "kiem_dinh": "kupiec|a0.01|co",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0686,
-  "sai_so_chuan_mc": 0.00357474586509307,
+  "ty_le_bac_bo_5pct": 0.0256,
+  "sai_so_chuan_mc": 0.002233590830926739,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:06",
-   "giay": 2.29
+   "thoi_diem": "2026-10-22 01:29:36",
+   "giay": 1.86
   }
  },
  "kupiec|a0.01|luc": {
   "kiem_dinh": "kupiec|a0.01|luc",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.7712,
-  "sai_so_chuan_mc": 0.005940548122858698,
+  "ty_le_bac_bo_5pct": 0.378,
+  "sai_so_chuan_mc": 0.0068573464255497546,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:06",
-   "giay": 2.16
+   "thoi_diem": "2026-10-22 01:29:36",
+   "giay": 1.86
   }
  },
  "christoffersen|a0.01|co": {
   "kiem_dinh": "christoffersen|a0.01|co",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0328,
-  "sai_so_chuan_mc": 0.002518894995826543,
+  "ty_le_bac_bo_5pct": 0.0214,
+  "sai_so_chuan_mc": 0.002046560040653584,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:08",
-   "giay": 3.83
+   "thoi_diem": "2026-10-22 01:29:38",
+   "giay": 3.03
   }
  },
  "dq|a0.01|co": {
   "kiem_dinh": "dq|a0.01|co",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.1188,
-  "sai_so_chuan_mc": 0.004575730761310154,
+  "ty_le_bac_bo_5pct": 0.1596,
+  "sai_so_chuan_mc": 0.005179340498557707,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:29",
-   "giay": 24.7
+   "thoi_diem": "2026-10-22 01:29:48",
+   "giay": 13.81
   }
  },
  "dq_hac|a0.01|H2": {
   "kiem_dinh": "dq_hac|a0.01|H2",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.1316,
-  "sai_so_chuan_mc": 0.0047808250334016615,
+  "ty_le_bac_bo_5pct": 0.1258,
+  "sai_so_chuan_mc": 0.00468986908132839,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:44",
-   "giay": 39.79
+   "thoi_diem": "2026-10-22 01:29:56",
+   "giay": 21.58
   }
  },
  "dq_hac|a0.01|H3": {
   "kiem_dinh": "dq_hac|a0.01|H3",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.1412,
-  "sai_so_chuan_mc": 0.004924683949249942,
+  "ty_le_bac_bo_5pct": 0.091,
+  "sai_so_chuan_mc": 0.004067407036429966,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:44",
-   "giay": 39.98
+   "thoi_diem": "2026-10-22 01:29:56",
+   "giay": 21.57
   }
  },
  "kupiec|a0.025|co": {
   "kiem_dinh": "kupiec|a0.025|co",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0496,
-  "sai_so_chuan_mc": 0.0030704996336101396,
+  "ty_le_bac_bo_5pct": 0.072,
+  "sai_so_chuan_mc": 0.003655571090814676,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:06",
-   "giay": 2.2
+   "thoi_diem": "2026-10-22 01:29:36",
+   "giay": 1.79
   }
  },
  "kupiec|a0.025|luc": {
   "kiem_dinh": "kupiec|a0.025|luc",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.98,
-  "sai_so_chuan_mc": 0.001979898987322334,
+  "ty_le_bac_bo_5pct": 0.8242,
+  "sai_so_chuan_mc": 0.0053832027641544395,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:06",
-   "giay": 2.19
+   "thoi_diem": "2026-10-22 01:29:36",
+   "giay": 1.79
   }
  },
  "christoffersen|a0.025|co": {
   "kiem_dinh": "christoffersen|a0.025|co",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0382,
-  "sai_so_chuan_mc": 0.002710747498384901,
+  "ty_le_bac_bo_5pct": 0.0276,
+  "sai_so_chuan_mc": 0.0023168185082133646,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:08",
-   "giay": 3.78
+   "thoi_diem": "2026-10-22 01:29:38",
+   "giay": 3.11
   }
  },
  "dq|a0.025|co": {
   "kiem_dinh": "dq|a0.025|co",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0672,
-  "sai_so_chuan_mc": 0.003540738905934748,
+  "ty_le_bac_bo_5pct": 0.0818,
+  "sai_so_chuan_mc": 0.003875790500014158,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:29",
-   "giay": 24.89
+   "thoi_diem": "2026-10-22 01:29:48",
+   "giay": 13.69
   }
  },
  "dq_hac|a0.025|H2": {
   "kiem_dinh": "dq_hac|a0.025|H2",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0794,
-  "sai_so_chuan_mc": 0.003823496828820445,
+  "ty_le_bac_bo_5pct": 0.0836,
+  "sai_so_chuan_mc": 0.003914359206817892,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:44",
-   "giay": 39.9
+   "thoi_diem": "2026-10-22 01:29:56",
+   "giay": 21.73
   }
  },
  "dq_hac|a0.025|H3": {
   "kiem_dinh": "dq_hac|a0.025|H3",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0856,
-  "sai_so_chuan_mc": 0.00395658034165869,
+  "ty_le_bac_bo_5pct": 0.1,
+  "sai_so_chuan_mc": 0.004242640687119285,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:44",
-   "giay": 39.92
+   "thoi_diem": "2026-10-22 01:29:56",
+   "giay": 21.69
   }
  },
  "kupiec|a0.05|co": {
   "kiem_dinh": "kupiec|a0.05|co",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.053,
-  "sai_so_chuan_mc": 0.003168311853337673,
+  "ty_le_bac_bo_5pct": 0.0492,
+  "sai_so_chuan_mc": 0.0030587369942510585,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:06",
-   "giay": 2.15
+   "thoi_diem": "2026-10-22 01:29:38",
+   "giay": 1.65
   }
  },
  "kupiec|a0.05|luc": {
   "kiem_dinh": "kupiec|a0.05|luc",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 1.0,
-  "sai_so_chuan_mc": 1.414213562373095e-08,
+  "ty_le_bac_bo_5pct": 0.9778,
+  "sai_so_chuan_mc": 0.002083610328252382,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:06",
-   "giay": 2.18
+   "thoi_diem": "2026-10-22 01:29:38",
+   "giay": 1.7
   }
  },
  "christoffersen|a0.05|co": {
   "kiem_dinh": "christoffersen|a0.05|co",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0534,
-  "sai_so_chuan_mc": 0.0031795735563122296,
+  "ty_le_bac_bo_5pct": 0.0494,
+  "sai_so_chuan_mc": 0.003064625262572897,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:10",
-   "giay": 3.33
+   "thoi_diem": "2026-10-22 01:29:39",
+   "giay": 2.9
   }
  },
  "dq|a0.05|co": {
   "kiem_dinh": "dq|a0.05|co",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0508,
-  "sai_so_chuan_mc": 0.0031054584202658392,
+  "ty_le_bac_bo_5pct": 0.0628,
+  "sai_so_chuan_mc": 0.0034309229079068507,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:30",
-   "giay": 24.11
+   "thoi_diem": "2026-10-22 01:29:50",
+   "giay": 13.11
   }
  },
  "dq_hac|a0.05|H2": {
   "kiem_dinh": "dq_hac|a0.05|H2",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0548,
-  "sai_so_chuan_mc": 0.003218600938296017,
+  "ty_le_bac_bo_5pct": 0.0658,
+  "sai_so_chuan_mc": 0.003506290347361439,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:45",
-   "giay": 38.6
+   "thoi_diem": "2026-10-22 01:29:58",
+   "giay": 20.27
   }
  },
  "dq_hac|a0.05|H3": {
   "kiem_dinh": "dq_hac|a0.05|H3",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0716,
-  "sai_so_chuan_mc": 0.0036461881465442783,
+  "ty_le_bac_bo_5pct": 0.075,
+  "sai_so_chuan_mc": 0.003724916106437835,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:45",
-   "giay": 38.66
+   "thoi_diem": "2026-10-22 01:29:58",
+   "giay": 20.27
   }
  },
  "berkowitz|co": {
   "kiem_dinh": "berkowitz|co",
-  "N": 940,
-  "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0488,
-  "sai_so_chuan_mc": 0.00304691844328003,
-  "_nguon": {
-   "may": "may_manh",
-   "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:10",
-   "giay": 3.68
-  }
- },
- "dm|iid": {
-  "kiem_dinh": "dm|iid",
-  "N": 940,
+  "N": 435,
   "R": 5000,
   "ty_le_bac_bo_5pct": 0.051,
   "sai_so_chuan_mc": 0.003111237695837462,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:10",
-   "giay": 3.2
+   "thoi_diem": "2026-10-22 01:29:41",
+   "giay": 3.03
+  }
+ },
+ "dm|iid": {
+  "kiem_dinh": "dm|iid",
+  "N": 435,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0576,
+  "sai_so_chuan_mc": 0.0032949124419322587,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-22 01:29:41",
+   "giay": 2.68
   }
  },
  "dm|ar1": {
   "kiem_dinh": "dm|ar1",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0786,
-  "sai_so_chuan_mc": 0.003805838672355937,
+  "ty_le_bac_bo_5pct": 0.0858,
+  "sai_so_chuan_mc": 0.003960766592466665,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:14",
-   "giay": 5.98
+   "thoi_diem": "2026-10-22 01:29:43",
+   "giay": 4.05
   }
  },
  "gw|iid": {
   "kiem_dinh": "gw|iid",
-  "N": 940,
+  "N": 435,
   "R": 5000,
-  "ty_le_bac_bo_5pct": 0.0526,
-  "sai_so_chuan_mc": 0.003156999841621789,
+  "ty_le_bac_bo_5pct": 0.049,
+  "sai_so_chuan_mc": 0.0030528347482299137,
   "_nguon": {
    "may": "may_manh",
    "host": "Cloudiso",
-   "thoi_diem": "2026-10-20 22:11:11",
-   "giay": 2.74
+   "thoi_diem": "2026-10-22 01:29:43",
+   "giay": 2.3
   }
  }
 }
