@@ -7,7 +7,7 @@ b05 (mục 6): dự báo cuốn chiếu trên XT cho mọi tập biến thỏa n
     và không làm xấu FZ0; SPA cho "ít nhất một ứng viên cải thiện"; LR trong mẫu từng biến hiệu chỉnh Holm; VIF;
     độ ổn định của gamma qua các lần ước lượng lại; báo cáo mọi ứng viên.
 b06 (mục 5, 6): dự báo cuốn chiếu trên XT cho tập biến được chọn và cấu hình chính với mọi phân phối; chọn phân phối
-    có LS cao nhất (GED chỉ báo cáo).
+    có LS cao nhất (GED tham gia khi [bam_sat_bm02].ged_tham_gia_chon = true, bám BM02; ngược lại chỉ báo cáo).
 b07 (mục 8.1, Phụ lục C.7): kiểm tra ba điều kiện chuyển giai đoạn rồi ghi KHOA_CAU_HINH.json; từ đây khối KT mới
     được mở.
 THƯ VIỆN: numpy, scipy.stats, jax.
@@ -258,17 +258,19 @@ def _th_b06(ctx, kq):
     al = ctx.cfg["danh_gia"]["alphas"]
     bang = {g: DG.tom_tat(db[g], r, db[g]["rho_sao"], khoa, al, lags=ctx.cfg["danh_gia"]["tre_phan_vi_dong"]) for g in nhom}
     chon_tap = _taps_b06(ctx)[0]
-    pps = _cac_pp(ctx, False)
+    pps = _cac_pp(ctx, ctx.cfg["bam_sat_bm02"]["ged_tham_gia_chon"])     # BM02: GED là một trong bốn phân phối
     tot = max(pps, key=lambda pp: bang[f"{pp}|{chon_tap}"]["LS"])
     dmb = {f"{a}-{b}": dict(zip(("t", "p_mot_phia"), DG.dm(-db[f"{a}|{chon_tap}"]["ls"], -db[f"{b}|{chon_tap}"]["ls"])))
            for a in _cac_pp(ctx) for b in _cac_pp(ctx) if a != b}
     ctx.ghi("chon_phan_phoi.json", {"tap": chon_tap, "phan_phoi": tot, "bang_XT": bang, "DM_LS": dmb,
-                                    "ghi_chu": "GED (Phụ lục B) chỉ báo cáo, không tham gia lựa chọn."})
+                                    "ghi_chu": ("GED tham gia lựa chọn (bám BM02)." if ctx.cfg["bam_sat_bm02"]["ged_tham_gia_chon"]
+                                                else "GED (Phụ lục B) chỉ báo cáo, không tham gia lựa chọn."),
+                                    "ung_vien": pps})
     ctx.ghi("du_bao_XT.pkl", db)
 
 
 Buoc("b06", "chon_phan_phoi", "5, 6", TEP, _lam_b06, _th_b06, don_vi=_dv_b06, phu_thuoc=("b05",),
-     cau_hinh=("du_lieu", "khoi", "mo_hinh", "mle", "danh_gia"), thu_vien=TV)
+     cau_hinh=("du_lieu", "khoi", "mo_hinh", "mle", "danh_gia", "bam_sat_bm02"), thu_vien=TV)
 
 
 # ---------------------------------------------------------------------------------------- b07
@@ -278,7 +280,7 @@ def _cong_b07(ctx):
     mp = ctx.doc("mo_phong_khoi_phuc.json", "b03a")
     pp, bien = cp["phan_phoi"], tuple(cb["chon"])
     cg = ctx.cfg["cong"]
-    dk1 = mp["dieu_kien_8_1_i"].get(pp, {"dat": False})
+    dk1 = mp["dieu_kien_8_1_i"].get(pp, {"dat": False, "ghi_chu": f"phan phoi {pp} chua co mo phong khoi phuc tham so (b03a)"})
     x = uoc_luong_day_du(ctx, pp, bien, ctx.khoi()["XT"][1], ("b07", pp), bootstrap=False)
     dk2 = {"hoi_quy_tau_F_p": x["chan_doan"]["hoi_quy_tau_F_p"], "z2_tb_theo_tau": x["chan_doan"]["z2_tb_theo_tau"]}
     dk2["dat"] = bool(dk2["hoi_quy_tau_F_p"] > cg["p_tau"])

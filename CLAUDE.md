@@ -5,7 +5,8 @@ Ghi chú vận hành cho Claude khi làm việc trong repo này.
 ## Trạng thái hiện hành (20/10/2026) — cấu trúc mới, bám đề cương
 
 - Người dùng yêu cầu **bám đề cương bắt buộc** (`tai_lieu/de_cuong/`), đủ bốn phương pháp (MLE, VB-MF, VB-FR,
-  NUTS) ở mọi mốc ước lượng lại; khối UL/XT/KT = 750/420/940; chạy bằng `chay.bat`; máy này chỉ chạy hồ sơ
+  NUTS) ở mọi mốc ước lượng lại; từ 22/10/2026 bám đề cương đã đăng ký BM02: khối UL/XT/KT = 750/925/435 (80/20),
+  GED tham gia chọn phân phối, thêm GARCH(1,1) nền (xem mục 0000 của `GHI_CHU_DU_AN.md`); chạy bằng `chay.bat`; máy này chỉ chạy hồ sơ
   `nhanh`, bản đầy đủ chạy trên máy mạnh hơn.
 - Cấu trúc: `cau_hinh/` (một tệp tham số), `ma_nguon/de_cuong/` (thư viện, JAX/NumPyro), `quy_trinh/` (b00–b14,
   điểm vào `chay.py`), `ket_qua/` (theo bước, có `_ho_so/`, `_diem_kiem_tra/`), `kiem_thu/`, `luu_tru/` (chỉ

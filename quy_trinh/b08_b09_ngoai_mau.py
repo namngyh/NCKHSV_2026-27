@@ -24,7 +24,7 @@ from de_cuong.khung import Buoc
 from de_cuong.mo_hinh_jax import TIEN_NGHIEM_GOC, DacTa
 
 TEP = __file__
-TV = ("du_lieu", "mo_hinh_jax", "uoc_luong", "phan_phoi", "danh_gia")
+TV = ("du_lieu", "mo_hinh_jax", "uoc_luong", "phan_phoi", "danh_gia", "garch_nen")
 
 
 def _moc(ctx):
@@ -70,9 +70,22 @@ def _bayes_mot(ctx, khoa, pt, spec, dl, m, chi_so, pa=TIEN_NGHIEM_GOC):
 
 
 # ---------------------------------------------------------------------------------------- b08
+def _garch_mot_moc(ctx, pp: str, s0: int, s1: int) -> dict:
+    """GARCH(1,1) nền (BM02): MLE trên [BO_QUA, s0) và dự báo cắm tham số cho [s0, s1), cùng khuôn với EGARCH-X."""
+    from de_cuong import garch_nen as GN
+    f = DL.dac_trung(ctx.du_lieu(), s0 - 1)
+    dl = U.chuan_bi(f, (), s0)
+    m = GN.mle(pp, dl, ctx.cfg["mle"]["so_diem_khoi_tao"], ctx.cfg["mle"]["do_tan_khoi_tao"], ctx.rng("garch", pp, s0))
+    db = GN.du_bao_cam(pp, m["psi"], dl, s0, s1, ctx.cfg["danh_gia"]["alphas"])
+    return {"s0": s0, "s1": s1, "psi": m["psi"], "xi": m["xi"], "ll": m["ll"], "so_gan_tot": m["so_gan_tot"],
+            "so_diem": m["so_diem"], "do_tan_ll": m["do_tan_ll"], "db": db, "rho_sao": f["rho_sao"][s0:s1],
+            "c_rho": f["c_rho"], "ten": m["ten"]}
+
+
 def _dv_b08(ctx):
     moc, _, _ = _moc(ctx)
     ds = [f"mle|{pp}|{t}::{k:03d}" for pp, t in cau_hinh_mle(ctx) for k in range(len(moc))]
+    ds += [f"gar|{ctx.khoa()['phan_phoi']}|GARCH::{k:03d}" for k in range(len(moc))]
     for pt in ctx.cfg["bayes"]["phuong_phap"]:
         ds += [f"{pt}|{k:03d}|{h}::0" for k in range(len(moc)) for h in _hau_to(ctx, pt)]
     return ds
@@ -86,6 +99,9 @@ def _lam_b08(ctx, khoa, truoc):
     if p[0] == "mle":
         s0 = moc[int(nhom[1])]
         return C.mle_mot_moc(ctx, p[1], C.tu_ten_tap(p[2]), s0, min(s0 + buoc, cuoi), truoc)
+    if p[0] == "gar":
+        s0 = moc[int(nhom[1])]
+        return _garch_mot_moc(ctx, p[1], s0, min(s0 + buoc, cuoi))
     k, h = int(p[1]), p[2]
     s0 = moc[k]
     spec, dl, m = _mle_khoi_tao(ctx, s0)
@@ -125,6 +141,8 @@ def _th_b08(ctx, kq):
     mle = {}
     for pp, t in cau_hinh_mle(ctx):
         mle[f"{pp}|{t}"] = C.ghep([v for k, v in kq.items() if k.split("::")[0] == f"mle|{pp}|{t}"])
+    pg = ctx.khoa()["phan_phoi"]
+    mle[f"{pg}|GARCH"] = C.ghep([v for k, v in kq.items() if k.split("::")[0] == f"gar|{pg}|GARCH"])
     ctx.ghi("mle_cuon_chieu.pkl", mle)
     gop, chan_doan = _gop_bayes_moc(ctx, kq)
     ctx.ghi("bayes_cuon_chieu.pkl", gop)
@@ -278,10 +296,12 @@ def _th_b09(ctx, kq):
                            ctx.cfg["danh_gia"]["so_lan_bootstrap"], ctx.cfg["danh_gia"]["do_dai_khoi_tb"])
                for ham, L in mat.items()}
     egarch = f"MLE|{kh['phan_phoi']}|EGARCH"
+    garch = f"MLE|{kh['phan_phoi']}|GARCH"
     ctx.ghi("danh_gia_KT.json", {"khoi_KT": [kt0, kt1], "ngay": [str(d.date[kt0].date()), str(d.date[kt1 - 1].date())],
                                  "cau_hinh_chon": chon, "bang": bang, "nhom_phien": theo_nhom,
                                  "so_sanh_voi_cau_hinh_chon": so_sanh, "tap_mo_hinh_tin_cay": tin_cay,
-                                 "CH1_EGARCH-X_vs_EGARCH": {ham: so_sanh[ham].get(egarch) for ham in mat}})
+                                 "CH1_EGARCH-X_vs_EGARCH": {ham: so_sanh[ham].get(egarch) for ham in mat},
+                                 "CH1_EGARCH-X_vs_GARCH": {ham: so_sanh[ham].get(garch) for ham in mat}})
     ctx.ghi("du_bao_KT.pkl", {"mo_hinh": mo_hinh, "r": r, "khoa": khoa, "nhom": nm})
 
 

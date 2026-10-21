@@ -17,8 +17,15 @@ nguong_r_bat_thuong = 7.0       # |r| > 7% sau khi loại phiên chuyển (2.8)
 
 [khoi]                          # mục 5.1, Bảng 7 (đã chốt 20/10/2026)
 UL = 750
-XT = 420                        # KT = phần còn lại
+XT = 420                        # GIÁ TRỊ CŨ của đề cương chi tiết, chỉ còn dùng để giữ mã băm của b01, b02, b03a (kết quả
+                                # b03a đã chạy xong một phần). XT đang dùng nằm ở [khoi_bm02] bên dưới.
 buoc_uoc_luong_lai = 21
+
+[khoi_bm02]                     # 22/10/2026: bám đề cương đã đăng ký (BM02, mục 4): 80% phiên đầu (đến 16/10/2024) là trong
+XT = 925                        # mẫu = UL + XT; 20% cuối (17/10/2024 - 17/07/2026, 435 phiên) là KT. Ghi đè [khoi].XT.
+
+[bam_sat_bm02]                  # các điểm bám đề cương đã đăng ký (BM02) khác với đề cương chi tiết
+ged_tham_gia_chon = true        # BM02 mục 4: GED là một trong bốn phân phối so sánh (đề cương chi tiết: chỉ báo cáo)
 
 [mo_hinh]                       # mục 3
 phan_phoi = ["chuan", "student", "skewt"]
@@ -117,6 +124,8 @@ may_manh = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 [de_cuong_goc]                  # giá trị đề cương quy định; khác đi sẽ tự ghi vào nhật ký sai lệch (b13)
 "khoi.UL" = 750
 "khoi.XT" = 420
+"khoi_bm02.XT" = 420
+"bam_sat_bm02.ged_tham_gia_chon" = false
 "khoi.buoc_uoc_luong_lai" = 21
 "mle.so_diem_khoi_tao" = 20
 "bayes.nuts_so_chuoi" = 4

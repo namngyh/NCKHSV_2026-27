@@ -314,7 +314,8 @@ class NguCanh:
 
     def _tinh_khoi(self, n: int) -> dict:
         b0 = self.cfg["du_lieu"]["bo_qua_dau"]
-        ul, xt = self.cfg["khoi"]["UL"], self.cfg["khoi"]["XT"]
+        ul = self.cfg["khoi"]["UL"]
+        xt = self.cfg.get("khoi_bm02", {}).get("XT", self.cfg["khoi"]["XT"])    # [khoi_bm02] ghi đè (bám BM02, 22/10/2026)
         return {"UL": (b0, b0 + ul), "XT": (b0 + ul, b0 + ul + xt), "KT": (b0 + ul + xt, n)}
 
     def khoi(self) -> dict:
@@ -351,6 +352,11 @@ class ChuaXongPhuThuoc(RuntimeError):
     pass
 
 
+# b01, b02 chỉ dùng khối UL (kết quả không đổi khi XT đổi), nên mã băm của chúng không tính [khoi_bm02]: nhờ vậy việc
+# đổi XT (bám BM02) không làm b02 chạy lại, không đổi mã băm đầu ra của b02 và không làm b03a mất kết quả đã chạy.
+BUOC_KHONG_PHU_THUOC_XT = ("b01", "b02")
+
+
 def _bam_vao(ctx: NguCanh, b: Buoc) -> str:
     dep = {}
     for m in b.phu_thuoc:
@@ -362,6 +368,8 @@ def _bam_vao(ctx: NguCanh, b: Buoc) -> str:
     # chỉ băm phần cấu hình ảnh hưởng con số; số tiến trình, bộ nhớ, phân tán không làm bước phải chạy lại
     chon = {s: ({k: ctx.cfg[s][k] for k in ("hat_giong", "du_lieu_goc")} if s == "chung" else ctx.cfg[s])
             for s in b.cau_hinh}
+    if "khoi" in chon and "khoi_bm02" in ctx.cfg and b.ma not in BUOC_KHONG_PHU_THUOC_XT:
+        chon["khoi"] = {**chon["khoi"], "XT_bm02": ctx.cfg["khoi_bm02"]["XT"]}
     return bam({"ho_so": ctx.ho_so, "cfg": chon, "dep": dep, "tep": bam_tep(tep),
                 "du_lieu": bam_du_lieu(ctx.cfg)})
 

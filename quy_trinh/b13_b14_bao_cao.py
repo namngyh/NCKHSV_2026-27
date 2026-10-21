@@ -75,6 +75,13 @@ def phu_luc_sai_lech(ctx) -> str:
 
 
 # ---------------------------------------------------------------------------------------- b13
+def _bang_khoi(ctx) -> dict:
+    """Bảng 7 tính lại từ cấu hình hiện hành (kiem_tra_du_lieu.json của b01 không phụ thuộc XT nên có thể cũ)."""
+    d = ctx.du_lieu()
+    return {k: {"tu": str(d.date[v[0]].date()), "den": str(d.date[v[1] - 1].date()), "so_phien": v[1] - v[0],
+                "so_phien_chuyen": int(d.J[v[0]:v[1]].sum())} for k, v in ctx.khoi().items()}
+
+
 def _lam_b13(ctx, khoa, truoc):
     import matplotlib
     matplotlib.use("Agg")
@@ -88,7 +95,7 @@ def _lam_b13(ctx, khoa, truoc):
            f"{len(q['phien_chuyen_hop_dong'])} phiên chuyển hợp đồng; {len(q['phien_cham_bien_khoa'])} phiên khóa biên; "
            f"c_rho (UL) = {_f(q['dai_dien_phuong_sai']['c_rho_UL'])}.", "",
            _bang(["Khối", "Từ", "Đến", "Số phiên", "Phiên chuyển"], ["k", "tu", "den", "so_phien", "so_phien_chuyen"],
-                 [{"k": k, **v} for k, v in q["khoi"].items()]), ""]
+                 [{"k": k, **v} for k, v in _bang_khoi(ctx).items()]), ""]
     kc = ctx.doc("kiem_tra_cai_dat.json", "b02")
     da = kc["doi_chieu_arch"]
     md += ["## 2. Kiểm tra cài đặt và đối chiếu độc lập (Phụ lục A, C.5)", "",

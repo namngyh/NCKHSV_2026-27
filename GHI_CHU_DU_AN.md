@@ -1,5 +1,20 @@
 # Ghi chú dự án: dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
+## 0000. BÁM ĐỀ CƯƠNG ĐÃ ĐĂNG KÝ BM02 (22/10/2026) — mới nhất, đọc trước
+
+Người dùng chốt: "muốn bám sát đề cương đã đăng ký nhất" (`BM02_Decuong.docx`). Thay đổi so với đề cương chi tiết:
+- **Chia mẫu theo BM02 mục 4**: 80% phiên đầu (đến 16/10/2024) là trong mẫu = UL (750) + XT (925); KT = 20% cuối, 435 phiên
+  (17/10/2024 - 17/07/2026). Cấu hình: `[khoi_bm02].XT = 925` ghi đè `[khoi].XT = 420` (giữ giá trị cũ ở `[khoi]` chỉ để
+  mã băm của b01, b02, b03a không đổi, nên 8.000+ đơn vị b03a đã chạy không bị mất; xem `BUOC_KHONG_PHU_THUOC_XT` trong khung.py).
+  b02k, b04 trở đi chạy lại với khối mới. Bảng 7 của báo cáo tính lại từ cấu hình hiện hành (b13 `_bang_khoi`).
+- **GED tham gia chọn phân phối** (b06): `[bam_sat_bm02].ged_tham_gia_chon = true`. Mô phỏng khôi phục (b03a) KHÔNG có GED
+  (BM02 không có mô phỏng); nếu GED được chọn thì cổng b07 điều kiện (i) ghi "chưa có mô phỏng" và không đạt, khi đó cần
+  thêm b03c (mô phỏng MLE cho GED) hoặc ghi nhận.
+- **GARCH(1,1) làm mô hình nền** (BM02 mục 3, 5, câu hỏi 1): `ma_nguon/de_cuong/garch_nen.py`, chạy MLE cuốn chiếu ở b08
+  (phân phối đã chọn), so sánh ở b09 (`CH1_EGARCH-X_vs_GARCH`). Kiểm thử: `kiem_thu/test_garch_nen.py` (khớp gói arch).
+- Chưa làm (cần xác minh): độ bền theo tập biến ngoại sinh và cửa sổ ước lượng (BM02 mục 5, 6) trong b12; quy đổi ký quỹ ra
+  tiền theo hệ số nhân K = 100.000 đồng/điểm.
+
 ## 000. TRẠNG THÁI MỚI NHẤT (20/10/2026 khoảng 21:30) — ĐÃ PUSH GitHub, commit 39c13b2
 
 - Đã triển khai và push toàn bộ đường ống chạy song song **1 máy mạnh (chủ trì, 9/10 việc) + 1 phiên Colab (`colab_1`, 1/10)**. Hướng dẫn chạy: README.md và mục "Cách chạy" trong cuộc trao đổi ngày 20/10 (A–F).
