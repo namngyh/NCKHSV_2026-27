@@ -1,0 +1,288 @@
+{
+ "kupiec|a0.01|co": {
+  "kiem_dinh": "kupiec|a0.01|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0686,
+  "sai_so_chuan_mc": 0.00357474586509307,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:06",
+   "giay": 2.29
+  }
+ },
+ "kupiec|a0.01|luc": {
+  "kiem_dinh": "kupiec|a0.01|luc",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.7712,
+  "sai_so_chuan_mc": 0.005940548122858698,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:06",
+   "giay": 2.16
+  }
+ },
+ "christoffersen|a0.01|co": {
+  "kiem_dinh": "christoffersen|a0.01|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0328,
+  "sai_so_chuan_mc": 0.002518894995826543,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:08",
+   "giay": 3.83
+  }
+ },
+ "dq|a0.01|co": {
+  "kiem_dinh": "dq|a0.01|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.1188,
+  "sai_so_chuan_mc": 0.004575730761310154,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:29",
+   "giay": 24.7
+  }
+ },
+ "dq_hac|a0.01|H2": {
+  "kiem_dinh": "dq_hac|a0.01|H2",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.1316,
+  "sai_so_chuan_mc": 0.0047808250334016615,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:44",
+   "giay": 39.79
+  }
+ },
+ "dq_hac|a0.01|H3": {
+  "kiem_dinh": "dq_hac|a0.01|H3",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.1412,
+  "sai_so_chuan_mc": 0.004924683949249942,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:44",
+   "giay": 39.98
+  }
+ },
+ "kupiec|a0.025|co": {
+  "kiem_dinh": "kupiec|a0.025|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0496,
+  "sai_so_chuan_mc": 0.0030704996336101396,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:06",
+   "giay": 2.2
+  }
+ },
+ "kupiec|a0.025|luc": {
+  "kiem_dinh": "kupiec|a0.025|luc",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.98,
+  "sai_so_chuan_mc": 0.001979898987322334,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:06",
+   "giay": 2.19
+  }
+ },
+ "christoffersen|a0.025|co": {
+  "kiem_dinh": "christoffersen|a0.025|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0382,
+  "sai_so_chuan_mc": 0.002710747498384901,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:08",
+   "giay": 3.78
+  }
+ },
+ "dq|a0.025|co": {
+  "kiem_dinh": "dq|a0.025|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0672,
+  "sai_so_chuan_mc": 0.003540738905934748,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:29",
+   "giay": 24.89
+  }
+ },
+ "dq_hac|a0.025|H2": {
+  "kiem_dinh": "dq_hac|a0.025|H2",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0794,
+  "sai_so_chuan_mc": 0.003823496828820445,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:44",
+   "giay": 39.9
+  }
+ },
+ "dq_hac|a0.025|H3": {
+  "kiem_dinh": "dq_hac|a0.025|H3",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0856,
+  "sai_so_chuan_mc": 0.00395658034165869,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:44",
+   "giay": 39.92
+  }
+ },
+ "kupiec|a0.05|co": {
+  "kiem_dinh": "kupiec|a0.05|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.053,
+  "sai_so_chuan_mc": 0.003168311853337673,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:06",
+   "giay": 2.15
+  }
+ },
+ "kupiec|a0.05|luc": {
+  "kiem_dinh": "kupiec|a0.05|luc",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 1.0,
+  "sai_so_chuan_mc": 1.414213562373095e-08,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:06",
+   "giay": 2.18
+  }
+ },
+ "christoffersen|a0.05|co": {
+  "kiem_dinh": "christoffersen|a0.05|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0534,
+  "sai_so_chuan_mc": 0.0031795735563122296,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:10",
+   "giay": 3.33
+  }
+ },
+ "dq|a0.05|co": {
+  "kiem_dinh": "dq|a0.05|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0508,
+  "sai_so_chuan_mc": 0.0031054584202658392,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:30",
+   "giay": 24.11
+  }
+ },
+ "dq_hac|a0.05|H2": {
+  "kiem_dinh": "dq_hac|a0.05|H2",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0548,
+  "sai_so_chuan_mc": 0.003218600938296017,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:45",
+   "giay": 38.6
+  }
+ },
+ "dq_hac|a0.05|H3": {
+  "kiem_dinh": "dq_hac|a0.05|H3",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0716,
+  "sai_so_chuan_mc": 0.0036461881465442783,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:45",
+   "giay": 38.66
+  }
+ },
+ "berkowitz|co": {
+  "kiem_dinh": "berkowitz|co",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0488,
+  "sai_so_chuan_mc": 0.00304691844328003,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:10",
+   "giay": 3.68
+  }
+ },
+ "dm|iid": {
+  "kiem_dinh": "dm|iid",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.051,
+  "sai_so_chuan_mc": 0.003111237695837462,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:10",
+   "giay": 3.2
+  }
+ },
+ "dm|ar1": {
+  "kiem_dinh": "dm|ar1",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0786,
+  "sai_so_chuan_mc": 0.003805838672355937,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:14",
+   "giay": 5.98
+  }
+ },
+ "gw|iid": {
+  "kiem_dinh": "gw|iid",
+  "N": 940,
+  "R": 5000,
+  "ty_le_bac_bo_5pct": 0.0526,
+  "sai_so_chuan_mc": 0.003156999841621789,
+  "_nguon": {
+   "may": "may_manh",
+   "host": "Cloudiso",
+   "thoi_diem": "2026-10-20 22:11:11",
+   "giay": 2.74
+  }
+ }
+}

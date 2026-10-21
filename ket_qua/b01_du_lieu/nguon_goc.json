@@ -1,0 +1,18 @@
+{
+ "commit": "d15fedbefca362972910b0db06c0340f48886739",
+ "h_vao": "3c482782e4d60d274c2fe4bb167eb55e69d432399d4d6908852ebdaf1d94cf84",
+ "bam_du_lieu": "70bfdb35ef0ea56b61e253183509d90368751ad1c15659683c9c1f8c408e110d",
+ "bam_ma": "28bdce2c93ba0224902fcde2d6ad67a51362d20b0e8df122f18246f24b9c5038",
+ "ho_so": "day_du",
+ "may_tong_hop": {
+  "host": "Cloudiso",
+  "he_dieu_hanh": "Windows-11-10.0.26300-SP0",
+  "python": "3.12.10",
+  "so_loi": 16,
+  "bo_xu_ly": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD"
+ },
+ "so_don_vi_theo_may": {
+  "may_manh": 1
+ },
+ "thoi_diem": "2026-10-20 22:10:50"
+}

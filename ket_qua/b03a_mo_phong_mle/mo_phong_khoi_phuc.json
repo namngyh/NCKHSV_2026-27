@@ -1,0 +1,1088 @@
+{
+ "B": 100,
+ "T": 2000,
+ "kich_ban": {
+  "E1": [
+   -0.1,
+   [
+    0.05,
+    0.05
+   ],
+   8.0,
+   -0.1
+  ],
+  "E2": [
+   0.0,
+   [
+    0.05,
+    0.05
+   ],
+   8.0,
+   -0.1
+  ],
+  "E3": [
+   -0.1,
+   [
+    0.05,
+    0.05
+   ],
+   4.0,
+   -0.1
+  ],
+  "E4": [
+   -0.1,
+   [
+    0.0,
+    0.0
+   ],
+   8.0,
+   -0.1
+  ]
+ },
+ "bang": {
+  "chuan|mle|E1": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": 0.002144836674800664,
+     "rmse": 0.030584848917479535,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.97
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": -0.0004491130701160877,
+     "rmse": 0.010659049411455252,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.97
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.010455187302443799,
+     "rmse": 0.029011389129111814,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.92
+    },
+    "theta": {
+     "that": -0.1,
+     "chech": -0.0006367515975853799,
+     "rmse": 0.01618842992033739,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.95
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.0009314298574029578,
+     "rmse": 0.011204657585755829,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.93
+    },
+    "gamma_X1": {
+     "that": 0.05,
+     "chech": 0.0002775602459704584,
+     "rmse": 0.010252264944680749,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "gamma_X2": {
+     "that": 0.05,
+     "chech": 0.001904558406235089,
+     "rmse": 0.010504631426057051,
+     "do_phu": 0.9,
+     "do_phu_hessian": 0.93
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": 0.021057198537063736,
+     "rmse": 0.14708182973046965,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.97
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": -0.01977457847563355,
+     "rmse": 0.14798688456725212,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": 0.015647848564523156,
+     "rmse": 0.20394930606995168,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.94
+    }
+   },
+   "bac_bo_theta0": 1.0,
+   "bac_bo_gamma0": 1.0
+  },
+  "chuan|mle|E2": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": -0.001267328040686977,
+     "rmse": 0.029854858599207987,
+     "do_phu": 0.98,
+     "do_phu_hessian": 0.98
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": -0.00123910806842503,
+     "rmse": 0.0102072232654492,
+     "do_phu": 0.98,
+     "do_phu_hessian": 0.98
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.00445383358448232,
+     "rmse": 0.031624268554687744,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.92
+    },
+    "theta": {
+     "that": 0.0,
+     "chech": -0.0029317346563360034,
+     "rmse": 0.015395257313618245,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.97
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.0018328130629612193,
+     "rmse": 0.011711219007966968,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "gamma_X1": {
+     "that": 0.05,
+     "chech": 0.0008774315411027802,
+     "rmse": 0.009855752951758704,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.97
+    },
+    "gamma_X2": {
+     "that": 0.05,
+     "chech": 0.0026762538016807703,
+     "rmse": 0.01019048033828353,
+     "do_phu": 0.98,
+     "do_phu_hessian": 0.97
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": 0.017750592228345578,
+     "rmse": 0.13888903581185258,
+     "do_phu": 0.98,
+     "do_phu_hessian": 0.96
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.013950061701529173,
+     "rmse": 0.14274950092751734,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.97
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": 0.004539501803331247,
+     "rmse": 0.18957042946705913,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.96
+    }
+   },
+   "bac_bo_theta0": 0.04,
+   "bac_bo_gamma0": 1.0
+  },
+  "chuan|mle|E3": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": -0.005394021733975581,
+     "rmse": 0.03471285062845289,
+     "do_phu": 0.91,
+     "do_phu_hessian": 0.91
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 0.0022922019479862093,
+     "rmse": 0.012155575314905154,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.94
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.007907602513189959,
+     "rmse": 0.029378621034291973,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.9
+    },
+    "theta": {
+     "that": -0.1,
+     "chech": -0.002369844065757146,
+     "rmse": 0.016889520757285576,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.0026005470259877596,
+     "rmse": 0.010345348081334305,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.94
+    },
+    "gamma_X1": {
+     "that": 0.05,
+     "chech": 0.0016469949223750393,
+     "rmse": 0.009788531299515827,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.93
+    },
+    "gamma_X2": {
+     "that": 0.05,
+     "chech": -0.0007973590026669886,
+     "rmse": 0.009353644375492494,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.94
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": -0.011135453220101788,
+     "rmse": 0.1499027580481547,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.95
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.01921800838291172,
+     "rmse": 0.15456313522643103,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.95
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": -0.011330586740343611,
+     "rmse": 0.21020403137808177,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.95
+    }
+   },
+   "bac_bo_theta0": 1.0,
+   "bac_bo_gamma0": 1.0
+  },
+  "chuan|mle|E4": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": -0.004716162462716219,
+     "rmse": 0.036281266982762905,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.92
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 4.522920005489428e-05,
+     "rmse": 0.014095219287714773,
+     "do_phu": 0.89,
+     "do_phu_hessian": 0.88
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.008371074997237556,
+     "rmse": 0.030459994070784972,
+     "do_phu": 0.9,
+     "do_phu_hessian": 0.9
+    },
+    "theta": {
+     "that": -0.1,
+     "chech": -0.0015701892694962006,
+     "rmse": 0.01660907722270616,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.00014974970861514558,
+     "rmse": 0.013773847418795778,
+     "do_phu": 0.89,
+     "do_phu_hessian": 0.91
+    },
+    "gamma_X1": {
+     "that": 0.0,
+     "chech": -4.1010191927166944e-05,
+     "rmse": 0.010385364190315315,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.92
+    },
+    "gamma_X2": {
+     "that": 0.0,
+     "chech": -0.0006534883850886443,
+     "rmse": 0.009607601650468511,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": -0.0018965124087196175,
+     "rmse": 0.16441406703260303,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.014464943406195793,
+     "rmse": 0.15488578849606127,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.94
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": -0.0013915344879478389,
+     "rmse": 0.23079667273093923,
+     "do_phu": 0.89,
+     "do_phu_hessian": 0.93
+    }
+   },
+   "bac_bo_theta0": 1.0,
+   "bac_bo_gamma0": 0.08
+  },
+  "student|mle|E1": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": -0.0011298462185806931,
+     "rmse": 0.028932352662982733,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 0.0008462888435823058,
+     "rmse": 0.012410428169920154,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.95
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.012052442386764863,
+     "rmse": 0.03238743011985811,
+     "do_phu": 0.87,
+     "do_phu_hessian": 0.86
+    },
+    "theta": {
+     "that": -0.1,
+     "chech": 0.0016585074830326007,
+     "rmse": 0.018786689483148423,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.93
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.0015920370919001259,
+     "rmse": 0.010440954231928836,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "gamma_X1": {
+     "that": 0.05,
+     "chech": -0.000250405677957938,
+     "rmse": 0.010292427124001498,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.97
+    },
+    "gamma_X2": {
+     "that": 0.05,
+     "chech": 0.00038545045659105486,
+     "rmse": 0.011468960633908133,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.95
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": -0.022464906167109784,
+     "rmse": 0.1771801487072499,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.023078461648859624,
+     "rmse": 0.2030079560989292,
+     "do_phu": 0.9,
+     "do_phu_hessian": 0.93
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": -0.00856707938562561,
+     "rmse": 0.24857726625306237,
+     "do_phu": 0.9,
+     "do_phu_hessian": 0.91
+    },
+    "nu": {
+     "that": 8.0,
+     "chech": 0.5897873505196585,
+     "rmse": 1.8704119022939973,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.98
+    }
+   },
+   "bac_bo_theta0": 1.0,
+   "bac_bo_gamma0": 1.0
+  },
+  "student|mle|E2": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": 0.0010606463528847953,
+     "rmse": 0.033400439146630045,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.92
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 0.0004129736579820885,
+     "rmse": 0.013769752093349089,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.008519841731057182,
+     "rmse": 0.035541074135225684,
+     "do_phu": 0.87,
+     "do_phu_hessian": 0.87
+    },
+    "theta": {
+     "that": 0.0,
+     "chech": -0.0005267753840016598,
+     "rmse": 0.020643382189636073,
+     "do_phu": 0.91,
+     "do_phu_hessian": 0.93
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.00038587457287391435,
+     "rmse": 0.015603126185230456,
+     "do_phu": 0.9,
+     "do_phu_hessian": 0.91
+    },
+    "gamma_X1": {
+     "that": 0.05,
+     "chech": -0.0007349433283170267,
+     "rmse": 0.011249964467425166,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.97
+    },
+    "gamma_X2": {
+     "that": 0.05,
+     "chech": 0.00113939679648871,
+     "rmse": 0.012600004882272227,
+     "do_phu": 0.91,
+     "do_phu_hessian": 0.91
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": -0.031166144484737503,
+     "rmse": 0.18843016756432857,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.95
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.023215236045107314,
+     "rmse": 0.19904225945198215,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.94
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": -0.04819196623159956,
+     "rmse": 0.23490230428379724,
+     "do_phu": 0.98,
+     "do_phu_hessian": 0.96
+    },
+    "nu": {
+     "that": 8.0,
+     "chech": 0.609923865562398,
+     "rmse": 2.4295469236722047,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.95
+    }
+   },
+   "bac_bo_theta0": 0.09,
+   "bac_bo_gamma0": 1.0
+  },
+  "student|mle|E3": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": 0.0020361787111778887,
+     "rmse": 0.02462119114002281,
+     "do_phu": 0.98,
+     "do_phu_hessian": 0.97
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 0.0012041708890737645,
+     "rmse": 0.014179512118369092,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.94
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.009455040968096455,
+     "rmse": 0.0363498452038963,
+     "do_phu": 0.91,
+     "do_phu_hessian": 0.89
+    },
+    "theta": {
+     "that": -0.1,
+     "chech": -0.0024883737748698734,
+     "rmse": 0.022097398770333395,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.003475354486534883,
+     "rmse": 0.012768286621681765,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "gamma_X1": {
+     "that": 0.05,
+     "chech": 0.003313543117720455,
+     "rmse": 0.013267089243693547,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.93
+    },
+    "gamma_X2": {
+     "that": 0.05,
+     "chech": 0.0033380960764501956,
+     "rmse": 0.014185152927708616,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.92
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": 0.002898117220634983,
+     "rmse": 0.19512490808844385,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.016485651829353895,
+     "rmse": 0.20121300720877353,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": -0.015415971969752591,
+     "rmse": 0.25474682954278116,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.95
+    },
+    "nu": {
+     "that": 4.0,
+     "chech": 0.13580041045560376,
+     "rmse": 0.4443328663238285,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.97
+    }
+   },
+   "bac_bo_theta0": 1.0,
+   "bac_bo_gamma0": 1.0
+  },
+  "student|mle|E4": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": 0.0018822146806989914,
+     "rmse": 0.032999096599679666,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.92
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 0.002051332011253583,
+     "rmse": 0.01353307829809242,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.92
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.014403933752546973,
+     "rmse": 0.03532321821170053,
+     "do_phu": 0.89,
+     "do_phu_hessian": 0.88
+    },
+    "theta": {
+     "that": -0.1,
+     "chech": -0.0006515002842460173,
+     "rmse": 0.02113089857131398,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.0027742917993131056,
+     "rmse": 0.01437458986260764,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "gamma_X1": {
+     "that": 0.0,
+     "chech": 0.0008725772644822798,
+     "rmse": 0.011293258172645608,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.93
+    },
+    "gamma_X2": {
+     "that": 0.0,
+     "chech": -0.00018499329263399863,
+     "rmse": 0.01043993218765944,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.95
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": -0.03427986601408792,
+     "rmse": 0.18416800264436464,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.93
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.01007276369667966,
+     "rmse": 0.19305489601093254,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.92
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": 0.01667736259751316,
+     "rmse": 0.24277219378144757,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.96
+    },
+    "nu": {
+     "that": 8.0,
+     "chech": 0.6839768378840237,
+     "rmse": 2.406992292343404,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.97
+    }
+   },
+   "bac_bo_theta0": 1.0,
+   "bac_bo_gamma0": 0.09
+  },
+  "skewt|mle|E1": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": -0.0007128483498407104,
+     "rmse": 0.033344124733964496,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.95
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 0.0018043885786872538,
+     "rmse": 0.011522410466650193,
+     "do_phu": 0.98,
+     "do_phu_hessian": 0.98
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.006098316176553498,
+     "rmse": 0.029152159366719495,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.92
+    },
+    "theta": {
+     "that": -0.1,
+     "chech": -0.0012440770100973896,
+     "rmse": 0.017145244500407157,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.97
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.002542927071634583,
+     "rmse": 0.010912315741616224,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.96
+    },
+    "gamma_X1": {
+     "that": 0.05,
+     "chech": 0.0009969541834427584,
+     "rmse": 0.01027891706778139,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "gamma_X2": {
+     "that": 0.05,
+     "chech": 0.001664546110682929,
+     "rmse": 0.01076711437693191,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": -0.021674859220950027,
+     "rmse": 0.1678391212441101,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.96
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.029544564417027918,
+     "rmse": 0.17267864590092874,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.95
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": -0.01842882803117334,
+     "rmse": 0.20941464101179877,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.95
+    },
+    "nu": {
+     "that": 8.0,
+     "chech": 0.6835716101718013,
+     "rmse": 1.6359783054701194,
+     "do_phu": 0.98,
+     "do_phu_hessian": 0.98
+    },
+    "lambda": {
+     "that": -0.1,
+     "chech": -0.0015973408520078992,
+     "rmse": 0.0319159533429235,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.95
+    }
+   },
+   "bac_bo_theta0": 1.0,
+   "bac_bo_gamma0": 1.0
+  },
+  "skewt|mle|E2": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": -0.005208797811238237,
+     "rmse": 0.02944702737135796,
+     "do_phu": 0.99,
+     "do_phu_hessian": 0.99
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 0.0020838152346980784,
+     "rmse": 0.011788667360765656,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.009274928813608994,
+     "rmse": 0.03492906893117732,
+     "do_phu": 0.89,
+     "do_phu_hessian": 0.87
+    },
+    "theta": {
+     "that": 0.0,
+     "chech": -0.0011009440732871057,
+     "rmse": 0.019842313502472765,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.95
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.0012431083214764604,
+     "rmse": 0.013019104861345535,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.91
+    },
+    "gamma_X1": {
+     "that": 0.05,
+     "chech": -8.426078893456111e-05,
+     "rmse": 0.012316469775623763,
+     "do_phu": 0.9,
+     "do_phu_hessian": 0.91
+    },
+    "gamma_X2": {
+     "that": 0.05,
+     "chech": 0.00011998683566098914,
+     "rmse": 0.011478761745633176,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.96
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": -0.02830952672997862,
+     "rmse": 0.18081658744373702,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.97
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.00562486316819391,
+     "rmse": 0.1876956269025988,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.93
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": 0.018396489262793688,
+     "rmse": 0.2682338776590376,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.92
+    },
+    "nu": {
+     "that": 8.0,
+     "chech": 0.5846732276525758,
+     "rmse": 1.7079172349433622,
+     "do_phu": 0.98,
+     "do_phu_hessian": 0.98
+    },
+    "lambda": {
+     "that": -0.1,
+     "chech": -0.005474713312141599,
+     "rmse": 0.03603251556511024,
+     "do_phu": 0.9,
+     "do_phu_hessian": 0.9
+    }
+   },
+   "bac_bo_theta0": 0.06,
+   "bac_bo_gamma0": 1.0
+  },
+  "skewt|mle|E3": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": -0.007840715323778683,
+     "rmse": 0.03376245063423095,
+     "do_phu": 0.91,
+     "do_phu_hessian": 0.91
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 0.0019569716883784663,
+     "rmse": 0.014896495369000144,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.95
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.012176322717337172,
+     "rmse": 0.033124798713986395,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.93
+    },
+    "theta": {
+     "that": -0.1,
+     "chech": -0.0032486831402516736,
+     "rmse": 0.022242468902519862,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.95
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.0026821596062202523,
+     "rmse": 0.012341142600425207,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.93
+    },
+    "gamma_X1": {
+     "that": 0.05,
+     "chech": 0.001137983794162825,
+     "rmse": 0.011943427069937014,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.93
+    },
+    "gamma_X2": {
+     "that": 0.05,
+     "chech": 0.0008193332694843214,
+     "rmse": 0.012790907915189702,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": -0.02287394267365519,
+     "rmse": 0.1967477926091722,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.96
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.022484632712985717,
+     "rmse": 0.2097603078823617,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.93
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": -0.007440827184717269,
+     "rmse": 0.2721516145751226,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.95
+    },
+    "nu": {
+     "that": 4.0,
+     "chech": 0.14779409722840472,
+     "rmse": 0.3607311198454068,
+     "do_phu": 0.99,
+     "do_phu_hessian": 0.99
+    },
+    "lambda": {
+     "that": -0.1,
+     "chech": -0.0049899626953270985,
+     "rmse": 0.030140473418933795,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.95
+    }
+   },
+   "bac_bo_theta0": 1.0,
+   "bac_bo_gamma0": 1.0
+  },
+  "skewt|mle|E4": {
+   "B": 100,
+   "tham_so": {
+    "mu": {
+     "that": 0.05,
+     "chech": -0.003079671058818295,
+     "rmse": 0.03098119399951054,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.94
+    },
+    "omega": {
+     "that": 0.04,
+     "chech": 0.0008955479365777653,
+     "rmse": 0.014519383335646199,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.94
+    },
+    "kappa": {
+     "that": 0.15,
+     "chech": -0.013033437541857047,
+     "rmse": 0.03176638258968089,
+     "do_phu": 0.92,
+     "do_phu_hessian": 0.9
+    },
+    "theta": {
+     "that": -0.1,
+     "chech": -0.0025969912234356613,
+     "rmse": 0.02059742667677291,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.94
+    },
+    "beta": {
+     "that": 0.95,
+     "chech": -0.0007956017901336543,
+     "rmse": 0.012759304596443815,
+     "do_phu": 0.93,
+     "do_phu_hessian": 0.93
+    },
+    "gamma_X1": {
+     "that": 0.0,
+     "chech": -0.0003968911598344958,
+     "rmse": 0.00947893736214054,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.98
+    },
+    "gamma_X2": {
+     "that": 0.0,
+     "chech": -0.00034983927929964874,
+     "rmse": 0.00979126332617701,
+     "do_phu": 0.94,
+     "do_phu_hessian": 0.94
+    },
+    "delta_dh": {
+     "that": 0.0,
+     "chech": -0.022171677819281928,
+     "rmse": 0.15065441804260665,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.98
+    },
+    "delta_sau": {
+     "that": 0.0,
+     "chech": 0.013280875830699352,
+     "rmse": 0.15787840640685377,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.96
+    },
+    "delta_nghi": {
+     "that": 0.0,
+     "chech": -0.0006906374073807431,
+     "rmse": 0.23662055785440886,
+     "do_phu": 0.95,
+     "do_phu_hessian": 0.96
+    },
+    "nu": {
+     "that": 8.0,
+     "chech": 0.7018122241928394,
+     "rmse": 1.9226052738295945,
+     "do_phu": 0.97,
+     "do_phu_hessian": 0.98
+    },
+    "lambda": {
+     "that": -0.1,
+     "chech": -0.0007618054673518188,
+     "rmse": 0.02878258956538713,
+     "do_phu": 0.96,
+     "do_phu_hessian": 0.97
+    }
+   },
+   "bac_bo_theta0": 1.0,
+   "bac_bo_gamma0": 0.04
+  }
+ },
+ "dieu_kien_8_1_i": {
+  "chuan": {
+   "do_phu_min": 0.89,
+   "do_phu_max": 0.98,
+   "bac_bo_sai_E2_theta": 0.04,
+   "bac_bo_sai_E4_gamma": 0.08,
+   "so_that_bai": 0,
+   "dat": false
+  },
+  "student": {
+   "do_phu_min": 0.87,
+   "do_phu_max": 0.97,
+   "bac_bo_sai_E2_theta": 0.09,
+   "bac_bo_sai_E4_gamma": 0.09,
+   "so_that_bai": 0,
+   "dat": false
+  },
+  "skewt": {
+   "do_phu_min": 0.89,
+   "do_phu_max": 0.98,
+   "bac_bo_sai_E2_theta": 0.06,
+   "bac_bo_sai_E4_gamma": 0.04,
+   "so_that_bai": 0,
+   "dat": false
+  }
+ },
+ "tham_so_xet_cong": [
+  "omega",
+  "kappa",
+  "theta",
+  "beta",
+  "gamma_X1",
+  "gamma_X2"
+ ],
+ "so_lan_that_bai": {},
+ "loi_that_bai": {}
+}
