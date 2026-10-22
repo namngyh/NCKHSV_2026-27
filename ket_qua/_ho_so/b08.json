@@ -1,7 +1,15 @@
 {
- "trang_thai": "dang_chay",
+ "trang_thai": "xong",
  "h_vao": "7876d9700fc7a65162e8c1b704de896ab4474d1d7136b9f235e5eecdba51bf88",
+ "h_ra": "8c9e70d948c6f3721a28d6f8ce3bb2362a35fa6808db015443e3d70bb34827f6",
  "so_don_vi": 1105,
+ "bat_dau": "2026-10-22 08:52:18",
+ "ket_thuc": "2026-10-22 12:46:33",
+ "giay_tong_hop": 6.6,
+ "cong": null,
+ "chap_nhan_cong": false,
  "thu_muc_diem_kiem_tra": "_diem_kiem_tra\\b08\\7876d9700fc7",
- "bat_dau": "2026-10-22 08:52:18"
+ "so_don_vi_theo_may": {
+  "may_manh": 1105
+ }
 }
