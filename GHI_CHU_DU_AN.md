@@ -5,7 +5,7 @@
 Người dùng bổ sung `VN30F2M_1d` (18/08/2017 - 21/10/2026, phủ 2.170/2.171 phiên F1M) và chấp nhận làm lại toàn bộ.
 - `[du_lieu].xu_ly_dao_han = "f2m"`: tại phiên chuyển r_t = 100 ln(F1M_t / F2M_{t-1}), qua đêm tương tự với giá mở.
   Kiểm tra: độ lệch chuẩn lợi suất phiên chuyển 1,95% (cách cũ, chứa cú nhảy cơ sở) -> 1,27% (cùng hợp đồng),
-  ngày thường 1,48%. Chỉ còn 2 lợi suất khuyết (phiên đầu mẫu và 16/08/2019 thiếu F2M).
+  ngày thường 1,48%. Chỉ còn 1 lợi suất khuyết (phiên đầu mẫu); F2M ngày 15/08/2019 vắng trong tệp gốc đã bổ sung 877,0 (xem du_lieu/goc/VN30F2M_bo_sung.md).
 - Cột `J` = chỉ thị phiên chuyển theo lịch (biến giả D_sau, nhóm phiên); cột mới `khuyet` = lợi suất khuyết (hàm hợp
   lý, đệ quy). `dac_trung()["J"]` nay trả `khuyet`, thêm `J_chuyen`.
 - Ký quỹ: `tong_that_thuc` tính R_{t,H} từ chuỗi lợi suất cùng hợp đồng, nên cửa sổ qua phiên chuyển không còn bị loại.
