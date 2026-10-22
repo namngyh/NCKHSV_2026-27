@@ -37,7 +37,9 @@ def tham_so_that(kb: str, pp: str) -> np.ndarray:
     return np.array(p + {"chuan": [], "student": [nu], "skewt": [nu, lam], "ged": [1.5]}[pp])
 
 
-def _bien_va_lich(n: int, rng):
+def _bien_va_lich(n: int, rng, khuyet_phien_chuyen: bool = True):
+    """Biến ngoại sinh, biến giả lịch và cờ lợi suất khuyết. Phiên chuyển hợp đồng (D_sau = 1) là quan sát khuyết khi
+    `khuyet_phien_chuyen`; ngược lại (dữ liệu có giá F2M, 22/10/2026) mọi lợi suất đều quan sát được, biến giả vẫn giữ."""
     X = np.zeros((n, 2))
     for t in range(1, n):
         X[t] = 0.5 * X[t - 1] + math.sqrt(0.75) * rng.normal(size=2)
@@ -48,13 +50,13 @@ def _bien_va_lich(n: int, rng):
     Z = np.zeros((n, 5))
     Z[1:, :2] = X[:-1]
     Z[:, 2:] = D
-    return Z, D[:, 1] > 0
+    return Z, (D[:, 1] > 0) if khuyet_phien_chuyen else np.zeros(n, bool)
 
 
-def sinh(spec: DacTa, psi: np.ndarray, T: int, khoi_dong: int, rng):
-    """Dữ liệu mô phỏng ở dạng (r, J, Z, mặt nạ, lh0) cho hàm hợp lý."""
+def sinh(spec: DacTa, psi: np.ndarray, T: int, khoi_dong: int, rng, khuyet_phien_chuyen: bool = True):
+    """Dữ liệu mô phỏng ở dạng (r, J, Z, mặt nạ, lh0) cho hàm hợp lý; J là cờ lợi suất khuyết."""
     n = T + khoi_dong
-    Z, J = _bien_va_lich(n, rng)
+    Z, J = _bien_va_lich(n, rng, khuyet_phien_chuyen)
     lh_bd = float(psi[1] / (1 - psi[4]))
     r, _ = U.sinh_tu_mo_hinh(spec, psi, Z, J, lh_bd, rng)
     r, J, Z = r[khoi_dong:], J[khoi_dong:], Z[khoi_dong:]
@@ -78,7 +80,8 @@ def du_lieu_lan(kb: str, pp: str, cfg: dict, seed: int):
     """(spec, psi_0, dữ liệu) của một lần lặp mô phỏng khôi phục; tất định theo seed."""
     spec = DacTa(pp, BIEN)
     psi0 = tham_so_that(kb, pp)
-    dl = sinh(spec, psi0, cfg["mo_phong"]["T"], cfg["mo_phong"]["khoi_dong"], np.random.default_rng(seed))
+    dl = sinh(spec, psi0, cfg["mo_phong"]["T"], cfg["mo_phong"]["khoi_dong"], np.random.default_rng(seed),
+              cfg["mo_phong"].get("khuyet_phien_chuyen", True))
     return spec, psi0, dl
 
 
@@ -86,7 +89,8 @@ def du_lieu_sbc(pp: str, cfg: dict, seed: int):
     rng = np.random.default_rng(seed)
     spec = DacTa(pp, BIEN)
     psi0 = rut_tien_nghiem(pp, rng)
-    return spec, psi0, sinh(spec, psi0, cfg["mo_phong"]["T"], cfg["mo_phong"]["khoi_dong"], rng)
+    return spec, psi0, sinh(spec, psi0, cfg["mo_phong"]["T"], cfg["mo_phong"]["khoi_dong"], rng,
+                            cfg["mo_phong"].get("khuyet_phien_chuyen", True))
 
 
 def _mle(spec, dl, cfg, seed):

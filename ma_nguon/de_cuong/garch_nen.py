@@ -86,7 +86,8 @@ def loc(psi, du_lieu):
 def ll_tung_phien(psi, pp: str, du_lieu):
     h, z = loc(psi, du_lieu)
     sh = psi[4:]
-    return jnp.where(du_lieu[3], log_mat_do(z, pp, sh) - 0.5 * jnp.log(h), 0.0)
+    z_an = jnp.where(du_lieu[3], z, 1.0)       # tránh gradient NaN tại z = 0 ở phiên bị che (xem mo_hinh_jax.ll_tung_phien)
+    return jnp.where(du_lieu[3], log_mat_do(z_an, pp, sh) - 0.5 * jnp.log(h), 0.0)
 
 
 @lru_cache(maxsize=None)

@@ -163,6 +163,27 @@ def test_mo_rong_don_vi_chi_chay_phan_thieu(goc_tam):
     assert K.chay_buoc("t_mr", "day_du") == "bo_qua" and DEM["n"] == 0
 
 
+def test_xu_ly_dao_han_bang_f2m():
+    """Phiên chuyển: r_t = 100 ln(F1M_t / F2M_{t-1}); chỉ khuyết khi thiếu F2M; tổn thất H phiên đi qua phiên chuyển."""
+    from de_cuong import du_lieu as DL
+    from de_cuong import ky_quy as KQ
+    cfg = K.doc_cau_hinh("day_du")
+    if cfg["du_lieu"].get("xu_ly_dao_han") != "f2m":
+        pytest.skip("cau hinh khong dung F2M")
+    d = DL.xay_ngay(K.GOC / cfg["chung"]["du_lieu_goc"], cfg)
+    f2 = DL.doc_f2m(K.GOC / cfg["du_lieu"]["du_lieu_f2m"])
+    J = d["J"].to_numpy()
+    idx = np.flatnonzero(J & ~d["khuyet"].to_numpy())
+    assert len(idx) >= 100 and d["khuyet"].sum() <= 3
+    for t in idx[:5]:
+        p2 = f2[d["date"].iloc[t - 1]]
+        assert math.isclose(d["r"].iloc[t], 100 * math.log(d["close"].iloc[t] / p2), rel_tol=1e-12)
+    assert np.nanstd(d["r"].to_numpy()[J]) < 2 * np.nanstd(d["r"].to_numpy()[~J])   # không còn cú nhảy cơ sở
+    R, ok = KQ.tong_that_thuc(d, 3)
+    t = idx[3] - 1                                                                  # cửa sổ (t, t+2] chứa phiên chuyển
+    assert ok[t, 1] and math.isclose(R[t, 1], math.expm1((d["r"].iloc[t + 1] + d["r"].iloc[t + 2]) / 100))
+
+
 def test_b03b_so_lan_lap_rieng():
     """b03b: VB dùng B_vb, NUTS dùng B_nuts; [mo_phong_bayes] không nằm trong mã băm của b03a, b03b."""
     import importlib

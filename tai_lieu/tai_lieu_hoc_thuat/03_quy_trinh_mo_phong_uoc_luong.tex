@@ -1,0 +1,380 @@
+% =====================================================================
+%  TÀI LIỆU 3. QUY TRÌNH MÔ PHỎNG VÀ ƯỚC LƯỢNG
+%  Dự báo rủi ro và cơ chế ký quỹ động cho hợp đồng tương lai VN30F1M
+%  bằng mô hình EGARCH-X
+%  Biên dịch: xelatex 03_quy_trinh_mo_phong_uoc_luong.tex (hai lượt)
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{mathptmx}
+\usepackage[no-math]{fontspec}
+\setmainfont{TeX Gyre Termes}
+\usepackage{polyglossia}
+\setdefaultlanguage{vietnamese}
+
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3cm,right=2cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.22}
+\setlength{\parskip}{3pt}
+\usepackage{booktabs,array,longtable}
+\usepackage{enumitem}
+\setlist{itemsep=2pt,topsep=4pt}
+\usepackage{xcolor}
+\definecolor{lienket}{RGB}{0,70,140}
+\usepackage[colorlinks=true,linkcolor=lienket,citecolor=lienket,urlcolor=lienket]{hyperref}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+\usepackage{fancyhdr}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape Quy trình mô phỏng và ước lượng — EGARCH-X và ký quỹ động VN30F1M}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\theoremstyle{remark}
+\newtheorem{nhanxet}{Nhận xét}[section]
+
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\ma}[1]{\texttt{\small #1}}
+\newcommand{\UL}{\mathrm{UL}}
+\newcommand{\XT}{\mathrm{XT}}
+\newcommand{\KT}{\mathrm{KT}}
+
+\title{\textbf{DỰ BÁO RỦI RO VÀ CƠ CHẾ KÝ QUỸ ĐỘNG\\ CHO HỢP ĐỒNG TƯƠNG LAI VN30F1M BẰNG MÔ HÌNH EGARCH-X}\\[8pt]
+\large Tài liệu 3: Quy trình mô phỏng và ước lượng}
+\author{Nguyễn Hoài Nam \and Nguyễn Thuận Hiếu \and Đặng Chí Hiếu\\[4pt]
+\small Khoa Toán -- Thống kê, Trường Đại học Tôn Đức Thắng}
+\date{Tháng 10 năm 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent Tài liệu mô tả quy trình tính toán đang được thực hiện trên máy chủ chính của dự án: Môi trường, thứ tự các bước, khối lượng công việc của từng bước, cách vận hành và theo dõi, thời gian đã đo được và các sự kiện đáng kể của đợt chạy chính thức. Mục đích là để người đọc, kể cả người không trực tiếp vận hành, có thể hiểu vì sao mỗi bước tồn tại, bước nào phụ thuộc bước nào, kết quả nào đã có và kết quả nào chưa có tại thời điểm viết. Các con số về thời gian được phân biệt rõ giữa số đã đo và số ước tính. Tài liệu không báo cáo kết luận nghiên cứu; kết luận chỉ có sau khi các bước ngoài mẫu hoàn tất.
+
+\medskip
+\noindent\textbf{Từ khóa:} Quy trình tính toán, mô phỏng khôi phục tham số, ước lượng cuốn chiếu, điểm kiểm tra, khả năng tái lập.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Mục đích và phạm vi}
+
+Quy trình tính toán của nghiên cứu có ba đặc điểm khiến nó cần được mô tả riêng. Thứ nhất, khối lượng lớn: Chỉ riêng mô phỏng khôi phục tham số và ước lượng cuốn chiếu bốn phương pháp đã gồm hàng trăm nghìn lần ước lượng. Thứ hai, các bước có thứ tự phụ thuộc chặt: Kết quả của bước trước quyết định cấu hình của bước sau, và có một cổng kiểm tra giữa hai giai đoạn. Thứ ba, thời gian chạy tính bằng ngày, nên quy trình phải dừng và chạy tiếp được mà không làm thay đổi kết quả.
+
+Tài liệu mô tả quy trình ở trạng thái đang chạy tại thời điểm viết (ngày 22/10/2026), với các điểm sau.
+\begin{itemize}
+\item Cấu hình, mã nguồn và dữ liệu ở trạng thái của kho mã tại thời điểm viết.
+\item Mọi số đo thời gian lấy từ nhật ký chạy trên máy chủ chính.
+\item Phần chưa chạy được ghi là chưa chạy; ước tính được ghi là ước tính.
+\end{itemize}
+Lý thuyết nằm ở Tài liệu 1 và chi tiết cài đặt nằm ở Tài liệu 2.
+
+% =====================================================================
+\section{Môi trường thực hiện}
+
+\begin{table}[h]
+\centering
+\caption{Môi trường của máy chủ chính}\label{tab:moitruong}
+\begin{tabular}{@{}lp{9.4cm}@{}}
+\toprule
+\textbf{Hạng mục} & \textbf{Giá trị} \\
+\midrule
+Hệ điều hành & Windows 11 (bản 10.0.26300) \\
+Bộ xử lý & AMD64, 8 nhân, 16 luồng \\
+Python & 3.12.10 \\
+Thư viện chính & JAX 0.10.2, NumPyro 0.22.0, ArviZ 0.23.4, arch 8.0.0 \\
+Kho mã & Kho git công khai; bản làm việc đặt ngoài thư mục đồng bộ đám mây để tránh xung đột tệp \\
+Số tiến trình song song & Tự động: Số nhỏ hơn giữa (số lõi $-1$) và (RAM trống chia $1{,}5$ GB); khoảng $15$ trên máy này \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Phiên bản đầy đủ của mọi thư viện được ghi tự động vào tệp môi trường của máy mỗi lần khởi động. Hai lưu ý thực tế: (i) Khi chạy song song $15$ tiến trình, mỗi tiến trình chậm hơn khoảng $1{,}5$ đến $2{,}1$ lần so với khi chạy một mình; các thời gian trong tài liệu là thời gian đo ở chế độ song song đầy tải. (ii) Bản làm việc phải nằm ngoài thư mục đồng bộ đám mây, vì dịch vụ đồng bộ giữ tệp làm thao tác đổi tên tệp và thao tác git thất bại; sự cố này đã xảy ra và được xử lý bằng cách chuyển kho sang thư mục riêng.
+
+% =====================================================================
+\section{Cấu trúc ba lớp của quy trình}
+
+\subsection{Chuỗi chính và nhánh nền}
+
+Quy trình có một \emph{chuỗi chính} gồm các bước nối tiếp từ b00 đến b14, và một \emph{nhánh nền} là b03b (mô phỏng Bayes). Nhánh nền không chặn chuỗi chính vì mục đích của nó là kiểm chứng phương pháp, không quyết định cấu hình; vòng lặp điều phối chỉ chạy nhánh nền khi chuỗi chính đã xong hoặc đang phải chờ. Khi nhánh nền xong, các bước báo cáo, kiểm toán và đóng gói được chạy lại.
+
+\subsection{Hai giai đoạn và một cổng}
+
+\begin{description}
+\item[Giai đoạn 1 (b00 đến b07).] Xây dựng và chọn mô hình rủi ro chỉ bằng ước lượng hợp lý cực đại, không nhìn khối kiểm tra. Kết thúc bằng cổng b07.
+\item[Cổng b07.] Kiểm tra ba điều kiện của Mục 8 (Tài liệu 1). Nếu đạt, khối $\KT$ được mở và cấu hình được khóa.
+\item[Giai đoạn 2 (b08 đến b14).] Ước lượng cuốn chiếu bốn phương pháp, đánh giá ngoài mẫu, xây dựng ký quỹ, báo cáo.
+\end{description}
+
+\subsection{Ba khối thời gian}
+
+Dữ liệu được chia theo đề cương đã đăng ký: $\UL$ gồm $750$ phiên (31/01/2018 đến 28/01/2021), $\XT$ gồm $925$ phiên (29/01/2021 đến 16/10/2024) và $\KT$ gồm $435$ phiên (17/10/2024 đến 17/07/2026). Giai đoạn 1 chỉ dùng $\UL\cup\XT$; $\KT$ chỉ được nhìn thấy sau cổng. Mốc ước lượng lại cách nhau $21$ phiên, nên khối $\XT\cup\KT$ có $65$ mốc. Từ ngày 22/10/2026, lợi suất tại $105$ phiên chuyển hợp đồng được tính bằng giá VN30F2M của phiên trước (lợi suất cùng hợp đồng, Mục 2.2 của Tài liệu 1); chỉ còn $2$ lợi suất khuyết trên toàn mẫu.
+
+% =====================================================================
+\section{Các bước của quy trình}
+
+\subsection{Bảng tổng quan}
+
+\begin{longtable}{@{}p{1.2cm}p{4.1cm}p{5.6cm}p{3.2cm}@{}}
+\caption{Các bước, nội dung và khối lượng}\label{tab:buoc}\\
+\toprule
+\textbf{Bước} & \textbf{Tên} & \textbf{Nội dung} & \textbf{Số đơn vị việc} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Bước} & \textbf{Tên} & \textbf{Nội dung} & \textbf{Số đơn vị việc} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+b00 & Thông số thể chế & Đọc thông số (biên độ giá, hệ số nhân, mức ký quỹ của tổ chức bù trừ), yêu cầu mỗi thông số có nguồn và ngày xác minh & $1$ \\
+b01 & Dữ liệu & Dựng bảng ngày, phiên chuyển hợp đồng, đáo hạn, nghỉ dài, chạm biên; kiểm tra chất lượng & $1$ \\
+b02 & Kiểm tra cài đặt & Tích phân số của các phân phối, trường hợp giới hạn, đối chiếu JAX với bản độc lập và gói \ma{arch} & $1$ \\
+b02k & Cỡ và lực kiểm định & Mô phỏng cỡ và lực của kiểm định VaR với cỡ mẫu bằng khối $\KT$ & $22$ \\
+b03a & Mô phỏng khôi phục (MLE) & $3$ phân phối $\times$ $4$ trường hợp $\times$ $1.000$ lần lặp & $12.000$ \\
+b04 & MLE ban đầu & EGARCH-X trên $\UL$, $4$ phân phối, sai số chuẩn, chẩn đoán, khả nghịch & $4$ \\
+b04b & Dự báo tiên nghiệm & Kiểm tra tiên nghiệm có tạo ra lợi suất hợp lý không & $4$ \\
+b05 & Chọn biến & Dự báo cuốn chiếu trên $\XT$ cho mọi tập biến thỏa ngưỡng tương quan; chọn tiến; SPA; Holm & $1.446$ \\
+b06 & Chọn phân phối & Dự báo cuốn chiếu trên $\XT$ cho $4$ phân phối & $360$ \\
+b07 & Cổng & Kiểm tra ba điều kiện; khóa cấu hình & $1$ \\
+b08 & Cuốn chiếu bốn phương pháp & MLE, GARCH, VB mean-field, VB full-rank, NUTS tại $65$ mốc & $1.105$ \\
+b08b & Độ nhạy tiên nghiệm & NUTS với hai phương án tiên nghiệm tại mốc đầu khối $\KT$ & $8$ \\
+b09 & Đánh giá ngoài mẫu & So sánh bốn phương pháp, QLIKE, điểm logarit, VaR, ES, DM, MCS & $260$ \\
+b10 & Dự báo rủi ro $H$ phiên & Mô phỏng $10.000$ đường cho $6$ nguồn dự báo $\times$ $65$ mốc & $390$ \\
+b11 & Ký quỹ & Hiệu chỉnh trên $\XT$, đánh giá trên $\KT$, đối chứng & $9$ \\
+b12 & Độ bền & Đổi $w$, $\eta$; tổng hợp theo $H$, $\alpha$ & $1$ \\
+b13 & Báo cáo & Sinh bảng, hình, phụ lục sai lệch từ tệp kết quả & $1$ \\
+b15 & Kiểm toán & Tính lại con số chính, kiểm tra không rò rỉ $\KT$ & $1$ \\
+b14 & Đóng gói & Đóng gói hồ sơ nộp & $1$ \\
+b03b & Mô phỏng Bayes (nền) & VB và NUTS trên dữ liệu giả; hiệu chuẩn dựa trên mô phỏng & $89.400$ \\
+\end{longtable}
+
+Số đơn vị của b08 gồm $390$ ước lượng hợp lý cực đại ($6$ cấu hình $\times$ $65$ mốc: EGARCH, cấu hình chính, và biến được chọn với bốn phân phối), $65$ ước lượng GARCH(1,1), $195$ lần chạy VB mean-field ($65$ mốc $\times$ $3$ lần khởi tạo), $195$ lần chạy VB full-rank và $260$ chuỗi NUTS ($65$ mốc $\times$ $4$ chuỗi). Số đơn vị của b03b là $73.800$ lần chạy VB ($2$ họ $\times$ $3$ phân phối $\times$ [$4$ trường hợp $\times$ $1.000$ lần lặp $\times$ $3$ khởi tạo $+$ $100$ lần SBC $\times$ $3$ khởi tạo]) và $15.600$ chuỗi NUTS ($3$ phân phối $\times$ [$4$ trường hợp $\times$ $300$ lần lặp $\times$ $4$ chuỗi $+$ $100$ lần SBC $\times$ $4$ chuỗi]).
+
+\subsection{Thứ tự phụ thuộc}
+
+\begin{enumerate}
+\item b00, b01, b02 chạy trước và độc lập với ước lượng.
+\item b03a phụ thuộc b02. b04, b04b, b05 phụ thuộc b02. b06 phụ thuộc b05, vì cần biết biến được chọn.
+\item b07 phụ thuộc b03a, b04, b04b, b05, b06: Điều kiện (i) của cổng đọc kết quả b03a, điều kiện (ii) và (iii) đọc kết quả b04 đến b06.
+\item b08 phụ thuộc b07 (cần cấu hình đã khóa). b08b và b09 phụ thuộc b08. b10 phụ thuộc b08; b11 phụ thuộc b09, b10; b12 phụ thuộc b11.
+\item b13 phụ thuộc b12 và các bước phụ trợ; b15 phụ thuộc b13; b14 phụ thuộc b15.
+\item b03b chỉ phụ thuộc b02 (dữ liệu giả không phụ thuộc kết quả ước lượng), nên có thể chạy bất kỳ lúc nào.
+\end{enumerate}
+
+\subsection{Vai trò của từng nhóm bước}
+
+\paragraph{Mô phỏng khôi phục tham số (b03a, b03b).} Kiểm tra từng phương pháp có lấy lại đúng tham số khi biết trước giá trị thật (Mục 5 của Tài liệu 1). b03a dành cho hợp lý cực đại và quyết định điều kiện (i) của cổng. b03b dành cho Bayes biến phân và NUTS, kèm hiệu chuẩn dựa trên mô phỏng. Dữ liệu giả của mỗi lần lặp được sinh từ hạt giống riêng, dùng chung cho hai bước, nên các phương pháp được so trên cùng dữ liệu.
+
+\paragraph{Lựa chọn cấu hình (b04 đến b06).} Dự báo cuốn chiếu trên $\XT$ bằng hợp lý cực đại cho phép so rất nhiều cấu hình (tổ hợp biến $\times$ phân phối) với chi phí thấp. b05 chọn tập biến ngoại sinh bằng chọn tiến có kiểm soát đa kiểm định; b06 chọn phân phối.
+
+\paragraph{Ước lượng ngoài mẫu (b08, b09).} Cấu hình đã khóa được ước lượng lại tại $65$ mốc bằng cả bốn phương pháp, cùng mô hình nền GARCH(1,1) và EGARCH. b09 đánh giá toàn bộ trên khối $\KT$.
+
+\paragraph{Ký quỹ (b10 đến b12).} Chuyển phân phối dự báo thành mức ký quỹ và đánh giá.
+
+% =====================================================================
+\section{Thiết kế của hai bước mô phỏng}
+
+\subsection{Mô phỏng khôi phục bằng hợp lý cực đại (b03a)}
+
+Với mỗi cặp (phân phối, trường hợp) $\in\{\text{chuẩn, Student-}t,\text{ Student-}t\text{ lệch}\}\times\{E_1,\dots,E_4\}$ và mỗi chỉ số $b=0,\dots,999$, quy trình sinh một bộ dữ liệu $2.000$ phiên từ tham số thật (Bảng 5 của Tài liệu 1), không có lợi suất khuyết như dữ liệu thật sau khi dùng giá F2M, ước lượng bằng hợp lý cực đại với $20$ điểm khởi tạo, tính sai số chuẩn Hessian và bánh kẹp, và thống kê tỷ số hợp lý cho $\gamma=0$. Một đơn vị việc là một lần lặp. Tổng hợp tính độ chệch, RMSE, độ phủ của khoảng Wald $95\%$ cho từng tham số và tỷ lệ bác bỏ sai ở $E_2$, $E_4$.
+
+Số lần lặp $B=1.000$ cho sai số mô phỏng của độ phủ khoảng $0{,}007$. Giá trị này được chọn sau khi các lần chạy với $B=100$ và $B=500$ cho độ phủ nhỏ nhất $0{,}89$ (quá sát ngưỡng $0{,}90$ để kết luận); xem Mục~\ref{sec:suKien}.
+
+\subsection{Mô phỏng Bayes (b03b)}
+
+Với cùng các bộ dữ liệu giả, b03b chạy VB mean-field, VB full-rank và NUTS. Số lần lặp riêng cho từng họ: $B_{\mathrm{VB}}=1.000$ và $B_{\mathrm{NUTS}}=300$, vì NUTS đắt hơn nhiều. Cấu hình này được tách khỏi mã băm đầu vào để có thể tăng $B$ về sau mà không chạy lại phần đã xong. Hiệu chuẩn dựa trên mô phỏng chạy $100$ lần cho mỗi (phân phối, phương pháp), mỗi lần rút tham số thật từ tiên nghiệm, sinh dữ liệu, suy diễn và ghi thứ hạng.
+
+\subsection{Cỡ mẫu và ý nghĩa thống kê}
+
+\begin{table}[h]
+\centering
+\caption{Sai số mô phỏng của độ phủ $\sqrt{0{,}95\times0{,}05/B}$}\label{tab:semc}
+\begin{tabular}{@{}rr@{}}
+\toprule
+\textbf{Số lần lặp $B$} & \textbf{Sai số chuẩn} \\
+\midrule
+$100$ & $0{,}022$ \\
+$300$ & $0{,}013$ \\
+$500$ & $0{,}010$ \\
+$1.000$ & $0{,}007$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Với $B=300$, hai độ phủ chênh nhau dưới khoảng $0{,}04$ không phân biệt được với nhiễu mô phỏng; kết luận về NUTS vì thế chỉ đủ để phát hiện lệch lớn, không đủ cho kết luận tinh. Nếu cần chính xác hơn, $B_{\mathrm{NUTS}}$ có thể tăng sau mà không mất công sức đã bỏ ra.
+
+% =====================================================================
+\section{Thiết kế của bước ước lượng cuốn chiếu (b08)}
+
+\subsection{Cửa sổ mở rộng và mốc}
+
+Tại mốc $s_0\in\{\text{đầu }\XT,\ +21,\ +42,\dots\}$, mô hình được ước lượng trên mọi dữ liệu từ phiên $62$ đến $s_0-1$, rồi dự báo cho $21$ phiên kế tiếp với tham số cố định. Mọi thống kê chuẩn hóa dùng dữ liệu đến $s_0-1$. Với $65$ mốc, mỗi cấu hình thu được dự báo cho $1.360$ phiên.
+
+\subsection{Cách bốn phương pháp phối hợp}
+
+Hợp lý cực đại của cấu hình được chọn tại mỗi mốc làm điểm khởi tạo cho VB và NUTS (cộng nhiễu): VB chạy $3$ lần khởi tạo, NUTS chạy $4$ chuỗi. Dùng chung điểm khởi tạo là cách làm hợp lý để giảm thời gian khởi động của NUTS, nhưng có hệ quả là bốn chuỗi không xuất phát từ những điểm \emph{rải rộng}; vì vậy chỉ số $\hat R$ có thể đánh giá hội tụ cục bộ tốt hơn hội tụ toàn cục. Nhận định này cần nhắc khi diễn giải chẩn đoán.
+
+\subsection{Đơn vị dài và điểm kiểm tra giữa chừng}
+
+Mỗi lần chạy VB và mỗi chuỗi NUTS là một đơn vị dài. Chúng được chia đoạn và lưu trạng thái: VB mỗi $2.000$ bước, NUTS sau khởi động và mỗi $100$ vòng lấy mẫu. Khi hết hộp thời gian $30$ phút, tiến trình dừng sạch sau khi lưu và đơn vị tiếp tục ở lượt sau. Trong nhật ký, dòng ``hết giờ trong đơn vị \dots{} đã ghi điểm kiểm tra giữa chừng'' là hoạt động bình thường, không phải lỗi.
+
+% =====================================================================
+\section{Vận hành}
+
+\subsection{Khởi động và theo dõi}
+
+Quy trình được khởi động bằng tệp \ma{chay.bat}, mục ``Chạy chính thức''. Mục này chạy chuỗi chính ở vai trò chủ trì, đồng bộ với kho git, và tự khởi động lại khi mã nguồn trên kho đổi. Khi dừng (đóng cửa sổ hoặc tắt máy), chạy lại cùng mục sẽ tiếp tục từ điểm kiểm tra. Các mục khác của \ma{chay.bat} gồm xem tiến độ, chạy thử rút gọn, kiểm thử, chạy riêng vài bước và sinh lại báo cáo.
+
+Có ba cách theo dõi: (i) Bảng tiến độ in số đơn vị đã xong của từng bước; (ii) nhật ký theo bước trong \ma{ket\_qua/\_nhat\_ky}, mỗi đơn vị xong ghi một dòng kèm thời gian; (iii) lịch sử commit trên kho git, mỗi $30$ phút máy đẩy kết quả một lần với thông điệp ghi thời điểm.
+
+\subsection{Đồng bộ và an toàn kết quả}
+
+Cứ $30$ phút, máy chạy lệnh đẩy kết quả (\ma{git add}, \ma{commit}, \ma{push}) rồi kéo thay đổi. Nếu việc đẩy bị từ chối vì kho đã đổi, máy kéo rồi đẩy lại, tối đa tám lần; nếu vẫn không được thì kết quả vẫn an toàn ở máy cục bộ và lần sau thử lại. Thông báo lỗi được che phần xác thực. Vì mỗi tệp kết quả chỉ do một máy ghi, việc đồng bộ không bao giờ gây xung đột nội dung.
+
+\subsection{Các điều kiện dừng và xử lý}
+
+\begin{table}[h]
+\centering
+\caption{Mã thoát của điểm vào và ý nghĩa}\label{tab:mathoat}
+\begin{tabular}{@{}cp{11.2cm}@{}}
+\toprule
+\textbf{Mã} & \textbf{Ý nghĩa và xử lý} \\
+\midrule
+$0$ & Xong hoặc hết việc. \\
+$1$ & Lỗi; xem nhật ký. Chạy lại tiếp tục từ điểm kiểm tra. \\
+$3$ & Cổng không đạt. Xem tệp kết quả cổng và trao đổi với giảng viên hướng dẫn trước khi chấp nhận hay sửa. \\
+$4$ & Mã nguồn hoặc cấu hình trên kho đổi; tiến trình dừng sạch và \ma{chay.bat} tự khởi động lại bằng bản mới. \\
+$130$ & Người dùng dừng tay. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =====================================================================
+\section{Thời gian đã đo và ước tính}
+
+\subsection{Thời gian đã đo trên máy chủ chính}
+
+\begin{table}[h]
+\centering
+\caption{Thời gian đã đo (chạy song song khoảng $15$ tiến trình)}\label{tab:daDo}
+\begin{tabular}{@{}lp{6.2cm}r@{}}
+\toprule
+\textbf{Bước hoặc đơn vị} & \textbf{Điều kiện} & \textbf{Thời gian} \\
+\midrule
+b03a, toàn bước & $12.000$ đơn vị, $B=1.000$ & $\approx14{,}9$ giờ \\
+b03a, một đơn vị & Phân phối chuẩn & $\approx30$ giây \\
+b03a, một đơn vị & Student-$t$ & $40$ đến $60$ giây \\
+b03a, một đơn vị & Student-$t$ lệch & $40$ đến $85$ giây \\
+b05, toàn bước & $1.446$ đơn vị trên $\XT$ & $\approx55$ phút \\
+b06, toàn bước & $360$ đơn vị & $\approx18$ phút \\
+b08, một đơn vị MLE & Cuốn chiếu, một mốc & $\approx24$ giây \\
+b08, một đơn vị GARCH & Một mốc & $\approx1$ giây \\
+b08, một lần chạy VB mean-field & $20.000$ bước & $\approx166$ giây (tối đa $202$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Ước tính phần còn lại}
+
+\begin{table}[h]
+\centering
+\caption{Ước tính thời gian phần chưa chạy}\label{tab:uoctinh}
+\begin{tabular}{@{}lp{7.2cm}p{3.6cm}@{}}
+\toprule
+\textbf{Bước} & \textbf{Cơ sở ước tính} & \textbf{Ước tính} \\
+\midrule
+b08, phần VB & $390$ lần chạy $\times$ $166$ giây $/\ 15$ tiến trình & $\approx1{,}2$ giờ \\
+b08, phần NUTS & $260$ chuỗi; \emph{chưa có số đo} cho một chuỗi & \emph{Chưa ước tính được} \\
+b09 đến b12 & Phần lớn là mô phỏng $10.000$ đường và đánh giá & Vài giờ (phỏng đoán) \\
+b03b, phần VB & $73.800$ lần chạy $\times$ $166$ giây $/\ 15$ & $\approx9$ đến $10$ ngày \\
+b03b, phần NUTS & $15.600$ chuỗi; \emph{chưa có số đo} & Phụ thuộc thời gian một chuỗi: Nếu $10$ phút thì $\approx7$ ngày, nếu $30$ phút thì $\approx22$ ngày \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Thời gian của NUTS chưa được đo vì tại thời điểm viết b08 mới chạy đến phần VB. Số liệu thật sẽ có khi các chuỗi NUTS đầu tiên hoàn tất; bảng trên sẽ được cập nhật. Các ước tính cho b03b là khoảng thời gian chạy liên tục, chưa tính các lần gián đoạn.
+
+% =====================================================================
+\section{Trạng thái tại thời điểm viết}\label{sec:trangthai}
+
+\begin{table}[h]
+\centering
+\caption{Trạng thái các bước (22/10/2026, sau khi bổ sung VN30F2M)}\label{tab:trangthai}
+\begin{tabular}{@{}lp{4.0cm}p{7.0cm}@{}}
+\toprule
+\textbf{Bước} & \textbf{Trạng thái} & \textbf{Ghi chú} \\
+\midrule
+Toàn bộ chuỗi chính & Chạy lại từ đầu & Dữ liệu (thêm VN30F2M) và cách xử lý đáo hạn đổi, nên mã băm dữ liệu đổi và mọi bước chạy lại \\
+b03a & Chạy lại & Dữ liệu mô phỏng không khuyết; $12.000$ đơn vị, khoảng $15$ giờ \\
+Kết quả cũ & Lưu bằng thẻ git & Kết quả theo cách xử lý cũ (loại phiên chuyển) được giữ để làm phân tích độ bền \\
+b03b & Chưa chạy & Chạy sau chuỗi chính \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ở lần chạy trước khi bổ sung VN30F2M (dữ liệu mô phỏng có phiên chuyển khuyết), độ phủ nhỏ nhất của b03a là $0{,}908$ (chuẩn), $0{,}904$ (Student-$t$) và $0{,}900$ (Student-$t$ lệch); cổng đạt và cấu hình khóa là Student-$t$ lệch với biến $G$. Các con số này thuộc thiết kế cũ và sẽ được thay bằng kết quả của lần chạy lại. Khi một độ phủ bằng đúng ngưỡng $0{,}90$ với sai số mô phỏng $0{,}007$, kết luận ``đạt'' cần được diễn giải là ``không bác bỏ được ngưỡng'' chứ không phải ``vượt ngưỡng một cách chắc chắn''.
+
+% =====================================================================
+\section{Các sự kiện đáng kể của đợt chạy chính thức}\label{sec:suKien}
+
+Việc ghi lại các điều chỉnh giữa chừng là cần thiết cho tính minh bạch; các điều chỉnh tự động cũng được ghi vào phụ lục sai lệch của báo cáo.
+
+\begin{table}[h]
+\centering
+\caption{Nhật ký sự kiện}\label{tab:suKien}
+\begin{tabular}{@{}lp{12.6cm}@{}}
+\toprule
+\textbf{Ngày} & \textbf{Sự kiện} \\
+\midrule
+20/10 & Bắt đầu chạy chính thức. Các bước b00 đến b06 xong ở cấu hình đầu ($B=100$ cho mô phỏng; khối $\UL/\XT/\KT=750/420/940$). \\
+20/10 & Cổng b07 không đạt: Độ phủ nhỏ nhất $0{,}89$ (tham số $\kappa_1$, trường hợp $E_2$), dưới ngưỡng $0{,}90$. Điều kiện (ii) và (iii) đạt. \\
+21/10 & Không hạ ngưỡng. Tăng $B$ của b03a lên $500$ để giảm sai số mô phỏng; độ phủ nhỏ nhất $0{,}892$, cổng vẫn không đạt. \\
+21/10 & Tăng $B$ của b03a lên $1.000$ và chạy lại từ đầu; độ phủ nhỏ nhất $0{,}900$, cổng đạt. \\
+22/10 & Bám đề cương đã đăng ký: Chia mẫu 80/20 (khối $\UL/\XT/\KT=750/925/435$), thêm GED vào lựa chọn phân phối, thêm GARCH(1,1) nền. Thiết kế mã băm giữ nguyên kết quả b03a đã chạy. \\
+22/10 & Tách số lần lặp b03b thành $B_{\mathrm{VB}}=1.000$ và $B_{\mathrm{NUTS}}=300$, có thể tăng sau. \\
+22/10 & b05 đến b07 chạy lại với cách chia mới; cổng đạt, cấu hình khóa không đổi. \\
+22/10 & Bổ sung chuỗi VN30F2M. Lợi suất phiên chuyển tính bằng giá F2M của phiên trước (độ lệch chuẩn lợi suất phiên chuyển giảm từ $1{,}95\%$ xuống $1{,}27\%$); dữ liệu mô phỏng không còn lợi suất khuyết. Kết quả cũ gắn thẻ git; toàn bộ quy trình chạy lại từ đầu, kể cả b03a. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{nhanxet}[Về việc tăng số lần lặp để vượt cổng]
+Việc tăng $B$ sau khi thấy độ phủ sát ngưỡng có thể bị đặt câu hỏi về tính khách quan. Tài liệu này ghi rõ: (i) Ngưỡng $0{,}90$ không bị thay đổi; (ii) lý do tăng $B$ là sai số mô phỏng $0{,}022$ ở $B=100$ quá lớn so với khoảng cách $0{,}01$ tới ngưỡng; (iii) lần chạy cuối cho độ phủ đúng bằng ngưỡng, nên kết luận được nêu ở mức không bác bỏ. Người đọc có thể tự đánh giá từ toàn bộ bảng độ phủ trong báo cáo.
+\end{nhanxet}
+
+% =====================================================================
+\section{Khả năng tái lập và sản phẩm}
+
+\subsection{Điều kiện tái lập}
+
+\begin{itemize}
+\item Mã nguồn, cấu hình, dữ liệu gốc và kết quả trung gian nằm trong cùng một kho git; mỗi tệp kết quả có tệp nguồn gốc ghi mã băm đầu vào, mã băm mã nguồn, mã băm dữ liệu, thời điểm và thông tin máy.
+\item Hạt giống ngẫu nhiên cố định theo (bước, đơn vị), nên chạy lại ở máy khác cho cùng kết quả đến sai số làm tròn.
+\item Phiên bản thư viện được khóa trong tệp yêu cầu và ghi lại cho từng lần khởi động.
+\item Các bước báo cáo đọc trực tiếp tệp kết quả, không có con số nhập tay; bước kiểm toán tính lại các con số chính và so với báo cáo, có chênh lệch thì bước thất bại.
+\end{itemize}
+
+\subsection{Sản phẩm}
+
+Quy trình sinh ra: Bảng tham số và chẩn đoán; kết quả mô phỏng khôi phục; so sánh bốn phương pháp; dự báo ngoài mẫu (QLIKE, điểm logarit mật độ, VaR, ES, FZ0); chuỗi mức ký quỹ động theo ngày và so sánh với các quy tắc đối chứng; phụ lục sai lệch so với đề cương; và gói đóng gói để nộp.
+
+% =====================================================================
+\section{Những điều chưa thể kết luận}\label{sec:chuaKetLuan}
+
+\begin{enumerate}
+\item Chưa có kết quả nào về so sánh bốn phương pháp, hậu nghiệm hay hiệu quả của ký quỹ; mọi tham số đã báo cáo ở các bước đầu là ước lượng điểm hợp lý cực đại.
+\item Chưa biết thời gian một chuỗi NUTS, nên chưa ước lượng được thời gian của b08 và b03b.
+\item Mô phỏng khôi phục chưa có kết quả cho các phương pháp Bayes (b03b chưa chạy); vì thế chưa thể nói VB hay NUTS có lấy lại đúng tham số hay không.
+\item Mô phỏng khôi phục chưa bao gồm GED, dù GED tham gia chọn phân phối.
+\item Khối $\KT$ chỉ có $435$ phiên; kiểm định dựa trên số lần vi phạm có lực thấp, và kết luận trên khối này cần được diễn giải thận trọng.
+\end{enumerate}
+
+\end{document}

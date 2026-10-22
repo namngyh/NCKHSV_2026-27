@@ -1,0 +1,366 @@
+% =====================================================================
+%  TÀI LIỆU 2. MÃ NGUỒN VÀ THUẬT TOÁN
+%  Dự báo rủi ro và cơ chế ký quỹ động cho hợp đồng tương lai VN30F1M
+%  bằng mô hình EGARCH-X
+%  Biên dịch: xelatex 02_ma_nguon_thuat_toan.tex (hai lượt)
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{mathptmx}
+\usepackage[no-math]{fontspec}
+\setmainfont{TeX Gyre Termes}
+\usepackage{polyglossia}
+\setdefaultlanguage{vietnamese}
+
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3cm,right=2cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.22}
+\setlength{\parskip}{3pt}
+\usepackage{booktabs,array,longtable}
+\usepackage{enumitem}
+\setlist{itemsep=2pt,topsep=4pt}
+\usepackage{xcolor}
+\definecolor{lienket}{RGB}{0,70,140}
+\definecolor{nenkhung}{RGB}{246,247,250}
+\definecolor{vienkhung}{RGB}{150,160,180}
+\usepackage[colorlinks=true,linkcolor=lienket,citecolor=lienket,urlcolor=lienket]{hyperref}
+\usepackage{xr-hyper}
+\externaldocument{01_co_so_ly_thuyet}   % nhãn công thức, mục, bảng của Tài liệu 1 (biên dịch Tài liệu 1 trước)
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+\usepackage{fancyhdr}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape Mã nguồn và thuật toán — EGARCH-X và ký quỹ động VN30F1M}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+\usepackage[most]{tcolorbox}
+
+\newcounter{thuattoan}
+\newenvironment{thuattoan}[1]{%
+  \refstepcounter{thuattoan}%
+  \begin{tcolorbox}[enhanced,breakable,colback=nenkhung,colframe=vienkhung,boxrule=0.5pt,arc=1mm,
+    left=6pt,right=6pt,top=4pt,bottom=4pt,
+    title={\textbf{Thuật toán \thethuattoan.} #1},coltitle=black,colbacktitle=nenkhung!60!vienkhung!25]%
+  \small
+}{\end{tcolorbox}}
+
+\theoremstyle{remark}
+\newtheorem{nhanxet}{Nhận xét}[section]
+
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Prob}{\mathrm{P}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\VaR}{\mathrm{VaR}}
+\newcommand{\ES}{\mathrm{ES}}
+\newcommand{\ELBO}{\mathrm{ELBO}}
+\newcommand{\Fcal}{\mathcal{F}}
+\newcommand{\Ecal}{\mathcal{E}}
+\newcommand{\Ncal}{N}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\ma}[1]{\texttt{\small #1}}
+\newcommand{\UL}{\mathrm{UL}}
+\newcommand{\XT}{\mathrm{XT}}
+\newcommand{\KT}{\mathrm{KT}}
+
+\title{\textbf{DỰ BÁO RỦI RO VÀ CƠ CHẾ KÝ QUỸ ĐỘNG\\ CHO HỢP ĐỒNG TƯƠNG LAI VN30F1M BẰNG MÔ HÌNH EGARCH-X}\\[8pt]
+\large Tài liệu 2: Mã nguồn và thuật toán}
+\author{Nguyễn Hoài Nam \and Nguyễn Thuận Hiếu \and Đặng Chí Hiếu\\[4pt]
+\small Khoa Toán -- Thống kê, Trường Đại học Tôn Đức Thắng}
+\date{Tháng 10 năm 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent Tài liệu mô tả cách các phương pháp ở Tài liệu 1 được cài đặt thành mã nguồn Python có khả năng tái lập. Nội dung gồm kiến trúc mã, các thuật toán lõi (đệ quy phương sai, hàm hợp lý, ước lượng hợp lý cực đại, Bayes biến phân, NUTS, mô phỏng rủi ro nhiều phiên, quy tắc ký quỹ năm bước) và hạ tầng bảo đảm tính đúng đắn của quy trình tính toán dài hạn (băm đầu vào, điểm kiểm tra ba tầng, ghi nguyên tử, phân mảnh, cổng chuyển giai đoạn, khóa khối kiểm tra). Tài liệu chỉ mô tả những gì mã thực sự làm; những điểm thiết kế còn là lựa chọn tạm thời được nêu ở Mục~\ref{sec:luuy}.
+
+\medskip
+\noindent\textbf{Từ khóa:} Cài đặt, vi phân tự động, JAX, NumPyro, điểm kiểm tra, khả năng tái lập.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section{Kiến trúc mã nguồn}\label{sec:kientruc}
+
+\subsection{Nguyên tắc thiết kế}
+
+Mã nguồn tuân theo bốn nguyên tắc.
+\begin{enumerate}
+\item \textbf{Một nguồn sự thật cho hàm hợp lý.} Hợp lý cực đại, Bayes biến phân và NUTS dùng chung một hàm logarit hợp lý viết bằng JAX. Nhờ vậy sự khác biệt giữa các phương pháp chỉ đến từ thuật toán suy diễn, không đến từ khác biệt cài đặt.
+\item \textbf{Một nguồn sự thật cho tham số.} Mọi giá trị điều chỉnh được (cỡ khối, số lần lặp, siêu tham số ký quỹ, ngưỡng cổng) nằm trong một tệp cấu hình duy nhất. Mã không chứa hằng số ngầm.
+\item \textbf{Mỗi bước là một đơn vị độc lập có thể dừng và chạy tiếp.} Kết quả trung gian được ghi nguyên tử, và mã băm của đầu vào quyết định kết quả cũ còn dùng được hay không.
+\item \textbf{Không rò rỉ thông tin tương lai.} Mọi thống kê chuẩn hóa chỉ dùng dữ liệu đến thời điểm ước lượng lại; khối kiểm tra bị che khỏi mọi bước cho tới khi cấu hình được khóa.
+\end{enumerate}
+
+\subsection{Cấu trúc thư mục}
+
+\begin{table}[h]
+\centering
+\caption{Cấu trúc thư mục của kho mã}\label{tab:thumuc}
+\begin{tabular}{@{}lp{10.2cm}@{}}
+\toprule
+\textbf{Thư mục} & \textbf{Nội dung} \\
+\midrule
+\ma{cau\_hinh/} & \ma{de\_cuong.toml} (mọi tham số), \ma{the\_che.toml} (thông số thể chế kèm nguồn và ngày xác minh) \\
+\ma{ma\_nguon/de\_cuong/} & Thư viện: Mô hình, phân phối, ước lượng, mô phỏng, đánh giá, ký quỹ, khung điều phối \\
+\ma{quy\_trinh/} & Các bước b00 đến b15 và điểm vào \ma{chay.py} \\
+\ma{ket\_qua/} & Đầu ra theo từng bước, hồ sơ, điểm kiểm tra, nhật ký \\
+\ma{kiem\_thu/} & Kiểm thử tự động (21 kiểm thử) \\
+\ma{du\_lieu/} & Dữ liệu gốc và chuỗi ký quỹ lịch sử của tổ chức bù trừ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Ánh xạ từ lý thuyết sang mô-đun}
+
+\begin{table}[h]
+\centering
+\caption{Ánh xạ giữa nội dung lý thuyết (Tài liệu 1) và mô-đun cài đặt}\label{tab:anhxa}
+\begin{tabular}{@{}p{5.4cm}p{3.6cm}p{5.2cm}@{}}
+\toprule
+\textbf{Nội dung} & \textbf{Mục ở Tài liệu 1} & \textbf{Mô-đun} \\
+\midrule
+Dữ liệu, biến, biến lịch & Mục 2 & \ma{du\_lieu.py} \\
+Phân phối sai số & Mục 3.6 & \ma{phan\_phoi.py} (NumPy), \ma{mo\_hinh\_jax.py} (JAX) \\
+EGARCH-X, hàm hợp lý, đổi biến & Mục 3, 4.1 & \ma{mo\_hinh\_jax.py} \\
+GARCH(1,1) nền & Mục 3.1 & \ma{garch\_nen.py} \\
+MLE, VB, NUTS, dự báo & Mục 4 & \ma{uoc\_luong.py} \\
+Mô phỏng khôi phục, SBC & Mục 5 & \ma{mo\_phong.py} \\
+Chỉ tiêu, kiểm định, so sánh & Mục 6 & \ma{danh\_gia.py} \\
+Mô phỏng $H$ phiên, ký quỹ & Mục 7 & \ma{ky\_quy.py} \\
+Điều phối, băm, điểm kiểm tra & (hạ tầng) & \ma{khung.py}, \ma{dong\_bo.py} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Nền tảng tính toán}
+
+Thư viện JAX cung cấp ba công cụ mà toàn bộ cài đặt dựa vào. Thứ nhất, \emph{vi phân tự động}: Gradient và Hessian của hàm hợp lý được tính chính xác (không dùng sai phân hữu hạn), điều kiện cần cho L-BFGS ổn định và cho NUTS. Thứ hai, \emph{biên dịch đúng lúc} (\ma{jit}): Hàm được biên dịch một lần rồi chạy ở tốc độ mã máy. Thứ ba, \emph{vòng lặp có cấu trúc} (\ma{lax.scan}): Đệ quy phương sai theo thời gian được viết dưới dạng quét tuần tự mà vẫn khả vi. Độ chính xác kép được bật toàn cục. NumPyro cung cấp suy diễn biến phân ngẫu nhiên (\ma{SVI}) và NUTS trên cùng mật độ.
+
+Để JAX chỉ biên dịch một lần cho mọi mốc ước lượng lại, mọi mảng có độ dài cố định bằng cả bảng ngày; cửa sổ ước lượng được chọn bằng một mặt nạ logic thay vì cắt mảng.
+
+% =====================================================================
+\section{Thuật toán lõi}\label{sec:thuattoan}
+
+\subsection{Dữ liệu và xử lý đáo hạn}
+
+Hàm \ma{xay\_ngay} trong \ma{du\_lieu.py} gộp nến phút của F1M thành bảng ngày, xác định ngày đáo hạn (thứ Năm thứ ba, lùi về phiên trước nếu nghỉ), cờ phiên chuyển $J_t$, số phiên đến đáo hạn $\tau_t$ và ba biến giả lịch. Cách xử lý phiên chuyển do khóa cấu hình \ma{xu\_ly\_dao\_han} quyết định. Với giá trị \ma{"f2m"} (cấu hình chính thức), hàm đọc tệp giá ngày VN30F2M (\ma{doc\_f2m}), lấy giá đóng cửa F2M của phiên liền trước mỗi phiên chuyển và thay $r_t$, $r^d_t$ bằng lợi suất cùng hợp đồng; với giá trị \ma{"loai"}, lợi suất phiên chuyển để khuyết như cách cũ. Bảng ngày có hai cờ riêng biệt: \ma{J} là phiên chuyển theo lịch (dùng cho biến giả và nhóm phiên), \ma{khuyet} là lợi suất khuyết $\chi_t$ (dùng cho hàm hợp lý và đệ quy). Hàm \ma{dac\_trung} trả cờ khuyết cho phần ước lượng. Mã băm dữ liệu gồm cả tệp F2M, nên đổi dữ liệu này làm mọi bước chạy lại.
+
+\subsection{Đệ quy phương sai và hàm hợp lý}
+
+Hàm \ma{loc} trong \ma{mo\_hinh\_jax.py} thực hiện đệ quy \eqref{eq:pt} của Tài liệu 1 bằng \ma{lax.scan}. Trạng thái mang theo gồm $(\ln h_{t-1}, z_{t-1}, \chi_{t-1}, \text{cờ đầu chuỗi})$.
+
+\begin{thuattoan}{Đệ quy lọc $\ln h_t$ và $z_t$ của EGARCH-X}
+\textbf{Đầu vào:} Tham số $\theta=(\mu,\omega,\kappa_1,\kappa_2,\beta,\gamma,\delta,\theta_{\mathcal E})$; chuỗi $r_t$, cờ lợi suất khuyết $\chi_t$, ma trận $Z_t=[X_{t-1},D_t]$, $\ln h_1$ khởi tạo ($\ln h_0^{*}$).\\
+\textbf{Đầu ra:} Chuỗi $\ln h_t$ và $z_t$ cho mọi phiên.
+\begin{enumerate}
+\item Tính $\mu_{|z|}=\E|z|$ từ tham số hình dạng.
+\item Với phiên đầu: $\ln h_1\leftarrow\ln h_0^{*}$.
+\item Với mỗi phiên $t\ge2$:
+ \begin{enumerate}
+ \item Nếu $\chi_{t-1}=1$ thì $s\leftarrow0$; ngược lại $s\leftarrow\kappa_1(|z_{t-1}|-\mu_{|z|})+\kappa_2 z_{t-1}$.
+ \item $\ln h_t\leftarrow\operatorname{clip}\big(\omega+s+\beta\ln h_{t-1}+Z_t^\top(\gamma,\delta),\,-20,\,20\big)$.
+ \end{enumerate}
+\item $z_t\leftarrow0$ nếu $\chi_t=1$; ngược lại $z_t\leftarrow(r_t-\mu)\,e^{-\ln h_t/2}$.
+\end{enumerate}
+\end{thuattoan}
+
+Logarit hàm hợp lý \eqref{eq:loglik} là tổng, trên các phiên nằm trong mặt nạ cửa sổ ước lượng, của $\ln f_\Ecal(z_t)-\tfrac12\ln h_t$; các phiên $\chi_t=1$ có đóng góp bằng $0$. Hàm \ma{ll\_tung\_phien} trả về đóng góp từng phiên, từ đó suy ra tổng, véc-tơ điểm số (qua \ma{jacfwd}) và Hessian (qua \ma{hessian}) cho sai số chuẩn.
+
+\subsection{Đổi biến và hậu nghiệm}
+
+Hàm \ma{g} chuyển $\xi\to\theta$ theo \eqref{eq:reparam}, hàm \ma{g\_nghich} làm ngược lại và \ma{log\_jacobian} cộng các số hạng $\ln|d g_i/d\xi_i|$ của \eqref{eq:posterior}. Mật độ hậu nghiệm không chuẩn hóa trên $\xi$ là
+\begin{equation}
+\ln\tilde p(\xi\mid y)=\ell(g(\xi))+\ln p(g(\xi))+\ln|J_g(\xi)| .
+\end{equation}
+Đây là hàm duy nhất được truyền cho NumPyro, dưới dạng \ma{numpyro.factor} trên một biến \ma{xi} có tiên nghiệm phẳng; do đó VB và NUTS cùng mục tiêu. Số hạng $\ln p(\theta)$ của $\beta$ và $\lambda$ được tính trực tiếp theo $\xi$ để ổn định khi $\sigma(\xi)$ làm tròn thành $0$ hoặc $1$.
+
+\subsection{Ước lượng hợp lý cực đại}
+
+\begin{thuattoan}{MLE nhiều điểm khởi tạo (hàm \ma{mle})}
+\textbf{Đầu vào:} Dữ liệu $y$, đặc tả $(\Ecal,X)$, số điểm khởi tạo $n_0=20$, độ tán $0{,}3$, nghiệm ấm (tùy chọn).\\
+\textbf{Đầu ra:} $\hat\theta$, $\ell(\hat\theta)$, số điểm khởi tạo hội tụ về nghiệm tốt nhất, độ tán của $\ell$.
+\begin{enumerate}
+\item Giải mô hình đơn giản nhất (phân phối chuẩn, $\gamma=0$) từ $5$ giá trị khởi tạo của $\beta\in\{0{,}5;\,0{,}8;\,0{,}9;\,0{,}95;\,0{,}98\}$; giữ nghiệm tốt nhất $\theta_{\text{lồng}}$.
+\item Mở rộng $\theta_{\text{lồng}}$ thành điểm khởi tạo của cấu hình đầy đủ ($\gamma=0$; hình dạng $\nu=8$ và $\lambda=0$, riêng GED $\nu=1{,}5$) rồi chuyển sang $\xi$.
+\item Lập danh sách $n_0$ điểm: Điểm mở rộng và $n_0-1$ điểm cộng nhiễu $\Ncal(0,0{,}3^2)$; nếu có nghiệm ấm của lần ước lượng trước thì thêm vào đầu danh sách.
+\item Với mỗi điểm, cực tiểu hóa $-\ell(g(\xi))$ bằng L-BFGS-B với gradient từ vi phân tự động (dung sai gradient $10^{-6}$, tối đa $3.000$ vòng). Điểm cho giá trị không hữu hạn bị loại.
+\item Chọn nghiệm có $\ell$ lớn nhất; đếm số điểm có $\ell$ sai khác không quá $10^{-3}$ so với nghiệm tốt nhất.
+\end{enumerate}
+\end{thuattoan}
+
+Số điểm hội tụ về cùng nghiệm là chẩn đoán trực tiếp độ khó của bề mặt hợp lý: Nếu hầu hết điểm cho cùng một nghiệm, bề mặt gần như một đỉnh. Khi ước lượng lại theo mốc, nghiệm ấm của mốc trước được thêm vào danh sách nhằm tăng tốc và giữ tính liên tục.
+
+Sai số chuẩn dạng bánh kẹp được tính bằng ma trận quan sát $\hat A=-\sum\nabla^2\ell_t$ (Hessian đầy đủ qua \ma{hessian}) và $\hat B=S^\top S$ với $S$ là ma trận $n\times d$ của điểm số từng phiên (qua \ma{jacfwd}); phương sai là $\hat A^{-1}\hat B\hat A^{-1}$. Nếu $\hat A$ suy biến thì dùng giả nghịch đảo. Kiểm tra khả nghịch lọc hai đường $\ln h_t$ từ $\ln h_1$ và $\ln h_1+2$ rồi báo số phiên để chênh lệch dưới $10^{-6}$.
+
+\subsection{Mô hình nền GARCH(1,1)}
+
+Mô-đun \ma{garch\_nen.py} cài đặt \eqref{eq:garch} của Tài liệu 1 với cùng giao diện dữ liệu và cùng mật độ sai số như EGARCH-X. Đệ quy dùng $h_t$ thay vì $\ln h_t$ và chặn trong $[e^{-20},e^{20}]$. Tại phiên khuyết, trạng thái ``bình phương phần dư'' được thay bằng $h_t$ (kỳ vọng của nó). Tham số không ràng buộc là $\xi=(\mu,\ln\omega,\operatorname{logit}(a+\beta),\operatorname{logit}(a/(a+\beta)),\dots)$. Ước lượng dùng cùng thủ tục đa điểm khởi tạo với lưới $(a,\beta)\in\{(0{,}05;0{,}90),(0{,}10;0{,}80),(0{,}03;0{,}95),(0{,}15;0{,}70),(0{,}08;0{,}88)\}$. Mô-đun được kiểm thử bằng cách khôi phục tham số mô phỏng và đối chiếu với gói \ma{arch} (chênh lệch tham số dưới $0{,}02$ và log-hợp lý dưới $3$ đơn vị; phần dư khác biệt do cách gói \ma{arch} khởi tạo phương sai đầu).
+
+\subsection{Bayes biến phân}
+
+\begin{thuattoan}{Biến phân mean-field và full-rank (hàm \ma{vb})}
+\textbf{Đầu vào:} Mục tiêu $\ln\tilde p(\xi\mid y)$, điểm khởi tạo $\xi_0$, họ $\in\{\text{MF},\text{FR}\}$, số bước $20.000$, tốc độ học $0{,}005$, $1.000$ mẫu sau cùng.\\
+\textbf{Đầu ra:} Mẫu $\theta^{(s)}$, $\ELBO$ cuối, $\hat k$.
+\begin{enumerate}
+\item Khởi tạo $q=\Ncal(\xi_0,\,0{,}05^2I)$ cho cả hai họ (\ma{AutoNormal} cho MF, \ma{AutoMultivariateNormal} cho FR).
+\item Lặp $20.000$ bước (chia thành đoạn $2.000$ bước, mỗi đoạn lưu trạng thái tối ưu): Rút một mẫu $\zeta\sim\Ncal(0,I)$, tính $\xi=\mu_q+R\zeta$ (với mean-field, $R$ là ma trận chéo $\mathrm{diag}(s_1,\dots,s_d)$), tính gradient của $\ln\tilde p(\xi\mid y)-\ln q(\xi)$ theo $(\mu_q,R)$, cập nhật bằng Adam.
+\item $\ELBO$ cuối là trung bình của $5\%$ bước cuối (âm của hàm mất mát).
+\item Rút $1.000$ mẫu $\xi^{(s)}=\mu_q+R\zeta^{(s)}$ từ $q$ cuối, đổi sang $\theta^{(s)}=g(\xi^{(s)})$.
+\item Tính trọng số $\ln\tilde p(\xi^{(s)}\mid y)-\ln q(\xi^{(s)})$, khớp Pareto tổng quát cho đuôi để được $\hat k$.
+\end{enumerate}
+\end{thuattoan}
+
+Với dữ liệu thật, mỗi mốc ước lượng lại chạy VB từ ba điểm khởi tạo (nghiệm MLE của mốc cộng nhiễu $\Ncal(0,(0{,}02\,i)^2)$ với $i=0,1,2$) và giữ lần có $\ELBO$ lớn nhất; $\ELBO$ của cả ba lần được lưu để đánh giá độ ổn định. Chỉ báo $\hat k$ tính bằng \ma{arviz.psislw}.
+
+\subsection{NUTS}
+
+\begin{thuattoan}{Một chuỗi NUTS có điểm kiểm tra (hàm \ma{nuts\_chuoi})}
+\textbf{Đầu vào:} Mục tiêu $\ln\tilde p(\xi\mid y)$, điểm khởi tạo, $1.000$ vòng khởi động, $1.000$ mẫu, tỷ lệ chấp nhận đích $0{,}8$, độ sâu cây tối đa $10$, ma trận khối lượng đầy đủ.\\
+\textbf{Đầu ra:} Mẫu $\theta^{(s)}$, số bước phân kỳ, số bước nhảy cóc trung bình.
+\begin{enumerate}
+\item Chạy giai đoạn khởi động $1.000$ vòng để thích nghi bước $\epsilon$ và ma trận khối lượng. Lưu trạng thái sau khởi động.
+\item Chia $1.000$ mẫu thành các đoạn $100$ vòng. Với mỗi đoạn: Nạp trạng thái sau đoạn trước, chạy $100$ vòng, lưu mẫu và trạng thái (gồm $\epsilon$ và ma trận khối lượng đã thích nghi).
+\item Nối mọi đoạn thành một chuỗi $1.000$ mẫu.
+\end{enumerate}
+\end{thuattoan}
+
+Vì trạng thái lưu gồm cả bước và ma trận khối lượng, chuỗi tiếp tục sau khi dừng là đúng cùng một chuỗi Markov, không phải một chuỗi mới; điều này đã được kiểm thử. Mỗi mốc ước lượng lại chạy $4$ chuỗi độc lập (hạt giống khác nhau, khởi tạo $\xi_0=\hat\xi_{\text{MLE}}+\Ncal(0,0{,}05^2I)$), rồi hàm \ma{chan\_doan\_nuts} tính $\hat R$ chuẩn hóa thứ hạng, cỡ mẫu hiệu dụng phần thân và phần đuôi (qua \ma{arviz}) và số bước phân kỳ. Một mốc ``đạt'' khi $\hat R<1{,}01$, cỡ mẫu hiệu dụng tối thiểu $\ge400$ và không có phân kỳ.
+
+\subsection{Dự báo một phiên}
+
+Hàm \ma{du\_bao\_cam} nhận $\hat\theta$ cố định, lọc $\ln h_t$ trên toàn bảng, lấy các phiên trong khoảng dự báo và tính: $\ln h_t$, điểm logarit mật độ, giá trị tích phân xác suất, và với mỗi mức $\alpha$ hai cặp (VaR, ES) của vị thế mua và bán theo \eqref{eq:var1}, với $q_\alpha$ và $e_\alpha$ lấy từ \ma{phan\_phoi.py} (công thức đóng cho chuẩn, Student-$t$, Student-$t$ lệch; cầu phương cho GED). Hàm \ma{du\_bao\_hau\_nghiem} thực hiện hỗn hợp \eqref{eq:mdhn}: Với mỗi mẫu hậu nghiệm lọc $\ln h_t$ riêng, tính điểm logarit mật độ bằng \ma{logsumexp} trên các mẫu, và lấy VaR, ES từ phân phối gộp của $M=10.000$ lợi suất mô phỏng.
+
+\subsection{Mô phỏng rủi ro nhiều phiên}
+
+\begin{thuattoan}{Mô phỏng VaR và ES $H$ phiên cho một mốc (hàm \ma{mo\_phong\_moc})}
+\textbf{Đầu vào:} Tập tham số $P$ ($|P|=1$ với MLE, $1.000$ mẫu với Bayes), $S=10.000$ đường, $H_{\max}=3$, các mức $\alpha$, chế độ (tham số hoặc lọc).\\
+\textbf{Đầu ra:} Mảng VaR và ES kích thước (số phiên gốc, $H$, số $\alpha$, 2 phía).
+\begin{enumerate}
+\item Cho mỗi đường chọn ngẫu nhiên một bộ tham số trong $P$.
+\item Sinh trước ma trận $Z_{s,j}$ ($S\times H_{\max}$): Từ $\Ecal$ với tham số hình dạng của bộ đã chọn, hoặc bốc lại từ các phần dư chuẩn hóa trong mẫu (chế độ lọc). Ma trận này dùng chung cho mọi phiên gốc của mốc.
+\item Ước lượng mô hình tự hồi quy bậc một cho từng biến ngoại sinh trên cửa sổ ước lượng; lưu hệ số và phần dư.
+\item Với mỗi phiên gốc $t$ trong mốc: Lấy $\ln h^{(s)}_{t+1}$ đã lọc của bộ tham số tương ứng, đặt $X^{(s)}_{t+1}$ bằng giá trị quan sát được, và tích lũy $c^{(s)}\leftarrow0$.
+\item Với $j=1,\dots,H_{\max}$:
+ \begin{enumerate}
+ \item $c^{(s)}\leftarrow c^{(s)}+e^{\ln h^{(s)}/2}\,Z_{s,j}$ và $R^{(s)}\leftarrow e^{c^{(s)}/100}-1$.
+ \item Với mỗi $\alpha$ và mỗi phía (tổn thất $-R$ hoặc $R$): Chọn $k=\lceil\alpha S\rceil$ tổn thất lớn nhất bằng \ma{np.partition}; VaR là giá trị nhỏ nhất trong nhóm, ES là trung bình nhóm.
+ \item Nếu $j<H_{\max}$: Cập nhật $X^{(s)}\leftarrow c+\phi X^{(s)}+\text{phần dư bốc lại}$; $s\leftarrow(1-J)\,[\kappa_1(|Z_{s,j}|-\mu_{|z|})+\kappa_2 Z_{s,j}]$; $\ln h^{(s)}\leftarrow\operatorname{clip}(\omega+s+\beta\ln h^{(s)}+\gamma^\top X^{(s)}+\delta^\top D,\,-20,\,20)$.
+ \end{enumerate}
+\end{enumerate}
+\end{thuattoan}
+
+Hai đặc điểm của cài đặt cần nêu. Thứ nhất, các số ngẫu nhiên $Z_{s,j}$ dùng chung giữa các phiên gốc của một mốc (số ngẫu nhiên chung): Điều này làm các dự báo kề nhau mượt hơn và giảm khối lượng tính toán, nhưng làm sai số Monte Carlo của các phiên kề nhau tương quan. Thứ hai, mô phỏng đặt $\mu=0$ cho lợi suất tích lũy, một lựa chọn thận trọng cho ký quỹ.
+
+\subsection{Tổn thất thực tế và các thước đo đối chứng}
+
+Hàm \ma{tong\_that\_thuc} tính $R_{t,H}=\exp\big(\sum_{j=1}^{H}r_{t+j}/100\big)-1$ cho $H=1,2,3$ từ chuỗi lợi suất cùng hợp đồng (đã lấp tại phiên chuyển bằng giá F2M), và cờ hợp lệ (cửa sổ $(t,t+H]$ không chứa lợi suất khuyết). Nhờ vậy tổn thất qua phiên chuyển là tổn thất của một vị thế được cuộn sang hợp đồng mới. Mô phỏng lịch sử \ma{san\_lich\_su} lấy VaR $H$ phiên là phân vị của các $R_{s,H}$ đã hoàn tất trước $t$ (cửa sổ mở rộng, cần tối thiểu $100$ quan sát) và chọn phía lớn hơn; \ma{lich\_su\_cua\_so} làm tương tự với cửa sổ $250$ phiên; \ma{ewma\_var} cho VaR chuẩn $z_{1-\alpha}\sqrt{H\hat\sigma_{t+1}^2}/100$ với $\hat\sigma^2$ làm trơn mũ hệ số $0{,}94$.
+
+\subsection{Quy tắc ký quỹ năm bước}
+
+\begin{thuattoan}{Quy tắc ký quỹ (hàm \ma{quy\_tac})}
+\textbf{Đầu vào:} Chuỗi $\widehat{\VaR}_t$, $\widehat{\ES}_t$, sàn lịch sử $V^{LS}_t$ (cùng độ dài, theo thời gian); $(w,b,\varphi,\eta)$; $\Delta=0{,}01$, $g=0{,}005$.\\
+\textbf{Đầu ra:} Chuỗi $m_t$.
+\begin{enumerate}
+\item $m^{(1)}_t\leftarrow(1-w)\widehat{\VaR}_t+w\widehat{\ES}_t$, rồi $m^{(3)}_t\leftarrow\max\{(1+b)\,m^{(1)}_t,\ \varphi V^{LS}_t\}$.
+\item Với phiên hợp lệ đầu tiên: $m^{(4)}\leftarrow m^{(3)}_t$ và $m\leftarrow g\lceil m^{(3)}_t/g\rceil$.
+\item Với mỗi phiên hợp lệ tiếp theo:
+ \begin{enumerate}
+ \item $m^{(4)}_t\leftarrow\max\{m^{(3)}_t,\ \eta\,m^{(4)}_{t-1}+(1-\eta)\,m^{(3)}_t\}$.
+ \item $m_t\leftarrow\max\big\{\varphi V^{LS}_t,\ g\lceil\max(m^{(4)}_t,\ m_{t-1}-\Delta)/g\rceil\big\}$.
+ \end{enumerate}
+\end{enumerate}
+\end{thuattoan}
+
+Phép làm tròn lên có trừ một sai số số học nhỏ ($10^{-12}$) để tránh làm tròn lệch một bậc do sai số dấu phẩy động khi tỷ số là số nguyên. Các tham số $g=0{,}5\%$, $\Delta=1\%$ và mức ký quỹ đối chứng $17\%$ được đọc từ \ma{the\_che.toml}, nơi mỗi thông số phải có nguồn và ngày xác minh; hồ sơ chính thức không chạy nếu còn thông số thiếu nguồn.
+
+\subsection{Chỉ tiêu và kiểm định}
+
+Hàm \ma{chi\_tieu} tính tỷ lệ vượt, ký quỹ trung bình và lớn nhất, thiếu hụt bình quân và lớn nhất, độ lệch chuẩn của biến động ký quỹ, số lần điều chỉnh và tỷ số thuận chu kỳ $\max_t m_{t+20}/m_t$ trên các phiên hợp lệ. Hàm \ma{kiem\_dinh\_vuot} chạy Kupiec và Christoffersen trên dãy lấy thưa mỗi $H$ phiên và kiểm định phân vị động với phương sai vững (HAC) trên toàn dãy chồng lấn. Chi phí kỳ vọng và đường biên đánh đổi do \ma{chi\_phi} và \ma{duong\_bien} tính. Trong \ma{danh\_gia.py}: \ma{kupiec}, \ma{christoffersen}, \ma{phan\_vi\_dong}, \ma{fz0}, \ma{dm} (Diebold--Mariano với phương sai Newey--West), \ma{giacomini\_white}, \ma{spa} và \ma{mcs} (bootstrap dừng, độ dài khối $5$, $2.000$ lần lặp), \ma{berkowitz}, \ma{vif} và \ma{den\_giao\_thong}.
+
+% =====================================================================
+\section{Hạ tầng bảo đảm tính đúng đắn}\label{sec:hatang}
+
+Nghiên cứu cần chạy liên tục nhiều ngày trên một máy, nên hạ tầng phải bảo đảm ba điều: Dừng và chạy tiếp không làm thay đổi kết quả, kết quả cũ không bị dùng lại khi đầu vào đã đổi, và khối kiểm tra không rò rỉ. Các cơ chế sau thực hiện việc này.
+
+\subsection{Bước, đơn vị và hồ sơ}
+
+Mỗi bước (đối tượng \ma{Buoc}) khai báo một danh sách \emph{đơn vị việc} dạng \ma{nhóm::khóa}. Các nhóm độc lập nên chạy song song; các khóa trong cùng một nhóm chạy tuần tự để có thể khởi tạo ấm từ đơn vị trước. Chẳng hạn, đơn vị \ma{mle|skewt|G::055} là MLE cấu hình ``skew-t, biến G'' tại mốc thứ $56$. Mỗi bước có một hồ sơ ghi trạng thái (đang chạy, xong, cổng không đạt), mã băm đầu vào, mã băm đầu ra và thời điểm.
+
+\subsection{Mã băm đầu vào}
+
+Mã băm đầu vào của một bước gộp: Cấu hình các mục mà bước khai báo, mã băm đầu ra của các bước mà nó phụ thuộc, nội dung các tệp mã nguồn mà nó dùng, và nội dung dữ liệu gốc. Thư mục điểm kiểm tra có tên là mười hai ký tự đầu của mã băm này. Hệ quả: (i) Nếu đầu vào đổi, thư mục điểm kiểm tra mới trống và bước chạy lại; (ii) hai máy chạy hai phiên bản mã khác nhau ghi vào hai thư mục khác nhau, không thể trộn lẫn; (iii) những phần cấu hình không ảnh hưởng con số (số tiến trình, bộ nhớ, phân mảnh) không nằm trong mã băm, nên đổi chúng không làm chạy lại.
+
+Hai ngoại lệ có chủ đích được cài đặt. Thứ nhất, cờ \ma{mo\_rong\_don\_vi} (dùng cho mô phỏng Bayes) cho phép tăng số lần lặp mà chỉ chạy thêm các đơn vị còn thiếu, vì kết quả mỗi lần lặp chỉ phụ thuộc hạt giống riêng. Thứ hai, các bước chỉ dùng khối $\UL$ (dữ liệu, kiểm tra cài đặt) không băm cỡ khối $\XT$, vì kết quả của chúng không phụ thuộc cỡ này.
+
+\subsection{Điểm kiểm tra ba tầng}
+
+\begin{description}
+\item[Tầng 1 (cả bước).] Hồ sơ bước: Nếu đã xong với cùng mã băm đầu vào thì bước bị bỏ qua.
+\item[Tầng 2 (từng đơn vị).] Mỗi đơn vị xong được ghi thành một tệp riêng; khi chạy lại, các đơn vị đã có tệp được nạp thay vì tính lại.
+\item[Tầng 3 (trong đơn vị).] Với các đơn vị dài, trạng thái giữa chừng được lưu: Chuỗi NUTS sau khởi động và sau mỗi $100$ vòng lấy mẫu; VB sau mỗi $2.000$ bước tối ưu (gồm trạng thái bộ tối ưu Adam và lịch sử hàm mất mát).
+\end{description}
+
+Mọi tệp được ghi nguyên tử: Ghi vào tệp tạm cùng thư mục rồi đổi tên, nên không bao giờ có tệp ghi dở. Trên Windows, khi phần mềm diệt virus hoặc dịch vụ đồng bộ giữ tệp, thao tác đổi tên được thử lại tối đa $10$ lần.
+
+\subsection{Tính tất định và hạt giống}
+
+Hạt giống của mỗi đơn vị là băm của (hạt giống chung, mã bước, khóa đơn vị). Vì vậy làm lại một đơn vị ở bất kỳ thời điểm nào cũng cho cùng kết quả. Dữ liệu mô phỏng của mỗi lần lặp (phân phối, trường hợp, chỉ số) có hạt giống riêng không phụ thuộc bước, nên mô phỏng MLE và mô phỏng Bayes được đánh giá trên cùng các bộ dữ liệu giả.
+
+\subsection{Phân mảnh và song song hóa}
+
+Trên một máy, các nhóm đơn vị được chia cho các tiến trình con; số tiến trình mặc định là số nhỏ hơn giữa (số lõi $-1$) và (RAM trống chia $1{,}5$ GB), và giảm một nửa sau mỗi lần một tiến trình con bị hệ điều hành dừng vì thiếu bộ nhớ. Mỗi tiến trình dùng một luồng để tránh tranh chấp lõi giữa JAX và thư viện đại số tuyến tính. Mỗi nhóm có đúng một máy sở hữu, xác định tĩnh bằng băm tên nhóm trên danh sách phân mảnh trong cấu hình; thiết kế này cho phép thêm máy mà không đổi mã.
+
+\subsection{Cổng chuyển giai đoạn và khóa khối kiểm tra}
+
+Bước b07 kiểm tra ba điều kiện của Mục~\ref{sec:cong} (Tài liệu 1). Nếu không đạt, bước ghi trạng thái ``cổng không đạt'', in lý do và dừng toàn bộ chuỗi (mã thoát $3$); chỉ khi người dùng chủ động chạy lại với cờ chấp nhận, bước mới tiếp tục và việc chấp nhận được ghi vào hồ sơ cùng phụ lục sai lệch của báo cáo. Khi cổng đạt, bước ghi tệp \ma{KHOA\_CAU\_HINH.json} (phân phối, biến, ranh giới khối).
+
+Trước khi có tệp khóa, hàm cấp dữ liệu cho mọi bước cắt bảng ngày tại hết khối $\XT$, nên không có dòng mã nào có thể đọc khối $\KT$; bước khai báo cần khối $\KT$ sẽ bị từ chối. Bước kiểm toán b15 kiểm tra thêm rằng không có đầu ra nào của giai đoạn 1 chứa quan sát thuộc $\KT$.
+
+\subsection{Đồng bộ và vòng lặp điều phối}
+
+Điểm vào \ma{chay.py --buoc tat\_ca} chạy chuỗi chính theo thứ tự các bước, mỗi bước trong một hộp thời gian $30$ phút; hết hộp thì đẩy kết quả lên kho git, kéo thay đổi mới, rồi tiếp tục từ điểm kiểm tra. Nếu mã nguồn hoặc cấu hình trên kho đã đổi (so với mã băm lúc khởi động), tiến trình dừng sạch với mã thoát $4$ và tệp \ma{chay.bat} khởi động lại bằng bản mới. Khi chuỗi chính phải chờ hoặc đã xong, mô phỏng Bayes (b03b) chạy ở nền. Sau khi mô phỏng Bayes xong, các bước báo cáo, kiểm toán và đóng gói được chạy lại để báo cáo có đủ mục mô phỏng.
+
+% =====================================================================
+\section{Kiểm thử và kiểm chứng cài đặt}\label{sec:kiemthu}
+
+\begin{table}[h]
+\centering
+\caption{Các lớp kiểm chứng}\label{tab:kiemthu}
+\begin{tabular}{@{}p{4.6cm}p{9.8cm}@{}}
+\toprule
+\textbf{Đối tượng} & \textbf{Phép kiểm tra} \\
+\midrule
+Phân phối & Mật độ tích phân bằng $1$, phương sai bằng $1$; $\mu_{|z|}$ của bản JAX khớp cầu phương; trường hợp giới hạn ($\nu\to\infty$, $\lambda=0$) trùng phân phối đơn giản hơn; VaR, ES khớp Bảng~\ref{tab:vidu} (Tài liệu 1) đến $3$ chữ số \\
+Hàm hợp lý & Bản JAX khớp bản numba độc lập (log-hợp lý chênh $\sim10^{-12}$, MLE chênh $\sim10^{-8}$, sai số chuẩn trùng) \\
+Đối chiếu gói ngoài & EGARCH khớp gói \ma{arch}; GARCH(1,1) khớp gói \ma{arch}; MCS và SPA trùng kết luận \\
+Mật độ hậu nghiệm & Số hạng Jacobian và tiên nghiệm hữu hạn tại biên \\
+NUTS & Dừng sau khởi động rồi chạy tiếp cho đúng số mẫu \\
+Điểm kiểm tra & Mất một tệp thì chỉ tính lại đúng đơn vị đó; kết quả tổng hợp giống hệt; bước ``mở rộng đơn vị'' chỉ chạy phần thiếu \\
+Khóa khối kiểm tra & Dữ liệu bị cắt tại hết khối $\XT$; bước cần khóa bị từ chối \\
+Phân mảnh & Mỗi nhóm có đúng một chủ, phủ đủ, tất định \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ngoài kiểm thử đơn vị, đường ống được chạy thử trọn vẹn từ b00 đến b15 ở hồ sơ rút gọn (ít vòng lặp, ít mốc) mỗi khi đổi mã, để xác nhận các bước nối với nhau đúng trước khi chạy hồ sơ đầy đủ.
+
+% =====================================================================
+\section{Những điểm cần lưu ý khi diễn giải}\label{sec:luuy}
+
+\begin{enumerate}
+\item \textbf{Biến phân dùng một mẫu mỗi bước.} Gradient của $\ELBO$ ước lượng bằng một mẫu $\zeta$ mỗi bước, tốc độ học không giảm dần, và tham số cuối là của bước cuối chứ không phải trung bình các bước cuối. Cách làm này phổ biến nhưng có thể để lại dao động nhỏ quanh cực trị; độ ổn định qua ba điểm khởi tạo được dùng để kiểm soát.
+\item \textbf{Số ngẫu nhiên chung trong mô phỏng nhiều phiên.} Như đã nêu ở Mục~\ref{sec:thuattoan}, sai số Monte Carlo của VaR, ES các phiên kề nhau tương quan. Điều này không làm chệch dự báo nhưng ảnh hưởng đến độ chính xác của kiểm định trên chuỗi dự báo.
+\item \textbf{GARCH nền không có biến lịch.} GARCH(1,1) được cài đặt theo dạng chuẩn, không có biến giả lịch; EGARCH (khi $\gamma=0$) giữ biến lịch. Sự khác biệt này nên được nêu khi diễn giải kết quả so sánh GARCH với EGARCH.
+\item \textbf{GED không có trong mô phỏng khôi phục.} Mô phỏng khôi phục tham số chạy cho chuẩn, Student-$t$ và Student-$t$ lệch; GED tham gia chọn phân phối nhưng chưa có mô phỏng riêng.
+\item \textbf{Mã băm và đổi mã.} Mọi sửa đổi mã nguồn của một bước hay của mô-đun mà nó dùng đều làm bước chạy lại. Cơ chế này an toàn nhưng cần được tính đến khi đổi mã giữa chừng một lần chạy dài.
+\end{enumerate}
+
+\end{document}

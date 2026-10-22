@@ -109,17 +109,22 @@ def _duoi(L: np.ndarray, a: float):
 # Tổn thất thực tế, sàn mô phỏng lịch sử, đối chứng
 # ----------------------------------------------------------------------------------------
 def tong_that_thuc(d, Hmax: int = 3):
-    """R_{t,H} = P_{t+H}/P_t - 1 và mặt nạ hợp lệ (cửa sổ (t, t+H] không chứa phiên chuyển hợp đồng)."""
-    P = d["close"].to_numpy(float)
-    J = d["J"].to_numpy()
-    n = len(P)
+    """R_{t,H} = exp(tổng r_{t+1..t+H} / 100) - 1 trên chuỗi lợi suất CÙNG HỢP ĐỒNG, và mặt nạ hợp lệ.
+
+    Lợi suất r đã được lấp tại phiên chuyển bằng giá F2M (xu_ly_dao_han = "f2m"), nên tổn thất qua phiên chuyển là
+    tổn thất của một vị thế thật được cuộn sang hợp đồng mới. Cửa sổ (t, t+H] chứa lợi suất khuyết (thiếu F2M, hoặc
+    cách xử lý "loai") bị đánh dấu không hợp lệ, đúng như cách cũ (Nhận xét 4 của đề cương chi tiết)."""
+    r = d["r"].to_numpy(float)
+    n = len(r)
     R = np.full((n, Hmax), np.nan)
     ok = np.zeros((n, Hmax), bool)
     for h in range(1, Hmax + 1):
-        R[:n - h, h - 1] = P[h:] / P[:n - h] - 1
         for t in range(n - h):
-            ok[t, h - 1] = not J[t + 1:t + h + 1].any()
-    return np.where(ok, R, np.nan), ok
+            w = r[t + 1:t + h + 1]
+            if np.isfinite(w).all():
+                R[t, h - 1] = math.expm1(float(w.sum()) / 100.0)
+                ok[t, h - 1] = True
+    return R, ok
 
 
 def san_lich_su(R: np.ndarray, tmoc: np.ndarray, H: int, a: float) -> np.ndarray:

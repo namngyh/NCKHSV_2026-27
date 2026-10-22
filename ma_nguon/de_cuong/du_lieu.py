@@ -1,8 +1,13 @@
 """Dữ liệu và xây dựng biến theo mục 2 của đề cương.
 
 LÝ THUYẾT: Chuỗi ngày gồm bảy trường (giá mở, cao, thấp, đóng, V, V+, V-) lấy từ nến phút.
-Phiên chuyển hợp đồng J_t = 1 (phiên đầu tiên sau ngày đáo hạn, thứ Năm thứ ba của tháng)
-là quan sát khuyết của lợi suất (mục 2.3). Đại lượng đại diện phương sai là Garman-Klass cộng
+Phiên chuyển hợp đồng J_t = 1 (phiên đầu tiên sau ngày đáo hạn, thứ Năm thứ ba của tháng): P_{t-1} của F1M
+thuộc hợp đồng cũ. Cách xử lý chọn bằng [du_lieu].xu_ly_dao_han (22/10/2026):
+  "f2m"  : lợi suất cùng hợp đồng r_t = 100 ln(P_t / P^{F2M}_{t-1}) và r^dem_t = 100 ln(O_t / P^{F2M}_{t-1}),
+           vì hợp đồng là F2M ở phiên t-1 chính là F1M ở phiên t; chỉ khuyết khi thiếu giá F2M phiên t-1;
+  "loai" : lợi suất phiên chuyển là quan sát khuyết (cách cũ, mục 2.3 của đề cương chi tiết).
+Cột `J` luôn là chỉ thị phiên chuyển theo lịch (dùng cho biến giả D_sau, nhóm phiên); cột `khuyet` là cờ lợi suất
+khuyết (dùng cho hàm hợp lý và đệ quy phương sai). Đại lượng đại diện phương sai là Garman-Klass cộng
 phần qua đêm, nhân hệ số thang đo c_rho (mục 2.4). Biến ngoại sinh và các thống kê chuẩn hóa
 chỉ dùng dữ liệu đến thời điểm ước lượng lại s (mục 2.7), nên hàm `dac_trung(ngay, s)` nhận s.
 
@@ -18,20 +23,32 @@ import pandas as pd
 
 GOC = Path(__file__).resolve().parents[2]
 CSV = GOC / "du_lieu" / "goc" / "ohlc_export.csv"
+CSV_F2M = GOC / "du_lieu" / "goc" / "VN30F2M_1d.csv"
 # Giá trị mặc định; `ap_dung_cau_hinh` ghi đè bằng cau_hinh/de_cuong.toml [du_lieu].
 N_V = 60            # cửa sổ khối lượng trung bình (mục 2.6)
 EPS = 1e-6          # hằng số tránh logarit của không (Bảng 4)
 BO_QUA = 61         # số phiên đầu bỏ đi vì thiếu lịch sử 60 phiên cho biến ngoại sinh
 NGHI = 3            # số ngày làm việc liên tiếp không giao dịch để coi là kỳ nghỉ dài (mục 2.5)
+XU_LY_DAO_HAN = "loai"   # "f2m" hoặc "loai"; cấu hình chính thức đặt "f2m"
 TEN_BIEN = ["A", "G", "F", "B", "O"]
 
 
 def ap_dung_cau_hinh(cfg: dict | None):
     """Đặt các hằng số của mục 2 theo cấu hình (một nguồn sự thật duy nhất)."""
-    global N_V, EPS, BO_QUA, NGHI
+    global N_V, EPS, BO_QUA, NGHI, XU_LY_DAO_HAN, CSV_F2M
     if cfg:
         c = cfg["du_lieu"]
         N_V, EPS, BO_QUA, NGHI = int(c["n_V"]), float(c["eps"]), int(c["bo_qua_dau"]), int(c["nghi_dai_toi_thieu"])
+        XU_LY_DAO_HAN = c.get("xu_ly_dao_han", "loai")
+        if c.get("du_lieu_f2m"):
+            CSV_F2M = GOC / c["du_lieu_f2m"]
+
+
+def doc_f2m(csv: Path) -> pd.Series:
+    """Giá đóng cửa ngày của VN30F2M, chỉ mục là ngày giao dịch (giờ Việt Nam)."""
+    b = pd.read_csv(csv, usecols=["datetime_vn", "close"])
+    s = pd.Series(b["close"].to_numpy(float), index=pd.to_datetime(b["datetime_vn"].str[:10]))
+    return s[~s.index.duplicated(keep="last")].sort_index()
 
 
 def doc_ngay(csv: Path = CSV) -> pd.DataFrame:
@@ -105,6 +122,17 @@ def xay_ngay(csv: Path = CSV, cfg: dict | None = None) -> pd.DataFrame:
     d["r"] = 100 * np.log(d["close"] / d["close"].shift(1))
     d["dem"] = 100 * np.log(d["open"] / d["close"].shift(1))
     d.loc[d["J"], ["r", "dem"]] = np.nan
+    if XU_LY_DAO_HAN == "f2m":
+        # giá F2M của phiên liền trước = giá của chính hợp đồng mới (F1M ở phiên t)
+        f2 = doc_f2m(CSV_F2M)
+        p2 = f2.reindex(d["date"].shift(1)).to_numpy()
+        cl, op_ = d["close"].to_numpy(float), d["open"].to_numpy(float)
+        lap = d["J"].to_numpy() & np.isfinite(p2) & (p2 > 0)
+        d.loc[lap, "r"] = 100 * np.log(cl[lap] / p2[lap])
+        d.loc[lap, "dem"] = 100 * np.log(op_[lap] / p2[lap])
+    elif XU_LY_DAO_HAN != "loai":
+        raise ValueError(f"xu_ly_dao_han = {XU_LY_DAO_HAN!r} khong hop le (chi 'f2m' hoac 'loai')")
+    d["khuyet"] = d["r"].isna().to_numpy()
     d["rho"] = d["rho_gk"] + d["dem"] ** 2
     d["khoa_bien"] = (d["open"] == d["high"]) & (d["high"] == d["low"]) & (d["low"] == d["close"])
     return d
@@ -158,7 +186,7 @@ def dac_trung(d: pd.DataFrame, s: int) -> dict:
     Xz = np.where(np.isnan(Xz) & (ti[:, None] >= BO_QUA), 0.0, Xz)   # O khuyết ở phiên chuyển -> 0
     D = d[["D_dh", "D_sau", "D_nghi"]].to_numpy(float)
     return {"Xtho": X, "X": Xz, "rho_sao": c_rho * rho, "c_rho": c_rho, "tau": tau, "D": D,
-            "r": r, "J": d["J"].to_numpy(), "khoa": khoa, "vs": vs}
+            "r": r, "J": d["khuyet"].to_numpy(), "J_chuyen": d["J"].to_numpy(), "khoa": khoa, "vs": vs}
 
 
 def chia_khoi(n_phien: int, ul: int = 700, xt: int = 420) -> dict:

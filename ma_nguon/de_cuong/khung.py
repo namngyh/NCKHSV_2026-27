@@ -107,10 +107,15 @@ _BAM_DU_LIEU: dict[str, str] = {}
 
 
 def bam_du_lieu(cfg) -> str:
-    p = str(GOC / cfg["chung"]["du_lieu_goc"])
-    if p not in _BAM_DU_LIEU:
-        _BAM_DU_LIEU[p] = bam_tep([p])
-    return _BAM_DU_LIEU[p]
+    """Băm dữ liệu gốc: chuỗi F1M và, khi xử lý đáo hạn bằng F2M, cả chuỗi F2M."""
+    tep = [str(GOC / cfg["chung"]["du_lieu_goc"])]
+    c = cfg.get("du_lieu", {})
+    if c.get("xu_ly_dao_han") == "f2m" and c.get("du_lieu_f2m"):
+        tep.append(str(GOC / c["du_lieu_f2m"]))
+    k = "|".join(tep)
+    if k not in _BAM_DU_LIEU:
+        _BAM_DU_LIEU[k] = bam_tep([Path(p) for p in tep])
+    return _BAM_DU_LIEU[k]
 
 
 def ghi_nguyen_tu(path: Path, du_lieu: bytes):

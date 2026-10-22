@@ -208,7 +208,10 @@ def loc(psi, pp: str, nx: int, du_lieu, can: float = 20.0):
 def ll_tung_phien(psi, pp: str, nx: int, du_lieu):
     lnh, z = loc(psi, pp, nx, du_lieu)
     sh = psi[5 + nx + 3:]
-    return jnp.where(du_lieu[3], log_mat_do(z, pp, sh) - 0.5 * lnh, 0.0)
+    # Tại phiên bị che mặt nạ, z có thể bằng 0; với GED khi nu < 1, đạo hàm của |z|^nu tại 0 là vô hạn và phép `where`
+    # chỉ che giá trị chứ không che gradient (0 x vô hạn = NaN). Thay z bằng giá trị an toàn trước khi tính mật độ.
+    z_an = jnp.where(du_lieu[3], z, 1.0)
+    return jnp.where(du_lieu[3], log_mat_do(z_an, pp, sh) - 0.5 * lnh, 0.0)
 
 
 @lru_cache(maxsize=None)

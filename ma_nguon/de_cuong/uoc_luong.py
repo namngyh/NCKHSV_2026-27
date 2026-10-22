@@ -235,6 +235,12 @@ def vb(spec: DacTa, dl, xi0, kieu: str, so_buoc: int, toc_do: float, so_mau: int
     res_losses = np.asarray(losses)
     rng = np.random.default_rng(seed)
     eps = rng.normal(size=(so_mau, spec.d))
+    tham = [np.asarray(v) for v in p.values()]
+    if not all(np.isfinite(v).all() for v in tham) or not np.isfinite(res_losses).any():
+        # tối ưu phân kỳ (tham số biến phân thành NaN): ghi nhận thất bại thay vì làm sập cả bước; b08 chọn lần khởi tạo khác
+        return {"psi_mau": np.full((so_mau, spec.d), np.nan), "xi_mau": np.full((so_mau, spec.d), np.nan),
+                "elbo": float("-inf"), "k_hat": float("inf"), "loss_moc": res_losses[::max(1, len(res_losses) // 200)],
+                "giay": giay + time.time() - t, "so_buoc": int(da), "that_bai": True}
     if kieu == "vb_mf":
         loc, sc = np.asarray(p["xi_auto_loc"]), np.asarray(p["xi_auto_scale"])
         xs = loc + sc * eps

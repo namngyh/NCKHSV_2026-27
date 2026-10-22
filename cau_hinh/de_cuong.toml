@@ -14,6 +14,10 @@ eps = 1e-6                      # hằng số tránh log(0) (Bảng 4)
 bo_qua_dau = 61                 # phiên đầu thiếu lịch sử 60 phiên cho biến ngoại sinh
 nghi_dai_toi_thieu = 3          # ngày làm việc liên tiếp không giao dịch (2.5)
 nguong_r_bat_thuong = 7.0       # |r| > 7% sau khi loại phiên chuyển (2.8)
+# 22/10/2026: xử lý đáo hạn bằng giá VN30F2M. "f2m": lợi suất phiên chuyển = ln(F1M_t / F2M_{t-1}) (cùng hợp đồng);
+# "loai": lợi suất phiên chuyển là quan sát khuyết (cách cũ). Biến giả D_sau giữ nguyên trong cả hai cách.
+xu_ly_dao_han = "f2m"
+du_lieu_f2m = "du_lieu/goc/VN30F2M_1d.csv"
 
 [khoi]                          # mục 5.1, Bảng 7 (đã chốt 20/10/2026)
 UL = 750
@@ -64,6 +68,7 @@ B = 1000                        # KHÔNG còn dùng cho b03b từ 22/10/2026 (xe
 B_mle = 1000                    # số lần lặp của mô phỏng MLE (b03a); tăng từ 100 vì độ phủ kappa (E2) = 0,89 sát ngưỡng 0,90 (21/10/2026)
 T = 2000
 khoi_dong = 200
+khuyet_phien_chuyen = false     # 22/10/2026: dữ liệu mô phỏng không có lợi suất khuyết (khớp xu_ly_dao_han = "f2m")
 phuong_phap = ["mle", "vb_mf", "vb_fr", "nuts"]
 sbc_so_lan = 100                # hiệu chuẩn dựa trên mô phỏng cho suy diễn Bayes
 sbc_kich_ban = "E1"
@@ -128,6 +133,8 @@ may_manh = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 [de_cuong_goc]                  # giá trị đề cương quy định; khác đi sẽ tự ghi vào nhật ký sai lệch (b13)
 "khoi.UL" = 750
 "khoi.XT" = 420
+"du_lieu.xu_ly_dao_han" = "loai"
+"mo_phong.khuyet_phien_chuyen" = true
 "khoi_bm02.XT" = 420
 "bam_sat_bm02.ged_tham_gia_chon" = false
 "khoi.buoc_uoc_luong_lai" = 21

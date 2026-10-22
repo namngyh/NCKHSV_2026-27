@@ -1,0 +1,895 @@
+% =====================================================================
+%  TÀI LIỆU 1. CƠ SỞ LÝ THUYẾT
+%  Dự báo rủi ro và cơ chế ký quỹ động cho hợp đồng tương lai VN30F1M
+%  bằng mô hình EGARCH-X
+%  Biên dịch: xelatex 01_co_so_ly_thuyet.tex (hai lượt)
+% =====================================================================
+\documentclass[12pt,a4paper]{article}
+
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage{mathptmx}
+\usepackage[no-math]{fontspec}
+\setmainfont{TeX Gyre Termes}
+\usepackage{polyglossia}
+\setdefaultlanguage{vietnamese}
+
+\usepackage[a4paper,top=2.5cm,bottom=2.5cm,left=3cm,right=2cm]{geometry}
+\usepackage{setspace}
+\setstretch{1.22}
+\setlength{\parskip}{3pt}
+\usepackage{booktabs,array,longtable}
+\usepackage{enumitem}
+\setlist{itemsep=2pt,topsep=4pt}
+\usepackage{xcolor}
+\definecolor{lienket}{RGB}{0,70,140}
+\usepackage[colorlinks=true,linkcolor=lienket,citecolor=lienket,urlcolor=lienket]{hyperref}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf}
+\usepackage{fancyhdr}
+\setlength{\headheight}{14pt}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\itshape Cơ sở lý thuyết — EGARCH-X và ký quỹ động VN30F1M}
+\fancyhead[R]{\small\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\theoremstyle{definition}
+\newtheorem{dinhnghia}{Định nghĩa}[section]
+\newtheorem{menhde}{Mệnh đề}[section]
+\theoremstyle{remark}
+\newtheorem{nhanxet}{Nhận xét}[section]
+
+\newcommand{\E}{\mathrm{E}}
+\newcommand{\Prob}{\mathrm{P}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\VaR}{\mathrm{VaR}}
+\newcommand{\ES}{\mathrm{ES}}
+\newcommand{\QLIKE}{\mathrm{QLIKE}}
+\newcommand{\LS}{\mathrm{LS}}
+\newcommand{\ELBO}{\mathrm{ELBO}}
+\newcommand{\KL}{\mathrm{KL}}
+\newcommand{\Fcal}{\mathcal{F}}
+\newcommand{\Ecal}{\mathcal{E}}
+\newcommand{\Ncal}{N}
+\newcommand{\ind}{\mathbf{1}}
+\newcommand{\sigm}{\operatorname{sigmoid}}
+\newcommand{\splus}{\operatorname{softplus}}
+\newcommand{\UL}{\mathrm{UL}}
+\newcommand{\XT}{\mathrm{XT}}
+\newcommand{\KT}{\mathrm{KT}}
+
+\title{\textbf{DỰ BÁO RỦI RO VÀ CƠ CHẾ KÝ QUỸ ĐỘNG\\ CHO HỢP ĐỒNG TƯƠNG LAI VN30F1M BẰNG MÔ HÌNH EGARCH-X}\\[8pt]
+\large Tài liệu 1: Cơ sở lý thuyết}
+\author{Nguyễn Hoài Nam \and Nguyễn Thuận Hiếu \and Đặng Chí Hiếu\\[4pt]
+\small Khoa Toán -- Thống kê, Trường Đại học Tôn Đức Thắng}
+\date{Tháng 10 năm 2026}
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+
+\begin{abstract}
+\noindent Tài liệu trình bày toàn bộ cơ sở lý thuyết của nghiên cứu dự báo rủi ro và xây dựng cơ chế ký quỹ động cho hợp đồng tương lai chỉ số VN30 kỳ hạn gần nhất (VN30F1M). Nội dung gồm sáu phần. Phần thứ nhất xây dựng dữ liệu và biến: Lợi suất có xử lý phiên chuyển hợp đồng, đại lượng đại diện cho phương sai theo biên độ giá, biến lịch và năm biến ngoại sinh ứng viên. Phần thứ hai đặc tả ba mô hình phương sai có điều kiện, GARCH(1,1), EGARCH và EGARCH-X, cùng bốn phân phối sai số chuẩn hóa. Phần thứ ba trình bày bốn phương pháp ước lượng và suy diễn trên cùng một hàm hợp lý: Hợp lý cực đại, Bayes biến phân mean-field, Bayes biến phân full-rank và Monte Carlo Hamilton với thuật toán NUTS. Phần thứ tư trình bày nghiên cứu mô phỏng khôi phục tham số. Phần thứ năm trình bày hệ thống tiêu chí đánh giá dự báo ngoài mẫu. Phần thứ sáu chuyển dự báo phân phối có điều kiện thành giá trị chịu rủi ro, tổn thất kỳ vọng ở phần đuôi và một quy tắc ký quỹ năm bước có các thành phần chống thuận chu kỳ. Mọi khái niệm được định nghĩa ở lần xuất hiện đầu tiên; mọi công thức đi kèm mục đích sử dụng và ý nghĩa của từng ký hiệu.
+
+\medskip
+\noindent\textbf{Từ khóa:} EGARCH-X, phương sai có điều kiện, giá trị chịu rủi ro, tổn thất kỳ vọng ở phần đuôi, suy diễn biến phân, NUTS, ký quỹ động, VN30F1M.
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+% =====================================================================
+\section*{Bảng ký hiệu}
+\addcontentsline{toc}{section}{Bảng ký hiệu}
+
+Lợi suất tính theo phần trăm, phương sai tính theo phần trăm bình phương. Tỷ lệ ký quỹ và tổn thất ở Mục~\ref{sec:kyquy} tính theo tỷ lệ của giá trị hợp đồng.
+
+\begin{longtable}{@{}p{3.4cm}p{11.4cm}@{}}
+\toprule
+\textbf{Ký hiệu} & \textbf{Ý nghĩa} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Ký hiệu} & \textbf{Ý nghĩa} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+$t$, $\Fcal_t$ & Chỉ số phiên giao dịch; tập thông tin có được đến cuối phiên $t$. \\
+$P^{o}_t, P^{h}_t, P^{l}_t, P_t$ & Giá mở cửa, cao nhất, thấp nhất, đóng cửa của VN30F1M tại phiên $t$. \\
+$V_t, V^{+}_t, V^{-}_t$ & Khối lượng giao dịch, khối lượng mua chủ động, khối lượng bán chủ động. \\
+$J_t$ & Chỉ thị phiên chuyển hợp đồng: $J_t=1$ tại phiên đầu tiên chuỗi F1M dùng hợp đồng mới. \\
+$P^{(2)}_t$ & Giá đóng cửa của VN30F2M (hợp đồng kỳ hạn thứ hai) tại phiên $t$. \\
+$\chi_t$ & Chỉ thị lợi suất khuyết: $\chi_t=1$ khi $r_t$ không tính được. \\
+$\tau_t$ & Số phiên còn lại đến ngày đáo hạn của hợp đồng đang là F1M. \\
+$D_t$ & Véc-tơ ba biến giả lịch (phiên đáo hạn, phiên sau chuyển hợp đồng, phiên đầu sau kỳ nghỉ dài). \\
+$r_t$, $r^{d}_t$ & Lợi suất đóng cửa -- đóng cửa và lợi suất qua đêm (\%). \\
+$\rho_t$, $\rho^{*}_t$ & Đại lượng đại diện cho phương sai ngày và bản đã hiệu chỉnh thang đo. \\
+$X_{t-1}$ & Véc-tơ $d_X$ biến ngoại sinh quan sát được đến cuối phiên $t-1$. \\
+$h_t$, $z_t$ & Phương sai có điều kiện và sai số chuẩn hóa: $r_t-\mu=\sqrt{h_t}\,z_t$. \\
+$\Ecal$; $\nu$, $\lambda$ & Phân phối của $z_t$; bậc tự do (hoặc tham số hình dạng) và tham số lệch. \\
+$\omega,\kappa_1,\kappa_2,\beta$ & Hệ số chặn, hiệu ứng độ lớn, hiệu ứng dấu, độ dai dẳng trong phương trình $\ln h_t$. \\
+$\gamma$, $\delta$ & Véc-tơ hệ số của biến ngoại sinh và của biến giả lịch. \\
+$y$ & Dữ liệu quan sát dùng để suy diễn; với chuỗi thời gian, $y=(r_t)_{t\in\mathcal T}$. \\
+$\theta$, $\xi$ & Véc-tơ toàn bộ tham số, $d=\dim\theta$ (như giáo trình); ảnh của $\theta$ trên $\mathbb R^{d}$, $\theta=g(\xi)$. \\
+$p(\theta)$, $p(y\mid\theta)$, $p(\theta\mid y)$ & Mật độ tiên nghiệm, mật độ mẫu (hàm hợp lý) và mật độ hậu nghiệm; $p(y)$ là hằng số chuẩn hóa. \\
+$L(\theta\mid y)$, $\ell(\theta)$ & Hàm hợp lý $L(\theta\mid y)=p(y\mid\theta)$ và logarit của nó $\ell(\theta)=\ln L(\theta\mid y)$. \\
+$\pi(\xi)$, $\theta^{(i)}$ & Mật độ đích của chuỗi Markov (hậu nghiệm) và mẫu thứ $i$ do thuật toán sinh ra, như Chương 6 của giáo trình. \\
+$q$, $\mu_q$, $C$ & Phân phối xấp xỉ hậu nghiệm trong suy diễn biến phân, véc-tơ trung bình và ma trận hiệp phương sai của nó. \\
+$\alpha$, $H$ & Mức đuôi (xác suất tổn thất vượt ngưỡng) và khoảng thanh lý (số phiên). \\
+$R_{t,H}$, $L_{t,H}$ & Lợi suất đơn $H$ phiên và tổn thất theo tỷ lệ. \\
+$m_t$, $K$ & Tỷ lệ ký quỹ ấn định sau phiên $t$; hệ số nhân của hợp đồng (đồng trên một điểm). \\
+$\UL$, $\XT$, $\KT$ & Khối ước lượng ban đầu, khối xác thực, khối kiểm tra. \\
+$n$, $S$, $B$ & Số phiên của một khối đánh giá; số đường mô phỏng; số lần lặp mô phỏng. \\
+\end{longtable}
+
+\paragraph{Quy ước ký hiệu.} Tài liệu theo ký hiệu của giáo trình Thống kê Bayes: $\theta$ là véc-tơ tham số, $y$ là dữ liệu, $p(\theta\mid y)\propto p(y\mid\theta)\,p(\theta)$ là quy tắc Bayes, $L(\theta\mid y)=p(y\mid\theta)$ là hàm hợp lý, $\theta^{(i)}$ là mẫu thứ $i$ của chuỗi Markov, $N(\mu,\sigma^2)$ là phân phối chuẩn với trung bình $\mu$ và phương sai $\sigma^2$, $\mathrm{P}(\cdot)$ là xác suất và $\mathrm{E}(\cdot)$ là kỳ vọng. Vì $\theta$ dành cho véc-tơ tham số, hai hệ số của cú sốc trong phương trình phương sai được ký hiệu $\kappa_1$ (hiệu ứng độ lớn) và $\kappa_2$ (hiệu ứng dấu, hay đòn bẩy); trong mã nguồn chúng có tên \texttt{kappa} và \texttt{theta}. Phân phối của sai số chuẩn hóa ký hiệu $\Ecal$ để không trùng với $G(a,b)$ của phân phối Gamma. Các ký hiệu chỉ có trong nghiên cứu này (ví dụ $h_t$, $\rho^{*}_t$, $m_t$) được định nghĩa ở lần xuất hiện đầu tiên.
+
+% =====================================================================
+\section{Đặt vấn đề}\label{sec:datvande}
+
+\subsection{Bối cảnh}
+
+Ký quỹ là tuyến phòng vệ đầu tiên của hệ thống thanh toán bù trừ phái sinh. Mức ký quỹ quá thấp làm tổn thất có thể vượt tài sản bảo đảm khi giá biến động mạnh; mức ký quỹ quá cao làm tăng chi phí vốn của nhà đầu tư và giảm thanh khoản của thị trường. Các nguyên tắc quốc tế về hạ tầng thị trường tài chính yêu cầu ký quỹ được xác định dựa trên rủi ro, đồng thời hạn chế tính thuận chu kỳ, tức xu hướng ký quỹ tăng đột ngột đúng vào lúc thị trường căng thẳng \cite{pfmi2012}.
+
+Lợi suất tài sản tài chính có tính tụ cụm biến động: Các giai đoạn biến động mạnh và yếu nối tiếp nhau. Họ mô hình phương sai có điều kiện thay đổi tự hồi quy (ARCH) và dạng tổng quát (GARCH) mô tả hiện tượng này \cite{engle1982,bollerslev1986}. Mô hình GARCH dạng mũ (EGARCH) mô hình hóa logarit của phương sai, nhờ đó phương sai luôn dương mà không cần ràng buộc dấu, đồng thời cho phép phản ứng khác nhau trước cú sốc dương và cú sốc âm \cite{nelson1991}. Khi bổ sung biến giải thích ngoại sinh vào phương trình phương sai, ta được lớp mô hình GARCH-X; mô hình được sử dụng trong nghiên cứu này, EGARCH-X, là EGARCH có thêm biến ngoại sinh.
+
+Với VN30F1M, một mức ký quỹ cố định bỏ qua tính tụ cụm của biến động: Thừa vốn trong giai đoạn yên tĩnh và thiếu bảo vệ trong giai đoạn căng thẳng. Nghiên cứu đề xuất một quy tắc ký quỹ thay đổi theo dự báo rủi ro có điều kiện và đánh giá quy tắc đó trên dữ liệu lịch sử.
+
+\subsection{Câu hỏi nghiên cứu}
+
+Theo đề cương đã đăng ký, nghiên cứu trả lời ba câu hỏi.
+\begin{description}[leftmargin=0pt]
+\item[CH1.] Việc bổ sung biến ngoại sinh vào EGARCH có cải thiện dự báo biến động và rủi ro đuôi ngoài mẫu của VN30F1M so với GARCH và EGARCH hay không?
+\item[CH2.] Các phương pháp ước lượng và suy diễn tham số (hợp lý cực đại, Bayes biến phân mean-field, Bayes biến phân full-rank, NUTS) và các phân phối sai số khác nhau như thế nào về dự báo, mức bất định của tham số, độ ổn định hoặc hội tụ và thời gian tính toán?
+\item[CH3.] Cơ chế ký quỹ động dựa trên VaR và ES có cải thiện sự đánh đổi giữa mức bảo vệ trước tổn thất và lượng vốn ký quỹ so với các mức ký quỹ đối chứng hay không?
+\end{description}
+
+Ba câu hỏi được chuyển thành các giả thuyết kiểm định được:
+\begin{itemize}
+\item Với CH1: $H_0:\gamma=0$ trong EGARCH-X (kiểm định tỷ số hợp lý trong mẫu), và $H_0:\E[\Delta\ell_t]=0$ với $\Delta\ell_t$ là chênh lệch mất mát ngoài mẫu giữa EGARCH-X và mô hình nền (kiểm định Diebold--Mariano).
+\item Với CH2: Các phân phối sai số cho cùng điểm logarit mật độ dự báo; hậu nghiệm xấp xỉ bằng biến phân trùng với hậu nghiệm tham chiếu của NUTS về độ lệch chuẩn biên và cấu trúc tương quan.
+\item Với CH3: Tại cùng mức ký quỹ trung bình, quy tắc động không làm giảm thiếu hụt bình quân so với quy tắc đối chứng.
+\end{itemize}
+
+\subsection{Cấu trúc tài liệu}
+
+Mục~\ref{sec:dulieu} xây dựng dữ liệu và biến. Mục~\ref{sec:mohinh} đặc tả các mô hình và phân phối. Mục~\ref{sec:uocluong} trình bày bốn phương pháp ước lượng và suy diễn. Mục~\ref{sec:mophong} trình bày nghiên cứu mô phỏng khôi phục tham số. Mục~\ref{sec:danhgia} trình bày thiết kế đánh giá ngoài mẫu và quy trình chọn mô hình. Mục~\ref{sec:kyquy} xây dựng cơ chế ký quỹ động. Mục~\ref{sec:cong} nêu điều kiện chuyển giai đoạn, và Mục~\ref{sec:gioihan} nêu các giới hạn về lý thuyết.
+
+% =====================================================================
+\section{Dữ liệu và xây dựng biến}\label{sec:dulieu}
+
+\subsection{Nguồn dữ liệu}
+
+Dữ liệu là chuỗi ngày của VN30F1M từ ngày 06/11/2017 đến ngày 17/07/2026, gồm $2.171$ phiên, thu thập từ nền tảng DataPro \cite{datapro}. Mỗi phiên có bảy trường: Giá mở cửa, cao nhất, thấp nhất, đóng cửa, khối lượng, khối lượng mua chủ động và khối lượng bán chủ động. Chuỗi F1M là chuỗi nối của các hợp đồng kỳ hạn gần nhất. Bổ sung cho chuỗi này là giá đóng cửa ngày của VN30F2M, chuỗi nối của các hợp đồng kỳ hạn thứ hai, từ ngày 18/08/2017, phủ $2.170$ trong $2.171$ phiên của F1M; chuỗi F2M chỉ được dùng để tính lợi suất tại phiên chuyển hợp đồng (Mục~\ref{sec:chuyenhd}). Dữ liệu không gồm giá thanh toán hằng ngày hay dữ liệu trong ngày; hai giới hạn này quyết định cách xây dựng biến ở các mục dưới.
+
+\subsection{Lợi suất và phiên chuyển hợp đồng}\label{sec:chuyenhd}
+
+Ngày giao dịch cuối cùng của hợp đồng là thứ Năm thứ ba của tháng đáo hạn; trong mẫu có $105$ lần chuyển hợp đồng. Tại phiên chuyển hợp đồng ($J_t=1$), giá $P_{t-1}$ của chuỗi F1M thuộc hợp đồng cũ còn $P_t$ thuộc hợp đồng mới, nên $\ln(P_t/P_{t-1})$ chứa chênh lệch cơ sở giữa hai kỳ hạn chứ không phải lợi suất của một vị thế có thật. Hợp đồng là kỳ hạn thứ hai ở phiên $t-1$ chính là kỳ hạn gần nhất ở phiên $t$, nên lợi suất cùng hợp đồng tại phiên chuyển tính được từ giá F2M của phiên trước, ký hiệu $P^{(2)}_{t-1}$:
+\begin{equation}\label{eq:loisuat}
+r_t=\begin{cases}100\ln\dfrac{P_t}{P_{t-1}}, & J_t=0,\\[8pt] 100\ln\dfrac{P_t}{P^{(2)}_{t-1}}, & J_t=1,\end{cases}
+\qquad
+r^{d}_t=\begin{cases}100\ln\dfrac{P^{o}_t}{P_{t-1}}, & J_t=0,\\[8pt] 100\ln\dfrac{P^{o}_t}{P^{(2)}_{t-1}}, & J_t=1.\end{cases}
+\end{equation}
+Chuỗi $r_t$ thu được là lợi suất của một vị thế kỳ hạn gần nhất được cuộn sang hợp đồng mới vào cuối ngày đáo hạn. Kiểm tra trên dữ liệu xác nhận cách tính này: Tại $104$ phiên chuyển có giá F2M, độ lệch chuẩn của lợi suất theo cách nối thô $\ln(P_t/P_{t-1})$ là $1{,}95\%$, còn theo \eqref{eq:loisuat} là $1{,}27\%$, gần với $1{,}48\%$ của các phiên thường; nghĩa là cú nhảy cơ sở đã được loại bỏ.
+
+Gọi $\chi_t$ là chỉ thị lợi suất khuyết: $\chi_t=1$ khi $r_t$ không tính được. Sau xử lý trên, chỉ còn hai phiên có $\chi_t=1$: Phiên đầu tiên của mẫu (không có giá phiên trước) và một phiên chuyển thiếu giá F2M (16/08/2019). Cách đưa các phiên này vào đệ quy phương sai được trình bày ở Mục~\ref{sec:khuyet}. Biến giả của phiên chuyển hợp đồng vẫn được giữ (Mục 2.4), để hấp thụ khác biệt biến động còn lại quanh đáo hạn.
+
+\subsection{Đại lượng đại diện cho phương sai}\label{sec:proxy}
+
+Phương sai có điều kiện không quan sát được, nên việc đánh giá dự báo phương sai cần một đại lượng đại diện ít nhiễu. Bình phương phần dư không chệch nhưng rất nhiễu \cite{patton2011}. Khi không có dữ liệu trong ngày, ta dùng ước lượng theo biên độ giá. Gọi
+\begin{equation}
+u_t=\ln\frac{P^{h}_t}{P^{o}_t},\qquad d_t=\ln\frac{P^{l}_t}{P^{o}_t},\qquad c_t=\ln\frac{P_t}{P^{o}_t}
+\end{equation}
+lần lượt là biên độ lên, biên độ xuống và lợi suất trong phiên. Ước lượng Garman--Klass \cite{garmanklass1980} của phương sai trong phiên, đưa về thang phần trăm bình phương, là
+\begin{equation}\label{eq:gk}
+\rho^{GK}_t=100^2\Big[\tfrac12(u_t-d_t)^2-(2\ln2-1)\,c_t^2\Big].
+\end{equation}
+Ước lượng này không âm khi dữ liệu thỏa điều kiện toàn vẹn $P^{l}_t\le\min(P^{o}_t,P_t)\le\max(P^{o}_t,P_t)\le P^{h}_t$. Ước lượng của Parkinson \cite{parkinson1980} và Rogers--Satchell \cite{rogers1991} được tính để đối chiếu.
+
+Ước lượng~\eqref{eq:gk} chỉ phản ánh phương sai trong phiên. Đại lượng đại diện cho phương sai đóng cửa -- đóng cửa được xây dựng bằng cách cộng phần qua đêm rồi hiệu chỉnh thang đo \cite{hansenlunde2005rv}:
+\begin{equation}\label{eq:proxy}
+\rho_t=\rho^{GK}_t+\big(r^{d}_t\big)^2,\qquad
+\hat c_\rho=\frac{\sum_{t\le s,\,J_t=0}r_t^2}{\sum_{t\le s,\,J_t=0}\rho_t},\qquad
+\rho^{*}_t=\hat c_\rho\,\rho_t ,
+\end{equation}
+trong đó $s$ là mốc ước lượng gần nhất. Hệ số $\hat c_\rho$ bù cho hai nguồn chệch xuống: Biên độ quan sát rời rạc nhỏ hơn biên độ liên tục, và có những khoảng không giao dịch trong phiên. Lý do phải hiệu chỉnh được giải thích ở Mục~\ref{sec:qlike}.
+
+\begin{nhanxet}[Phiên chạm biên]
+Khi giá khóa ở biên độ trần hoặc sàn suốt phiên, bốn mức giá bằng nhau và mọi ước lượng theo biên độ bằng không, trong khi biến động thực tế rất lớn. Các phiên này được đánh dấu: Đại lượng đại diện của chúng bị loại khỏi tiêu chí QLIKE, và trong biến ngoại sinh, $\rho^{GK}_t$ được thay bằng $r_t^2$.
+\end{nhanxet}
+
+\subsection{Biến lịch}
+
+Ba biến giả, đều biết trước tại thời điểm dự báo, mô tả khác biệt biến động có tính lịch:
+\begin{equation}
+D^{dh}_t=\ind\{\tau_t=0\},\qquad D^{sau}_t=J_t,\qquad D^{ng}_t=\ind\{t \text{ là phiên đầu sau kỳ nghỉ từ } 3 \text{ ngày làm việc}\}.
+\end{equation}
+Biến thứ ba mô tả lượng thông tin tích lũy trong kỳ nghỉ dài, chẳng hạn Tết Nguyên đán.
+
+\subsection{Biến ngoại sinh ứng viên}\label{sec:bienngoaisinh}
+
+Mọi biến ngoại sinh vào phương trình phương sai của phiên $t$ được đo đến cuối phiên $t-1$. Chuỗi khối lượng F1M có dạng răng cưa theo chu kỳ đáo hạn và có xu hướng tăng dài hạn, nên logarit khối lượng thô không dừng. Gọi $\bar V_{t-1}$ là trung bình khối lượng của $60$ phiên trước và $\hat\varsigma(k)$ là hệ số mùa theo số phiên đến đáo hạn,
+\begin{equation}
+\hat\varsigma(k)=\text{trung bình của } \frac{V_t}{\bar V_{t-1}} \text{ trên các phiên } t\le s \text{ có } \tau_t=k .
+\end{equation}
+Bảng~\ref{tab:ungvien} định nghĩa năm ứng viên; $\epsilon=10^{-6}$ tránh logarit của không.
+
+\begin{table}[h]
+\centering
+\caption{Biến ngoại sinh ứng viên}\label{tab:ungvien}
+\begin{tabular}{@{}llp{6.4cm}@{}}
+\toprule
+\textbf{Ký hiệu} & \textbf{Định nghĩa} & \textbf{Diễn giải} \\
+\midrule
+$A_t$ & $\ln V_t-\ln\big(\bar V_{t-1}\,\hat\varsigma(\tau_t)\big)$ & Khối lượng bất thường, đã khử xu hướng và chu kỳ đáo hạn \\
+$G_t$ & $\ln\big(\rho^{GK}_t+\epsilon\big)$ & Phương sai trong phiên theo biên độ giá \\
+$F_t$ & $\ln\big(\tfrac{1}{60}\sum_{j=0}^{59}\rho^{GK}_{t-j}+\epsilon\big)$ & Thành phần chậm của biến động \\
+$B_t$ & $\big|V^{+}_t-V^{-}_t\big|\,/\,\big(V^{+}_t+V^{-}_t\big)$ & Độ lớn của mất cân bằng lệnh \\
+$O_t$ & $\ln\big((r^{d}_t)^2+\epsilon\big)$ & Độ lớn của khoảng nhảy qua đêm; khuyết khi $\chi_t=1$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Cấu hình chính của đề cương có hai biến, $X_{t-1}=(A_{t-1},G_{t-1})$, đại diện cho kênh khối lượng và kênh biến động. Cấu hình này luôn được báo cáo; cấu hình được chọn có thể khác và được xác định theo quy trình ở Mục~\ref{sec:chonbien}.
+
+\subsection{Chuẩn hóa không rò rỉ thông tin}
+
+Mỗi thành phần của $X_{t-1}$ được chuẩn hóa bằng trung bình và độ lệch chuẩn tính trên dữ liệu có đến mốc ước lượng gần nhất. Cũng như $\hat c_\rho$ và $\hat\varsigma$, các thống kê này không bao giờ dùng quan sát thuộc khoảng đang được dự báo. Giá trị khuyết của $O_t$ (khi $\chi_t=1$) được gán bằng $0$ sau chuẩn hóa, tức bằng trung bình huấn luyện. Nhờ chuẩn hóa, hệ số $\gamma_j$ có cùng một cách đọc cho mọi biến: Mức thay đổi của $\ln h_t$ khi biến thứ $j$ tăng một độ lệch chuẩn.
+
+\subsection{Chia mẫu theo thời gian}\label{sec:chiamau}
+
+Theo đề cương đã đăng ký, $80\%$ số phiên đầu (đến ngày 16/10/2024) là dữ liệu trong mẫu, dùng để ước lượng, hiệu chỉnh và lựa chọn cấu hình; $20\%$ còn lại (từ ngày 17/10/2024 đến ngày 17/07/2026) là dữ liệu ngoài mẫu. Để việc lựa chọn không dựa trên chính dữ liệu dùng để ước lượng, phần trong mẫu được chia tiếp thành hai khối. Sau khi bỏ $61$ phiên đầu (thiếu lịch sử $60$ phiên cho biến ngoại sinh), ba khối là:
+
+\begin{table}[h]
+\centering
+\caption{Ba khối thời gian}\label{tab:khoi}
+\begin{tabular}{@{}lllp{6.6cm}@{}}
+\toprule
+\textbf{Khối} & \textbf{Thời gian} & \textbf{Số phiên} & \textbf{Vai trò} \\
+\midrule
+$\UL$ & 31/01/2018 -- 28/01/2021 & $750$ & Ước lượng ban đầu \\
+$\XT$ & 29/01/2021 -- 16/10/2024 & $925$ & Chọn biến ngoại sinh, phân phối, siêu tham số ký quỹ \\
+$\KT$ & 17/10/2024 -- 17/07/2026 & $435$ & Chỉ dùng để báo cáo; không lựa chọn nào dựa trên khối này \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Trong khối $\XT$ và $\KT$, dự báo được tạo theo cửa sổ mở rộng: Tham số được ước lượng lại mỗi $21$ phiên (khoảng một tháng) trên toàn bộ dữ liệu trước mốc; giữa hai lần ước lượng lại, đệ quy phương sai được cập nhật hằng ngày với tham số cố định. Như vậy mọi dự báo cho phiên $t+1$ chỉ dùng thông tin trong $\Fcal_t$.
+
+\begin{nhanxet}[Lực của kiểm định trên khối kiểm tra]
+Với $n=435$ phiên và $\alpha=1\%$, số vi phạm kỳ vọng chỉ khoảng $4$, nên các kiểm định dựa trên số lần vi phạm có lực thấp. Vì vậy, lựa chọn trên khối $\XT$ dựa vào các điểm số liên tục (điểm logarit mật độ, điểm VaR--ES) có lực cao hơn, và kết luận trên khối $\KT$ phải được diễn giải thận trọng.
+\end{nhanxet}
+
+% =====================================================================
+\section{Mô hình phương sai có điều kiện}\label{sec:mohinh}
+
+Ba mô hình được xét đều có chung phương trình trung bình
+\begin{equation}\label{eq:tb}
+r_t=\mu+\varepsilon_t,\qquad \varepsilon_t=\sqrt{h_t}\,z_t,\qquad z_t\overset{\text{iid}}{\sim}\Ecal,\qquad \E z_t=0,\quad \Var z_t=1 .
+\end{equation}
+Vì $z_t$ có phương sai $1$, $h_t$ đúng là phương sai của $r_t$ có điều kiện theo $\Fcal_{t-1}$. Ba mô hình khác nhau ở phương trình của $h_t$.
+
+\subsection{Mô hình nền GARCH(1,1)}
+
+Mô hình GARCH(1,1) \cite{bollerslev1986} mô hình hóa trực tiếp phương sai:
+\begin{equation}\label{eq:garch}
+h_t=\omega+a\,\varepsilon_{t-1}^2+\beta\,h_{t-1},\qquad \omega>0,\ a\ge0,\ \beta\ge0,\ a+\beta<1 .
+\end{equation}
+Hệ số $a$ đo phản ứng của phương sai với cú sốc phiên trước, $\beta$ đo độ dai dẳng, và điều kiện $a+\beta<1$ bảo đảm quá trình dừng với phương sai vô điều kiện $\omega/(1-a-\beta)$. Phản ứng của $h_t$ chỉ phụ thuộc $\varepsilon_{t-1}^2$, nên cú sốc dương và âm cùng độ lớn có tác động như nhau. Đây là mô hình nền theo đề cương đã đăng ký; mô hình không có biến ngoại sinh và biến lịch.
+
+\subsection{Mô hình EGARCH và EGARCH-X}
+
+EGARCH-X mô hình hóa logarit của phương sai:
+\begin{align}
+\ln h_t&=\omega+s_{t-1}+\beta\ln h_{t-1}+\gamma^\top X_{t-1}+\delta^\top D_t, \label{eq:pt}\\
+s_{t-1}&=(1-\chi_{t-1})\big[\kappa_1\big(|z_{t-1}|-\mu_{|z|}\big)+\kappa_2 z_{t-1}\big], \label{eq:sock}
+\end{align}
+trong đó $\mu_{|z|}=\E|z_t|$ dưới phân phối $\Ecal$. EGARCH là trường hợp riêng $\gamma=0$. Các thành phần có ý nghĩa như sau:
+\begin{itemize}
+\item Số hạng $\kappa_1\big(|z_{t-1}|-\mu_{|z|}\big)$ là hiệu ứng độ lớn. Nó có kỳ vọng bằng không và tăng theo biên độ của cú sốc chuẩn hóa.
+\item Số hạng $\kappa_2 z_{t-1}$ là hiệu ứng dấu. Khi $\kappa_2<0$, cú sốc âm làm tăng $\ln h_t$ nhiều hơn cú sốc dương cùng độ lớn; đây là hiệu ứng đòn bẩy \cite{nelson1991}.
+\item Hệ số $\beta$ đo độ dai dẳng của logarit phương sai.
+\item Véc-tơ $\gamma$ là kênh thông tin ngoại sinh, và $\delta$ đo khác biệt biến động có tính lịch.
+\end{itemize}
+Dưới góc nhìn thống kê, \eqref{eq:pt} là một hồi quy tuyến tính của $\ln h_t$ lên trễ của chính nó, một hàm của cú sốc chuẩn hóa và các biến giải thích.
+
+\subsection{Điều kiện chính quy}
+
+\begin{enumerate}
+\item \textbf{Tính dương.} Vì vế trái của \eqref{eq:pt} là $\ln h_t$, ta có $h_t>0$ với mọi giá trị tham số; không cần ràng buộc dấu trên $\omega,\kappa_1,\kappa_2,\gamma,\delta$. Đây là ưu điểm của EGARCH so với GARCH, vốn cần $\omega>0$, $a\ge0$, $\beta\ge0$.
+\item \textbf{Tính dừng.} Quá trình $\ln h_t$ dừng khi $|\beta|<1$. Nghiên cứu dùng miền $\beta\in(0,1)$, vì độ dai dẳng âm không có ý nghĩa kinh tế, và vì miền tham số phải trùng nhau giữa hợp lý cực đại và suy diễn Bayes để so sánh có nghĩa.
+\item \textbf{Khả nghịch.} Lý thuyết tiệm cận của ước lượng hợp lý cực đại cho EGARCH đòi hỏi đệ quy lọc khả nghịch, tức ảnh hưởng của giá trị khởi tạo $\ln h_1$ tắt dần theo thời gian \cite{straumann2006}. Điều kiện này được kiểm tra thực nghiệm bằng cách lọc $\ln h_t$ từ hai giá trị khởi tạo khác nhau và theo dõi chênh lệch.
+\item \textbf{Khởi tạo và bảo vệ số học.} $\ln h_1$ bằng logarit phương sai mẫu của $20$ lợi suất đầu tiên; $\ln h_t$ được chặn trong $[-20,20]$ để hàm mũ không tràn số.
+\end{enumerate}
+
+\begin{nhanxet}[Moment vô điều kiện dưới sai số đuôi dày]
+Kỳ vọng $\E[h_{t+1}\mid\Fcal_{t-1}]$ chứa thừa số $\E\big[\exp(\kappa_1|z|+\kappa_2 z)\big]$. Với $z$ có đuôi đa thức (Student-$t$, Student-$t$ lệch), đại lượng này vô hạn khi $\kappa_1+|\kappa_2|>0$, nên kỳ vọng phương sai từ hai bước trở đi không tồn tại theo nghĩa chặt. Mô hình có điều kiện vẫn xác định đầy đủ: Hàm hợp lý, dự báo một bước và mọi tiêu chí ở Mục~\ref{sec:danhgia} đều là đại lượng có điều kiện. Hệ quả thực hành là dự báo nhiều bước phải dùng phân vị và mô phỏng (Mục~\ref{sec:mophongH}) chứ không dùng kỳ vọng phương sai.
+\end{nhanxet}
+
+\subsection{Phiên chuyển hợp đồng và quan sát khuyết}\label{sec:khuyet}
+
+Nhờ lợi suất cùng hợp đồng \eqref{eq:loisuat}, phiên chuyển hợp đồng là một quan sát bình thường: Nó đóng góp vào hàm hợp lý, và cú sốc chuẩn hóa $z_t$ của nó đi vào đệ quy phương sai như mọi phiên khác. Phần khác biệt về biến động quanh đáo hạn (chẳng hạn do thanh khoản dịch chuyển giữa hai kỳ hạn) được hấp thụ bởi biến giả $D^{sau}_t$ và $D^{dh}_t$.
+
+Với số ít phiên có $\chi_t=1$, lợi suất không xác định nên $z_t$ không xác định. Phiên này không đóng góp vào hàm hợp lý. Trong \eqref{eq:sock}, cú sốc của nó được thay bằng kỳ vọng có điều kiện, bằng không vì $\E\big[\kappa_1(|z|-\mu_{|z|})+\kappa_2 z\big]=0$; đệ quy vẫn được cập nhật qua $\beta\ln h_t$, $X_t$ và $D_{t+1}$. Với GARCH, theo cùng nguyên tắc, $\varepsilon_t^2$ tại phiên khuyết được thay bằng kỳ vọng của nó là $h_t$:
+\begin{equation}
+h_{t+1}=\omega+(a+\beta)\,h_t\qquad\text{khi } \chi_t=1 .
+\end{equation}
+Cách xử lý giữ cho chuỗi phương sai liên tục qua quan sát khuyết.
+
+\begin{nhanxet}[Cách xử lý cũ làm phân tích độ bền]
+Trước khi có chuỗi F2M, mọi phiên chuyển hợp đồng được coi là khuyết ($\chi_t=J_t$) và các cửa sổ ký quỹ chứa phiên chuyển bị loại. Cách xử lý này vẫn được giữ trong cấu hình như một phương án so sánh, để kiểm tra kết luận có nhạy với cách xử lý đáo hạn hay không.
+\end{nhanxet}
+
+\subsection{Phân phối sai số chuẩn hóa}\label{sec:phanphoi}
+
+Bốn phân phối được so sánh, đều chuẩn hóa về kỳ vọng $0$ và phương sai $1$.
+
+\paragraph{Phân phối chuẩn.} $f(z)=(2\pi)^{-1/2}e^{-z^2/2}$ và $\mu_{|z|}=\sqrt{2/\pi}$.
+
+\paragraph{Student-$t$ chuẩn hóa.} Với $\nu>2$ \cite{bollerslev1987},
+\begin{equation}\label{eq:tstd}
+f(z)=C_\nu\Big(1+\frac{z^2}{\nu-2}\Big)^{-\frac{\nu+1}{2}},\qquad
+C_\nu=\frac{\Gamma\big(\frac{\nu+1}{2}\big)}{\sqrt{\pi(\nu-2)}\,\Gamma\big(\frac{\nu}{2}\big)},\qquad
+\mu_{|z|}=\frac{2\sqrt{\nu-2}\,\Gamma\big(\frac{\nu+1}{2}\big)}{(\nu-1)\sqrt{\pi}\,\Gamma\big(\frac{\nu}{2}\big)} .
+\end{equation}
+Thừa số $\nu-2$ thay cho $\nu$ là phép co giãn bảo đảm $\Var z_t=1$. Khi $\nu\to\infty$, phân phối hội tụ về phân phối chuẩn.
+
+\paragraph{Student-$t$ lệch của Hansen.} Với $\nu>2$ và $-1<\lambda<1$ \cite{hansen1994}, đặt
+\begin{equation}
+A=4\lambda\,C_\nu\,\frac{\nu-2}{\nu-1},\qquad B=\sqrt{1+3\lambda^2-A^2}.
+\end{equation}
+Mật độ là
+\begin{equation}\label{eq:skt}
+f(z)=B\,C_\nu\Big(1+\frac{1}{\nu-2}\Big(\frac{Bz+A}{1\mp\lambda}\Big)^2\Big)^{-\frac{\nu+1}{2}},
+\end{equation}
+với dấu trừ khi $z<-A/B$ và dấu cộng khi $z\ge-A/B$. Khi $\lambda<0$, đuôi trái dày hơn đuôi phải; $\lambda=0$ cho lại \eqref{eq:tstd}.
+
+\paragraph{Phân phối sai số tổng quát (GED).} Với tham số hình dạng $\nu>0$ \cite{nelson1991},
+\begin{equation}\label{eq:ged}
+f(z)=\frac{\nu\,\exp\big(-\tfrac12|z/c_\nu|^{\nu}\big)}{c_\nu\,2^{1+1/\nu}\,\Gamma(1/\nu)},\qquad
+c_\nu=\Big[\frac{2^{-2/\nu}\,\Gamma(1/\nu)}{\Gamma(3/\nu)}\Big]^{1/2},\qquad
+\mu_{|z|}=c_\nu\,2^{1/\nu}\,\frac{\Gamma(2/\nu)}{\Gamma(1/\nu)} .
+\end{equation}
+Trường hợp $\nu=2$ là phân phối chuẩn; $\nu<2$ cho đuôi dày hơn chuẩn. Khác với Student-$t$, đuôi của GED giảm theo hàm mũ nên mọi moment tồn tại.
+
+\subsection{Hàm hợp lý}
+
+Gọi $\mathcal T$ là tập phiên trong cửa sổ ước lượng và $\mathcal T^{o}=\{t\in\mathcal T: J_t=0\}$. Véc-tơ tham số của EGARCH-X là
+\begin{equation*}
+\theta=(\mu,\ \omega,\ \kappa_1,\ \kappa_2,\ \beta,\ \gamma,\ \delta,\ \theta_{\mathcal E}),
+\end{equation*}
+trong đó $\theta_{\mathcal E}$ là tham số hình dạng (không có, $\nu$, hoặc $(\nu,\lambda)$). Logarit hàm hợp lý là
+\begin{equation}\label{eq:loglik}
+\ell(\theta)=\sum_{t\in\mathcal T^{o}}\Big[\ln f_\Ecal\big(z_t(\theta)\big)-\tfrac12\ln h_t(\theta)\Big],\qquad z_t(\theta)=\frac{r_t-\mu}{\sqrt{h_t(\theta)}} .
+\end{equation}
+Số hạng $-\tfrac12\ln h_t$ là Jacobian của phép đổi biến từ $z_t$ sang $r_t$. Số tham số là $d=5+d_X+3+\dim\theta_{\mathcal E}$.
+
+\subsection{Mô hình lồng nhau và kiểm định trong mẫu}
+
+EGARCH là trường hợp $\gamma=0$ của EGARCH-X. Vì $0$ là điểm trong của không gian tham số của $\gamma$, dưới $H_0:\gamma=0$ thống kê tỷ số hợp lý
+\begin{equation}
+\mathrm{LR}=2\big[\ell(\hat\theta)-\ell(\tilde\theta)\big]
+\end{equation}
+hội tụ theo phân phối về $\chi^2_{d_X}$, với $\tilde\theta$ là nghiệm có ràng buộc. Kiểm định trong mẫu bổ sung, chứ không thay thế, cho so sánh ngoài mẫu ở Mục~\ref{sec:sosanh}. GARCH và EGARCH không lồng nhau, nên chúng chỉ được so sánh bằng tiêu chí ngoài mẫu.
+
+% =====================================================================
+\section{Ước lượng và suy diễn tham số}\label{sec:uocluong}
+
+\subsection{Tham số hóa không ràng buộc}
+
+Cả bốn phương pháp làm việc trên cùng một không gian không ràng buộc $\xi\in\mathbb R^{d}$, qua một song ánh trơn $\theta=g(\xi)$ tác động theo từng tọa độ:
+\begin{equation}\label{eq:reparam}
+\beta=\sigm(\xi_\beta),\qquad \nu=2+\splus(\xi_\nu),\qquad \lambda=\tanh(\xi_\lambda),
+\end{equation}
+trong đó $\sigm(x)=1/(1+e^{-x})$ và $\splus(x)=\ln(1+e^{x})$. Với GED, $\nu=\splus(\xi_\nu)$. Các tham số còn lại giữ nguyên. Phép biến đổi bảo đảm $\beta\in(0,1)$, $\nu>2$ và $|\lambda|<1$ theo cấu trúc, nên bộ tối ưu và bộ lấy mẫu không bao giờ rơi ra ngoài miền hợp lệ.
+
+Với GARCH(1,1), các ràng buộc được bảo đảm bằng $\omega=e^{\xi_1}$, $a+\beta=\sigm(\xi_2)$ và $a=(a+\beta)\,\sigm(\xi_3)$.
+
+\subsection{Ước lượng hợp lý cực đại}
+
+\paragraph{Tối ưu hóa.} Ước lượng là $\hat\theta=g(\hat\xi)$ với $\hat\xi=\arg\max_{\xi}\ell(g(\xi))$. Bài toán được giải bằng thuật toán L-BFGS, một phương pháp tựa Newton dùng bộ nhớ hạn chế, với gradient tính chính xác bằng vi phân tự động. Vì bề mặt hợp lý có thể có nhiều cực trị địa phương, tối ưu được chạy từ ít nhất $20$ điểm khởi tạo: Điểm đầu là nghiệm của mô hình đơn giản hơn (phân phối chuẩn, $\gamma=0$), các điểm còn lại ngẫu nhiên quanh đó. Số điểm khởi tạo hội tụ về cùng nghiệm tốt nhất là một chẩn đoán độc lập về độ khó của bài toán.
+
+\paragraph{Sai số chuẩn.} Gọi $\ell_t$ là đóng góp của phiên $t$ vào \eqref{eq:loglik}. Đặt
+\begin{equation}
+\hat A=-\sum_t\frac{\partial^2\ell_t}{\partial\theta\,\partial\theta^\top}\Big|_{\hat\theta},\qquad
+\hat B=\sum_t\frac{\partial\ell_t}{\partial\theta}\,\frac{\partial\ell_t}{\partial\theta^\top}\Big|_{\hat\theta}.
+\end{equation}
+Sai số chuẩn dạng Hessian lấy từ $\hat A^{-1}$. Vì phân phối sai số có thể bị đặc tả sai, sai số chuẩn dạng bánh kẹp của ước lượng hợp lý cực đại giả \cite{bollerslevwooldridge1992}
+\begin{equation}
+\widehat{\Var}(\hat\theta)=\hat A^{-1}\hat B\hat A^{-1}
+\end{equation}
+được dùng làm căn cứ chính. Chênh lệch lớn giữa hai dạng là dấu hiệu đặc tả sai phân phối. Khoảng tin cậy Wald mức $95\%$ là $\hat\theta_i\pm1{,}96\,\widehat{\mathrm{se}}_i$. Khi nghiệm sát biên (ví dụ $\hat\beta>0{,}98$), khoảng tin cậy được bổ sung bằng bootstrap tham số.
+
+\paragraph{Chẩn đoán phần dư.} Với $\hat z_t$ là phần dư chuẩn hóa: (i) Kiểm định Ljung--Box trên $\hat z_t$ và $\hat z_t^2$; (ii) hồi quy $\hat z_t^2-1$ lên biến lịch và lên nhóm $\tau_t$, kèm kiểm định $F$, để xác nhận chu kỳ đáo hạn đã được hấp thụ; (iii) biến đổi tích phân xác suất với kiểm định Berkowitz \cite{berkowitz2001}; (iv) kiểm định điểm gãy phương sai \cite{inclan1994}.
+
+\subsection{Suy diễn Bayes}
+
+\subsubsection{Định lý Bayes và tiên nghiệm}
+
+Suy diễn Bayes coi tham số $\theta$ là đại lượng ngẫu nhiên và cập nhật niềm tin ban đầu về $\theta$ bằng dữ liệu $y$. Theo quy tắc Bayes,
+\begin{equation}\label{eq:bayes}
+p(\theta\mid y)=\frac{p(y\mid\theta)\,p(\theta)}{p(y)}\ \propto\ p(y\mid\theta)\,p(\theta),\qquad L(\theta\mid y)=p(y\mid\theta),
+\end{equation}
+trong đó $p(\theta\mid y)$ là mật độ hậu nghiệm, $p(\theta)$ là mật độ tiên nghiệm, $p(y\mid\theta)$ là mật độ mẫu hay hàm hợp lý $L(\theta\mid y)$, và $p(y)=\int p(y\mid\theta)\,p(\theta)\,d\theta$ là hằng số chuẩn hóa. Hằng số này thường không tính được dạng đóng, và các phương pháp dưới đây không cần tính nó, chỉ cần dạng tỷ lệ: Hậu nghiệm tỷ lệ với tiên nghiệm nhân hợp lý. Ký hiệu theo giáo trình Thống kê Bayes (Chương 1 và Chương 6); giáo trình Chương 3 và 4 viết $g(\cdot)$ cho tiên nghiệm và $f(y\mid\cdot)$ cho hợp lý. Với chuỗi thời gian, hàm hợp lý phân tích được theo sai số dự báo một bước, $L(\theta\mid y)=\prod_t f\big(r_t\mid\Fcal_{t-1};\theta\big)=e^{\ell(\theta)}$, nên $\ell(\theta)=\ln L(\theta\mid y)$ chính là \eqref{eq:loglik}.
+
+Kết quả của suy diễn là cả một phân phối, từ đó lấy trung bình hậu nghiệm làm ước lượng điểm và khoảng tin cậy Bayes mức $95\%$ (khoảng giữa phân vị $2{,}5\%$ và $97{,}5\%$) làm thước đo bất định. Các khối tham số độc lập với nhau trong tiên nghiệm, theo Bảng~\ref{tab:prior}.
+
+\begin{table}[h]
+\centering
+\caption{Phân phối tiên nghiệm}\label{tab:prior}
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Tham số} & \textbf{Tiên nghiệm} & \textbf{Ghi chú} \\
+\midrule
+$\mu,\ \omega,\ \kappa_1,\ \kappa_2$ & $\Ncal(0,\,0{,}5^2)$ & Không ràng buộc dấu \\
+$\beta$ & $\mathrm{Beta}(20,\,1{,}5)$ & Kỳ vọng xấp xỉ $0{,}93$, giá trên $(0,1)$ \\
+$\gamma_j$ & $\Ncal(0,\,0{,}5^2)$ & Biến đã chuẩn hóa \\
+$\delta_j$ & $\Ncal(0,\,1)$ & Biến giả lịch \\
+$\nu-2$ (Student-$t$, SkT) & $G(2,\,0{,}1)$ & Kỳ vọng $\E\nu=22$, cho phép đuôi rất dày \\
+$(\lambda+1)/2$ & $\mathrm{Beta}(2,\,2)$ & Đối xứng quanh $\lambda=0$ \\
+$\nu$ (GED) & $G(4,\,2)$ & Kỳ vọng $2$, tức phân phối chuẩn \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Ở đây $G(a,b)$ là phân phối Gamma với tham số hình dạng $a$ và tốc độ $b$, và $N(m,s^2)$ là phân phối chuẩn với trung bình $m$ và phương sai $s^2$. Tính hợp lý của tiên nghiệm được kiểm tra bằng dự báo tiên nghiệm: Rút $\theta$ từ tiên nghiệm, sinh chuỗi lợi suất, rồi so các thống kê (độ lệch chuẩn, độ nhọn, phân vị) với dữ liệu thật. Ảnh hưởng của tiên nghiệm lên hậu nghiệm được đo bằng phân tích độ nhạy với hai phương án rộng hơn và hẹp hơn.
+
+\subsubsection{Hậu nghiệm trên không gian không ràng buộc}
+
+Suy diễn được thực hiện trên $\xi$, nên theo công thức đổi biến,
+\begin{equation}\label{eq:posterior}
+\ln p(\xi\mid y)=\ell\big(g(\xi)\big)+\ln p\big(g(\xi)\big)+\sum_{i=1}^{d}\ln\Big|\frac{d g_i}{d\xi_i}\Big|+\text{hằng số}.
+\end{equation}
+Các đạo hàm là $d\beta/d\xi_\beta=\beta(1-\beta)$, $d\nu/d\xi_\nu=\sigm(\xi_\nu)$, $d\lambda/d\xi_\lambda=1-\lambda^2$, và bằng $1$ cho các tham số không biến đổi. Thiếu số hạng Jacobian, mật độ trên $\xi$ không còn là ảnh đúng của hậu nghiệm, và mọi moment tính từ đó bị chệch.
+
+\subsubsection{Bayes biến phân}
+
+Bayes biến phân thay bài toán tích phân bằng bài toán tối ưu: Tìm trong một họ phân phối đơn giản $\mathcal Q$ phân phối gần hậu nghiệm nhất theo độ phân kỳ Kullback--Leibler \cite{blei2017},
+\begin{equation}
+q^{*}=\arg\min_{q\in\mathcal Q}\KL\big(q\,\|\,p(\cdot\mid y)\big),\qquad
+\KL\big(q\,\|\,p(\cdot\mid y)\big)=\E_q\big[\ln q(\xi)-\ln p(\xi\mid y)\big].
+\end{equation}
+Vì $p(\xi\mid y)$ chỉ biết đến một hằng số nhân $p(y)$, ta dùng đẳng thức $\ln p(y)=\ELBO(q)+\KL\big(q\,\|\,p(\cdot\mid y)\big)$, trong đó
+\begin{equation}\label{eq:elbo}
+\ELBO(q)=\E_q\big[\ln\tilde p(\xi\mid y)\big]-\E_q\big[\ln q(\xi)\big],
+\end{equation}
+với $\tilde p(\xi\mid y)$ là vế phải của \eqref{eq:posterior} không có hằng số, tức hậu nghiệm chưa chuẩn hóa. Vì $\ln p(y)$ cố định, cực tiểu hóa $\KL$ tương đương cực đại hóa $\ELBO$, gọi là cận dưới của bằng chứng. Hai họ được so sánh:
+\begin{itemize}
+\item \textbf{Mean-field:} $q(\xi)=\Ncal\big(\mu_q,\ \mathrm{diag}(s_1^2,\dots,s_d^2)\big)$, các thành phần độc lập, $2d$ tham số biến phân.
+\item \textbf{Full-rank:} $q(\xi)=\Ncal(\mu_q,\ C)$ với $C=RR^\top$, $R$ tam giác dưới có đường chéo dương, $d+d(d+1)/2$ tham số biến phân, biểu diễn được tương quan giữa các tham số.
+\end{itemize}
+Gradient của $\ELBO$ được ước lượng không chệch bằng thủ thuật tái tham số hóa \cite{kingma2014}: Viết $\xi=\mu_q+R\zeta$ với $\zeta\sim\Ncal(0,I)$, khi đó $\ELBO$ là kỳ vọng theo $\zeta$, một phân phối không phụ thuộc tham số biến phân, nên đạo hàm có thể đưa vào trong kỳ vọng. Mỗi bước tối ưu rút một mẫu $\zeta$ và cập nhật $(\mu_q,R)$ bằng thuật toán Adam. Quy trình này là phương pháp biến phân vi phân tự động \cite{kucukelbir2017}.
+
+\begin{nhanxet}[Xu hướng đánh giá thấp bất định của mean-field]
+$\KL\big(q\,\|\,p(\cdot\mid y)\big)$ phạt nặng khối lượng của $q$ đặt ở vùng hậu nghiệm thấp, nên $q$ có xu hướng co lại bên trong hậu nghiệm. Khi các tham số tương quan mạnh (chẳng hạn $\beta$ với $\omega$ và $\gamma$), mean-field không biểu diễn được tương quan và thường cho độ lệch chuẩn biên nhỏ hơn thật. Full-rank khắc phục một phần hạn chế này. Đây là nội dung trung tâm của CH2.
+\end{nhanxet}
+
+Chất lượng xấp xỉ được chẩn đoán bằng hai cách. Thứ nhất, chỉ số $\hat k$ của lấy mẫu quan trọng làm trơn Pareto \cite{yao2018}: Với các mẫu $\xi^{(s)}\sim q$, xét trọng số $w_s=\tilde p(\xi^{(s)}\mid y)/q(\xi^{(s)})$; khớp phân phối Pareto tổng quát cho đuôi của $w_s$, tham số hình dạng $\hat k$ đo độ dày đuôi. Giá trị $\hat k<0{,}7$ được coi là chấp nhận được. Thứ hai, độ ổn định của $\ELBO$ khi tối ưu lại từ ba điểm khởi tạo khác nhau.
+
+\subsubsection{Monte Carlo Hamilton và thuật toán NUTS}
+
+Monte Carlo chuỗi Markov sinh một dãy mẫu $\{\xi^{(0)},\xi^{(1)},\xi^{(2)},\dots\}$ từ một chuỗi Markov có phân phối cân bằng giới hạn là hậu nghiệm; theo ký hiệu của giáo trình (Chương 6), mật độ đích là $\pi(\xi)=p(\xi\mid y)$, chỉ cần biết đến một hằng số nhân. Thuật toán Metropolis--Hastings đề xuất $\xi^{*}\sim q(\xi^{*}\mid\xi^{(i-1)})$ và chấp nhận với xác suất $\alpha_{\mathrm{MH}}=\min\big\{1,\ \pi(\xi^{*})\,q(\xi^{(i-1)}\mid\xi^{*})\big/\big[\pi(\xi^{(i-1)})\,q(\xi^{*}\mid\xi^{(i-1)})\big]\big\}$; nếu không thì giữ $\xi^{(i)}=\xi^{(i-1)}$. Với đề xuất bước ngẫu nhiên, hiệu quả thấp khi số chiều tăng, vì bước đề xuất phải nhỏ mới được chấp nhận.
+
+Monte Carlo Hamilton (HMC) là một cách đề xuất khác: Dùng gradient của mật độ để đề xuất các bước xa mà vẫn có xác suất chấp nhận cao. Đặt hàm thế năng $U(\xi)=-\ln\tilde p(\xi\mid y)$ và thêm biến động lượng $v\sim\Ncal(0,\mathbf M)$, với $\mathbf M$ là ma trận khối lượng. Hàm Hamilton là
+\begin{equation}
+\mathcal H(\xi,v)=U(\xi)+\tfrac12\,v^\top\mathbf M^{-1}v .
+\end{equation}
+Quỹ đạo của hệ được xấp xỉ bằng phương pháp nhảy cóc với bước $\epsilon$:
+\begin{equation}
+v\leftarrow v-\tfrac{\epsilon}{2}\nabla U(\xi),\qquad \xi\leftarrow\xi+\epsilon\,\mathbf M^{-1}v,\qquad v\leftarrow v-\tfrac{\epsilon}{2}\nabla U(\xi).
+\end{equation}
+Phương pháp này bảo toàn thể tích và khả đảo, nên tỷ số đề xuất $q$ trong $\alpha_{\mathrm{MH}}$ triệt tiêu, và xác suất chấp nhận chỉ còn $\min\{1,\exp(\mathcal H_{\text{cũ}}-\mathcal H_{\text{mới}})\}$; chuỗi thu được có đúng phân phối cân bằng $\pi(\xi)$.
+
+Hiệu quả của HMC phụ thuộc mạnh vào số bước nhảy cóc. Thuật toán NUTS \cite{hoffman2014} tự chọn độ dài quỹ đạo: Quỹ đạo được nhân đôi dần theo hai chiều thời gian cho tới khi bắt đầu quay đầu, tức khi $(\xi^{+}-\xi^{-})^\top v^{-}<0$ hoặc $(\xi^{+}-\xi^{-})^\top v^{+}<0$, với $\xi^{\pm},v^{\pm}$ là hai đầu quỹ đạo. Trong giai đoạn khởi động, bước $\epsilon$ được thích nghi để tỷ lệ chấp nhận trung bình đạt mức đích $0{,}8$, và ma trận khối lượng đầy đủ $\mathbf M$ được ước lượng từ hiệp phương sai của các mẫu khởi động. Các mẫu khởi động bị loại bỏ, tương tự giai đoạn burn-in trong giáo trình.
+
+NUTS được dùng làm \emph{hậu nghiệm tham chiếu}, với bốn chuỗi độc lập, mỗi chuỗi $1.000$ vòng khởi động và $1.000$ mẫu. Kết quả chỉ được sử dụng khi thỏa đồng thời ba điều kiện \cite{vehtari2021}:
+\begin{itemize}
+\item Chỉ số $\hat R$ dạng chuẩn hóa thứ hạng nhỏ hơn $1{,}01$ cho mọi tham số. Chỉ số này so phương sai giữa các chuỗi với phương sai trong từng chuỗi; khi các chuỗi xuất phát từ những điểm khác nhau đã trộn vào nhau, $\hat R$ gần $1$.
+\item Cỡ mẫu hiệu dụng phần thân và phần đuôi không dưới $400$. Cỡ mẫu hiệu dụng là số mẫu độc lập có cùng lượng thông tin với các mẫu tự tương quan của chuỗi.
+\item Không có bước chuyển phân kỳ sau khởi động. Bước phân kỳ là bước mà sai số tích phân của quỹ đạo bùng nổ, dấu hiệu chuỗi không khám phá được một vùng của hậu nghiệm.
+\end{itemize}
+
+\subsection{So sánh bốn phương pháp}
+
+Lấy NUTS làm tham chiếu, sai lệch của mỗi phương pháp khác được đo bằng: (i) Tỷ số độ lệch chuẩn biên $\mathrm{sd}_q(\theta_i)/\mathrm{sd}_{\mathrm{NUTS}}(\theta_i)$; (ii) chênh lệch trung bình tính theo đơn vị độ lệch chuẩn tham chiếu; (iii) chuẩn Frobenius của hiệu hai ma trận tương quan hậu nghiệm; (iv) thời gian tính toán. Với hợp lý cực đại, độ lệch chuẩn lấy từ ma trận bánh kẹp và ước lượng điểm đóng vai trò trung bình.
+
+Hợp lý cực đại cho mật độ dự báo cắm tham số, $\hat f_t(r)=f(r\mid\Fcal_{t-1};\hat\theta)$. Phương pháp Bayes cho mật độ dự báo hậu nghiệm, là hỗn hợp theo tham số:
+\begin{equation}\label{eq:mdhn}
+\hat f_t(r)=\frac1S\sum_{s=1}^{S}f\big(r\mid\Fcal_{t-1};\theta^{(s)}\big),\qquad \theta^{(s)}\sim p(\theta\mid y).
+\end{equation}
+Hỗn hợp này có đuôi dày hơn mật độ cắm tham số. Chênh lệch giữa hai đối tượng chính là ảnh hưởng của bất định tham số lên dự báo, và là kênh qua đó CH2 tác động tới CH3.
+
+% =====================================================================
+\section{Mô phỏng khôi phục tham số}\label{sec:mophong}
+
+\subsection{Mục đích và thiết kế}
+
+Trước khi áp dụng cho dữ liệu thật, các phương pháp ước lượng được kiểm tra trên dữ liệu sinh từ tham số $\theta_0$ đã biết. Nếu một phương pháp không lấy lại được tham số thật, hoặc tạo ra hiệu ứng khi thực tế không có, mọi kết luận thực nghiệm dựa trên nó mất căn cứ.
+
+Mỗi lần lặp sinh $T=2.000$ quan sát sau $200$ quan sát khởi động. Hai biến ngoại sinh là các quá trình tự hồi quy bậc một hệ số $0{,}5$ có phương sai $1$; phiên đáo hạn xuất hiện mỗi $21$ phiên và phiên kế tiếp mang biến giả của phiên chuyển hợp đồng; như dữ liệu thật sau khi dùng giá F2M, mọi lợi suất mô phỏng đều quan sát được. Tham số chung là $\mu_0=0{,}05$, $\omega_0=0{,}04$, $\kappa_{1,0}=0{,}15$, $\beta_0=0{,}95$, $\delta_0=0$. Bốn trường hợp được xét theo Bảng~\ref{tab:truonghop}.
+
+\begin{table}[h]
+\centering
+\caption{Các trường hợp mô phỏng khôi phục tham số}\label{tab:truonghop}
+\begin{tabular}{@{}cccccp{5.6cm}@{}}
+\toprule
+\textbf{Trường hợp} & $\kappa_{2,0}$ & $\gamma_0$ & $\nu_0$ & $\lambda_0$ & \textbf{Câu hỏi} \\
+\midrule
+$E_1$ & $-0{,}10$ & $(0{,}05;\,0{,}05)$ & $8$ & $-0{,}1$ & Khôi phục đúng khi có đòn bẩy? \\
+$E_2$ & $0$ & $(0{,}05;\,0{,}05)$ & $8$ & $-0{,}1$ & Có tạo ra đòn bẩy giả khi không có? \\
+$E_3$ & $-0{,}10$ & $(0{,}05;\,0{,}05)$ & $4$ & $-0{,}1$ & Còn đúng khi đuôi rất dày? \\
+$E_4$ & $-0{,}10$ & $(0;\,0)$ & $8$ & $-0{,}1$ & Có tạo ra hiệu ứng ngoại sinh giả khi không có? \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Với phân phối chuẩn, bỏ $\nu_0,\lambda_0$; với Student-$t$, bỏ $\lambda_0$.
+
+\subsection{Tiêu chí}
+
+Gọi $\hat\theta^{(b)}$ là ước lượng ở lần lặp $b=1,\dots,B$ và $[\ell^{(b)},u^{(b)}]$ là khoảng $95\%$ tương ứng (khoảng Wald với hợp lý cực đại, khoảng tin cậy Bayes với các phương pháp còn lại). Các tiêu chí là
+\begin{gather}
+\text{Độ chệch}=\frac1B\sum_b\big(\hat\theta^{(b)}-\theta_0\big),\qquad
+\text{RMSE}=\Big[\frac1B\sum_b\big(\hat\theta^{(b)}-\theta_0\big)^2\Big]^{1/2},\\
+\text{Độ phủ}=\frac1B\sum_b\ind\big\{\ell^{(b)}\le\theta_0\le u^{(b)}\big\}.
+\end{gather}
+Với khoảng đúng mức danh nghĩa, độ phủ có kỳ vọng $0{,}95$. Bản thân độ phủ là một tỷ lệ ước lượng từ $B$ lần lặp, nên có sai số mô phỏng
+\begin{equation}
+\mathrm{se}_{MC}=\sqrt{\frac{0{,}95\times0{,}05}{B}},
+\end{equation}
+bằng $0{,}022$ khi $B=100$, $0{,}013$ khi $B=300$ và $0{,}007$ khi $B=1.000$ \cite{morris2019}. Trong $E_2$ và $E_4$, tỷ lệ bác bỏ $H_0:\kappa_2=0$ và $H_0:\gamma=0$ ở mức $5\%$ là tỷ lệ bác bỏ sai, và phải gần $0{,}05$.
+
+\subsection{Hiệu chuẩn dựa trên mô phỏng}
+
+Hiệu chuẩn dựa trên mô phỏng \cite{talts2018} kiểm tra chính thuật toán suy diễn Bayes, không chỉ ước lượng điểm. Mỗi lần lặp rút $\theta_0$ từ tiên nghiệm, sinh dữ liệu từ $\theta_0$, chạy suy diễn để có $S$ mẫu hậu nghiệm, rồi ghi thứ hạng của $\theta_0$ trong các mẫu đó. Nếu thuật toán đúng, theo tính chất tự nhất quán của Bayes,
+\begin{equation}
+\int p(\theta\mid y)\,p(y\mid\theta_0)\,p(\theta_0)\,d\theta_0\,dy=p(\theta),
+\end{equation}
+nên thứ hạng có phân phối đều rời rạc trên $\{0,1,\dots,S\}$. Thứ hạng dồn về hai đầu cho thấy hậu nghiệm quá hẹp, dồn vào giữa cho thấy hậu nghiệm quá rộng. Độ đều được kiểm định bằng kiểm định khi bình phương trên các nhóm thứ hạng.
+
+% =====================================================================
+\section{Đánh giá dự báo ngoài mẫu}\label{sec:danhgia}
+
+\subsection{Dự báo phương sai}\label{sec:qlike}
+
+Gọi $\hat h_t$ là dự báo phương sai một bước tạo tại cuối phiên $t-1$. Tiêu chí chính là
+\begin{equation}
+\QLIKE=\frac1n\sum_{t}\Big[\ln\hat h_t+\frac{\rho^{*}_t}{\hat h_t}\Big],
+\end{equation}
+lấy trên các phiên có đại lượng đại diện xác định và không chạm biên. QLIKE thuộc lớp hàm mất mát cho thứ hạng nhất quán giữa các mô hình khi phương sai thật được thay bằng một đại lượng đại diện có kỳ vọng có điều kiện bằng phương sai thật \cite{patton2011}. Điều kiện này giải thích việc hiệu chỉnh ở \eqref{eq:proxy}: Nếu $\E[\rho_t\mid\Fcal_{t-1}]=c\,h_t$ với $c\neq1$, kỳ vọng của QLIKE đạt cực tiểu tại $\hat h_t=c\,h_t$ thay vì $h_t$.
+
+\subsection{Dự báo mật độ}
+
+Điểm logarit mật độ trung bình
+\begin{equation}
+\LS=\frac1n\sum_t\ln\hat f_t(r_t),\qquad
+\hat f_t(r)=\frac{1}{\sqrt{\hat h_t}}\,f_\Ecal\Big(\frac{r-\hat\mu}{\sqrt{\hat h_t}}\Big)
+\end{equation}
+là một quy tắc chấm điểm chặt: Kỳ vọng của nó đạt cực đại duy nhất tại mật độ thật. Giá trị lớn hơn là tốt hơn. Với suy diễn Bayes, $\hat f_t$ là mật độ dự báo hậu nghiệm \eqref{eq:mdhn}. Hiệu chuẩn của dự báo mật độ được kiểm tra bằng biến đổi tích phân xác suất $u_t=\hat F_t(r_t)$: Nếu mật độ dự báo đúng, $u_t$ độc lập và có phân phối đều trên $(0,1)$ \cite{dgt1998}. Kiểm định Berkowitz \cite{berkowitz2001} đưa $u_t$ về $\Phi^{-1}(u_t)$, khớp một mô hình tự hồi quy bậc một và kiểm định đồng thời trung bình $0$, phương sai $1$ và hệ số tự hồi quy $0$ (ba bậc tự do).
+
+\subsection{Giá trị chịu rủi ro và tổn thất kỳ vọng ở phần đuôi}
+
+Gọi $L_t=-r_t$ là tổn thất một phiên của vị thế mua và $\alpha$ là mức đuôi. Theo quy ước của nghiên cứu, VaR là phân vị mức $1-\alpha$ của tổn thất, một số dương:
+\begin{equation}
+\VaR_{t,\alpha}=Q_{L_t\mid\Fcal_{t-1}}(1-\alpha),\qquad
+\ES_{t,\alpha}=\frac1\alpha\int_{1-\alpha}^{1}Q_{L_t\mid\Fcal_{t-1}}(u)\,du .
+\end{equation}
+Với phân phối liên tục, $\ES_{t,\alpha}=\E[L_t\mid L_t\ge\VaR_{t,\alpha},\Fcal_{t-1}]$, tức tổn thất trung bình khi tổn thất vượt VaR \cite{rockafellar2000}. ES là thước đo rủi ro nhất quán \cite{artzner1999,acerbitasche2002}, còn VaR thì không. Vì $L_t=-\mu-\sqrt{h_t}\,z_t$, tính chất vị trí -- thang đo của phân vị cho công thức đóng
+\begin{equation}\label{eq:var1}
+\widehat{\VaR}_{t,\alpha}=-\hat\mu-\sqrt{\hat h_t}\;q_\alpha,\qquad
+\widehat{\ES}_{t,\alpha}=-\hat\mu-\sqrt{\hat h_t}\;e_\alpha,
+\end{equation}
+với $q_\alpha$ là phân vị mức $\alpha$ của $\Ecal$ và $e_\alpha=\E_\Ecal[z\mid z\le q_\alpha]$. Với vị thế bán, $L_t=r_t$ và đuôi phải của $\Ecal$ được dùng. Biểu thức của $q_\alpha$, $e_\alpha$ cho từng phân phối ở Phụ lục~\ref{app:varES}.
+
+\subsection{Kiểm định độ phủ của VaR}
+
+Gọi $I_t=\ind\{L_t>\widehat{\VaR}_{t,\alpha}\}$ là chỉ thị vi phạm, $x=\sum_tI_t$ và $\hat\pi=x/n$. Dự báo phân vị đúng khi và chỉ khi $\{I_t\}$ là dãy Bernoulli$(\alpha)$ độc lập.
+
+\paragraph{Kiểm định Kupiec} \cite{kupiec1995} kiểm tra độ phủ vô điều kiện, $H_0:\E I_t=\alpha$:
+\begin{equation}
+LR_{uc}=-2\ln\frac{(1-\alpha)^{n-x}\,\alpha^{x}}{(1-\hat\pi)^{n-x}\,\hat\pi^{x}}\ \sim\ \chi^2_1 \text{ (tiệm cận)}.
+\end{equation}
+
+\paragraph{Kiểm định Christoffersen} \cite{christoffersen1998} kiểm tra thêm tính độc lập. Gọi $n_{ij}$ là số lần $I_t$ chuyển từ trạng thái $i$ sang $j$, $\pi_{01}=n_{01}/(n_{00}+n_{01})$, $\pi_{11}=n_{11}/(n_{10}+n_{11})$ và $\pi=(n_{01}+n_{11})/(n-1)$. Khi đó
+\begin{equation}
+LR_{ind}=-2\ln\frac{(1-\pi)^{n_{00}+n_{10}}\,\pi^{n_{01}+n_{11}}}{(1-\pi_{01})^{n_{00}}\,\pi_{01}^{n_{01}}\,(1-\pi_{11})^{n_{10}}\,\pi_{11}^{n_{11}}}\ \sim\ \chi^2_1,\qquad
+LR_{cc}=LR_{uc}+LR_{ind}\ \sim\ \chi^2_2 .
+\end{equation}
+Vi phạm dồn cụm làm tăng $\pi_{11}$ so với $\pi_{01}$ và bị $LR_{ind}$ phát hiện.
+
+\paragraph{Kiểm định phân vị động} \cite{engle_manganelli2004} hồi quy $I_t-\alpha$ lên hằng số, các trễ của $I_t$ và VaR dự báo; dưới giả thuyết dự báo đúng, mọi hệ số bằng không.
+
+\paragraph{Đèn giao thông Basel.} Trên cửa sổ $250$ phiên với VaR mức $99\%$, số vi phạm từ $0$ đến $4$ là vùng xanh, từ $5$ đến $9$ là vùng vàng và từ $10$ trở lên là vùng đỏ.
+
+\subsection{Điểm nhất quán cho cặp VaR và ES}
+
+VaR đánh giá được bằng hàm mất mát phân vị \cite{koenker1978,gneiting2011}. ES một mình không có hàm chấm điểm nhất quán, nhưng cặp (VaR, ES) thì có \cite{fissler2016}. Với tổn thất dương và $0<v\le e$, hàm điểm FZ0 \cite{pzc2019} viết theo quy ước tổn thất là
+\begin{equation}\label{eq:fz0}
+S_\alpha(v,e;L)=\frac{1}{\alpha e}\,\ind\{L>v\}\,(L-v)+\frac{v}{e}+\ln e-1 .
+\end{equation}
+Kỳ vọng của $S_\alpha$ đạt cực tiểu tại cặp thật: Lấy đạo hàm theo $v$ cho $\Prob(L>v)=\alpha$, và theo $e$ cho $e=\E[L\mid L>v]$. Điểm trung bình càng nhỏ càng tốt; đây là tiêu chí chính cho dự báo rủi ro đuôi.
+
+\subsection{So sánh dự báo có kiểm định}\label{sec:sosanh}
+
+\paragraph{Kiểm định Diebold--Mariano.} Gọi $\ell^{(a)}_t,\ell^{(b)}_t$ là mất mát của hai cấu hình (QLIKE, $-\ln\hat f_t(r_t)$ hoặc $S_\alpha$), $\Delta\ell_t=\ell^{(a)}_t-\ell^{(b)}_t$ và $\overline{\Delta\ell}$ là trung bình mẫu. Thống kê \cite{dm1995}
+\begin{equation}
+DM=\frac{\overline{\Delta\ell}}{\sqrt{\hat V/n}},\qquad
+\hat V=\hat c_0+2\sum_{j=1}^{J}\Big(1-\frac{j}{J+1}\Big)\hat c_j ,
+\end{equation}
+với $\hat c_j$ là hiệp phương sai mẫu bậc $j$ của $\Delta\ell_t$ (phương sai Newey--West \cite{newey1987}), có phân phối tiệm cận chuẩn tắc dưới $H_0:\E[\Delta\ell_t]=0$. Kiểm định một phía được dùng khi câu hỏi là ``cấu hình $a$ có tốt hơn $b$ hay không''.
+
+\paragraph{Kiểm định Giacomini--White} \cite{giacomini2006} kiểm tra khả năng dự báo có điều kiện, phù hợp khi dự báo tạo từ tham số được ước lượng lại theo cửa sổ.
+
+\paragraph{Tập mô hình tin cậy} \cite{hln2011} loại dần các cấu hình kém nhất cho tới khi giả thuyết ``mọi cấu hình còn lại có mất mát kỳ vọng bằng nhau'' không bị bác bỏ; tập còn lại chứa cấu hình tốt nhất với xác suất $90\%$. Phân phối của thống kê được xấp xỉ bằng bootstrap dừng.
+
+\paragraph{Kiểm định SPA} \cite{hansen2005,white2000} kiểm tra giả thuyết ``không ứng viên nào tốt hơn mô hình chuẩn''. Khi nhiều ứng viên được thử, việc chỉ báo cáo giá trị $p$ của ứng viên tốt nhất dẫn tới thiên lệch do tìm kiếm; kiểm định SPA kiểm soát thiên lệch này.
+
+\subsection{Quy trình chọn biến ngoại sinh và phân phối}\label{sec:chonbien}
+
+Quy trình được cố định trước khi nhìn vào khối $\KT$:
+\begin{enumerate}
+\item Chỉ dùng $\UL\cup\XT$. Khối kiểm tra không tham gia bất kỳ lựa chọn nào.
+\item \textbf{Chọn tiến từng biến.} Bắt đầu từ EGARCH ($\gamma=0$, giữ biến lịch). Ở mỗi bước, thêm ứng viên cho điểm logarit mật độ trung bình cao nhất trên $\XT$; giữ biến nếu cải thiện có ý nghĩa theo kiểm định Diebold--Mariano một phía ở mức $5\%$ và không làm xấu điểm FZ0. Dừng khi không còn cải thiện có ý nghĩa.
+\item \textbf{Kiểm soát đa kiểm định.} Kiểm định SPA cho câu hỏi ``có ít nhất một ứng viên cải thiện''; các kiểm định tỷ số hợp lý trong mẫu từng biến được hiệu chỉnh theo phương pháp Holm.
+\item \textbf{Đa cộng tuyến.} Không đưa đồng thời hai biến có tương quan mẫu vượt $0{,}8$; báo cáo hệ số phóng đại phương sai.
+\item \textbf{Độ ổn định.} Hệ số $\hat\gamma_j$ phải giữ dấu qua các lần ước lượng lại.
+\item \textbf{Chọn phân phối.} Với tập biến đã chọn, phân phối có điểm logarit mật độ cao nhất trên $\XT$ trong bốn phân phối được chọn.
+\end{enumerate}
+Mọi ứng viên đã thử, kể cả biến bị loại, đều được báo cáo.
+
+\subsection{Phân tích theo nhóm phiên}
+
+Mọi tiêu chí được báo cáo cho toàn khối và cho ba nhóm: Quanh đáo hạn ($\tau_t\le2$ hoặc phiên chuyển hợp đồng), sau kỳ nghỉ dài, và các phiên căng thẳng, xác định khách quan là các phiên có $\rho^{*}_t$ vượt phân vị $95\%$ của $250$ phiên trước.
+
+% =====================================================================
+\section{Cơ chế ký quỹ động}\label{sec:kyquy}
+
+\subsection{Tổn thất, phân vị và ký quỹ cơ sở}
+
+Gọi $m_t$ là tỷ lệ ký quỹ ấn định sau khi đóng cửa phiên $t$ và áp dụng từ phiên $t+1$; ký quỹ bằng tiền trên một hợp đồng là $m_t\,K\,P_t$. Gọi $H$ là số phiên cần để thanh lý vị thế khi thành viên không bổ sung ký quỹ. Với $R_{t,H}=P_{t+H}/P_t-1$, tổn thất theo tỷ lệ của hai phía là $L^{M}_{t,H}=-R_{t,H}$ (vị thế mua) và $L^{B}_{t,H}=R_{t,H}$ (vị thế bán). Yêu cầu ``tổn thất vượt ký quỹ với xác suất $\alpha$'' tương đương
+\begin{equation}
+\Prob\big(L_{t,H}>m_t\mid\Fcal_t\big)=\alpha\iff m_t=Q_{L_{t,H}\mid\Fcal_t}(1-\alpha),
+\end{equation}
+tức ký quỹ cơ sở là một phân vị có điều kiện của tổn thất. Mức đuôi $\alpha$ và khoảng thanh lý $H$ là tham số thiết kế do người nghiên cứu ấn định; mô hình cung cấp phân phối có điều kiện. Vị thế mua chịu rủi ro ở đuôi trái của $R_{t,H}$, vị thế bán ở đuôi phải; hai VaR khác nhau khi phân phối lệch, và cả khi $H\ge2$ với $\kappa_2\neq0$.
+
+\subsection{Dự báo rủi ro $H$ phiên bằng mô phỏng}\label{sec:mophongH}
+
+Với $H=1$, \eqref{eq:var1} cho công thức đóng. Với $H\ge2$, phương sai của phiên $t+2$ phụ thuộc cú sốc của phiên $t+1$ qua hàm mũ, nên lợi suất tích lũy là tổng của các biến phụ thuộc, khác phân phối và đuôi dày; phân phối của nó không có dạng đóng. Phân phối được xấp xỉ bằng $S=10.000$ đường mô phỏng:
+\begin{enumerate}
+\item Với mỗi đường $s$: Lấy $\theta^{(s)}$ từ hậu nghiệm (suy diễn Bayes) hoặc đặt $\theta^{(s)}=\hat\theta$ (hợp lý cực đại).
+\item Đặt $\ln h^{(s)}_{t+1}$ bằng giá trị lọc tại cuối phiên $t$ theo chính bộ tham số đó.
+\item Với $j=1,\dots,H$: Sinh $z^{(s)}_{t+j}\sim\Ecal$, đặt $r^{(s)}_{t+j}=\sqrt{h^{(s)}_{t+j}}\,z^{(s)}_{t+j}$ (lấy $\mu=0$, một lựa chọn thận trọng cho ký quỹ), sinh biến ngoại sinh từ mô hình tự hồi quy bậc một ước lượng trên cùng cửa sổ với phần dư lấy mẫu lại, và cập nhật $\ln h^{(s)}_{t+j+1}$ theo \eqref{eq:pt}.
+\item Tính $R^{(s)}=\exp\big(\sum_{j}r^{(s)}_{t+j}/100\big)-1$ và hai tổn thất $\mp R^{(s)}$.
+\item Với các tổn thất xếp giảm dần $L^{(1)}\ge\dots\ge L^{(S)}$ và $j^{*}=\lceil\alpha S\rceil$: $\widehat{\VaR}=L^{(j^{*})}$ và $\widehat{\ES}=\frac1{j^{*}}\sum_{i\le j^{*}}L^{(i)}$.
+\end{enumerate}
+Biến thể mô phỏng lịch sử có lọc \cite{mcneilfrey2000} thay $\Ecal$ tham số ở bước 3 bằng việc lấy mẫu lại phần dư chuẩn hóa $\hat z_t$ của cửa sổ ước lượng.
+
+\subsection{Quy tắc ký quỹ năm bước}\label{sec:quytac}
+
+Ký quỹ thường áp dụng cùng một tỷ lệ cho hai phía, nên gọi $\widehat{\VaR}_t$ và $\widehat{\ES}_t$ là giá trị lớn hơn giữa hai phía. Quy tắc gồm năm bước nối tiếp.
+
+\paragraph{Bước 1: Mức cơ sở.} Với trọng số $w\in[0,1]$,
+\begin{equation}
+m^{(1)}_t=(1-w)\,\widehat{\VaR}_t+w\,\widehat{\ES}_t .
+\end{equation}
+\paragraph{Bước 2: Hệ số đệm.} Với $b\ge0$, $m^{(2)}_t=(1+b)\,m^{(1)}_t$.
+
+\paragraph{Bước 3: Mức sàn chống thuận chu kỳ.} Gọi $V^{LS}_t$ là VaR $H$ phiên theo mô phỏng lịch sử trên toàn bộ dữ liệu đến $t$, tức gồm cả các giai đoạn căng thẳng trong quá khứ, và $\varphi\in(0,1]$:
+\begin{equation}
+\underline m_t=\varphi\,V^{LS}_t,\qquad m^{(3)}_t=\max\big\{m^{(2)}_t,\ \underline m_t\big\}.
+\end{equation}
+\paragraph{Bước 4: Làm trơn bất đối xứng.} Với $\eta\in[0,1)$,
+\begin{equation}
+m^{(4)}_t=\max\big\{m^{(3)}_t,\ \eta\,m^{(4)}_{t-1}+(1-\eta)\,m^{(3)}_t\big\}.
+\end{equation}
+Khi mức mục tiêu tăng, $m^{(4)}_t=m^{(3)}_t$, tức ký quỹ tăng ngay; khi mức mục tiêu giảm, $m^{(4)}_t$ giảm dần theo trung bình mũ. Về thống kê, đây là đánh đổi độ chệch lấy phương sai của một ước lượng phân vị nhiễu, theo hướng có lợi cho an toàn.
+
+\paragraph{Bước 5: Giới hạn tốc độ giảm và làm tròn.} Với mức giảm tối đa mỗi phiên $\Delta$ và bước làm tròn $g$,
+\begin{equation}
+m_t=\max\Big\{\underline m_t,\ g\,\Big\lceil\frac{1}{g}\max\big\{m^{(4)}_t,\ m_{t-1}-\Delta\big\}\Big\rceil\Big\}.
+\end{equation}
+Nghiên cứu dùng $g=0{,}5\%$ và $\Delta=1\%$. Quy tắc không giới hạn tốc độ tăng, vì giới hạn tăng sẽ gây thiếu hụt đúng lúc biến động bùng nổ.
+
+\subsection{Hiệu chỉnh siêu tham số theo chi phí kỳ vọng}
+
+Gọi $L_{t,H}=|R_{t,H}|$ là tổn thất của phía chịu lỗ, $c_v$ là chi phí vốn trên một đơn vị ký quỹ và $c_{th}$ là chi phí trên một đơn vị tổn thất vượt ký quỹ. Chi phí kỳ vọng thực nghiệm của một quy tắc là
+\begin{equation}
+\mathcal C=\frac1n\sum_{t}\Big[c_v\,m_t+c_{th}\,\big(L_{t,H}-m_t\big)^{+}\Big],\qquad x^{+}=\max\{x,0\}.
+\end{equation}
+
+\begin{menhde}[Mức đuôi tối ưu]
+Với $L$ có phân phối liên tục, mức ký quỹ $m^{*}$ cực tiểu hóa $\E\big[c_v\,m+c_{th}(L-m)^{+}\big]$ thỏa $\Prob(L>m^{*})=c_v/c_{th}$.
+\end{menhde}
+\noindent\textit{Chứng minh.} Đạo hàm theo $m$ của kỳ vọng là $c_v-c_{th}\Prob(L>m)$, đơn điệu tăng theo $m$; cho bằng không ta được điều kiện cần và đủ. \hfill$\square$
+
+Như vậy, mức đuôi tối ưu là $\alpha^{*}=c_v/c_{th}$, và bài toán tương đương cực tiểu hóa hàm mất mát phân vị \cite{koenker1978}. Nghiên cứu đặt $c_{th}/c_v=1/\alpha$ cho mỗi mức đuôi thiết kế. Với mỗi cặp $(H,\alpha)$, $H\in\{1,2,3\}$ và $\alpha\in\{5\%;\,2{,}5\%;\,1\%\}$, bộ $(w,b,\varphi,\eta)$ được chọn trên khối $\XT$ trong lưới $w\in\{0;0{,}5;1\}$, $b\in\{0;0{,}1;0{,}25\}$, $\varphi\in\{0{,}5;0{,}75;1\}$, $\eta\in\{0;0{,}8;0{,}95\}$ ($81$ tổ hợp), rồi giữ cố định trên khối $\KT$.
+
+Vì $c_{th}$ không quan sát được, nghiên cứu báo cáo thêm \emph{đường biên đánh đổi}: Với mỗi tổ hợp trong lưới, tính cặp (ký quỹ trung bình, thiếu hụt bình quân mỗi phiên) trên $\XT$, rồi giữ các tổ hợp không bị tổ hợp nào khác trội hơn về cả hai tiêu chí.
+
+\subsection{Quy tắc đối chứng}
+
+Quy tắc đề xuất được so với: (i) ký quỹ cố định, mức chọn trên $\XT$ sao cho tỷ lệ vượt bằng của quy tắc đề xuất; (ii) VaR theo trung bình trượt hàm mũ với hệ số $0{,}94$; (iii) mô phỏng lịch sử $250$ phiên; (iv) mô phỏng lịch sử có lọc theo EGARCH-X; (v) VaR thô của hợp lý cực đại, chưa qua quy tắc năm bước; (vi) mức ký quỹ của tổ chức bù trừ, cả mức hằng số $17\%$ và chuỗi lịch sử theo các thời kỳ ($10\%$, $13\%$, $17\%$); (vii) mốc trên bằng $H$ lần biên độ giá ngày. Để so sánh công bằng theo giả thuyết của CH3, các quy tắc còn được co giãn về cùng ký quỹ trung bình rồi so thiếu hụt bình quân bằng kiểm định Diebold--Mariano.
+
+\subsection{Chỉ tiêu đánh giá}\label{sec:danhgiakyquy}
+
+Gọi $V_t=\ind\{L_{t,H}>m_t\}$ là chỉ thị vượt ký quỹ. Các chỉ tiêu trên khối $\KT$ gồm
+\begin{equation}
+\text{Tỷ lệ vượt}=\frac1n\sum_tV_t,\qquad
+\text{Thiếu hụt bình quân}=\frac{\sum_t(L_{t,H}-m_t)^{+}}{\sum_tV_t},\qquad
+\bar m=\frac1n\sum_tm_t,
+\end{equation}
+cùng thiếu hụt lớn nhất, ký quỹ lớn nhất, độ lệch chuẩn của $m_t-m_{t-1}$, số lần điều chỉnh và tỷ số thuận chu kỳ $\max_t m_{t+20}/m_t$.
+
+\begin{nhanxet}[Phụ thuộc do cửa sổ chồng lấn]
+Với $H\ge2$, các tổn thất $L_{t,H}$ chồng lấn nên $V_t$ có tương quan chuỗi đến bậc $H-1$, trong khi các kiểm định Kupiec và Christoffersen giả định độc lập. Vì vậy hai kiểm định này được thực hiện trên dãy lấy thưa mỗi $H$ phiên, và kiểm định phân vị động với phương sai vững trước tự tương quan được báo cáo bổ sung trên toàn bộ dãy.
+\end{nhanxet}
+
+\begin{nhanxet}[Cửa sổ chứa phiên chuyển hợp đồng]
+Tổn thất $H$ phiên được tính từ chuỗi lợi suất cùng hợp đồng, $R_{t,H}=\exp\big(\sum_{j=1}^{H}r_{t+j}/100\big)-1$, nên một cửa sổ $(t,t+H]$ chứa phiên chuyển cho đúng tổn thất của một vị thế được cuộn sang hợp đồng mới khi đáo hạn, và được giữ lại trong đánh giá. Chỉ các cửa sổ chứa phiên có $\chi=1$ bị loại.
+\end{nhanxet}
+
+\paragraph{Kiểm tra độ bền.} Thay đổi $w$ và $\eta$ quanh cấu hình được chọn; tổng hợp theo $H$ và $\alpha$; so sánh ký quỹ từ hợp lý cực đại và từ mật độ dự báo hậu nghiệm; đánh giá riêng các nhóm phiên căng thẳng, quanh đáo hạn và sau kỳ nghỉ dài.
+
+% =====================================================================
+\section{Điều kiện chuyển giai đoạn}\label{sec:cong}
+
+Nghiên cứu gồm hai giai đoạn: Giai đoạn 1 xây dựng mô hình rủi ro, giai đoạn 2 xây dựng ký quỹ. Khối kiểm tra chỉ được mở, và giai đoạn 2 chỉ được bắt đầu, khi ba điều kiện cùng đạt:
+\begin{enumerate}
+\item[(i)] Mô phỏng khôi phục tham số bằng hợp lý cực đại cho độ phủ của khoảng $95\%$ trong $[0{,}90;\,0{,}99]$ ở mọi tham số và mọi trường hợp, tỷ lệ bác bỏ sai trong $E_2$, $E_4$ không vượt $0{,}10$, và không có lần lặp thất bại.
+\item[(ii)] Trung bình của $\hat z_t^2$ theo nhóm $\tau_t$ không khác $1$ có ý nghĩa ở mức $5\%$, tức chu kỳ đáo hạn đã được hấp thụ.
+\item[(iii)] Dự báo VaR một phiên của cấu hình được chọn không bị các kiểm định Kupiec và Christoffersen bác bỏ ở mức $5\%$ trên khối $\XT$.
+\end{enumerate}
+Ngưỡng $0{,}90$ ở điều kiện (i) là ngưỡng nội bộ, rộng hơn thông lệ đánh giá mô phỏng \cite{morris2019}. Vì vậy bài viết báo cáo toàn bộ độ phủ kèm sai số mô phỏng, chứ không chỉ kết luận đạt hay không đạt.
+
+% =====================================================================
+\section{Giới hạn về lý thuyết}\label{sec:gioihan}
+
+\begin{enumerate}
+\item Đại lượng đại diện cho phương sai dựa trên biên độ giá ngày, kém chính xác hơn phương sai thực hiện từ dữ liệu trong ngày.
+\item Lợi suất tại phiên chuyển hợp đồng dựa trên giá đóng cửa F2M của phiên trước, vốn kém thanh khoản hơn F1M; sai số của giá F2M truyền thẳng vào lợi suất của các phiên chuyển. Một phiên chuyển thiếu giá F2M vẫn bị coi là khuyết.
+\item Biên độ dao động giá ngày làm lợi suất bị kiểm duyệt tại biên, nên đuôi phân phối quan sát được có thể mỏng hơn đuôi thực của giá cân bằng. Nghiên cứu ghi nhận các phiên chạm biên nhưng không mô hình hóa kiểm duyệt.
+\item Với Student-$t$ và Student-$t$ lệch, kỳ vọng phương sai nhiều bước không tồn tại theo nghĩa chặt; mọi đại lượng nhiều bước được tính qua phân vị mô phỏng.
+\item Tỷ số chi phí $c_{th}/c_v$ là giả định thiết kế, không ước lượng từ dữ liệu của thành viên bù trừ.
+\item Quy tắc ký quỹ được đánh giá trên dữ liệu lịch sử của một hợp đồng; nghiên cứu không mô phỏng hành vi của thành viên bù trừ, tài sản bảo đảm hay phản ứng của thị trường trước thay đổi ký quỹ.
+\end{enumerate}
+
+% =====================================================================
+\appendix
+\section{Công thức VaR và ES một phiên theo phân phối}\label{app:varES}
+
+Gọi $q_\alpha$ là phân vị mức $\alpha$ của $z$ và $e_\alpha=\E[z\mid z\le q_\alpha]$. Gọi $t_\nu^{-1}$, $f_\nu$, $F_\nu$ là hàm phân vị, hàm mật độ, hàm phân phối của Student-$t$ chưa chuẩn hóa với $\nu$ bậc tự do, và $c_\nu=\sqrt{(\nu-2)/\nu}$.
+
+\paragraph{Phân phối chuẩn.} Với $\Phi$, $\phi$ là hàm phân phối và hàm mật độ chuẩn tắc,
+\begin{equation}
+q_\alpha=\Phi^{-1}(\alpha),\qquad e_\alpha=-\frac{\phi(q_\alpha)}{\alpha}.
+\end{equation}
+
+\paragraph{Student-$t$ chuẩn hóa.} Với $x_\alpha=t_\nu^{-1}(\alpha)$,
+\begin{equation}
+q_\alpha=c_\nu\,x_\alpha,\qquad e_\alpha=-c_\nu\,\frac{f_\nu(x_\alpha)}{\alpha}\cdot\frac{\nu+x_\alpha^2}{\nu-1},
+\end{equation}
+suy từ đẳng thức $\int_{-\infty}^{x}u\,f_\nu(u)\,du=-f_\nu(x)\,(\nu+x^2)/(\nu-1)$.
+
+\paragraph{Student-$t$ lệch của Hansen.} Với $A$, $B$ như ở Mục~\ref{sec:phanphoi}, khi $\alpha<(1-\lambda)/2$ (trường hợp của các mức đuôi nhỏ), đặt $x_\alpha=t_\nu^{-1}\big(\alpha/(1-\lambda)\big)$. Khi đó
+\begin{equation}
+q_\alpha=\frac{(1-\lambda)\,c_\nu\,x_\alpha-A}{B},\qquad
+e_\alpha=\frac{1-\lambda}{\alpha B}\Big[-(1-\lambda)\,c_\nu\,f_\nu(x_\alpha)\,\frac{\nu+x_\alpha^2}{\nu-1}-A\,F_\nu(x_\alpha)\Big],
+\end{equation}
+với $F_\nu(x_\alpha)=\alpha/(1-\lambda)$. Kỳ vọng đuôi phải cho vị thế bán được tính tương tự trên nhánh $z\ge-A/B$.
+
+\paragraph{GED.} Phân vị lấy từ phân phối chuẩn tổng quát với thang đo $c_\nu\,2^{1/\nu}$; kỳ vọng đuôi tính bằng cầu phương số.
+
+\paragraph{Ví dụ số.} Bảng~\ref{tab:vidu} cho VaR và ES một phiên với $\mu=0$ và $\sqrt{h_t}=1\%$; với $\sqrt{h_t}$ khác, các giá trị nhân tuyến tính. Các giá trị này được dùng làm phép kiểm tra cài đặt bắt buộc.
+
+\begin{table}[h]
+\centering
+\caption{VaR và ES một phiên (\%), $\mu=0$, $\sqrt{h_t}=1\%$}\label{tab:vidu}
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+ & \multicolumn{2}{c}{$\alpha=1\%$} & \multicolumn{2}{c}{$\alpha=2{,}5\%$} & \multicolumn{2}{c}{$\alpha=5\%$} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}
+Phân phối & VaR & ES & VaR & ES & VaR & ES \\
+\midrule
+Chuẩn & $2{,}326$ & $2{,}665$ & $1{,}960$ & $2{,}338$ & $1{,}645$ & $2{,}063$ \\
+Student-$t$, $\nu=5$ & $2{,}606$ & $3{,}449$ & $1{,}991$ & $2{,}728$ & $1{,}561$ & $2{,}239$ \\
+SkT, $\nu=5$, $\lambda=-0{,}1$, vị thế mua & $2{,}783$ & $3{,}720$ & $2{,}102$ & $2{,}919$ & $1{,}627$ & $2{,}377$ \\
+SkT, $\nu=5$, $\lambda=-0{,}1$, vị thế bán & $2{,}416$ & $3{,}159$ & $1{,}871$ & $2{,}522$ & $1{,}488$ & $2{,}089$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% =====================================================================
+\renewcommand{\refname}{Tài liệu tham khảo}
+\begin{thebibliography}{99}
+\addcontentsline{toc}{section}{Tài liệu tham khảo}
+\setlength{\itemsep}{2pt}
+
+\bibitem{acerbitasche2002} Acerbi, C., \& Tasche, D. (2002). On the coherence of expected shortfall. \emph{Journal of Banking \& Finance}, 26(7), 1487--1503. \url{https://doi.org/10.1016/S0378-4266(02)00283-2}
+
+\bibitem{artzner1999} Artzner, P., Delbaen, F., Eber, J.-M., \& Heath, D. (1999). Coherent measures of risk. \emph{Mathematical Finance}, 9(3), 203--228. \url{https://doi.org/10.1111/1467-9965.00068}
+
+\bibitem{berkowitz2001} Berkowitz, J. (2001). Testing density forecasts, with applications to risk management. \emph{Journal of Business \& Economic Statistics}, 19(4), 465--474. \url{https://doi.org/10.1198/07350010152596718}
+
+\bibitem{blei2017} Blei, D. M., Kucukelbir, A., \& McAuliffe, J. D. (2017). Variational inference: A review for statisticians. \emph{Journal of the American Statistical Association}, 112(518), 859--877. \url{https://doi.org/10.1080/01621459.2017.1285773}
+
+\bibitem{bollerslev1986} Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. \emph{Journal of Econometrics}, 31(3), 307--327. \url{https://doi.org/10.1016/0304-4076(86)90063-1}
+
+\bibitem{bollerslev1987} Bollerslev, T. (1987). A conditionally heteroskedastic time series model for speculative prices and rates of return. \emph{The Review of Economics and Statistics}, 69(3), 542--547. \url{https://doi.org/10.2307/1925546}
+
+\bibitem{bollerslevwooldridge1992} Bollerslev, T., \& Wooldridge, J. M. (1992). Quasi-maximum likelihood estimation and inference in dynamic models with time-varying covariances. \emph{Econometric Reviews}, 11(2), 143--172. \url{https://doi.org/10.1080/07474939208800229}
+
+\bibitem{christoffersen1998} Christoffersen, P. F. (1998). Evaluating interval forecasts. \emph{International Economic Review}, 39(4), 841--862. \url{https://doi.org/10.2307/2527341}
+
+\bibitem{pfmi2012} Committee on Payment and Settlement Systems \& Technical Committee of the International Organization of Securities Commissions (2012). \emph{Principles for financial market infrastructures}. Bank for International Settlements. \url{https://www.bis.org/cpmi/publ/d101a.pdf}
+
+\bibitem{datapro} DataPro. Giải pháp phân tích và theo dõi thị trường đầu tư (nguồn dữ liệu VN30F1M). \url{https://datapro.vn/}
+
+\bibitem{dgt1998} Diebold, F. X., Gunther, T. A., \& Tay, A. S. (1998). Evaluating density forecasts with applications to financial risk management. \emph{International Economic Review}, 39(4), 863--883. \url{https://doi.org/10.2307/2527342}
+
+\bibitem{dm1995} Diebold, F. X., \& Mariano, R. S. (1995). Comparing predictive accuracy. \emph{Journal of Business \& Economic Statistics}, 13(3), 253--263. \url{https://doi.org/10.1080/07350015.1995.10524599}
+
+\bibitem{engle1982} Engle, R. F. (1982). Autoregressive conditional heteroscedasticity with estimates of the variance of United Kingdom inflation. \emph{Econometrica}, 50(4), 987--1007. \url{https://doi.org/10.2307/1912773}
+
+\bibitem{engle_manganelli2004} Engle, R. F., \& Manganelli, S. (2004). CAViaR: Conditional autoregressive value at risk by regression quantiles. \emph{Journal of Business \& Economic Statistics}, 22(4), 367--381. \url{https://doi.org/10.1198/073500104000000370}
+
+\bibitem{fissler2016} Fissler, T., \& Ziegel, J. F. (2016). Higher order elicitability and Osband's principle. \emph{The Annals of Statistics}, 44(4), 1680--1707. \url{https://doi.org/10.1214/16-AOS1439}
+
+\bibitem{garmanklass1980} Garman, M. B., \& Klass, M. J. (1980). On the estimation of security price volatilities from historical data. \emph{The Journal of Business}, 53(1), 67--78. \url{https://doi.org/10.1086/296072}
+
+\bibitem{giacomini2006} Giacomini, R., \& White, H. (2006). Tests of conditional predictive ability. \emph{Econometrica}, 74(6), 1545--1578. \url{https://doi.org/10.1111/j.1468-0262.2006.00718.x}
+
+\bibitem{gneiting2011} Gneiting, T. (2011). Making and evaluating point forecasts. \emph{Journal of the American Statistical Association}, 106(494), 746--762. \url{https://doi.org/10.1198/jasa.2011.r10138}
+
+\bibitem{hansen1994} Hansen, B. E. (1994). Autoregressive conditional density estimation. \emph{International Economic Review}, 35(3), 705--730. \url{https://doi.org/10.2307/2527081}
+
+\bibitem{hansen2005} Hansen, P. R. (2005). A test for superior predictive ability. \emph{Journal of Business \& Economic Statistics}, 23(4), 365--380. \url{https://doi.org/10.1198/073500105000000063}
+
+\bibitem{hansenlunde2005rv} Hansen, P. R., \& Lunde, A. (2005). A realized variance for the whole day based on intermittent high-frequency data. \emph{Journal of Financial Econometrics}, 3(4), 525--554. \url{https://doi.org/10.1093/jjfinec/nbi028}
+
+\bibitem{hln2011} Hansen, P. R., Lunde, A., \& Nason, J. M. (2011). The model confidence set. \emph{Econometrica}, 79(2), 453--497. \url{https://doi.org/10.3982/ECTA5771}
+
+\bibitem{hoffman2014} Hoffman, M. D., \& Gelman, A. (2014). The No-U-Turn Sampler: Adaptively setting path lengths in Hamiltonian Monte Carlo. \emph{Journal of Machine Learning Research}, 15(47), 1593--1623. \url{https://www.jmlr.org/papers/v15/hoffman14a.html}
+
+\bibitem{inclan1994} Inclán, C., \& Tiao, G. C. (1994). Use of cumulative sums of squares for retrospective detection of changes of variance. \emph{Journal of the American Statistical Association}, 89(427), 913--923. \url{https://doi.org/10.1080/01621459.1994.10476824}
+
+\bibitem{kingma2014} Kingma, D. P., \& Welling, M. (2014). Auto-encoding variational Bayes. \emph{International Conference on Learning Representations}. \url{https://arxiv.org/abs/1312.6114}
+
+\bibitem{koenker1978} Koenker, R., \& Bassett, G. (1978). Regression quantiles. \emph{Econometrica}, 46(1), 33--50. \url{https://doi.org/10.2307/1913643}
+
+\bibitem{kucukelbir2017} Kucukelbir, A., Tran, D., Ranganath, R., Gelman, A., \& Blei, D. M. (2017). Automatic differentiation variational inference. \emph{Journal of Machine Learning Research}, 18(14), 1--45. \url{https://www.jmlr.org/papers/v18/16-107.html}
+
+\bibitem{kupiec1995} Kupiec, P. H. (1995). Techniques for verifying the accuracy of risk measurement models. \emph{The Journal of Derivatives}, 3(2), 73--84. \url{https://doi.org/10.3905/jod.1995.407942}
+
+\bibitem{mcneilfrey2000} McNeil, A. J., \& Frey, R. (2000). Estimation of tail-related risk measures for heteroscedastic financial time series: An extreme value approach. \emph{Journal of Empirical Finance}, 7(3--4), 271--300. \url{https://doi.org/10.1016/S0927-5398(00)00012-8}
+
+\bibitem{morris2019} Morris, T. P., White, I. R., \& Crowther, M. J. (2019). Using simulation studies to evaluate statistical methods. \emph{Statistics in Medicine}, 38(11), 2074--2102. \url{https://doi.org/10.1002/sim.8086}
+
+\bibitem{nelson1991} Nelson, D. B. (1991). Conditional heteroskedasticity in asset returns: A new approach. \emph{Econometrica}, 59(2), 347--370. \url{https://doi.org/10.2307/2938260}
+
+\bibitem{newey1987} Newey, W. K., \& West, K. D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \emph{Econometrica}, 55(3), 703--708. \url{https://doi.org/10.2307/1913610}
+
+\bibitem{parkinson1980} Parkinson, M. (1980). The extreme value method for estimating the variance of the rate of return. \emph{The Journal of Business}, 53(1), 61--65. \url{https://doi.org/10.1086/296071}
+
+\bibitem{patton2011} Patton, A. J. (2011). Volatility forecast comparison using imperfect volatility proxies. \emph{Journal of Econometrics}, 160(1), 246--256. \url{https://doi.org/10.1016/j.jeconom.2010.03.034}
+
+\bibitem{pzc2019} Patton, A. J., Ziegel, J. F., \& Chen, R. (2019). Dynamic semiparametric models for expected shortfall (and Value-at-Risk). \emph{Journal of Econometrics}, 211(2), 388--413. \url{https://doi.org/10.1016/j.jeconom.2018.10.008}
+
+\bibitem{rockafellar2000} Rockafellar, R. T., \& Uryasev, S. (2000). Optimization of conditional value-at-risk. \emph{Journal of Risk}, 2(3), 21--41. \url{https://doi.org/10.21314/JOR.2000.038}
+
+\bibitem{rogers1991} Rogers, L. C. G., \& Satchell, S. E. (1991). Estimating variance from high, low and closing prices. \emph{The Annals of Applied Probability}, 1(4), 504--512. \url{https://doi.org/10.1214/aoap/1177005835}
+
+\bibitem{straumann2006} Straumann, D., \& Mikosch, T. (2006). Quasi-maximum-likelihood estimation in conditionally heteroscedastic time series: A stochastic recurrence equations approach. \emph{The Annals of Statistics}, 34(5), 2449--2495. \url{https://doi.org/10.1214/009053606000000803}
+
+\bibitem{talts2018} Talts, S., Betancourt, M., Simpson, D., Vehtari, A., \& Gelman, A. (2018). Validating Bayesian inference algorithms with simulation-based calibration. \emph{arXiv preprint}. \url{https://arxiv.org/abs/1804.06788}
+
+\bibitem{vehtari2021} Vehtari, A., Gelman, A., Simpson, D., Carpenter, B., \& Bürkner, P.-C. (2021). Rank-normalization, folding, and localization: An improved $\widehat R$ for assessing convergence of MCMC. \emph{Bayesian Analysis}, 16(2), 667--718. \url{https://doi.org/10.1214/20-BA1221}
+
+\bibitem{white2000} White, H. (2000). A reality check for data snooping. \emph{Econometrica}, 68(5), 1097--1126. \url{https://doi.org/10.1111/1468-0262.00152}
+
+\bibitem{yao2018} Yao, Y., Vehtari, A., Simpson, D., \& Gelman, A. (2018). Yes, but did it work?: Evaluating variational inference. \emph{Proceedings of the 35th International Conference on Machine Learning}, PMLR 80, 5581--5590. \url{https://proceedings.mlr.press/v80/yao18a.html}
+
+\end{thebibliography}
+
+\end{document}

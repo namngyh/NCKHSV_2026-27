@@ -65,8 +65,17 @@ def _bayes_mot(ctx, khoa, pt, spec, dl, m, chi_so, pa=TIEN_NGHIEM_GOC):
         return U.nuts_chuoi(spec, dl, m["xi"] + rng.normal(0, 0.05, spec.d), b["nuts_khoi_dong"], b["nuts_so_mau"],
                             b["nuts_dich_chap_nhan"], b["nuts_do_sau_cay"], seed, thu_muc=ctx.thu_muc_doan(khoa),
                             vong_moi_doan=b["nuts_vong_moi_doan"], pa=pa)
-    return U.vb(spec, dl, m["xi"] + rng.normal(0, 0.02 * chi_so, spec.d), pt, b["vb_so_buoc"], b["vb_toc_do_hoc"],
-                b["so_mau_hau_nghiem"], seed, thu_muc=ctx.thu_muc_doan(khoa), buoc_moi_doan=b["vb_buoc_moi_doan"], pa=pa)
+    xi0 = m["xi"] + rng.normal(0, 0.02 * chi_so, spec.d)
+    out = U.vb(spec, dl, xi0, pt, b["vb_so_buoc"], b["vb_toc_do_hoc"], b["so_mau_hau_nghiem"], seed,
+               thu_muc=ctx.thu_muc_doan(khoa), buoc_moi_doan=b["vb_buoc_moi_doan"], pa=pa)
+    for lan in (1, 2):             # tối ưu phân kỳ (NaN): thử lại từ điểm khác, tốc độ học nhỏ dần, không dùng trạng thái đã hỏng
+        if not out.get("that_bai"):
+            break
+        ctx.log(f"VB {khoa} phan ky (NaN); thu lai lan {lan} voi toc do hoc {b['vb_toc_do_hoc'] / 2 ** lan:.5f}")
+        out = U.vb(spec, dl, m["xi"] + rng.normal(0, 0.02 * (chi_so + lan), spec.d), pt, b["vb_so_buoc"],
+                   b["vb_toc_do_hoc"] / 2 ** lan, b["so_mau_hau_nghiem"], seed + 1000 * lan, thu_muc=None,
+                   buoc_moi_doan=b["vb_buoc_moi_doan"], pa=pa)
+    return out
 
 
 # ---------------------------------------------------------------------------------------- b08
@@ -131,6 +140,8 @@ def _gop_bayes_moc(ctx, kq) -> tuple[dict, dict]:
                 chan_doan[km][pt] = cd
             else:
                 tot = max(ds, key=lambda v: v["elbo"])
+                if tot.get("that_bai"):
+                    raise RuntimeError(f"VB {pt} moc {km}: ca {len(ds)} lan khoi tao deu phan ky (NaN); xem lai tham so toc do hoc")
                 gop[km][pt] = {**tot, "elbo_cac_lan": [v["elbo"] for v in ds]}
                 chan_doan[km][pt] = {"k_hat": tot["k_hat"], "elbo_cac_lan": [v["elbo"] for v in ds],
                                      "dat": bool(tot["k_hat"] < b["k_hat_toi_da"])}
