@@ -1,6 +1,6 @@
 {
- "commit": "877a3fe8741355afc4899167b453fb21f47e177e",
- "h_vao": "ca97de032ae06887ded53ca815abb31695c37fdcafec6993f38b45e73b510696",
+ "commit": "7e8b77ede5d44c58500dde350c34a6c31e01d0db",
+ "h_vao": "dd49e9df13a1dc4807e977a080ca4997a16ff4095d4ca5e1e112bd02f9b0d0fd",
  "bam_du_lieu": "70bfdb35ef0ea56b61e253183509d90368751ad1c15659683c9c1f8c408e110d",
  "bam_ma": "bbd7b856a6ebc769f4f6ef25a384134e250017b8b98cb8ad68eaac8f13768c7e",
  "ho_so": "day_du",
@@ -12,7 +12,7 @@
   "bo_xu_ly": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD"
  },
  "so_don_vi_theo_may": {
-  "may_manh": 6000
+  "may_manh": 12000
  },
- "thoi_diem": "2026-10-21 16:32:55"
+ "thoi_diem": "2026-10-22 07:37:33"
 }
