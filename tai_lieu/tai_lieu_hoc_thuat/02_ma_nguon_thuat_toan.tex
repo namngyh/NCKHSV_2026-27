@@ -218,6 +218,10 @@ Mô-đun \ma{garch\_nen.py} cài đặt \eqref{eq:garch} của Tài liệu 1 v�
 \end{enumerate}
 \end{thuattoan}
 
+\paragraph{Xử lý phân kỳ.} Tối ưu ngẫu nhiên đôi khi phân kỳ: Tham số biến phân thành NaN sau vài chục bước. Khi đó hàm \ma{vb} không ném lỗi mà trả kết quả có cờ ``thất bại'' với $\ELBO=-\infty$. Bước b08 chạy lại lần khởi tạo đó tối đa hai lần, mỗi lần từ một điểm khởi tạo khác và với tốc độ học giảm một nửa ($0{,}0025$ rồi $0{,}00125$). Chỉ khi cả ba lần khởi tạo của một mốc đều thất bại, bước mới dừng và báo rõ mốc và phương pháp.
+
+\paragraph{Gradient tại phiên bị che.} Hàm hợp lý tính mật độ cho mọi phiên rồi nhân với mặt nạ; tại phiên bị che, $z_t=0$. Với GED khi $\nu<1$, đạo hàm của $|z|^{\nu}$ tại $z=0$ là vô hạn, và phép che chỉ che giá trị chứ không che đạo hàm, nên gradient thành NaN ($0\times\infty$). Lỗi này chỉ lộ ra khi GED tham gia lựa chọn và được dùng cho VB. Mã hiện thay $z_t$ tại phiên bị che bằng $1$ trước khi tính mật độ (cả EGARCH-X và GARCH), nên giá trị hợp lý không đổi mà gradient luôn hữu hạn.
+
 Với dữ liệu thật, mỗi mốc ước lượng lại chạy VB từ ba điểm khởi tạo (nghiệm MLE của mốc cộng nhiễu $\Ncal(0,(0{,}02\,i)^2)$ với $i=0,1,2$) và giữ lần có $\ELBO$ lớn nhất; $\ELBO$ của cả ba lần được lưu để đánh giá độ ổn định. Chỉ báo $\hat k$ tính bằng \ma{arviz.psislw}.
 
 \subsection{NUTS}
@@ -358,7 +362,9 @@ Ngoài kiểm thử đơn vị, đường ống được chạy thử trọn v�
 \begin{enumerate}
 \item \textbf{Biến phân dùng một mẫu mỗi bước.} Gradient của $\ELBO$ ước lượng bằng một mẫu $\zeta$ mỗi bước, tốc độ học không giảm dần, và tham số cuối là của bước cuối chứ không phải trung bình các bước cuối. Cách làm này phổ biến nhưng có thể để lại dao động nhỏ quanh cực trị; độ ổn định qua ba điểm khởi tạo được dùng để kiểm soát.
 \item \textbf{Số ngẫu nhiên chung trong mô phỏng nhiều phiên.} Như đã nêu ở Mục~\ref{sec:thuattoan}, sai số Monte Carlo của VaR, ES các phiên kề nhau tương quan. Điều này không làm chệch dự báo nhưng ảnh hưởng đến độ chính xác của kiểm định trên chuỗi dự báo.
+\item \textbf{Quy đổi ký quỹ ra tiền chưa có trong đầu ra.} Mọi chỉ tiêu ký quỹ được tính theo tỷ lệ giá trị hợp đồng; phép nhân với hệ số nhân và giá hợp đồng (Tài liệu 1, Mục 7) chưa được đưa vào báo cáo tự động.
 \item \textbf{GARCH nền không có biến lịch.} GARCH(1,1) được cài đặt theo dạng chuẩn, không có biến giả lịch; EGARCH (khi $\gamma=0$) giữ biến lịch. Sự khác biệt này nên được nêu khi diễn giải kết quả so sánh GARCH với EGARCH.
+\item \textbf{Chẩn đoán hồi quy theo biến lịch bỏ biến phiên chuyển.} Trong chẩn đoán phần dư, hồi quy $\hat z_t^2-1$ lên biến lịch chỉ dùng biến đáo hạn và biến nghỉ dài, vì trước đây phiên chuyển không có lợi suất. Từ khi dùng giá F2M, phiên chuyển có lợi suất, nên hồi quy này nên thêm biến phiên chuyển. Chẩn đoán này không thuộc điều kiện của cổng (điều kiện (ii) dùng hồi quy theo nhóm $\tau_t$), và sẽ được sửa sau khi mô phỏng b03a xong, để không làm máy chạy lại bước đó.
 \item \textbf{GED không có trong mô phỏng khôi phục.} Mô phỏng khôi phục tham số chạy cho chuẩn, Student-$t$ và Student-$t$ lệch; GED tham gia chọn phân phối nhưng chưa có mô phỏng riêng.
 \item \textbf{Mã băm và đổi mã.} Mọi sửa đổi mã nguồn của một bước hay của mô-đun mà nó dùng đều làm bước chạy lại. Cơ chế này an toàn nhưng cần được tính đến khi đổi mã giữa chừng một lần chạy dài.
 \end{enumerate}

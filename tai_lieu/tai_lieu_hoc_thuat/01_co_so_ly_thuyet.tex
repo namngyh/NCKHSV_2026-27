@@ -172,6 +172,13 @@ r_t=\begin{cases}100\ln\dfrac{P_t}{P_{t-1}}, & J_t=0,\\[8pt] 100\ln\dfrac{P_t}{P
 \qquad
 r^{d}_t=\begin{cases}100\ln\dfrac{P^{o}_t}{P_{t-1}}, & J_t=0,\\[8pt] 100\ln\dfrac{P^{o}_t}{P^{(2)}_{t-1}}, & J_t=1.\end{cases}
 \end{equation}
+\paragraph{Ví dụ.} Phiên 16/08/2019 là phiên chuyển hợp đồng: Ngày 15/08/2019 là ngày đáo hạn của hợp đồng tháng 8, nên giá F1M ngày 15/08 ($890{,}4$ điểm) thuộc hợp đồng tháng 8, còn giá F1M ngày 16/08 ($879{,}1$ điểm) thuộc hợp đồng tháng 9. Hợp đồng tháng 9 ngày 15/08 là F2M, với giá đóng cửa $877{,}0$ điểm. Hai cách tính cho
+\begin{align*}
+\text{nối thô: }&\ 100\ln\frac{879{,}1}{890{,}4}=-1{,}277\%,\\
+\text{cùng hợp đồng: }&\ 100\ln\frac{879{,}1}{877{,}0}=+0{,}239\%.
+\end{align*}
+Cách nối thô cho một khoản lỗ $1{,}28\%$ không có thật: Đó chỉ là chênh lệch giá giữa hai kỳ hạn tại ngày 15/08. Lợi suất cùng hợp đồng mới là biến động giá thật của hợp đồng tháng 9 trong phiên 16/08.
+
 Chuỗi $r_t$ thu được là lợi suất của một vị thế kỳ hạn gần nhất được cuộn sang hợp đồng mới vào cuối ngày đáo hạn. Kiểm tra trên dữ liệu xác nhận cách tính này: Tại $105$ phiên chuyển, độ lệch chuẩn của lợi suất theo cách nối thô $\ln(P_t/P_{t-1})$ là $1{,}95\%$, còn theo \eqref{eq:loisuat} là $1{,}27\%$, gần với $1{,}48\%$ của các phiên thường; nghĩa là cú nhảy cơ sở đã được loại bỏ.
 
 Gọi $\chi_t$ là chỉ thị lợi suất khuyết: $\chi_t=1$ khi $r_t$ không tính được. Sau xử lý trên, chỉ còn một phiên có $\chi_t=1$: Phiên đầu tiên của mẫu, vì không có giá phiên trước. Cách đưa các phiên này vào đệ quy phương sai được trình bày ở Mục~\ref{sec:khuyet}. Biến giả của phiên chuyển hợp đồng vẫn được giữ (Mục 2.4), để hấp thụ khác biệt biến động còn lại quanh đáo hạn.
@@ -195,6 +202,12 @@ lần lượt là biên độ lên, biên độ xuống và lợi suất trong p
 \rho^{*}_t=\hat c_\rho\,\rho_t ,
 \end{equation}
 trong đó $s$ là mốc ước lượng gần nhất. Hệ số $\hat c_\rho$ bù cho hai nguồn chệch xuống: Biên độ quan sát rời rạc nhỏ hơn biên độ liên tục, và có những khoảng không giao dịch trong phiên. Lý do phải hiệu chỉnh được giải thích ở Mục~\ref{sec:qlike}.
+
+\paragraph{Diễn giải từng thành phần.} Lợi suất đóng cửa -- đóng cửa của một phiên gồm hai phần nối tiếp: Phần qua đêm (từ giá đóng cửa hôm trước đến giá mở cửa hôm nay) và phần trong phiên (từ giá mở cửa đến giá đóng cửa):
+\begin{equation*}
+\underbrace{\ln\frac{P_t}{P_{t-1}}}_{\text{cả ngày}}=\underbrace{\ln\frac{P^{o}_t}{P_{t-1}}}_{\text{qua đêm}}+\underbrace{\ln\frac{P_t}{P^{o}_t}}_{\text{trong phiên}} .
+\end{equation*}
+Vì hai phần xấp xỉ không tương quan, phương sai cả ngày xấp xỉ bằng tổng phương sai qua đêm và phương sai trong phiên. Bình phương lợi suất qua đêm $(r^d_t)^2$ đại diện cho phần thứ nhất, còn $\rho^{GK}_t$ đại diện cho phần thứ hai; tổng của chúng là $\rho_t$ trong \eqref{eq:proxy}. Trong $\rho^{GK}_t$, số hạng $\tfrac12(u_t-d_t)^2$ khai thác biên độ cả phiên, còn số hạng $-(2\ln2-1)c^2_t$ hiệu chỉnh phần biên độ đã được giải thích bởi xu hướng từ giá mở đến giá đóng.
 
 \begin{nhanxet}[Phiên chạm biên]
 Khi giá khóa ở biên độ trần hoặc sàn suốt phiên, bốn mức giá bằng nhau và mọi ước lượng theo biên độ bằng không, trong khi biến động thực tế rất lớn. Các phiên này được đánh dấu: Đại lượng đại diện của chúng bị loại khỏi tiêu chí QLIKE, và trong biến ngoại sinh, $\rho^{GK}_t$ được thay bằng $r_t^2$.
@@ -295,6 +308,27 @@ trong đó $\mu_{|z|}=\E|z_t|$ dưới phân phối $\Ecal$. EGARCH là trườn
 \end{itemize}
 Dưới góc nhìn thống kê, \eqref{eq:pt} là một hồi quy tuyến tính của $\ln h_t$ lên trễ của chính nó, một hàm của cú sốc chuẩn hóa và các biến giải thích.
 
+\paragraph{Đường cong tác động của cú sốc.} Tách \eqref{eq:sock} theo dấu của $z_{t-1}$ (với phiên không khuyết):
+\begin{equation}\label{eq:nic}
+s_{t-1}=\begin{cases}
+(\kappa_1+\kappa_2)\,z_{t-1}-\kappa_1\mu_{|z|}, & z_{t-1}\ge0,\\[4pt]
+(\kappa_2-\kappa_1)\,z_{t-1}-\kappa_1\mu_{|z|}, & z_{t-1}<0 .
+\end{cases}
+\end{equation}
+Đây là hai đường thẳng gặp nhau tại $z_{t-1}=0$. Độ dốc bên phải là $\kappa_1+\kappa_2$, độ dốc bên trái (theo độ lớn $|z_{t-1}|$) là $\kappa_1-\kappa_2$. Khi $\kappa_2<0$, ta có $\kappa_1-\kappa_2>\kappa_1+\kappa_2$: Một cú sốc âm làm $\ln h_t$ tăng nhiều hơn một cú sốc dương cùng độ lớn. Ví dụ, với $\kappa_1=0{,}15$ và $\kappa_2=-0{,}10$, cú sốc $z=+2$ làm $s$ tăng $0{,}05\times2=0{,}10$, còn cú sốc $z=-2$ làm $s$ tăng $0{,}25\times2=0{,}50$ (cùng trừ đi $\kappa_1\mu_{|z|}$), tức phương sai phiên sau tăng thêm khoảng $e^{0{,}40}-1\approx49\%$ so với trường hợp cú sốc dương.
+
+\paragraph{Dạng nhân của phương sai.} Lấy hàm mũ hai vế của \eqref{eq:pt}:
+\begin{equation}\label{eq:nhan}
+h_t=e^{\omega}\cdot h_{t-1}^{\,\beta}\cdot e^{s_{t-1}}\cdot e^{\gamma^\top X_{t-1}}\cdot e^{\delta^\top D_t}.
+\end{equation}
+Mỗi thành phần tác động theo tỷ lệ: Khi biến ngoại sinh thứ $j$ tăng một độ lệch chuẩn (các yếu tố khác cố định), phương sai được nhân với $e^{\gamma_j}$; chẳng hạn $\gamma_j=0{,}17$ tương ứng mức tăng $e^{0{,}17}-1\approx18\%$. Tương tự, phiên chuyển hợp đồng nhân phương sai với $e^{\delta_{sau}}$.
+
+\paragraph{Lặp đệ quy.} Thay \eqref{eq:pt} vào chính nó $k$ lần,
+\begin{equation*}
+\ln h_t=\omega\sum_{i=0}^{k-1}\beta^{i}+\sum_{i=0}^{k-1}\beta^{i}\big(s_{t-1-i}+\gamma^\top X_{t-1-i}+\delta^\top D_{t-i}\big)+\beta^{k}\ln h_{t-k}.
+\end{equation*}
+Một cú sốc ở $i$ phiên trước có trọng số $\beta^{i}$, nên ảnh hưởng của nó tắt dần theo cấp số nhân; với $\beta=0{,}8$, sau $10$ phiên chỉ còn $0{,}8^{10}\approx11\%$. Thời gian bán rã là $\ln0{,}5/\ln\beta$, khoảng $3{,}1$ phiên khi $\beta=0{,}8$ và $13{,}5$ phiên khi $\beta=0{,}95$. Khi $k\to\infty$ và $|\beta|<1$, số hạng $\beta^k\ln h_{t-k}$ biến mất, tức giá trị khởi tạo không còn ảnh hưởng.
+
 \subsection{Điều kiện chính quy}
 
 \begin{enumerate}
@@ -334,7 +368,11 @@ f(z)=C_\nu\Big(1+\frac{z^2}{\nu-2}\Big)^{-\frac{\nu+1}{2}},\qquad
 C_\nu=\frac{\Gamma\big(\frac{\nu+1}{2}\big)}{\sqrt{\pi(\nu-2)}\,\Gamma\big(\frac{\nu}{2}\big)},\qquad
 \mu_{|z|}=\frac{2\sqrt{\nu-2}\,\Gamma\big(\frac{\nu+1}{2}\big)}{(\nu-1)\sqrt{\pi}\,\Gamma\big(\frac{\nu}{2}\big)} .
 \end{equation}
-Thừa số $\nu-2$ thay cho $\nu$ là phép co giãn bảo đảm $\Var z_t=1$. Khi $\nu\to\infty$, phân phối hội tụ về phân phối chuẩn.
+Thừa số $\nu-2$ thay cho $\nu$ là phép co giãn bảo đảm $\Var z_t=1$. Thật vậy, nếu $T$ có phân phối Student-$t$ thông thường với $\nu$ bậc tự do thì $\Var T=\nu/(\nu-2)$ khi $\nu>2$; đặt
+\begin{equation*}
+z=\sqrt{\frac{\nu-2}{\nu}}\;T\quad\Longrightarrow\quad\Var z=\frac{\nu-2}{\nu}\cdot\frac{\nu}{\nu-2}=1,
+\end{equation*}
+và đổi biến từ $T$ sang $z$ cho đúng mật độ \eqref{eq:tstd}. Điều kiện $\nu>2$ chính là điều kiện để phương sai tồn tại. Khi $\nu\to\infty$, phân phối hội tụ về phân phối chuẩn; $\nu$ càng nhỏ, đuôi càng dày (với $\nu=4$, moment bậc bốn đã vô hạn).
 
 \paragraph{Student-$t$ lệch của Hansen.} Với $\nu>2$ và $-1<\lambda<1$ \cite{hansen1994}, đặt
 \begin{equation}
@@ -364,7 +402,16 @@ trong đó $\theta_{\mathcal E}$ là tham số hình dạng (không có, $\nu$, 
 \begin{equation}\label{eq:loglik}
 \ell(\theta)=\sum_{t\in\mathcal T^{o}}\Big[\ln f_\Ecal\big(z_t(\theta)\big)-\tfrac12\ln h_t(\theta)\Big],\qquad z_t(\theta)=\frac{r_t-\mu}{\sqrt{h_t(\theta)}} .
 \end{equation}
-Số hạng $-\tfrac12\ln h_t$ là Jacobian của phép đổi biến từ $z_t$ sang $r_t$. Số tham số là $d=5+d_X+3+\dim\theta_{\mathcal E}$.
+Số hạng $-\tfrac12\ln h_t$ là Jacobian của phép đổi biến từ $z_t$ sang $r_t$: Vì $r_t=\mu+\sqrt{h_t}\,z_t$, mật độ của $r_t$ là $f_\Ecal(z_t)\cdot|dz_t/dr_t|=f_\Ecal(z_t)/\sqrt{h_t}$, và lấy logarit cho đúng hai số hạng trong ngoặc. Số tham số là $d=5+d_X+3+\dim\theta_{\mathcal E}$.
+
+\paragraph{Khai triển cho từng phân phối.} Thay mật độ của Mục~\ref{sec:phanphoi} vào \eqref{eq:loglik}, đóng góp của một phiên $\ell_t(\theta)=\ln f_\Ecal(z_t)-\tfrac12\ln h_t$ là
+\begin{align*}
+\text{chuẩn: }\quad&\ell_t=-\tfrac12\ln(2\pi)-\tfrac12\ln h_t-\tfrac12 z_t^2,\\
+\text{Student-}t\text{: }\quad&\ell_t=\ln C_\nu-\tfrac12\ln h_t-\tfrac{\nu+1}{2}\ln\Big(1+\frac{z_t^2}{\nu-2}\Big),\\
+\text{Student-}t\text{ lệch: }\quad&\ell_t=\ln B+\ln C_\nu-\tfrac12\ln h_t-\tfrac{\nu+1}{2}\ln\Big(1+\frac{1}{\nu-2}\Big(\frac{Bz_t+A}{1\mp\lambda}\Big)^2\Big),\\
+\text{GED: }\quad&\ell_t=\ln\nu-\ln c_\nu-\big(1+\tfrac1\nu\big)\ln2-\ln\Gamma\big(\tfrac1\nu\big)-\tfrac12\ln h_t-\tfrac12\Big|\frac{z_t}{c_\nu}\Big|^{\nu}.
+\end{align*}
+Với phân phối chuẩn, một quan sát lớn ($|z_t|$ lớn) bị phạt theo $z_t^2$; với Student-$t$, mức phạt chỉ tăng theo $\ln z_t^2$. Đó là lý do phân phối đuôi dày ít bị kéo lệch bởi các phiên biến động cực đoan.
 
 \subsection{Mô hình lồng nhau và kiểm định trong mẫu}
 
@@ -400,7 +447,9 @@ Sai số chuẩn dạng Hessian lấy từ $\hat A^{-1}$. Vì phân phối sai s
 \begin{equation}
 \widehat{\Var}(\hat\theta)=\hat A^{-1}\hat B\hat A^{-1}
 \end{equation}
-được dùng làm căn cứ chính. Chênh lệch lớn giữa hai dạng là dấu hiệu đặc tả sai phân phối. Khoảng tin cậy Wald mức $95\%$ là $\hat\theta_i\pm1{,}96\,\widehat{\mathrm{se}}_i$. Khi nghiệm sát biên (ví dụ $\hat\beta>0{,}98$), khoảng tin cậy được bổ sung bằng bootstrap tham số.
+được dùng làm căn cứ chính. Lý do: Khi phân phối $\Ecal$ được đặc tả đúng, đẳng thức ma trận thông tin cho $\E\hat A=\E\hat B$, nên $\hat A^{-1}\hat B\hat A^{-1}\approx\hat A^{-1}$ và hai dạng gần nhau; khi đặc tả sai, đẳng thức này không còn, chỉ dạng bánh kẹp còn vững. Vì vậy chênh lệch lớn giữa hai dạng là dấu hiệu đặc tả sai phân phối.
+
+\paragraph{Ý nghĩa hình học.} Ma trận $\hat A$ là độ cong của bề mặt logarit hợp lý tại đỉnh. Bề mặt càng nhọn theo một hướng, $\hat A$ càng lớn theo hướng đó, và tham số tương ứng được xác định càng chính xác. Trong trường hợp một tham số, $\mathrm{se}\approx1/\sqrt{-\ell''(\hat\theta)}$. Khoảng tin cậy Wald mức $95\%$ là $\hat\theta_i\pm1{,}96\,\widehat{\mathrm{se}}_i$. Khi nghiệm sát biên (ví dụ $\hat\beta>0{,}98$), khoảng tin cậy được bổ sung bằng bootstrap tham số.
 
 \paragraph{Chẩn đoán phần dư.} Với $\hat z_t$ là phần dư chuẩn hóa: (i) Kiểm định Ljung--Box trên $\hat z_t$ và $\hat z_t^2$; (ii) hồi quy $\hat z_t^2-1$ lên biến lịch và lên nhóm $\tau_t$, kèm kiểm định $F$, để xác nhận chu kỳ đáo hạn đã được hấp thụ; (iii) biến đổi tích phân xác suất với kiểm định Berkowitz \cite{berkowitz2001}; (iv) kiểm định điểm gãy phương sai \cite{inclan1994}.
 
@@ -451,7 +500,13 @@ Bayes biến phân thay bài toán tích phân bằng bài toán tối ưu: Tìm
 q^{*}=\arg\min_{q\in\mathcal Q}\KL\big(q\,\|\,p(\cdot\mid y)\big),\qquad
 \KL\big(q\,\|\,p(\cdot\mid y)\big)=\E_q\big[\ln q(\xi)-\ln p(\xi\mid y)\big].
 \end{equation}
-Vì $p(\xi\mid y)$ chỉ biết đến một hằng số nhân $p(y)$, ta dùng đẳng thức $\ln p(y)=\ELBO(q)+\KL\big(q\,\|\,p(\cdot\mid y)\big)$, trong đó
+Vì $p(\xi\mid y)$ chỉ biết đến một hằng số nhân $p(y)$, ta khai triển KL bằng $p(\xi\mid y)=\tilde p(\xi\mid y)/p(y)$, với $\tilde p(\xi\mid y)=p(y\mid\xi)\,p(\xi)$ là hậu nghiệm chưa chuẩn hóa:
+\begin{align*}
+\KL\big(q\,\|\,p(\cdot\mid y)\big)
+&=\E_q\big[\ln q(\xi)\big]-\E_q\big[\ln\tilde p(\xi\mid y)-\ln p(y)\big]\\
+&=\ln p(y)-\Big(\E_q\big[\ln\tilde p(\xi\mid y)\big]-\E_q\big[\ln q(\xi)\big]\Big).
+\end{align*}
+Từ đó suy ra đẳng thức $\ln p(y)=\ELBO(q)+\KL\big(q\,\|\,p(\cdot\mid y)\big)$, trong đó
 \begin{equation}\label{eq:elbo}
 \ELBO(q)=\E_q\big[\ln\tilde p(\xi\mid y)\big]-\E_q\big[\ln q(\xi)\big],
 \end{equation}
@@ -460,6 +515,11 @@ với $\tilde p(\xi\mid y)$ là vế phải của \eqref{eq:posterior} không c�
 \item \textbf{Mean-field:} $q(\xi)=\Ncal\big(\mu_q,\ \mathrm{diag}(s_1^2,\dots,s_d^2)\big)$, các thành phần độc lập, $2d$ tham số biến phân.
 \item \textbf{Full-rank:} $q(\xi)=\Ncal(\mu_q,\ C)$ với $C=RR^\top$, $R$ tam giác dưới có đường chéo dương, $d+d(d+1)/2$ tham số biến phân, biểu diễn được tương quan giữa các tham số.
 \end{itemize}
+Với $q$ là phân phối chuẩn, số hạng thứ hai của \eqref{eq:elbo} có dạng đóng (entropy của phân phối chuẩn nhiều chiều):
+\begin{equation*}
+-\E_q\big[\ln q(\xi)\big]=\tfrac d2\ln(2\pi e)+\tfrac12\ln\det C=\tfrac d2\ln(2\pi e)+\sum_{i=1}^{d}\ln R_{ii},
+\end{equation*}
+với mean-field thì $R_{ii}=s_i$. Số hạng này tăng khi $q$ rộng ra, nên nó ngăn $q$ co về một điểm; số hạng thứ nhất kéo $q$ về vùng hậu nghiệm cao. $\ELBO$ là sự cân bằng giữa hai lực đó. Với cấu hình Student-$t$ lệch có một biến ngoại sinh ($d=11$), mean-field có $22$ tham số biến phân, full-rank có $11+66=77$.
 Gradient của $\ELBO$ được ước lượng không chệch bằng thủ thuật tái tham số hóa \cite{kingma2014}: Viết $\xi=\mu_q+R\zeta$ với $\zeta\sim\Ncal(0,I)$, khi đó $\ELBO$ là kỳ vọng theo $\zeta$, một phân phối không phụ thuộc tham số biến phân, nên đạo hàm có thể đưa vào trong kỳ vọng. Mỗi bước tối ưu rút một mẫu $\zeta$ và cập nhật $(\mu_q,R)$ bằng thuật toán Adam. Quy trình này là phương pháp biến phân vi phân tự động \cite{kucukelbir2017}.
 
 \begin{nhanxet}[Xu hướng đánh giá thấp bất định của mean-field]
@@ -486,8 +546,18 @@ Hiệu quả của HMC phụ thuộc mạnh vào số bước nhảy cóc. Thu�
 
 NUTS được dùng làm \emph{hậu nghiệm tham chiếu}, với bốn chuỗi độc lập, mỗi chuỗi $1.000$ vòng khởi động và $1.000$ mẫu. Kết quả chỉ được sử dụng khi thỏa đồng thời ba điều kiện \cite{vehtari2021}:
 \begin{itemize}
-\item Chỉ số $\hat R$ dạng chuẩn hóa thứ hạng nhỏ hơn $1{,}01$ cho mọi tham số. Chỉ số này so phương sai giữa các chuỗi với phương sai trong từng chuỗi; khi các chuỗi xuất phát từ những điểm khác nhau đã trộn vào nhau, $\hat R$ gần $1$.
-\item Cỡ mẫu hiệu dụng phần thân và phần đuôi không dưới $400$. Cỡ mẫu hiệu dụng là số mẫu độc lập có cùng lượng thông tin với các mẫu tự tương quan của chuỗi.
+\item Chỉ số $\hat R$ dạng chuẩn hóa thứ hạng nhỏ hơn $1{,}01$ cho mọi tham số. Chỉ số này so phương sai giữa các chuỗi với phương sai trong từng chuỗi. Với $M$ chuỗi, mỗi chuỗi $N$ mẫu, trung bình chuỗi $\bar\theta_m$, trung bình chung $\bar\theta$ và phương sai mẫu trong chuỗi $s_m^2$:
+\begin{equation*}
+W=\frac1M\sum_{m}s_m^2,\qquad
+B_R=\frac{N}{M-1}\sum_{m}\big(\bar\theta_m-\bar\theta\big)^2,\qquad
+\hat R=\sqrt{\frac{\frac{N-1}{N}W+\frac1N B_R}{W}} .
+\end{equation*}
+Khi các chuỗi đã trộn vào nhau, trung bình các chuỗi gần nhau, $B_R$ nhỏ và $\hat R\approx1$. Khi có chuỗi còn kẹt ở vùng khác, $B_R$ lớn và $\hat R>1$. Dạng chuẩn hóa thứ hạng áp công thức trên cho thứ hạng của mẫu (thay vì giá trị), nên vững với đuôi dày.
+\item Cỡ mẫu hiệu dụng phần thân và phần đuôi không dưới $400$. Cỡ mẫu hiệu dụng là số mẫu độc lập có cùng lượng thông tin với các mẫu tự tương quan của chuỗi:
+\begin{equation*}
+\mathrm{ESS}=\frac{MN}{1+2\sum_{k\ge1}\hat\varrho_k},
+\end{equation*}
+với $M$ chuỗi, mỗi chuỗi $N$ mẫu, và $\hat\varrho_k$ là tự tương quan bậc $k$ của chuỗi mẫu. Với $M=4$, $N=1.000$, tổng $4.000$ mẫu; nếu tự tương quan làm mẫu số bằng $10$ thì ESS chỉ còn $400$, đúng ngưỡng.
 \item Không có bước chuyển phân kỳ sau khởi động. Bước phân kỳ là bước mà sai số tích phân của quỹ đạo bùng nổ, dấu hiệu chuỗi không khám phá được một vùng của hậu nghiệm.
 \end{itemize}
 
@@ -558,7 +628,11 @@ Gọi $\hat h_t$ là dự báo phương sai một bước tạo tại cuối phi
 \begin{equation}
 \QLIKE=\frac1n\sum_{t}\Big[\ln\hat h_t+\frac{\rho^{*}_t}{\hat h_t}\Big],
 \end{equation}
-lấy trên các phiên có đại lượng đại diện xác định và không chạm biên. QLIKE thuộc lớp hàm mất mát cho thứ hạng nhất quán giữa các mô hình khi phương sai thật được thay bằng một đại lượng đại diện có kỳ vọng có điều kiện bằng phương sai thật \cite{patton2011}. Điều kiện này giải thích việc hiệu chỉnh ở \eqref{eq:proxy}: Nếu $\E[\rho_t\mid\Fcal_{t-1}]=c\,h_t$ với $c\neq1$, kỳ vọng của QLIKE đạt cực tiểu tại $\hat h_t=c\,h_t$ thay vì $h_t$.
+lấy trên các phiên có đại lượng đại diện xác định và không chạm biên. QLIKE thuộc lớp hàm mất mát cho thứ hạng nhất quán giữa các mô hình khi phương sai thật được thay bằng một đại lượng đại diện có kỳ vọng có điều kiện bằng phương sai thật \cite{patton2011}. Điều kiện này giải thích việc hiệu chỉnh ở \eqref{eq:proxy}. Thật vậy, với $\E[\rho^{*}_t\mid\Fcal_{t-1}]=\bar\rho$, kỳ vọng có điều kiện của mất mát một phiên là $\ln\hat h+\bar\rho/\hat h$. Lấy đạo hàm theo $\hat h$:
+\begin{equation*}
+\frac{d}{d\hat h}\Big(\ln\hat h+\frac{\bar\rho}{\hat h}\Big)=\frac1{\hat h}-\frac{\bar\rho}{\hat h^{2}}=0\iff\hat h=\bar\rho .
+\end{equation*}
+Đạo hàm cấp hai tại đó là $1/\bar\rho^{2}>0$, nên đây là cực tiểu. Do đó QLIKE thưởng cho dự báo bằng kỳ vọng của đại lượng đại diện. Nếu $\E[\rho_t\mid\Fcal_{t-1}]=c\,h_t$ với $c\neq1$, cực tiểu rơi vào $\hat h_t=c\,h_t$ thay vì $h_t$; nhân với $\hat c_\rho$ đưa $c$ về gần $1$. Mất mát QLIKE bất đối xứng: Dự báo thấp hơn thật bị phạt nặng hơn dự báo cao hơn thật cùng tỷ lệ, một tính chất phù hợp với quản trị rủi ro.
 
 \subsection{Dự báo mật độ}
 
@@ -581,7 +655,13 @@ Với phân phối liên tục, $\ES_{t,\alpha}=\E[L_t\mid L_t\ge\VaR_{t,\alpha}
 \widehat{\VaR}_{t,\alpha}=-\hat\mu-\sqrt{\hat h_t}\;q_\alpha,\qquad
 \widehat{\ES}_{t,\alpha}=-\hat\mu-\sqrt{\hat h_t}\;e_\alpha,
 \end{equation}
-với $q_\alpha$ là phân vị mức $\alpha$ của $\Ecal$ và $e_\alpha=\E_\Ecal[z\mid z\le q_\alpha]$. Với vị thế bán, $L_t=r_t$ và đuôi phải của $\Ecal$ được dùng. Biểu thức của $q_\alpha$, $e_\alpha$ cho từng phân phối ở Phụ lục~\ref{app:varES}.
+với $q_\alpha$ là phân vị mức $\alpha$ của $\Ecal$ và $e_\alpha=\E_\Ecal[z\mid z\le q_\alpha]$. Lập luận như sau: Tổn thất $L_t=-\mu-\sqrt{h_t}\,z_t$ là hàm giảm của $z_t$, nên tổn thất vượt ngưỡng $v$ khi và chỉ khi $z_t$ nhỏ hơn một ngưỡng tương ứng:
+\begin{equation*}
+\Prob(L_t>v)=\Prob\Big(z_t<-\frac{v+\mu}{\sqrt{h_t}}\Big)=\alpha\iff -\frac{v+\mu}{\sqrt{h_t}}=q_\alpha\iff v=-\mu-\sqrt{h_t}\,q_\alpha .
+\end{equation*}
+Tương tự, $\E[L_t\mid L_t\ge v]=-\mu-\sqrt{h_t}\,\E[z\mid z\le q_\alpha]$. Với vị thế bán, $L_t=r_t$ và đuôi phải của $\Ecal$ được dùng.
+
+\paragraph{Ví dụ.} Với $\mu=0$, $\sqrt{h_t}=1{,}5\%$ và phân phối chuẩn ở mức $\alpha=1\%$: $q_{0,01}=-2{,}326$ và $e_{0,01}=-\phi(-2{,}326)/0{,}01=-2{,}665$, nên $\VaR=1{,}5\times2{,}326=3{,}49\%$ và $\ES=1{,}5\times2{,}665=4{,}00\%$. Nghĩa là: Với xác suất $1\%$, vị thế mua lỗ hơn $3{,}49\%$ trong phiên tới, và khi điều đó xảy ra thì mức lỗ trung bình là $4{,}00\%$. Với phân phối đuôi dày cùng phương sai, $q_\alpha$ và $e_\alpha$ lớn hơn theo độ lớn (Bảng~\ref{tab:vidu}), nên VaR và ES lớn hơn. Biểu thức của $q_\alpha$, $e_\alpha$ cho từng phân phối ở Phụ lục~\ref{app:varES}.
 
 \subsection{Kiểm định độ phủ của VaR}
 
@@ -599,6 +679,12 @@ LR_{cc}=LR_{uc}+LR_{ind}\ \sim\ \chi^2_2 .
 \end{equation}
 Vi phạm dồn cụm làm tăng $\pi_{11}$ so với $\pi_{01}$ và bị $LR_{ind}$ phát hiện.
 
+\paragraph{Ví dụ số.} Trên khối kiểm tra $n=435$ phiên với $\alpha=1\%$, số vi phạm kỳ vọng là $4{,}35$. Nếu quan sát $x=8$ vi phạm thì $\hat\pi=8/435=1{,}84\%$ và
+\begin{equation*}
+LR_{uc}=-2\Big[427\ln\frac{0{,}99}{1-0{,}0184}+8\ln\frac{0{,}01}{0{,}0184}\Big]=2{,}48,\qquad p=0{,}115,
+\end{equation*}
+nên chưa bác bỏ dù số vi phạm gần gấp đôi kỳ vọng; với $x=3$ thì $p=0{,}49$. Ví dụ này minh họa lực thấp của kiểm định trên mẫu nhỏ. Ngược lại, nếu trong $8$ vi phạm đó có một cặp phiên liền nhau và một cụm ba phiên liền nhau (ba vi phạm còn lại đứng riêng), kiểm định Christoffersen cho $LR_{ind}=14{,}8$ và $p=0{,}0001$: Kiểm định độc lập phát hiện được điều mà kiểm định độ phủ bỏ sót. Các con số được tính bằng chính hàm của mã nguồn.
+
 \paragraph{Kiểm định phân vị động} \cite{engle_manganelli2004} hồi quy $I_t-\alpha$ lên hằng số, các trễ của $I_t$ và VaR dự báo; dưới giả thuyết dự báo đúng, mọi hệ số bằng không.
 
 \paragraph{Đèn giao thông Basel.} Trên cửa sổ $250$ phiên với VaR mức $99\%$, số vi phạm từ $0$ đến $4$ là vùng xanh, từ $5$ đến $9$ là vùng vàng và từ $10$ trở lên là vùng đỏ.
@@ -609,7 +695,12 @@ VaR đánh giá được bằng hàm mất mát phân vị \cite{koenker1978,gne
 \begin{equation}\label{eq:fz0}
 S_\alpha(v,e;L)=\frac{1}{\alpha e}\,\ind\{L>v\}\,(L-v)+\frac{v}{e}+\ln e-1 .
 \end{equation}
-Kỳ vọng của $S_\alpha$ đạt cực tiểu tại cặp thật: Lấy đạo hàm theo $v$ cho $\Prob(L>v)=\alpha$, và theo $e$ cho $e=\E[L\mid L>v]$. Điểm trung bình càng nhỏ càng tốt; đây là tiêu chí chính cho dự báo rủi ro đuôi.
+Kỳ vọng của $S_\alpha$ đạt cực tiểu tại cặp thật. Khai triển: Với $\bar S(v,e)=\E\,S_\alpha(v,e;L)$,
+\begin{align*}
+\frac{\partial\bar S}{\partial v}&=\frac1e\Big(1-\frac{\Prob(L>v)}{\alpha}\Big)=0\iff\Prob(L>v)=\alpha\iff v=\VaR_\alpha,\\
+\frac{\partial\bar S}{\partial e}&=\frac1e-\frac{v}{e^{2}}-\frac{\E[(L-v)\ind\{L>v\}]}{\alpha e^{2}}=0\iff e=v+\frac{\E[(L-v)^{+}]}{\alpha}=\ES_\alpha ,
+\end{align*}
+trong đó đẳng thức cuối là biểu diễn tối ưu hóa của ES \cite{rockafellar2000}: Tại $v=\VaR_\alpha$, $v+\alpha^{-1}\E[(L-v)^+]=\E[L\mid L>v]$. Điểm trung bình càng nhỏ càng tốt; đây là tiêu chí chính cho dự báo rủi ro đuôi.
 
 \subsection{So sánh dự báo có kiểm định}\label{sec:sosanh}
 
@@ -618,7 +709,7 @@ Kỳ vọng của $S_\alpha$ đạt cực tiểu tại cặp thật: Lấy đạ
 DM=\frac{\overline{\Delta\ell}}{\sqrt{\hat V/n}},\qquad
 \hat V=\hat c_0+2\sum_{j=1}^{J}\Big(1-\frac{j}{J+1}\Big)\hat c_j ,
 \end{equation}
-với $\hat c_j$ là hiệp phương sai mẫu bậc $j$ của $\Delta\ell_t$ (phương sai Newey--West \cite{newey1987}), có phân phối tiệm cận chuẩn tắc dưới $H_0:\E[\Delta\ell_t]=0$. Kiểm định một phía được dùng khi câu hỏi là ``cấu hình $a$ có tốt hơn $b$ hay không''.
+với $\hat c_j=\frac1n\sum_{t}(\Delta\ell_t-\overline{\Delta\ell})(\Delta\ell_{t-j}-\overline{\Delta\ell})$ là hiệp phương sai mẫu bậc $j$ của $\Delta\ell_t$ và số trễ $J=\lfloor n^{1/3}\rfloor$ ($J=7$ khi $n=435$, $J=9$ khi $n=881$). Trọng số $1-j/(J+1)$ (phương sai Newey--West \cite{newey1987}) bảo đảm $\hat V\ge0$, và các số hạng $\hat c_j$ tính đến tự tương quan của chênh lệch mất mát. Thống kê có phân phối tiệm cận chuẩn tắc dưới $H_0:\E[\Delta\ell_t]=0$; với giả thuyết đối ``$a$ tốt hơn $b$'' ($\E\Delta\ell_t<0$), giá trị $p$ một phía là $\Phi(DM)$. Kiểm định một phía được dùng khi câu hỏi là ``cấu hình $a$ có tốt hơn $b$ hay không''.
 
 \paragraph{Kiểm định Giacomini--White} \cite{giacomini2006} kiểm tra khả năng dự báo có điều kiện, phù hợp khi dự báo tạo từ tham số được ước lượng lại theo cửa sổ.
 
@@ -631,7 +722,7 @@ với $\hat c_j$ là hiệp phương sai mẫu bậc $j$ của $\Delta\ell_t$ (p
 Quy trình được cố định trước khi nhìn vào khối $\KT$:
 \begin{enumerate}
 \item Chỉ dùng $\UL\cup\XT$. Khối kiểm tra không tham gia bất kỳ lựa chọn nào.
-\item \textbf{Chọn tiến từng biến.} Bắt đầu từ EGARCH ($\gamma=0$, giữ biến lịch). Ở mỗi bước, thêm ứng viên cho điểm logarit mật độ trung bình cao nhất trên $\XT$; giữ biến nếu cải thiện có ý nghĩa theo kiểm định Diebold--Mariano một phía ở mức $5\%$ và không làm xấu điểm FZ0. Dừng khi không còn cải thiện có ý nghĩa.
+\item \textbf{Chọn tiến từng biến.} Trong bước này mọi cấu hình dùng phân phối Student-$t$, để việc chọn biến không phụ thuộc phân phối sẽ chọn sau. Bắt đầu từ EGARCH ($\gamma=0$, giữ biến lịch). Ở mỗi bước, thêm ứng viên cho điểm logarit mật độ trung bình cao nhất trên $\XT$; giữ biến nếu cải thiện có ý nghĩa theo kiểm định Diebold--Mariano một phía ở mức $5\%$ (với mất mát $-\ln\hat f_t(r_t)$) và điểm FZ0 trung bình ở mức $\alpha=2{,}5\%$ không tăng. Dừng khi không còn cải thiện có ý nghĩa.
 \item \textbf{Kiểm soát đa kiểm định.} Kiểm định SPA cho câu hỏi ``có ít nhất một ứng viên cải thiện''; các kiểm định tỷ số hợp lý trong mẫu từng biến được hiệu chỉnh theo phương pháp Holm.
 \item \textbf{Đa cộng tuyến.} Không đưa đồng thời hai biến có tương quan mẫu vượt $0{,}8$; báo cáo hệ số phóng đại phương sai.
 \item \textbf{Độ ổn định.} Hệ số $\hat\gamma_j$ phải giữ dấu qua các lần ước lượng lại.
@@ -656,7 +747,16 @@ tức ký quỹ cơ sở là một phân vị có điều kiện của tổn th�
 
 \subsection{Dự báo rủi ro $H$ phiên bằng mô phỏng}\label{sec:mophongH}
 
-Với $H=1$, \eqref{eq:var1} cho công thức đóng. Với $H\ge2$, phương sai của phiên $t+2$ phụ thuộc cú sốc của phiên $t+1$ qua hàm mũ, nên lợi suất tích lũy là tổng của các biến phụ thuộc, khác phân phối và đuôi dày; phân phối của nó không có dạng đóng. Phân phối được xấp xỉ bằng $S=10.000$ đường mô phỏng:
+Với $H=1$, \eqref{eq:var1} cho công thức đóng. Với $H\ge2$, phân phối của lợi suất tích lũy không có dạng đóng. Lấy $H=2$ để thấy rõ. Lợi suất hai phiên là
+\begin{gather*}
+r_{t+1}+r_{t+2}=\sqrt{h_{t+1}}\,z_{t+1}+\sqrt{h_{t+2}}\,z_{t+2},\\
+h_{t+2}=\exp\Big\{\omega+\kappa_1\big(|z_{t+1}|-\mu_{|z|}\big)+\kappa_2 z_{t+1}+\beta\ln h_{t+1}+\gamma^\top X_{t+1}+\delta^\top D_{t+2}\Big\}.
+\end{gather*}
+Ở đây $h_{t+1}$ đã biết tại cuối phiên $t$, nhưng $h_{t+2}$ phụ thuộc $z_{t+1}$ qua hàm mũ. Hai số hạng vì thế không độc lập: Một cú sốc âm lớn ở phiên $t+1$ vừa làm lỗ ngay, vừa làm phương sai phiên $t+2$ tăng vọt. Hàm phân phối của tổng là
+\begin{equation*}
+\Prob\big(r_{t+1}+r_{t+2}\le x\mid\Fcal_t\big)=\int F_\Ecal\Big(\frac{x-\sqrt{h_{t+1}}\,u}{\sqrt{h_{t+2}(u)}}\Big)f_\Ecal(u)\,du ,
+\end{equation*}
+một tích phân không có nguyên hàm sơ cấp; với $H$ tổng quát cần tích phân $H-1$ chiều, và $X_{t+1},\dots$ chưa quan sát được. Do đó phân phối được xấp xỉ bằng $S=10.000$ đường mô phỏng:
 \begin{enumerate}
 \item Với mỗi đường $s$: Lấy $\theta^{(s)}$ từ hậu nghiệm (suy diễn Bayes) hoặc đặt $\theta^{(s)}=\hat\theta$ (hợp lý cực đại).
 \item Đặt $\ln h^{(s)}_{t+1}$ bằng giá trị lọc tại cuối phiên $t$ theo chính bộ tham số đó.
@@ -692,6 +792,28 @@ m_t=\max\Big\{\underline m_t,\ g\,\Big\lceil\frac{1}{g}\max\big\{m^{(4)}_t,\ m_{
 \end{equation}
 Nghiên cứu dùng $g=0{,}5\%$ và $\Delta=1\%$. Quy tắc không giới hạn tốc độ tăng, vì giới hạn tăng sẽ gây thiếu hụt đúng lúc biến động bùng nổ.
 
+\paragraph{Ví dụ tính từng bước.} Xét năm phiên với VaR dự báo (lấy $w=0$ nên $m^{(1)}=\widehat{\VaR}$) lần lượt $8\%$, $12\%$ (cú sốc), rồi trở lại $8\%$; tham số $b=0{,}1$, sàn $\underline m_t=6\%$, $\eta=0{,}8$, $\Delta=1\%$, $g=0{,}5\%$. Bảng~\ref{tab:vidukyquy} cho từng bước; các giá trị trùng với kết quả của hàm cài đặt quy tắc trong mã nguồn.
+
+\begin{table}[h]
+\centering
+\caption{Ví dụ quy tắc ký quỹ năm bước (đơn vị \%)}\label{tab:vidukyquy}
+\begin{tabular}{@{}cccccp{6.8cm}@{}}
+\toprule
+\textbf{Phiên} & $m^{(1)}$ & $m^{(2)}=m^{(3)}$ & $m^{(4)}$ & $m_t$ & \textbf{Giải thích bước 4 và 5} \\
+\midrule
+1 & $8$ & $8{,}8$ & $8{,}80$ & $9{,}0$ & Phiên đầu: $m^{(4)}=m^{(3)}$, làm tròn lên $9{,}0$ \\
+2 & $12$ & $13{,}2$ & $13{,}20$ & $13{,}5$ & Mục tiêu tăng: Tăng ngay, làm tròn lên $13{,}5$ \\
+3 & $8$ & $8{,}8$ & $12{,}32$ & $12{,}5$ & $0{,}8\times13{,}2+0{,}2\times8{,}8=12{,}32$; nhưng không giảm quá $1$: $\max(12{,}32;\,13{,}5-1)=12{,}5$ \\
+4 & $8$ & $8{,}8$ & $11{,}62$ & $12{,}0$ & $0{,}8\times12{,}32+0{,}2\times8{,}8=11{,}62$; $\max(11{,}62;\,11{,}5)$, làm tròn lên $12{,}0$ \\
+5 & $8$ & $8{,}8$ & $11{,}05$ & $11{,}5$ & $0{,}8\times11{,}62+0{,}2\times8{,}8=11{,}05$, làm tròn lên $11{,}5$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Bước 3 không ràng buộc trong ví dụ ($8{,}8>6$). Ví dụ cho thấy tính bất đối xứng của quy tắc: Ký quỹ tăng từ $9\%$ lên $13{,}5\%$ trong một phiên khi rủi ro tăng, nhưng khi rủi ro trở lại mức cũ, nó giảm dần $13{,}5\to12{,}5\to12{,}0\to11{,}5$ thay vì quay ngay về $9\%$. Phần ký quỹ dôi ra trong các phiên 3 đến 5 là chi phí của sự ổn định; đổi lại, nếu cú sốc thứ hai đến ngay sau đó, thành viên không bị gọi ký quỹ lớn lần nữa.
+
+\paragraph{Quy đổi ra tiền.} Ký quỹ bằng tiền trên một hợp đồng là $m_t\,K\,P_t$, với hệ số nhân $K=100.000$ đồng trên một điểm. Ví dụ, với $m_t=12\%$ và giá $P_t=1.300$ điểm, ký quỹ là $0{,}12\times100.000\times1.300=15{,}6$ triệu đồng mỗi hợp đồng. Quy tắc và mọi chỉ tiêu được tính theo tỷ lệ; phép quy đổi chỉ dùng để trình bày, và hiện chưa nằm trong đầu ra tự động của mã nguồn.
+
 \subsection{Hiệu chỉnh siêu tham số theo chi phí kỳ vọng}
 
 Gọi $L_{t,H}=|R_{t,H}|$ là tổn thất của phía chịu lỗ, $c_v$ là chi phí vốn trên một đơn vị ký quỹ và $c_{th}$ là chi phí trên một đơn vị tổn thất vượt ký quỹ. Chi phí kỳ vọng thực nghiệm của một quy tắc là
@@ -704,6 +826,12 @@ Với $L$ có phân phối liên tục, mức ký quỹ $m^{*}$ cực tiểu hó
 \end{menhde}
 \noindent\textit{Chứng minh.} Đạo hàm theo $m$ của kỳ vọng là $c_v-c_{th}\Prob(L>m)$, đơn điệu tăng theo $m$; cho bằng không ta được điều kiện cần và đủ. \hfill$\square$
 
+Khai triển chi tiết: Viết $\E(L-m)^{+}=\int_m^{\infty}(x-m)f_L(x)\,dx$; theo quy tắc Leibniz, $\frac{d}{dm}\E(L-m)^{+}=-\int_m^{\infty}f_L(x)\,dx=-\Prob(L>m)$. Do đó
+\begin{equation*}
+\frac{d}{dm}\E\big[c_v\,m+c_{th}(L-m)^{+}\big]=c_v-c_{th}\,\Prob(L>m).
+\end{equation*}
+Biểu thức này âm khi $m$ nhỏ và tăng dần tới $c_v>0$ khi $m$ lớn, nên hàm chi phí lồi và có cực tiểu duy nhất tại $\Prob(L>m^{*})=c_v/c_{th}$. Ví dụ: Nếu một đồng thiếu hụt tốn gấp $100$ lần một đồng ký quỹ giữ trong một phiên ($c_{th}/c_v=100$), mức tối ưu là phân vị $1\%$ của tổn thất.
+
 Như vậy, mức đuôi tối ưu là $\alpha^{*}=c_v/c_{th}$, và bài toán tương đương cực tiểu hóa hàm mất mát phân vị \cite{koenker1978}. Nghiên cứu đặt $c_{th}/c_v=1/\alpha$ cho mỗi mức đuôi thiết kế. Với mỗi cặp $(H,\alpha)$, $H\in\{1,2,3\}$ và $\alpha\in\{5\%;\,2{,}5\%;\,1\%\}$, bộ $(w,b,\varphi,\eta)$ được chọn trên khối $\XT$ trong lưới $w\in\{0;0{,}5;1\}$, $b\in\{0;0{,}1;0{,}25\}$, $\varphi\in\{0{,}5;0{,}75;1\}$, $\eta\in\{0;0{,}8;0{,}95\}$ ($81$ tổ hợp), rồi giữ cố định trên khối $\KT$.
 
 Vì $c_{th}$ không quan sát được, nghiên cứu báo cáo thêm \emph{đường biên đánh đổi}: Với mỗi tổ hợp trong lưới, tính cặp (ký quỹ trung bình, thiếu hụt bình quân mỗi phiên) trên $\XT$, rồi giữ các tổ hợp không bị tổ hợp nào khác trội hơn về cả hai tiêu chí.
@@ -711,6 +839,12 @@ Vì $c_{th}$ không quan sát được, nghiên cứu báo cáo thêm \emph{đư
 \subsection{Quy tắc đối chứng}
 
 Quy tắc đề xuất được so với: (i) ký quỹ cố định, mức chọn trên $\XT$ sao cho tỷ lệ vượt bằng của quy tắc đề xuất; (ii) VaR theo trung bình trượt hàm mũ với hệ số $0{,}94$; (iii) mô phỏng lịch sử $250$ phiên; (iv) mô phỏng lịch sử có lọc theo EGARCH-X; (v) VaR thô của hợp lý cực đại, chưa qua quy tắc năm bước; (vi) mức ký quỹ của tổ chức bù trừ, cả mức hằng số $17\%$ và chuỗi lịch sử theo các thời kỳ ($10\%$, $13\%$, $17\%$); (vii) mốc trên bằng $H$ lần biên độ giá ngày. Để so sánh công bằng theo giả thuyết của CH3, các quy tắc còn được co giãn về cùng ký quỹ trung bình rồi so thiếu hụt bình quân bằng kiểm định Diebold--Mariano.
+
+Hai đối chứng cần công thức cụ thể. VaR theo trung bình trượt hàm mũ dùng phương sai làm trơn $\hat\sigma^2_t=\lambda\hat\sigma^2_{t-1}+(1-\lambda)r_t^2$ với $\lambda=0{,}94$, và giả định tổn thất $H$ phiên có phân phối chuẩn với phương sai $H\hat\sigma^2_t$:
+\begin{equation*}
+\VaR^{\mathrm{EWMA}}_{t,H,\alpha}=z_{1-\alpha}\sqrt{H\,\hat\sigma^2_t}\,/\,100 ,
+\end{equation*}
+với $z_{1-\alpha}$ là phân vị chuẩn tắc (chia $100$ để đổi từ phần trăm sang tỷ lệ). Phép co giãn về cùng ký quỹ trung bình nhân chuỗi $m_t$ của một quy tắc với hằng số $\bar m^{\mathrm{động}}/\bar m$, giữ nguyên hình dạng theo thời gian nhưng đổi mức trung bình; nhờ đó sự khác biệt về thiếu hụt chỉ còn đến từ việc phân bổ ký quỹ theo thời gian, không đến từ việc giữ nhiều hay ít vốn hơn.
 
 \subsection{Chỉ tiêu đánh giá}\label{sec:danhgiakyquy}
 
@@ -738,7 +872,11 @@ Tổn thất $H$ phiên được tính từ chuỗi lợi suất cùng hợp đ�
 Nghiên cứu gồm hai giai đoạn: Giai đoạn 1 xây dựng mô hình rủi ro, giai đoạn 2 xây dựng ký quỹ. Khối kiểm tra chỉ được mở, và giai đoạn 2 chỉ được bắt đầu, khi ba điều kiện cùng đạt:
 \begin{enumerate}
 \item[(i)] Mô phỏng khôi phục tham số bằng hợp lý cực đại cho độ phủ của khoảng $95\%$ trong $[0{,}90;\,0{,}99]$ ở mọi tham số và mọi trường hợp, tỷ lệ bác bỏ sai trong $E_2$, $E_4$ không vượt $0{,}10$, và không có lần lặp thất bại.
-\item[(ii)] Trung bình của $\hat z_t^2$ theo nhóm $\tau_t$ không khác $1$ có ý nghĩa ở mức $5\%$, tức chu kỳ đáo hạn đã được hấp thụ.
+\item[(ii)] Trung bình của $\hat z_t^2$ theo nhóm $\tau_t$ không khác $1$ có ý nghĩa ở mức $5\%$, tức chu kỳ đáo hạn đã được hấp thụ. Cụ thể, ước lượng hồi quy
+\begin{equation*}
+\hat z_t^2-1=a+\sum_{g=0}^{4}c_g\,\ind\{\min(\tau_t,5)=g\}+u_t
+\end{equation*}
+trên khối $\UL\cup\XT$; nhóm $\tau_t\ge5$ là nhóm gốc. Kiểm định $F$ cho $H_0:c_0=c_1=\dots=c_4=0$ phải có $p>0{,}05$. Nếu mô hình đã mô tả đúng biến động quanh đáo hạn, trung bình của $\hat z_t^2$ như nhau ở mọi nhóm $\tau$, nên mọi hệ số $c_g$ bằng không.
 \item[(iii)] Dự báo VaR một phiên của cấu hình được chọn không bị các kiểm định Kupiec và Christoffersen bác bỏ ở mức $5\%$ trên khối $\XT$.
 \end{enumerate}
 Ngưỡng $0{,}90$ ở điều kiện (i) là ngưỡng nội bộ, rộng hơn thông lệ đánh giá mô phỏng \cite{morris2019}. Vì vậy bài viết báo cáo toàn bộ độ phủ kèm sai số mô phỏng, chứ không chỉ kết luận đạt hay không đạt.
