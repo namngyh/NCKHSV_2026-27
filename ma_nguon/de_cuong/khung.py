@@ -214,6 +214,8 @@ class Buoc:
     song_song: bool = True
     cong: Callable | None = None          # cong(ctx) -> {"dat": bool, ...}
     chi_chu_tri: bool = False             # bước nhỏ/tổng hợp: chỉ máy chủ trì (hoặc một mình) chạy
+    mo_rong_don_vi: bool = False          # kết quả mỗi đơn vị chỉ phụ thuộc hạt giống riêng của nó (vd. lần lặp b của
+                                          # mô phỏng): số đơn vị đổi (tăng B) thì chạy tiếp phần thiếu, không làm lại
 
     def __post_init__(self):
         DANH_MUC[self.ma] = self
@@ -431,7 +433,8 @@ def chay_buoc(ma: str, ho_so: str = "day_du", chay_lai: bool = False, chap_nhan_
         return "cho_buoc_truoc"
     hs = doc_ho_so(ctx, ma)
     if (not chay_lai and hs and hs.get("h_vao") == h_vao and hs.get("trang_thai") == "xong"
-            and ctx.thu_muc().exists()):
+            and ctx.thu_muc().exists()
+            and not (b.mo_rong_don_vi and hs.get("so_don_vi") != len(b.don_vi(ctx)))):
         return "bo_qua"
     if b.can_khoa_KT and not ctx.co_khoa_KT():
         return "cho_buoc_truoc"

@@ -12,6 +12,9 @@ Người dùng chốt: "muốn bám sát đề cương đã đăng ký nhất" (
   thêm b03c (mô phỏng MLE cho GED) hoặc ghi nhận.
 - **GARCH(1,1) làm mô hình nền** (BM02 mục 3, 5, câu hỏi 1): `ma_nguon/de_cuong/garch_nen.py`, chạy MLE cuốn chiếu ở b08
   (phân phối đã chọn), so sánh ở b09 (`CH1_EGARCH-X_vs_GARCH`). Kiểm thử: `kiem_thu/test_garch_nen.py` (khớp gói arch).
+- **b03b số lần lặp riêng** (22/10/2026, người dùng chọn): `[mo_phong_bayes]` B_vb = 1000 (VB-MF, VB-FR), B_nuts = 300.
+  Mục này không được băm và b03b có cờ `mo_rong_don_vi`, nên tăng B sau này chỉ chạy thêm phần thiếu. Mã ở
+  `quy_trinh/b03b_so_lan_lap.py` (không sửa b03_mo_phong.py vì b03a băm cả tệp). `[mo_phong].B` không còn dùng.
 - Chưa làm (cần xác minh): độ bền theo tập biến ngoại sinh và cửa sổ ước lượng (BM02 mục 5, 6) trong b12; quy đổi ký quỹ ra
   tiền theo hệ số nhân K = 100.000 đồng/điểm.
 

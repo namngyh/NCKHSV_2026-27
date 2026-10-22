@@ -144,3 +144,37 @@ def test_diem_kiem_tra_tiep_tuc(goc_tam):
     assert (ctx.thu_muc() / "tong.json").read_text(encoding="utf-8") == truoc
     DEM["n"] = 0
     assert K.chay_buoc("t_dk", "day_du") == "bo_qua" and DEM["n"] == 0
+
+
+def test_mo_rong_don_vi_chi_chay_phan_thieu(goc_tam):
+    """Bước mo_rong_don_vi (b03b): tăng số lần lặp thì chỉ chạy các đơn vị mới; giữ nguyên số thì bỏ qua."""
+    import json
+    SO = {"B": 3}
+    K.Buoc("t_mr", "mo_rong", "-", __file__, _lam, _th, don_vi=lambda ctx: [f"a::{i}" for i in range(SO["B"])],
+           song_song=False, mo_rong_don_vi=True)
+    DEM["n"] = 0
+    assert K.chay_buoc("t_mr", "day_du") == "xong" and DEM["n"] == 3
+    SO["B"] = 5
+    DEM["n"] = 0
+    assert K.chay_buoc("t_mr", "day_du") == "xong" and DEM["n"] == 2       # chỉ a::3, a::4
+    ctx = K.NguCanh("day_du", K.DANH_MUC["t_mr"])
+    assert len(json.loads((ctx.thu_muc() / "tong.json").read_text(encoding="utf-8"))) == 5
+    DEM["n"] = 0
+    assert K.chay_buoc("t_mr", "day_du") == "bo_qua" and DEM["n"] == 0
+
+
+def test_b03b_so_lan_lap_rieng():
+    """b03b: VB dùng B_vb, NUTS dùng B_nuts; [mo_phong_bayes] không nằm trong mã băm của b03a, b03b."""
+    import importlib
+    importlib.import_module("quy_trinh.b03_mo_phong")
+    from quy_trinh import b03b_so_lan_lap as BL
+    b = K.DANH_MUC["b03b"]
+    assert b.mo_rong_don_vi and "mo_phong_bayes" not in b.cau_hinh and "mo_phong_bayes" not in K.DANH_MUC["b03a"].cau_hinh
+    cfg = K.doc_cau_hinh("day_du")
+    assert BL.so_lan_lap(cfg, "vb_mf") == cfg["mo_phong_bayes"]["B_vb"]
+    assert BL.so_lan_lap(cfg, "nuts") == cfg["mo_phong_bayes"]["B_nuts"]
+    ds = b.don_vi(K.NguCanh("day_du", b))
+    n_nuts = sum(1 for k in ds if k.startswith("mpb|skewt|nuts|E1|"))
+    n_vb = sum(1 for k in ds if k.startswith("mpb|skewt|vb_mf|E1|"))
+    assert n_nuts == cfg["mo_phong_bayes"]["B_nuts"] * cfg["bayes"]["nuts_so_chuoi"]
+    assert n_vb == cfg["mo_phong_bayes"]["B_vb"] * cfg["bayes"]["vb_so_lan_khoi_tao"]
