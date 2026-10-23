@@ -138,7 +138,7 @@ b00 & Thông số thể chế & Đọc thông số (biên độ giá, hệ số 
 b01 & Dữ liệu & Dựng bảng ngày, phiên chuyển hợp đồng, đáo hạn, nghỉ dài, chạm biên; kiểm tra chất lượng & $1$ \\
 b02 & Kiểm tra cài đặt & Tích phân số của các phân phối, trường hợp giới hạn, đối chiếu JAX với bản độc lập và gói \ma{arch} & $1$ \\
 b02k & Cỡ và lực kiểm định & Mô phỏng cỡ và lực của kiểm định VaR với cỡ mẫu bằng khối $\KT$ & $22$ \\
-b03a & Mô phỏng khôi phục (MLE) & $3$ phân phối $\times$ $4$ trường hợp $\times$ $1.000$ lần lặp & $12.000$ \\
+b03a & Mô phỏng khôi phục (MLE) & $4$ phân phối (gồm GED) $\times$ $4$ trường hợp $\times$ $1.000$ lần lặp & $16.000$ \\
 b04 & MLE ban đầu & EGARCH-X trên $\UL$, $4$ phân phối, sai số chuẩn, chẩn đoán, khả nghịch & $4$ \\
 b04b & Dự báo tiên nghiệm & Kiểm tra tiên nghiệm có tạo ra lợi suất hợp lý không & $4$ \\
 b05 & Chọn biến & Dự báo cuốn chiếu trên $\XT$ cho mọi tập biến thỏa ngưỡng tương quan; chọn tiến; SPA; Holm & $1.446$ \\
@@ -184,13 +184,13 @@ Số đơn vị của b08 gồm $390$ ước lượng hợp lý cực đại ($6
 
 \subsection{Mô phỏng khôi phục bằng hợp lý cực đại (b03a)}
 
-Với mỗi cặp (phân phối, trường hợp) $\in\{\text{chuẩn, Student-}t,\text{ Student-}t\text{ lệch}\}\times\{E_1,\dots,E_4\}$ và mỗi chỉ số $b=0,\dots,999$, quy trình sinh một bộ dữ liệu $2.000$ phiên từ tham số thật (Bảng 5 của Tài liệu 1), không có lợi suất khuyết như dữ liệu thật sau khi dùng giá F2M, ước lượng bằng hợp lý cực đại với $20$ điểm khởi tạo, tính sai số chuẩn Hessian và bánh kẹp, và thống kê tỷ số hợp lý cho $\gamma=0$. Một đơn vị việc là một lần lặp. Tổng hợp tính độ chệch, RMSE, độ phủ của khoảng Wald $95\%$ cho từng tham số và tỷ lệ bác bỏ sai ở $E_2$, $E_4$.
+Với mỗi cặp (phân phối, trường hợp) $\in\{\text{chuẩn, Student-}t,\text{ Student-}t\text{ lệch, GED}\}\times\{E_1,\dots,E_4\}$ và mỗi chỉ số $b=0,\dots,999$, quy trình sinh một bộ dữ liệu $2.000$ phiên từ tham số thật (Bảng 5 của Tài liệu 1), không có lợi suất khuyết như dữ liệu thật sau khi dùng giá F2M, ước lượng bằng hợp lý cực đại với $20$ điểm khởi tạo, tính sai số chuẩn Hessian và bánh kẹp, và thống kê tỷ số hợp lý cho $\gamma=0$. Một đơn vị việc là một lần lặp. Tổng hợp tính độ chệch, RMSE, độ phủ của khoảng Wald $95\%$ cho từng tham số và tỷ lệ bác bỏ sai ở $E_2$, $E_4$.
 
-Số lần lặp $B=1.000$ cho sai số mô phỏng của độ phủ khoảng $0{,}007$. Giá trị này được chọn sau khi các lần chạy với $B=100$ và $B=500$ cho độ phủ nhỏ nhất $0{,}89$ (quá sát ngưỡng $0{,}90$ để kết luận); xem Mục~\ref{sec:suKien}.
+GED được thêm vào ngày 23/10/2026 (tham số hình dạng thật $\nu=1{,}5$), sau khi bước chọn phân phối chọn GED và cổng b07 không đạt vì thiếu mô phỏng cho phân phối này; tổng số đơn vị tăng từ $12.000$ lên $16.000$. Số lần lặp $B=1.000$ cho sai số mô phỏng của độ phủ khoảng $0{,}007$. Giá trị này được chọn sau khi các lần chạy với $B=100$ và $B=500$ cho độ phủ nhỏ nhất $0{,}89$ (quá sát ngưỡng $0{,}90$ để kết luận); xem Mục~\ref{sec:suKien}.
 
 \subsection{Mô phỏng Bayes (b03b)}
 
-Với cùng các bộ dữ liệu giả, b03b chạy VB mean-field, VB full-rank và NUTS. Số lần lặp riêng cho từng họ: $B_{\mathrm{VB}}=1.000$ và $B_{\mathrm{NUTS}}=300$, vì NUTS đắt hơn nhiều. Cấu hình này được tách khỏi mã băm đầu vào để có thể tăng $B$ về sau mà không chạy lại phần đã xong. Hiệu chuẩn dựa trên mô phỏng chạy $100$ lần cho mỗi (phân phối, phương pháp), mỗi lần rút tham số thật từ tiên nghiệm, sinh dữ liệu, suy diễn và ghi thứ hạng.
+Với cùng các bộ dữ liệu giả, b03b chạy VB mean-field, VB full-rank và NUTS cho cả bốn phân phối (GED được thêm ngày 23/10/2026, giống b03a), tổng cộng $119.200$ đơn vị. Số lần lặp riêng cho từng họ: $B_{\mathrm{VB}}=1.000$ và $B_{\mathrm{NUTS}}=300$, vì NUTS đắt hơn nhiều. Cấu hình này được tách khỏi mã băm đầu vào để có thể tăng $B$ về sau mà không chạy lại phần đã xong. Hiệu chuẩn dựa trên mô phỏng chạy $100$ lần cho mỗi (phân phối, phương pháp), mỗi lần rút tham số thật từ tiên nghiệm, sinh dữ liệu, suy diễn và ghi thứ hạng.
 
 \subsection{Cỡ mẫu và ý nghĩa thống kê}
 
@@ -297,31 +297,32 @@ Các số đo trên lấy từ lần chạy đầy đủ đầu tiên (thiết k
 \toprule
 \textbf{Bước} & \textbf{Cơ sở ước tính} & \textbf{Ước tính} \\
 \midrule
-b03a & Như lần đầu & $\approx15$ giờ \\
-b04 đến b07 & Như lần đầu & $\approx1{,}5$ giờ \\
+b03a & $16.000$ đơn vị (thêm GED, khoảng $55$ giây mỗi đơn vị) & $\approx18$ đến $20$ giờ \\
+b04 đến b07 & Lần chạy 23/10 đo được: b05 $\approx1{,}8$ giờ, b06 $\approx18$ phút & $\approx2{,}5$ giờ \\
 b08 đến b14 & Như lần đầu & $\approx4$ đến $5$ giờ \\
-b03b, phần VB & $73.800$ lần chạy $\times$ $\approx230$ giây $/\ 15$ tiến trình & $\approx13$ ngày \\
-b03b, phần NUTS & $15.600$ chuỗi $\times$ $\approx196$ giây $/\ 15$ & $\approx2{,}4$ ngày \\
+b03b, phần VB & $98.400$ lần chạy $\times$ $\approx230$ giây $/\ 15$ tiến trình & $\approx17{,}5$ ngày \\
+b03b, phần NUTS & $20.800$ chuỗi $\times$ $\approx196$ giây $/\ 15$ & $\approx3{,}1$ ngày \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Các ước tính là thời gian chạy liên tục, chưa tính gián đoạn. Phần lớn thời gian của b03b dành cho VB; nếu cần rút ngắn, giảm số bước tối ưu của VB hiệu quả hơn giảm số lần lặp NUTS.
+Các ước tính là thời gian chạy liên tục với khoảng $15$ tiến trình, chưa tính gián đoạn. Số tiến trình được chọn lúc khởi động theo RAM còn trống; ở lần khởi động 14:39 ngày 23/10 máy chỉ chạy khoảng $9$ tiến trình, nên tốc độ thực tế chậm hơn tương ứng. Phần lớn thời gian của b03b dành cho VB; nếu cần rút ngắn, giảm số bước tối ưu của VB hiệu quả hơn giảm số lần lặp NUTS.
 
 % =====================================================================
 \section{Trạng thái tại thời điểm viết}\label{sec:trangthai}
 
 \begin{table}[h]
 \centering
-\caption{Trạng thái các bước (22/10/2026, sau khi bổ sung VN30F2M)}\label{tab:trangthai}
+\caption{Trạng thái các bước (tối 23/10/2026)}\label{tab:trangthai}
 \begin{tabular}{@{}lp{4.0cm}p{7.0cm}@{}}
 \toprule
 \textbf{Bước} & \textbf{Trạng thái} & \textbf{Ghi chú} \\
 \midrule
-Toàn bộ chuỗi chính & Chạy lại từ đầu & Dữ liệu (thêm VN30F2M) và cách xử lý đáo hạn đổi, nên mã băm dữ liệu đổi và mọi bước chạy lại \\
-b03a & Chạy lại & Dữ liệu mô phỏng không khuyết; $12.000$ đơn vị, khoảng $15$ giờ \\
+b00 đến b02k & Xong (14:31, 23/10) & Chạy trên dữ liệu đầy đủ (có giá F2M ngày 15/08/2019, chỉ một lợi suất khuyết) \\
+b03a & Đang chạy & $16.000$ đơn vị (gồm GED); khoảng $6.100$ đơn vị đã xong lúc 19:46 \\
+b04 đến b15 & Chờ & Sẽ chạy lại sau b03a; kết quả hiện có của các bước này thuộc lần chạy trên dữ liệu cũ, chỉ để tham khảo \\
+b03b & Chờ & $119.200$ đơn vị (gồm GED), chạy nền sau chuỗi chính \\
 Kết quả cũ & Lưu bằng thẻ git & Kết quả theo cách xử lý cũ (loại phiên chuyển) được giữ để làm phân tích độ bền \\
-b03b & Chưa chạy & Chạy sau chuỗi chính \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -347,10 +348,13 @@ Việc ghi lại các điều chỉnh giữa chừng là cần thiết cho tính
 22/10 & Bám đề cương đã đăng ký: Chia mẫu 80/20 (khối $\UL/\XT/\KT=750/925/435$), thêm GED vào lựa chọn phân phối, thêm GARCH(1,1) nền. Thiết kế mã băm giữ nguyên kết quả b03a đã chạy. \\
 22/10 & Tách số lần lặp b03b thành $B_{\mathrm{VB}}=1.000$ và $B_{\mathrm{NUTS}}=300$, có thể tăng sau. \\
 22/10 & b05 đến b07 chạy lại với cách chia mới; cổng đạt, cấu hình khóa không đổi. \\
-22/10 & Bổ sung chuỗi VN30F2M. Lợi suất phiên chuyển tính bằng giá F2M của phiên trước (độ lệch chuẩn lợi suất phiên chuyển giảm từ $1{,}95\%$ xuống $1{,}27\%$); dữ liệu mô phỏng không còn lợi suất khuyết. Kết quả cũ gắn thẻ git; toàn bộ quy trình chạy lại từ đầu, kể cả b03a. \\
+22/10 & Bổ sung chuỗi VN30F2M. Lợi suất phiên chuyển tính bằng giá F2M của phiên trước (độ lệch chuẩn lợi suất phiên chuyển giảm từ $1{,}96\%$ xuống $1{,}27\%$); dữ liệu mô phỏng không còn lợi suất khuyết. Kết quả cũ gắn thẻ git; toàn bộ quy trình chạy lại từ đầu, kể cả b03a. \\
 22/10 & Lần chạy đầy đủ đầu tiên (thiết kế cũ) hoàn tất b00 đến b15 lúc 12:55; kết quả lưu trong thẻ \ma{ket-qua-truoc-f2m}. \\
 22/10 & Chạy thử rút gọn với dữ liệu mới phát hiện lỗi gradient NaN của VB khi dùng GED; đã sửa, kèm cơ chế chạy lại lần khởi tạo VB bị phân kỳ. \\
-22/10 & Bổ sung giá F2M ngày 15/08/2019 ($877{,}0$, nguồn bản tin phái sinh, kiểm chéo với dữ liệu); chỉ còn một lợi suất khuyết. Máy chủ chính chạy lại từ đầu với dữ liệu hoàn chỉnh. \\
+22/10 & Bổ sung giá F2M ngày 15/08/2019 ($877{,}0$, nguồn bản tin phái sinh, kiểm chéo với dữ liệu); chỉ còn một lợi suất khuyết. \\
+23/10 & Lần chạy bắt đầu 19:50 ngày 22/10 hoàn tất b03a đến b06: b05 chọn biến $G$, b06 chọn GED; cổng b07 không đạt (12:06) vì chưa có mô phỏng khôi phục cho GED; điều kiện (ii) và (iii) đạt. \\
+23/10 & Phát hiện lần chạy trên dùng dữ liệu \emph{cũ} (lợi suất 16/08/2019 vẫn khuyết): Máy chủ chỉ tự khởi động lại khi mã hoặc cấu hình đổi, nên bản bổ sung dữ liệu 19:55 ngày 22/10 không được nhận. Kết quả b03a đến b07 của lần chạy đó chỉ để tham khảo. \\
+23/10 & Thêm GED vào mô phỏng khôi phục b03a ($16.000$ đơn vị) và b03b ($119.200$ đơn vị); mã băm khởi động lại nay theo dõi cả dữ liệu đầu vào. Máy chủ chạy lại từ b00 lúc 14:31 trên dữ liệu đầy đủ. \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -380,9 +384,9 @@ Quy trình sinh ra: Bảng tham số và chẩn đoán; kết quả mô phỏng 
 
 \begin{enumerate}
 \item Chưa có kết quả nào về so sánh bốn phương pháp, hậu nghiệm hay hiệu quả của ký quỹ; mọi tham số đã báo cáo ở các bước đầu là ước lượng điểm hợp lý cực đại.
-\item Chưa biết thời gian một chuỗi NUTS, nên chưa ước lượng được thời gian của b08 và b03b.
 \item Mô phỏng khôi phục chưa có kết quả cho các phương pháp Bayes (b03b chưa chạy); vì thế chưa thể nói VB hay NUTS có lấy lại đúng tham số hay không.
-\item Mô phỏng khôi phục chưa bao gồm GED, dù GED tham gia chọn phân phối.
+\item Mô phỏng khôi phục cho GED đang chạy; chưa biết GED có thỏa điều kiện (i) của cổng hay không. Nếu GED lại được chọn mà không đạt, quy trình sẽ dừng ở cổng như lần trước.
+\item Việc chọn biến $G$ và phân phối GED ở lần chạy 23/10 dựa trên dữ liệu cũ; lựa chọn chính thức là kết quả của lần chạy đang diễn ra.
 \item Khối $\KT$ chỉ có $435$ phiên; kiểm định dựa trên số lần vi phạm có lực thấp, và kết luận trên khối này cần được diễn giải thận trọng.
 \end{enumerate}
 

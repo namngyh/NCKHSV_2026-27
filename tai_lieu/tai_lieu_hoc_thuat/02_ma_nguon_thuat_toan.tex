@@ -112,7 +112,7 @@ Mã nguồn tuân theo bốn nguyên tắc.
 \ma{ma\_nguon/de\_cuong/} & Thư viện: Mô hình, phân phối, ước lượng, mô phỏng, đánh giá, ký quỹ, khung điều phối \\
 \ma{quy\_trinh/} & Các bước b00 đến b15 và điểm vào \ma{chay.py} \\
 \ma{ket\_qua/} & Đầu ra theo từng bước, hồ sơ, điểm kiểm tra, nhật ký \\
-\ma{kiem\_thu/} & Kiểm thử tự động (21 kiểm thử) \\
+\ma{kiem\_thu/} & Kiểm thử tự động (23 kiểm thử) \\
 \ma{du\_lieu/} & Dữ liệu gốc và chuỗi ký quỹ lịch sử của tổ chức bù trừ \\
 \bottomrule
 \end{tabular}
@@ -302,7 +302,7 @@ Mỗi bước (đối tượng \ma{Buoc}) khai báo một danh sách \emph{đơn
 
 Mã băm đầu vào của một bước gộp: Cấu hình các mục mà bước khai báo, mã băm đầu ra của các bước mà nó phụ thuộc, nội dung các tệp mã nguồn mà nó dùng, và nội dung dữ liệu gốc. Thư mục điểm kiểm tra có tên là mười hai ký tự đầu của mã băm này. Hệ quả: (i) Nếu đầu vào đổi, thư mục điểm kiểm tra mới trống và bước chạy lại; (ii) hai máy chạy hai phiên bản mã khác nhau ghi vào hai thư mục khác nhau, không thể trộn lẫn; (iii) những phần cấu hình không ảnh hưởng con số (số tiến trình, bộ nhớ, phân mảnh) không nằm trong mã băm, nên đổi chúng không làm chạy lại.
 
-Hai ngoại lệ có chủ đích được cài đặt. Thứ nhất, cờ \ma{mo\_rong\_don\_vi} (dùng cho mô phỏng Bayes) cho phép tăng số lần lặp mà chỉ chạy thêm các đơn vị còn thiếu, vì kết quả mỗi lần lặp chỉ phụ thuộc hạt giống riêng. Thứ hai, các bước chỉ dùng khối $\UL$ (dữ liệu, kiểm tra cài đặt) không băm cỡ khối $\XT$, vì kết quả của chúng không phụ thuộc cỡ này.
+Hai ngoại lệ có chủ đích được cài đặt. Thứ nhất, cờ \ma{mo\_rong\_don\_vi} (dùng cho mô phỏng khôi phục b03a và b03b) cho phép tăng số lần lặp hoặc thêm phân phối mà chỉ chạy thêm các đơn vị còn thiếu, vì kết quả mỗi lần lặp chỉ phụ thuộc hạt giống riêng. Danh sách đơn vị của hai bước này được đặt trong các tệp riêng \ma{b03b\_so\_lan\_lap.py} và \ma{b03a\_ged.py}, không nằm trong tệp được băm \ma{b03\_mo\_phong.py}; nhờ vậy việc thêm GED vào mô phỏng khôi phục (Mục~\ref{sec:luuy}) không làm mất các đơn vị đã xong. Thứ hai, các bước chỉ dùng khối $\UL$ (dữ liệu, kiểm tra cài đặt) không băm cỡ khối $\XT$, vì kết quả của chúng không phụ thuộc cỡ này.
 
 \subsection{Điểm kiểm tra ba tầng}
 
@@ -330,7 +330,7 @@ Trước khi có tệp khóa, hàm cấp dữ liệu cho mọi bước cắt b�
 
 \subsection{Đồng bộ và vòng lặp điều phối}
 
-Điểm vào \ma{chay.py --buoc tat\_ca} chạy chuỗi chính theo thứ tự các bước, mỗi bước trong một hộp thời gian $30$ phút; hết hộp thì đẩy kết quả lên kho git, kéo thay đổi mới, rồi tiếp tục từ điểm kiểm tra. Nếu mã nguồn hoặc cấu hình trên kho đã đổi (so với mã băm lúc khởi động), tiến trình dừng sạch với mã thoát $4$ và tệp \ma{chay.bat} khởi động lại bằng bản mới. Khi chuỗi chính phải chờ hoặc đã xong, mô phỏng Bayes (b03b) chạy ở nền. Sau khi mô phỏng Bayes xong, các bước báo cáo, kiểm toán và đóng gói được chạy lại để báo cáo có đủ mục mô phỏng.
+Điểm vào \ma{chay.py --buoc tat\_ca} chạy chuỗi chính theo thứ tự các bước, mỗi bước trong một hộp thời gian $30$ phút; hết hộp thì đẩy kết quả lên kho git, kéo thay đổi mới, rồi tiếp tục từ điểm kiểm tra. Nếu mã nguồn, cấu hình hoặc dữ liệu đầu vào (\ma{du\_lieu/goc}, \ma{du\_lieu/ngoai}, trừ tệp ghi chú) trên kho đã đổi so với mã băm lúc khởi động, tiến trình dừng sạch với mã thoát $4$ và tệp \ma{chay.bat} khởi động lại bằng bản mới. Dữ liệu đầu vào chỉ được đưa vào mã băm này từ ngày 23/10/2026: Trước đó, việc bổ sung giá F2M ngày 15/08/2019 không làm máy khởi động lại, nên một lần chạy đã tiếp tục trên dữ liệu cũ (Tài liệu 3). Khi cổng b07 không đạt (mã thoát $3$), \ma{chay.bat} dừng hẳn và phải được mở lại bằng tay. Khi chuỗi chính phải chờ hoặc đã xong, mô phỏng Bayes (b03b) chạy ở nền. Sau khi mô phỏng Bayes xong, các bước báo cáo, kiểm toán và đóng gói được chạy lại để báo cáo có đủ mục mô phỏng.
 
 % =====================================================================
 \section{Kiểm thử và kiểm chứng cài đặt}\label{sec:kiemthu}
@@ -364,8 +364,8 @@ Ngoài kiểm thử đơn vị, đường ống được chạy thử trọn v�
 \item \textbf{Số ngẫu nhiên chung trong mô phỏng nhiều phiên.} Như đã nêu ở Mục~\ref{sec:thuattoan}, sai số Monte Carlo của VaR, ES các phiên kề nhau tương quan. Điều này không làm chệch dự báo nhưng ảnh hưởng đến độ chính xác của kiểm định trên chuỗi dự báo.
 \item \textbf{Quy đổi ký quỹ ra tiền chưa có trong đầu ra.} Mọi chỉ tiêu ký quỹ được tính theo tỷ lệ giá trị hợp đồng; phép nhân với hệ số nhân và giá hợp đồng (Tài liệu 1, Mục 7) chưa được đưa vào báo cáo tự động.
 \item \textbf{GARCH nền không có biến lịch.} GARCH(1,1) được cài đặt theo dạng chuẩn, không có biến giả lịch; EGARCH (khi $\gamma=0$) giữ biến lịch. Sự khác biệt này nên được nêu khi diễn giải kết quả so sánh GARCH với EGARCH.
-\item \textbf{Chẩn đoán hồi quy theo biến lịch bỏ biến phiên chuyển.} Trong chẩn đoán phần dư, hồi quy $\hat z_t^2-1$ lên biến lịch chỉ dùng biến đáo hạn và biến nghỉ dài, vì trước đây phiên chuyển không có lợi suất. Từ khi dùng giá F2M, phiên chuyển có lợi suất, nên hồi quy này nên thêm biến phiên chuyển. Chẩn đoán này không thuộc điều kiện của cổng (điều kiện (ii) dùng hồi quy theo nhóm $\tau_t$), và sẽ được sửa sau khi mô phỏng b03a xong, để không làm máy chạy lại bước đó.
-\item \textbf{GED không có trong mô phỏng khôi phục.} Mô phỏng khôi phục tham số chạy cho chuẩn, Student-$t$ và Student-$t$ lệch; GED tham gia chọn phân phối nhưng chưa có mô phỏng riêng.
+\item \textbf{Chẩn đoán hồi quy theo biến lịch bỏ biến phiên chuyển.} Trong chẩn đoán phần dư, hồi quy $\hat z_t^2-1$ lên biến lịch chỉ dùng biến đáo hạn và biến nghỉ dài, vì trước đây phiên chuyển không có lợi suất. Từ khi dùng giá F2M, phiên chuyển có lợi suất, nên hồi quy này nên thêm biến phiên chuyển. Chẩn đoán này không thuộc điều kiện của cổng (điều kiện (ii) dùng hồi quy theo nhóm $\tau_t$). Việc sửa vẫn được hoãn: Sửa \ma{danh\_gia.py} làm đầu ra của b02 đổi, kéo theo b03a (16.000 đơn vị) chạy lại từ đầu.
+\item \textbf{GED trong mô phỏng khôi phục (từ 23/10/2026).} Ban đầu mô phỏng khôi phục chỉ chạy cho chuẩn, Student-$t$ và Student-$t$ lệch. Khi bước chọn phân phối chọn GED, cổng b07 không đạt vì điều kiện (i) không có số liệu cho GED. GED được bổ sung vào cả hai bước: b03a thêm $4.000$ đơn vị MLE (tổng $16.000$), b03b thêm $29.800$ đơn vị VB, NUTS và SBC (tổng $119.200$). Tham số thật của GED trong mô phỏng là $\nu=1{,}5$; các tham số còn lại như ba phân phối kia.
 \item \textbf{Mã băm và đổi mã.} Mọi sửa đổi mã nguồn của một bước hay của mô-đun mà nó dùng đều làm bước chạy lại. Cơ chế này an toàn nhưng cần được tính đến khi đổi mã giữa chừng một lần chạy dài.
 \end{enumerate}
 
