@@ -33,9 +33,13 @@ def commit_hien_tai() -> str:
 
 
 def bam_ma() -> str:
-    """Băm mã nguồn và cấu hình: đổi sau khi pull nghĩa là tiến trình đang chạy đã cũ, phải khởi động lại."""
+    """Băm mã nguồn, cấu hình và dữ liệu đầu vào: đổi sau khi pull nghĩa là tiến trình đang chạy đã cũ, phải khởi động lại.
+
+    Dữ liệu (du_lieu/goc, du_lieu/ngoai; trừ tệp ghi chú .md) được băm từ 23/10/2026: trước đó sửa dữ liệu (bổ sung giá F2M
+    ngày 15/08/2019) không làm máy khởi động lại, nên máy chạy tiếp cả đêm trên dữ liệu cũ."""
     tep = [p for d in ("ma_nguon", "quy_trinh") for p in (GOC / d).rglob("*.py") if "__pycache__" not in p.parts]
-    return bam_tep(tep + [GOC / "cau_hinh" / "de_cuong.toml", GOC / "cau_hinh" / "the_che.toml"])
+    du_lieu = [p for d in ("goc", "ngoai") for p in (GOC / "du_lieu" / d).rglob("*") if p.is_file() and p.suffix != ".md"]
+    return bam_tep(tep + du_lieu + [GOC / "cau_hinh" / "de_cuong.toml", GOC / "cau_hinh" / "the_che.toml"])
 
 
 def keo(log=print) -> bool:

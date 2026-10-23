@@ -11,6 +11,10 @@ gamma_G = 0,17. Người dùng chọn phương án 1: chạy mô phỏng khôi p
   Thử một đơn vị GED E1 với cấu hình đầy đủ: 55-65 s, khôi phục tốt (nu 1,51 so với 1,5; beta 0,955 so với 0,95).
 - Kiểm thử mới `test_b03a_them_ged`; 23/23 đạt.
 - Khi cổng không đạt, chay.py trả mã 3 và chay.bat dừng hẳn: phải mở lại chay.bat mục 2 trên máy mạnh.
+- PHÁT HIỆN 14:31: lần chạy b03a-b07 vừa xong dùng dữ liệu CŨ (16/08/2019 vẫn khuyết): máy không khởi động lại khi chỉ
+  dữ liệu đổi (commit 19:55 ngày 22/10), vì `dong_bo.bam_ma` chỉ băm mã và cấu hình. Khi mở lại (14:31 ngày 23/10), máy kéo
+  dữ liệu mới nên chạy lại từ b00, b03a làm đủ 16.000 đơn vị (khoảng 18-20 giờ). Kết quả chọn G/GED và cổng ở trên chỉ
+  tham khảo. Đã sửa `bam_ma` băm thêm `du_lieu/goc`, `du_lieu/ngoai` (trừ .md) để lần sau sửa dữ liệu thì máy tự khởi động lại.
 - Vẫn hoãn: sửa `danh_gia.chan_doan` (hồi quy theo biến lịch bỏ cột phiên chuyển). Sửa danh_gia.py làm b02 đổi h_ra nên
   b03a (16.000 đơn vị) chạy lại từ đầu; chỉ sửa khi chấp nhận chạy lại.
 
