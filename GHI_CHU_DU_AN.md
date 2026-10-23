@@ -1,6 +1,20 @@
 # Ghi chú dự án: dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
-## 00000. XỬ LÝ ĐÁO HẠN BẰNG VN30F2M (22/10/2026, chiều) — mới nhất
+## 000000. GED ĐƯỢC CHỌN, THÊM MÔ PHỎNG KHÔI PHỤC GED (23/10/2026) — mới nhất
+
+Lần chạy có VN30F2M: b03a xong 12.000 đơn vị (09:56), b05 chọn G (DM p = 0,045; thêm B: p = 0,106, loại), b06 chọn
+**GED**, cổng b07 KHÔNG ĐẠT (12:06) vì điều kiện (i): "phan phoi ged chua co mo phong khoi phuc tham so (b03a)";
+(ii) đạt (F p = 0,84), (iii) đạt (Kupiec p 0,81 / 0,65 / 0,52). Ước lượng UL+XT của ged|G: nu = 1,11, theta = -0,13,
+gamma_G = 0,17. Người dùng chọn phương án 1: chạy mô phỏng khôi phục cho GED.
+- `quy_trinh/b03a_ged.py` (nạp trong chay.py `MO_DUN`): thêm 4 x B_mle = 4.000 đơn vị `mp|ged|mle|E*|b`, đặt
+  `mo_rong_don_vi` cho b03a và tính điều kiện (i) cho cả GED. Không sửa b03_mo_phong.py nên 12.000 đơn vị cũ được dùng lại.
+  Thử một đơn vị GED E1 với cấu hình đầy đủ: 55-65 s, khôi phục tốt (nu 1,51 so với 1,5; beta 0,955 so với 0,95).
+- Kiểm thử mới `test_b03a_them_ged`; 23/23 đạt.
+- Khi cổng không đạt, chay.py trả mã 3 và chay.bat dừng hẳn: phải mở lại chay.bat mục 2 trên máy mạnh.
+- Vẫn hoãn: sửa `danh_gia.chan_doan` (hồi quy theo biến lịch bỏ cột phiên chuyển). Sửa danh_gia.py làm b02 đổi h_ra nên
+  b03a (16.000 đơn vị) chạy lại từ đầu; chỉ sửa khi chấp nhận chạy lại.
+
+## 00000. XỬ LÝ ĐÁO HẠN BẰNG VN30F2M (22/10/2026, chiều)
 
 Người dùng bổ sung `VN30F2M_1d` (18/08/2017 - 21/10/2026, phủ 2.170/2.171 phiên F1M) và chấp nhận làm lại toàn bộ.
 - `[du_lieu].xu_ly_dao_han = "f2m"`: tại phiên chuyển r_t = 100 ln(F1M_t / F2M_{t-1}), qua đêm tương tự với giá mở.

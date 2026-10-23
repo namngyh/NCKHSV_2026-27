@@ -199,3 +199,21 @@ def test_b03b_so_lan_lap_rieng():
     n_vb = sum(1 for k in ds if k.startswith("mpb|skewt|vb_mf|E1|"))
     assert n_nuts == cfg["mo_phong_bayes"]["B_nuts"] * cfg["bayes"]["nuts_so_chuoi"]
     assert n_vb == cfg["mo_phong_bayes"]["B_vb"] * cfg["bayes"]["vb_so_lan_khoi_tao"]
+
+
+def test_b03a_them_ged():
+    """b03a: GED được thêm vào mô phỏng khôi phục khi GED tham gia chọn (BM02); đơn vị cũ giữ nguyên tên, tệp băm của
+    b03a không đổi, và b03a được đánh dấu mo_rong_don_vi để chỉ chạy phần GED còn thiếu."""
+    import importlib
+    B3 = importlib.import_module("quy_trinh.b03_mo_phong")
+    tep_cu = K.DANH_MUC["b03a"].tep
+    importlib.import_module("quy_trinh.b03a_ged")
+    b = K.DANH_MUC["b03a"]
+    cfg = K.doc_cau_hinh("day_du")
+    ctx = K.NguCanh("day_du", b)
+    ds = b.don_vi(ctx)
+    cu = B3._dv_b03a(ctx)
+    assert b.mo_rong_don_vi and b.tep == tep_cu
+    assert set(cu) <= set(ds)
+    them = [k for k in ds if k.startswith("mp|ged|mle|")]
+    assert len(them) == 4 * cfg["mo_phong"]["B_mle"] and len(ds) == len(cu) + len(them)
