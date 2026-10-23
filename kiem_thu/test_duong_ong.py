@@ -217,3 +217,9 @@ def test_b03a_them_ged():
     assert set(cu) <= set(ds)
     them = [k for k in ds if k.startswith("mp|ged|mle|")]
     assert len(them) == 4 * cfg["mo_phong"]["B_mle"] and len(ds) == len(cu) + len(them)
+    # b03b cũng có GED (VB, NUTS, SBC), cùng số đơn vị mỗi phân phối, tệp băm không đổi
+    importlib.import_module("quy_trinh.b03b_so_lan_lap")
+    bb = K.DANH_MUC["b03b"]
+    db = bb.don_vi(K.NguCanh("day_du", bb))
+    n_pp = {pp: sum(1 for k in db if k.split("|")[1] == pp) for pp in ("chuan", "ged")}
+    assert n_pp["ged"] == n_pp["chuan"] > 0 and bb.tep == B3.TEP and bb.mo_rong_don_vi
