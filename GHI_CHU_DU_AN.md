@@ -1,6 +1,17 @@
 # Ghi chú dự án: dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
-## 000000. GED ĐƯỢC CHỌN, THÊM MÔ PHỎNG KHÔI PHỤC GED (23/10/2026) — mới nhất
+## 0000000. CỔNG ĐẠT, KHỐI KT ĐÃ MỞ; QUY TẮC SÁU BƯỚC, ĐỐI CHỨNG VSDC, QUY ĐỔI TIỀN (24/10/2026) — mới nhất
+
+- Cổng b07 đạt lúc 12:56 ngày 24/10 (GED, biến G, cấu hình chính A+G). b08–b15 xong lúc 16:22. b03b (119.200 đơn vị) đang chạy, ước tính còn ít nhất khoảng 5 ngày.
+- Vùng không điều chỉnh (bước 6 của quy tắc ký quỹ): `nguong_tang = 0.01`, `nguong_giam = 0.02` trong `[ky_quy]`, chốt và push trước khi cổng mở KT. b11 có đối chứng `dong_mle_khong_nguong`; b12 đổi ngưỡng (0/0, 1/2, 2/3) và phương án theo lịch VSDC 1/10/20.
+- Đối chứng cách tính VSDC (b12, `[vsdc]`): bản 2022–2023 (MVaR Cornish–Fisher, zc = 2,89) và 2025 (mean + 3 sigma trên biến động 2 ngày), n = 2 (bản 2025 thêm n = 1), kỳ quan sát 90/120/250, hằng ngày và theo lịch với độ trễ công bố 2 phiên. Văn bản: n là "số ngày cần thiết để thanh lý vị thế", không phải H.
+- Quy đổi ra tiền (b12, `_quy_doi_tien`): giá đóng cửa phiên gốc × 100.000 đồng/điểm.
+- `[de_cuong_goc]` là giá trị của đề cương CHI TIẾT, không phải BM02: các dòng khối và GED trong phụ lục sai lệch là chỗ bám BM02 có chủ đích. Tiêu đề phụ lục b13 đã sửa cho rõ, và thêm mục "Bổ sung ngoài đề cương".
+- Tài liệu 01–03 và P1 đã đồng bộ (quy tắc sáu bước, đối chứng VSDC, quy đổi tiền). Bản thảo cũ `bai_bao_ky_quy_dong.tex` CHƯA đồng bộ.
+- Báo cáo kết quả (chỉ số liệu, hình, công thức): `ICCIES 2027/bao cao ket qua/`, chạy `chay_bao_cao.bat`.
+- Còn mở: độ bền theo tập biến ngoại sinh và cửa sổ ước lượng, chạy lại xử lý đáo hạn cũ (làm sau khi b03b xong).
+
+## 000000. GED ĐƯỢC CHỌN, THÊM MÔ PHỎNG KHÔI PHỤC GED (23/10/2026)
 
 Lần chạy có VN30F2M: b03a xong 12.000 đơn vị (09:56), b05 chọn G (DM p = 0,045; thêm B: p = 0,106, loại), b06 chọn
 **GED**, cổng b07 KHÔNG ĐẠT (12:06) vì điều kiện (i): "phan phoi ged chua co mo phong khoi phuc tham so (b03a)";
