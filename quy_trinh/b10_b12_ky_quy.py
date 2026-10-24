@@ -224,12 +224,31 @@ def _lam_b12(ctx, khoa, truoc):
     m0 = KQ.quy_tac(v, e, san, c0["w"], c0["b"], c0["phi"], c0["eta"], giam, g)
     doi["lich_vsdc"] = KQ.chi_tieu(KQ.theo_lich_vsdc(m0, c0["phi"] * san, d["date"].iloc[tmoc].to_numpy()), L, hop, H)
     doi["vsdc"] = _doi_chung_vsdc(ctx, d, tmoc, L, hop, H, a)
+    doi["tien"] = _quy_doi_tien(ctx, d, tmoc, L, hop, s)
     theo_thiet_ke = {k: {x: v_["KT"]["dong_mle"][x] for x in ("m_tb", "ty_le_vuot", "thieu_hut_tb", "thieu_hut_moi_phien")}
                      for k, v_ in tk.items()}
     mle_vs_hau_nghiem = {k: {ng: v_["KT"][f"dong_{ng}"] for ng in ["mle"] + list(ctx.cfg["bayes"]["phuong_phap"])
                              if f"dong_{ng}" in v_["KT"]} for k, v_ in tk.items()}
     return {"thiet_ke_trinh_bay": key, "doi_w_eta": doi, "theo_H_alpha": theo_thiet_ke,
             "mle_vs_hau_nghiem": mle_vs_hau_nghiem, "nhom_phien": tk[key]["nhom_KT"]}
+
+
+def _quy_doi_tien(ctx, d, tmoc, L, hop, s) -> dict:
+    """Quy đổi ra đồng mỗi hợp đồng: giá trị hợp đồng = giá đóng cửa phiên gốc x hệ số nhân (mục 7.1). Ký quỹ = m x giá trị;
+    thiếu hụt = max(L - m, 0) x giá trị. Trung bình trên các phiên gốc hợp lệ của KT."""
+    he_so = float(_the_che(ctx, "he_so_nhan")["gia_tri"])
+    V = d["close"].to_numpy(float)[tmoc] * he_so
+    out = {"he_so_nhan": he_so, "gia_tri_hop_dong_tb": float(np.nanmean(V[hop]))}
+    for ten in ("dong_mle", "dong_mle_khong_nguong", "VSD_hang_so", "co_dinh_khop_XT", "VaR_tho_mle", "EWMA", "lich_su_cua_so"):
+        if ten not in s:
+            continue
+        m = np.asarray(s[ten], float)
+        ok = hop & np.isfinite(m) & np.isfinite(L)
+        th = np.maximum(L[ok] - m[ok], 0.0) * V[ok]
+        out[ten] = {"n": int(ok.sum()), "ky_quy_tb": float(np.mean(m[ok] * V[ok])), "ky_quy_max": float(np.max(m[ok] * V[ok])),
+                    "thieu_hut_moi_phien_tb": float(th.mean()), "thieu_hut_max": float(th.max()), "tong_thieu_hut": float(th.sum()),
+                    "thieu_hut_moi_lan_vuot": float(th[th > 0].mean()) if (th > 0).any() else 0.0}
+    return out
 
 
 def _doi_chung_vsdc(ctx, d, tmoc, L, hop, H, a) -> dict:

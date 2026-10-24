@@ -274,3 +274,18 @@ def test_vsdc_doi_chung():
     ngay = pd.bdate_range("2025-03-03", periods=60)
     m = KQ.vsdc_theo_lich(ngay, np.arange(60), lambda i: float(i))
     assert (np.diff(m)[np.diff(m) != 0] > 0).all() and len(set(m[~np.isnan(m)])) <= 9
+
+
+def test_quy_doi_tien():
+    """Ký quỹ ra tiền = m x giá đóng cửa x hệ số nhân; thiếu hụt = max(L - m, 0) x giá trị hợp đồng."""
+    import numpy as np
+    import pandas as pd
+    import quy_trinh.b10_b12_ky_quy as B
+    d = pd.DataFrame({"close": [1000.0, 1100.0, 1200.0]})
+    B._the_che = lambda ctx, ten: {"gia_tri": 100000}
+    s = {"dong_mle": np.array([0.05, 0.05, 0.05])}
+    L = np.array([0.04, 0.08, 0.05])
+    r = B._quy_doi_tien(None, d, np.array([0, 1, 2]), L, np.array([True, True, True]), s)["dong_mle"]
+    assert abs(r["ky_quy_tb"] - 0.05 * 1100 * 1e5) < 1e-6
+    assert abs(r["thieu_hut_max"] - 0.03 * 1100 * 1e5) < 1e-6
+    assert abs(r["tong_thieu_hut"] - 0.03 * 1100 * 1e5) < 1e-6
