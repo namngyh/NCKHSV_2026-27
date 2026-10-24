@@ -31,7 +31,9 @@
   "d8479dfa8227a4af4d50a9fe291fb0a49e8a70f4": [
    "b10",
    "b11",
-   "b12",
+   "b12"
+  ],
+  "a9fd88912cdfbbb579ed6b0cff1d31b0b5a52a72": [
    "b13"
   ]
  },
@@ -40,7 +42,7 @@
  "_nguon": {
   "may": "may_manh",
   "host": "Cloudiso",
-  "thoi_diem": "2026-10-24 18:33:53",
-  "giay": 1.04
+  "thoi_diem": "2026-10-24 20:43:19",
+  "giay": 0.89
  }
 }
