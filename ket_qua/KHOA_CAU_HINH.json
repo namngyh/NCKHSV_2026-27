@@ -1,5 +1,5 @@
 {
- "phan_phoi": "skewt",
+ "phan_phoi": "ged",
  "bien": [
   "G"
  ],
@@ -25,7 +25,7 @@
  "_nguon": {
   "may": "may_manh",
   "host": "Cloudiso",
-  "thoi_diem": "2026-10-22 08:52:17",
-  "giay": 0.74
+  "thoi_diem": "2026-10-24 12:56:07",
+  "giay": 0.7
  }
 }

@@ -1,8 +1,8 @@
 {
- "commit": "00b2976d0dd20f752f3f03420327a7f1373013d7",
- "h_vao": "3d388333d732e944c75a42b05bd972301aaffffe8ac61ddfa8803d5a66067cb1",
- "bam_du_lieu": "70bfdb35ef0ea56b61e253183509d90368751ad1c15659683c9c1f8c408e110d",
- "bam_ma": "2b7cdf1a5c2204e61053e0783aaecfc64f32e51ff5732e1337f16ebd8226c293",
+ "commit": "590979a9c0fbca2b29e9fed7480ffc0a1e81c3d4",
+ "h_vao": "a6df8a8eb16bfad84e29195893f8e9bb3f70ef06428fc04be4cb4f5eadcdb271",
+ "bam_du_lieu": "03556da1416026874136b20eb2bc304d142e28daae413b801b6f4b876f6fbee8",
+ "bam_ma": "cefdf15c509725e498182b44271ad6ced851777495c71335e7162f349cfb7477",
  "ho_so": "day_du",
  "may_tong_hop": {
   "host": "Cloudiso",
@@ -14,5 +14,5 @@
  "so_don_vi_theo_may": {
   "may_manh": 1
  },
- "thoi_diem": "2026-10-22 08:52:17"
+ "thoi_diem": "2026-10-24 12:56:07"
 }

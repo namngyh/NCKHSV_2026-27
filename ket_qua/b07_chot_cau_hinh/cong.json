@@ -1,8 +1,12 @@
 {
- "dat": false,
+ "dat": true,
  "i_mo_phong": {
-  "dat": false,
-  "ghi_chu": "phan phoi ged chua co mo phong khoi phuc tham so (b03a)"
+  "do_phu_min": 0.905,
+  "do_phu_max": 0.957,
+  "bac_bo_sai_E2_theta": 0.055,
+  "bac_bo_sai_E4_gamma": 0.062,
+  "so_that_bai": 0,
+  "dat": true
  },
  "ii_z2_theo_tau": {
   "hoi_quy_tau_F_p": 0.8362935960199801,

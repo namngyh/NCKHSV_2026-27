@@ -1,11 +1,20 @@
 {
- "trang_thai": "cong_khong_dat",
- "h_vao": "e0d8bb3945ce12cb6125ef5f7f7a14af5e757bbacdf3452bf0054bb19a9b0ffc",
+ "trang_thai": "xong",
+ "h_vao": "a6df8a8eb16bfad84e29195893f8e9bb3f70ef06428fc04be4cb4f5eadcdb271",
+ "h_ra": "2f09835ad631fdbb16dbe28c03ef6bf0ec83173cadd5a98fb4b075287620d482",
+ "so_don_vi": 1,
+ "bat_dau": "2026-10-24 12:56:06",
+ "ket_thuc": "2026-10-24 12:56:07",
+ "giay_tong_hop": 0.1,
  "cong": {
-  "dat": false,
+  "dat": true,
   "i_mo_phong": {
-   "dat": false,
-   "ghi_chu": "phan phoi ged chua co mo phong khoi phuc tham so (b03a)"
+   "do_phu_min": 0.905,
+   "do_phu_max": 0.957,
+   "bac_bo_sai_E2_theta": 0.055,
+   "bac_bo_sai_E4_gamma": 0.062,
+   "so_that_bai": 0,
+   "dat": true
   },
   "ii_z2_theo_tau": {
    "hoi_quy_tau_F_p": 0.8362935960199801,
@@ -128,5 +137,10 @@
     "dat": true
    }
   }
+ },
+ "chap_nhan_cong": false,
+ "thu_muc_diem_kiem_tra": "_diem_kiem_tra\\b07\\a6df8a8eb16b",
+ "so_don_vi_theo_may": {
+  "may_manh": 1
  }
 }
