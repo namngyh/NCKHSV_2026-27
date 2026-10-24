@@ -107,6 +107,14 @@ nguong_tang = 0.01              # vùng không điều chỉnh (kết quả chí
 nguong_giam = 0.02              # chỉ giảm khi thấp hơn >= 2 điểm % (bất đối xứng, chống thuận chu kỳ)
 nguong_do_ben = [[0.0, 0.0], [0.01, 0.02], [0.02, 0.03]]   # b12: không ngưỡng; chính; ngưỡng rộng
 
+[vsdc]                          # đối chứng cách tính ký quỹ theo văn bản VSDC (b12); đã chốt 24/10/2026
+n = 2                           # số ngày thanh lý (căn bậc hai nhân vào tỷ lệ); chọn bằng H của thiết kế trình bày chính
+n_bien_the_2025 = 1             # bản 2025 đã dùng biến động 2 ngày; biến thể không nhân thêm
+zc = 2.89                       # giá trị tới hạn ví dụ trong Phụ lục 2 QĐ 61/QĐ-VSD (2022)
+ky_quan_sat_2022 = [90, 120, 250]   # QĐ 61, QĐ 12: tối thiểu 90 ngày (chính), 120 và 250 để xét độ bền
+ky_quan_sat_2025 = [250, 120]       # QĐ 26: điểm 1.3.b 250 ngày (chính), điểm 1.3.a 120 ngày (tự mâu thuẫn)
+tre_cong_bo = 2                 # công bố trước tối thiểu 2 ngày làm việc
+
 [kiem_dinh_co_luc]              # b02k: cỡ và lực của các kiểm định bằng mô phỏng, cỡ mẫu = khối KT
 so_lan = 5000
 

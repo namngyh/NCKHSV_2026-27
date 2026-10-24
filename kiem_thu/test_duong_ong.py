@@ -251,3 +251,26 @@ def test_theo_lich_vsdc():
     assert all(ngay[i].day >= 1 and (ngay[i - 1].day < 10 <= ngay[i].day or ngay[i - 1].day < 20 <= ngay[i].day
                or ngay[i].month != ngay[i - 1].month) for i in doi)
     assert (KQ.theo_lich_vsdc(m, np.full(60, 0.5), ngay) >= 0.5).all()
+
+
+def test_vsdc_doi_chung():
+    """MVaR với S = K = 0 trùng mean + zc * sd; bản 2025 dùng 3 sigma; căn bậc hai theo n; cập nhật theo lịch giữ nguyên trong kỳ."""
+    import math
+    import numpy as np
+    import pandas as pd
+    from de_cuong import ky_quy as KQ
+    rng = np.random.default_rng(3)
+    r = rng.standard_normal(400)
+    t = [200, 300]
+    g1 = KQ.vsdc_gia_tri(r, t, 90, "var3", 1.0, hai_ngay=False)
+    g4 = KQ.vsdc_gia_tri(r, t, 90, "var3", 4.0, hai_ngay=False)
+    assert all(abs(g4[x] - 2 * g1[x]) < 1e-12 for x in t)                 # sqrt(4) = 2
+    u = np.expm1(r / 100)
+    w = -u[111:201]
+    v_tay = max(w.mean() + 3 * w.std(ddof=1), (u[111:201]).mean() + 3 * u[111:201].std(ddof=1), 0.0)
+    assert abs(g1[200] - v_tay) < 1e-12
+    gm = KQ.vsdc_gia_tri(r, t, 90, "mvar", 1.0)
+    assert all(np.isfinite(gm[x]) and gm[x] > 0 for x in t)
+    ngay = pd.bdate_range("2025-03-03", periods=60)
+    m = KQ.vsdc_theo_lich(ngay, np.arange(60), lambda i: float(i))
+    assert (np.diff(m)[np.diff(m) != 0] > 0).all() and len(set(m[~np.isnan(m)])) <= 9

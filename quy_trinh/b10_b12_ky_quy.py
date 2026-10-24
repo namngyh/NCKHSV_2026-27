@@ -223,6 +223,7 @@ def _lam_b12(ctx, khoa, truoc):
         doi["nguong"][f"{nt_}|{nd_}"] = KQ.chi_tieu(m, L, hop, H)
     m0 = KQ.quy_tac(v, e, san, c0["w"], c0["b"], c0["phi"], c0["eta"], giam, g)
     doi["lich_vsdc"] = KQ.chi_tieu(KQ.theo_lich_vsdc(m0, c0["phi"] * san, d["date"].iloc[tmoc].to_numpy()), L, hop, H)
+    doi["vsdc"] = _doi_chung_vsdc(ctx, d, tmoc, L, hop, H, a)
     theo_thiet_ke = {k: {x: v_["KT"]["dong_mle"][x] for x in ("m_tb", "ty_le_vuot", "thieu_hut_tb", "thieu_hut_moi_phien")}
                      for k, v_ in tk.items()}
     mle_vs_hau_nghiem = {k: {ng: v_["KT"][f"dong_{ng}"] for ng in ["mle"] + list(ctx.cfg["bayes"]["phuong_phap"])
@@ -231,9 +232,29 @@ def _lam_b12(ctx, khoa, truoc):
             "mle_vs_hau_nghiem": mle_vs_hau_nghiem, "nhom_phien": tk[key]["nhom_KT"]}
 
 
+def _doi_chung_vsdc(ctx, d, tmoc, L, hop, H, a) -> dict:
+    """Đối chứng cách tính VSDC (bản 2022/2023 và 2025) trên các phiên gốc của KT; n, kỳ quan sát, zc lấy từ [vsdc]."""
+    cv = ctx.cfg["vsdc"]
+    r = d["r"].to_numpy(float)
+    ngay = d["date"].iloc[tmoc].to_numpy()
+    cac = [("2022-2023 (MVaR)", "mvar", False, cv["n"], N) for N in cv["ky_quan_sat_2022"]]
+    cac += [(f"2025 (VaR 3 sigma), n = {n:g}", "var3", True, n, N) for n in (cv["n"], cv["n_bien_the_2025"])
+            for N in cv["ky_quan_sat_2025"]]
+    out = {}
+    for ten, kieu, hai, n, N in cac:
+        gia = KQ.vsdc_gia_tri(r, np.unique(np.r_[tmoc, tmoc - cv["tre_cong_bo"]]), N, kieu, n, cv["zc"], hai)
+        for che_do, m in (("hằng ngày", np.array([gia.get(int(t), np.nan) for t in tmoc])),
+                          ("theo lịch 1, 10, 20", KQ.vsdc_theo_lich(ngay, tmoc, lambda t: gia.get(t, np.nan), cv["tre_cong_bo"]))):
+            x = KQ.chi_tieu(m, L, hop, H)
+            x["kiem_dinh_thua"] = KQ.kiem_dinh_vuot(m, L, hop, H, a)
+            x["chi_phi"] = KQ.chi_phi(m, L, hop, 1.0, 1.0 / a)
+            out[f"{ten}; N = {N}; {che_do}"] = x
+    return out
+
+
 def _th_b12(ctx, kq):
     ctx.ghi("do_ben.json", kq["tat_ca::0"])
 
 
-Buoc("b12", "do_ben", "7.6", TEP, _lam_b12, _th_b12, phu_thuoc=("b11",), cau_hinh=("ky_quy",), thu_vien=TV,
+Buoc("b12", "do_ben", "7.6", TEP, _lam_b12, _th_b12, phu_thuoc=("b11",), cau_hinh=("ky_quy", "vsdc"), thu_vien=TV,
      can_khoa_KT=True, song_song=False, chi_chu_tri=True)

@@ -207,6 +207,61 @@ def theo_lich_vsdc(m, san, ngay, moc=(1, 10, 20)):
     return out
 
 
+def _cua_so_vsdc(x: np.ndarray, t: int, N: int):
+    """N giá trị tổn thất hữu hạn ngay trước và tại chỉ số t (dùng dữ liệu đến t); None nếu chưa đủ N."""
+    if t < N - 1:
+        return None
+    w = x[t - N + 1:t + 1]
+    return w if np.isfinite(w).all() else None
+
+
+def vsdc_gia_tri(r, chi_so, N: int, kieu: str, n: float, zc: float = 2.89, hai_ngay: bool = False) -> dict:
+    """Tỷ lệ ký quỹ ban đầu theo văn bản VSDC tại các chỉ số phiên chi_so (đối chứng, không phải chuỗi VSDC công bố).
+
+    LÝ THUYẾT: kieu = "mvar" (QĐ 61/QĐ-VSD 2022 và QĐ 12/QĐ-HĐTV 2023): IM = MVaR sqrt(n), MVaR = mean + Z delta,
+        Z = zc + (zc^2 - 1) S / 6 + (zc^3 - 3 zc) K / 24 - (2 zc^3 - 5 zc) S^2 / 36, S độ lệch, K độ nhọn thừa.
+        kieu = "var3" (QĐ 26/QĐ-HĐTV 2025): IM = VaR sqrt(n), VaR = mean + 3 delta, biến động 2 ngày (hai_ngay).
+        Hai phía: tổn thất của vị thế mua (-u) và vị thế bán (+u); lấy phía lớn hơn, sàn 0. u là tỷ lệ biến động giá
+        thường (expm1 của tổng lợi suất log). Văn bản không nêu độ nhọn là thô hay thừa; dùng độ nhọn thừa.
+    r: lợi suất log (%) theo phiên (khuyết = NaN). Trả về {chi_so: tỷ lệ ký quỹ hoặc NaN}."""
+    r = np.asarray(r, float)
+    u = np.expm1((r + np.r_[np.nan, r[:-1]] if hai_ngay else r) / 100.0)
+    out = {}
+    for t in chi_so:
+        best = np.nan
+        for dau in (-1.0, 1.0):
+            w = _cua_so_vsdc(dau * u, int(t), N)
+            if w is None:
+                continue
+            mean, sd = float(w.mean()), float(w.std(ddof=1))
+            if kieu == "mvar":
+                S = float(stats.skew(w, bias=False))
+                Kt = float(stats.kurtosis(w, bias=False))
+                Z = zc + (zc ** 2 - 1) * S / 6 + (zc ** 3 - 3 * zc) * Kt / 24 - (2 * zc ** 3 - 5 * zc) * S ** 2 / 36
+            else:
+                Z = 3.0
+            v = max((mean + Z * sd) * math.sqrt(n), 0.0)
+            best = v if not np.isfinite(best) else max(best, v)
+        out[int(t)] = best
+    return out
+
+
+def vsdc_theo_lich(ngay, tmoc, gia_tri_tai, tre: int = 2, moc=(1, 10, 20)) -> np.ndarray:
+    """Cập nhật theo lịch VSDC: tại phiên đầu tiên của mỗi kỳ (ngày 1, 10, 20) tính lại bằng dữ liệu đến `tre` phiên
+    trước đó (công bố trước >= 2 ngày làm việc), giữ nguyên đến kỳ sau. gia_tri_tai(t) -> giá trị tính bằng dữ liệu đến t."""
+    import pandas as pd
+    ngay = pd.DatetimeIndex(ngay)
+    ky = [(t.year, t.month, sum(t.day >= x for x in moc)) for t in ngay]
+    out = np.full(len(tmoc), np.nan)
+    hien, ky_truoc = np.nan, None
+    for i, t in enumerate(tmoc):
+        if ky[i] != ky_truoc:
+            ky_truoc = ky[i]
+            hien = gia_tri_tai(int(t) - tre)
+        out[i] = hien
+    return out
+
+
 def chi_tieu(m: np.ndarray, L: np.ndarray, hop_le: np.ndarray, H: int, mask: np.ndarray | None = None) -> dict:
     """Chỉ tiêu mục 7.6 trên các phiên gốc hợp lệ."""
     ok = hop_le & np.isfinite(m) & np.isfinite(L)
