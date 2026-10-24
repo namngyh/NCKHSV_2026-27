@@ -15,6 +15,13 @@ gamma_G = 0,17. Người dùng chọn phương án 1: chạy mô phỏng khôi p
   dữ liệu đổi (commit 19:55 ngày 22/10), vì `dong_bo.bam_ma` chỉ băm mã và cấu hình. Khi mở lại (14:31 ngày 23/10), máy kéo
   dữ liệu mới nên chạy lại từ b00, b03a làm đủ 16.000 đơn vị (khoảng 18-20 giờ). Kết quả chọn G/GED và cổng ở trên chỉ
   tham khảo. Đã sửa `bam_ma` băm thêm `du_lieu/goc`, `du_lieu/ngoai` (trừ .md) để lần sau sửa dữ liệu thì máy tự khởi động lại.
+- 21:27 ngày 23/10 (người dùng chọn): GED cũng được thêm vào b03b (`b03b_so_lan_lap.py` dùng `cac_phan_phoi`): thêm
+  29.800 đơn vị VB-MF, VB-FR, NUTS, SBC; tổng 119.200 (trước 89.400); ước tính b03b khoảng 20 ngày với 15 tiến trình.
+  Đã chạy thử GED ở hồ sơ nhanh cho cả bốn loại đơn vị. Kiểm thử 23/23.
+- Sự cố máy mạnh đêm 23/10: đồng bộ cuối 22:22, chạy lại 00:10 ngày 24/10, tiếp tục đúng chỗ dở (điểm kiểm tra từng đơn vị).
+  Lần khởi động 14:39 và 21:51 chỉ chạy khoảng 8-9 tiến trình (RAM trống thấp lúc khởi động).
+- Tài liệu tham khảo truy cập mở đã tải về `Desktop/Google Drive/NCKHSV_EGARCHX_Tai_lieu` (danh mục ở DANH_MUC_TAI_LIEU.md);
+  qua đó xác nhận murphy2016 (BoE Staff WP 597), pfmi2012 (CPSS-IOSCO, tháng 4/2012) và thông báo VSDC 18/10/2024 (17%).
 - Vẫn hoãn: sửa `danh_gia.chan_doan` (hồi quy theo biến lịch bỏ cột phiên chuyển). Sửa danh_gia.py làm b02 đổi h_ra nên
   b03a (16.000 đơn vị) chạy lại từ đầu; chỉ sửa khi chấp nhận chạy lại.
 

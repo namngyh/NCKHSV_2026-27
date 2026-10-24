@@ -313,13 +313,13 @@ Các ước tính là thời gian chạy liên tục với khoảng $15$ tiến 
 
 \begin{table}[h]
 \centering
-\caption{Trạng thái các bước (tối 23/10/2026)}\label{tab:trangthai}
+\caption{Trạng thái các bước (sáng 24/10/2026)}\label{tab:trangthai}
 \begin{tabular}{@{}lp{4.0cm}p{7.0cm}@{}}
 \toprule
 \textbf{Bước} & \textbf{Trạng thái} & \textbf{Ghi chú} \\
 \midrule
 b00 đến b02k & Xong (14:31, 23/10) & Chạy trên dữ liệu đầy đủ (có giá F2M ngày 15/08/2019, chỉ một lợi suất khuyết) \\
-b03a & Đang chạy & $16.000$ đơn vị (gồm GED); khoảng $6.100$ đơn vị đã xong lúc 19:46 \\
+b03a & Đang chạy & $16.000$ đơn vị (gồm GED); khoảng $12.900$ đơn vị đã xong lúc 07:55 ngày 24/10, đang chạy GED \\
 b04 đến b15 & Chờ & Sẽ chạy lại sau b03a; kết quả hiện có của các bước này thuộc lần chạy trên dữ liệu cũ, chỉ để tham khảo \\
 b03b & Chờ & $119.200$ đơn vị (gồm GED), chạy nền sau chuỗi chính \\
 Kết quả cũ & Lưu bằng thẻ git & Kết quả theo cách xử lý cũ (loại phiên chuyển) được giữ để làm phân tích độ bền \\
@@ -355,6 +355,7 @@ Việc ghi lại các điều chỉnh giữa chừng là cần thiết cho tính
 23/10 & Lần chạy bắt đầu 19:50 ngày 22/10 hoàn tất b03a đến b06: b05 chọn biến $G$, b06 chọn GED; cổng b07 không đạt (12:06) vì chưa có mô phỏng khôi phục cho GED; điều kiện (ii) và (iii) đạt. \\
 23/10 & Phát hiện lần chạy trên dùng dữ liệu \emph{cũ} (lợi suất 16/08/2019 vẫn khuyết): Máy chủ chỉ tự khởi động lại khi mã hoặc cấu hình đổi, nên bản bổ sung dữ liệu 19:55 ngày 22/10 không được nhận. Kết quả b03a đến b07 của lần chạy đó chỉ để tham khảo. \\
 23/10 & Thêm GED vào mô phỏng khôi phục b03a ($16.000$ đơn vị) và b03b ($119.200$ đơn vị); mã băm khởi động lại nay theo dõi cả dữ liệu đầu vào. Máy chủ chạy lại từ b00 lúc 14:31 trên dữ liệu đầy đủ. \\
+23--24/10 & Máy chủ gặp sự cố sau lần đồng bộ 22:22; chạy lại lúc 00:10 ngày 24/10 và tiếp tục đúng chỗ dở nhờ điểm kiểm tra từng đơn vị (không mất đơn vị đã xong). Các lần khởi động 14:39 và 21:51 chỉ chạy khoảng $8$ đến $9$ tiến trình do RAM trống thấp. \\
 \bottomrule
 \end{tabular}
 \end{table}
