@@ -103,6 +103,9 @@ lambda_ewma = 0.94
 cua_so_lich_su = 250
 trinh_bay_H = 2                 # cặp thiết kế trình bày chính (chưa được người dùng chốt)
 trinh_bay_alpha = 0.01
+nguong_tang = 0.01              # vùng không điều chỉnh (kết quả chính): chỉ tăng khi mức mục tiêu cao hơn mức áp dụng >= 1 điểm %
+nguong_giam = 0.02              # chỉ giảm khi thấp hơn >= 2 điểm % (bất đối xứng, chống thuận chu kỳ)
+nguong_do_ben = [[0.0, 0.0], [0.01, 0.02], [0.02, 0.03]]   # b12: không ngưỡng; chính; ngưỡng rộng
 
 [kiem_dinh_co_luc]              # b02k: cỡ và lực của các kiểm định bằng mô phỏng, cỡ mẫu = khối KT
 so_lan = 5000

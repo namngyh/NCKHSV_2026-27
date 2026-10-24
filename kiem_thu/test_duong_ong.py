@@ -223,3 +223,17 @@ def test_b03a_them_ged():
     db = bb.don_vi(K.NguCanh("day_du", bb))
     n_pp = {pp: sum(1 for k in db if k.split("|")[1] == pp) for pp in ("chuan", "ged")}
     assert n_pp["ged"] == n_pp["chuan"] > 0 and bb.tep == B3.TEP and bb.mo_rong_don_vi
+
+
+def test_quy_tac_vung_khong_dieu_chinh():
+    """Ngưỡng 0 trùng năm bước; ngưỡng dương giảm số lần đổi mức, giữ mức sàn, và tăng/giảm đúng bất đối xứng."""
+    import numpy as np
+    from de_cuong import ky_quy as KQ
+    rng = np.random.default_rng(1)
+    v = 0.08 + 0.03 * np.abs(rng.standard_normal(300))
+    e, san = 1.2 * v, np.full(300, 0.05)
+    m0 = KQ.quy_tac(v, e, san, 0.5, 0.1, 0.5, 0.8)
+    assert np.allclose(m0, KQ.quy_tac(v, e, san, 0.5, 0.1, 0.5, 0.8, ng_tang=0.0, ng_giam=0.0))
+    m1 = KQ.quy_tac(v, e, san, 0.5, 0.1, 0.5, 0.8, ng_tang=0.01, ng_giam=0.02)
+    assert (np.abs(np.diff(m1)) > 1e-12).sum() < (np.abs(np.diff(m0)) > 1e-12).sum()
+    assert (m1 >= 0.5 * san - 1e-12).all()

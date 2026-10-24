@@ -111,6 +111,7 @@ def _lam_b11(ctx, khoa, truoc):
     hop_kt = hop & o_kt
     g = float(_the_che(ctx, "buoc_lam_tron_ky_quy")["gia_tri"])
     giam = float(_the_che(ctx, "gioi_han_giam_moi_phien")["gia_tri"])
+    nt, nd = kqc["nguong_tang"], kqc["nguong_giam"]
     san = KQ.san_lich_su(R, tmoc, H, a)
     luoi = list(itertools.product(kqc["w"], kqc["b"], kqc["phi"], kqc["eta"]))
     vmax = lambda ng: np.max(db[ng]["var"][:, H - 1, ia, :], axis=1)
@@ -119,7 +120,7 @@ def _lam_b11(ctx, khoa, truoc):
     for ng in ["mle", "egarch_mle"] + list(ctx.cfg["bayes"]["phuong_phap"]):
         tot, bang = None, []
         for w, b, phi, eta in luoi:
-            m = KQ.quy_tac(vmax(ng), emax(ng), san, w, b, phi, eta, giam, g)
+            m = KQ.quy_tac(vmax(ng), emax(ng), san, w, b, phi, eta, giam, g, nt, nd)
             c = KQ.chi_phi(m, L, hop_xt, 1.0, 1.0 / a)
             ct = KQ.chi_tieu(m, L, hop_xt, H)
             bang.append({"w": w, "b": b, "phi": phi, "eta": eta, "chi_phi": c, **{x: ct[x] for x in
@@ -130,6 +131,8 @@ def _lam_b11(ctx, khoa, truoc):
     m_dong = dong["dong_mle"]
     vuot_xt = KQ.chi_tieu(m_dong, L, hop_xt, H)["ty_le_vuot"]
     nang = dict(dong)
+    c_ = chon["mle"]
+    nang["dong_mle_khong_nguong"] = KQ.quy_tac(vmax("mle"), emax("mle"), san, c_["w"], c_["b"], c_["phi"], c_["eta"], giam, g)
     nang["VaR_tho_mle"] = vmax("mle")
     nang["FHS_EGARCH-X"] = vmax("fhs")
     nang["EWMA"] = KQ.ewma_var(d, tmoc, H, a, kqc["lambda_ewma"])
@@ -166,7 +169,8 @@ def _lam_b11(ctx, khoa, truoc):
     return {"H": H, "alpha": a, "chon": chon, "XT_dong_mle": KQ.chi_tieu(m_dong, L, hop_xt, H),
             "duong_bien_XT": {ng: KQ.duong_bien(v) for ng, v in luoi_xt.items()}, "luoi_XT": luoi_xt,
             "KT": bang_kt, "nhom_KT": theo_nhom, "den_giao_thong": DG.den_giao_thong(B[o_kt]),
-            "chuoi": {**nang, "L": L, "hop_kt": hop_kt, "tmoc": tmoc}, "c_th_tren_c_v": 1 / a, "g": g, "giam": giam}
+            "chuoi": {**nang, "L": L, "hop_kt": hop_kt, "tmoc": tmoc}, "c_th_tren_c_v": 1 / a, "g": g, "giam": giam,
+            "nguong_tang": nt, "nguong_giam": nd}
 
 
 def _th_b11(ctx, kq):
@@ -211,8 +215,12 @@ def _lam_b12(ctx, khoa, truoc):
         doi[ten] = {}
         for x in luoi:
             c = {**c0, ten: x}
-            m = KQ.quy_tac(v, e, san, c["w"], c["b"], c["phi"], c["eta"], giam, g)
+            m = KQ.quy_tac(v, e, san, c["w"], c["b"], c["phi"], c["eta"], giam, g, kqc["nguong_tang"], kqc["nguong_giam"])
             doi[ten][str(x)] = KQ.chi_tieu(m, L, hop, H)
+    doi["nguong"] = {}
+    for nt_, nd_ in kqc["nguong_do_ben"]:
+        m = KQ.quy_tac(v, e, san, c0["w"], c0["b"], c0["phi"], c0["eta"], giam, g, nt_, nd_)
+        doi["nguong"][f"{nt_}|{nd_}"] = KQ.chi_tieu(m, L, hop, H)
     theo_thiet_ke = {k: {x: v_["KT"]["dong_mle"][x] for x in ("m_tb", "ty_le_vuot", "thieu_hut_tb", "thieu_hut_moi_phien")}
                      for k, v_ in tk.items()}
     mle_vs_hau_nghiem = {k: {ng: v_["KT"][f"dong_{ng}"] for ng in ["mle"] + list(ctx.cfg["bayes"]["phuong_phap"])

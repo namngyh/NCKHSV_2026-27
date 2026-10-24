@@ -163,13 +163,17 @@ def ewma_var(d, tmoc: np.ndarray, H: int, a: float, lam: float = 0.94) -> np.nda
 # ----------------------------------------------------------------------------------------
 # Quy tắc năm bước và chỉ tiêu (7.3, 7.6)
 # ----------------------------------------------------------------------------------------
-def quy_tac(var, es, san, w, b, phi, eta, giam=0.01, g=0.005):
-    """Áp dụng quy tắc năm bước cho các chuỗi var, es, san (cùng độ dài, theo thứ tự thời gian)."""
+def quy_tac(var, es, san, w, b, phi, eta, giam=0.01, g=0.005, ng_tang=0.0, ng_giam=0.0):
+    """Áp dụng quy tắc năm bước cho các chuỗi var, es, san (cùng độ dài, theo thứ tự thời gian).
+
+    Bước 6 (vùng không điều chỉnh): mức mục tiêu mi do năm bước tính; mức áp dụng chỉ đổi khi mi lệch khỏi mức đang áp
+    dụng tối thiểu ng_tang (tăng) hoặc ng_giam (giảm), khi đó nhảy thẳng tới mi; luôn giữ mức sàn phi * san.
+    Với ng_tang = ng_giam = 0, kết quả trùng quy tắc năm bước. Đệ quy của năm bước dùng mức mục tiêu."""
     n = len(var)
     m = np.full(n, np.nan)
     m1 = (1 - w) * var + w * es
     m3 = np.maximum((1 + b) * m1, phi * san)
-    prev4 = prev = None
+    prev4 = prev = ap = None
     for i in range(n):
         if not np.isfinite(m3[i]):
             continue
@@ -178,7 +182,10 @@ def quy_tac(var, es, san, w, b, phi, eta, giam=0.01, g=0.005):
         m4 = max(m3[i], eta * prev4 + (1 - eta) * m3[i])
         mi = max(phi * san[i], g * math.ceil(max(m4, prev - giam) / g - 1e-12))
         prev4, prev = m4, mi
-        m[i] = mi
+        if ap is None or mi >= ap + ng_tang - 1e-12 or mi <= ap - ng_giam + 1e-12:
+            ap = mi
+        ap = max(ap, phi * san[i])
+        m[i] = ap
     return m
 
 
