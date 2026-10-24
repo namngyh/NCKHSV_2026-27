@@ -44,7 +44,9 @@ def phu_luc_sai_lech(ctx) -> str:
         muc, ten = k.split(".", 1)
         if cfg[muc][ten] != v:
             lech.append(f"- `{k}`: đề cương {v}, đang dùng {cfg[muc][ten]}")
-    s += ["## Tham số khác đề cương", ""] + (lech or ["- Không có."]) + [""]
+    s += ["## Tham số khác đề cương chi tiết", "",
+          "Giá trị tham chiếu là của đề cương chi tiết (`tai_lieu/de_cuong/`). Các điểm về khối UL/XT/KT và GED tham gia chọn phân phối",
+          "là có chủ đích: nhóm bám đề cương đã đăng ký BM02, vốn khác đề cương chi tiết ở các điểm này.", ""] + (lech or ["- Không có."]) + [""]
     cong = []
     for ma in DANH:
         hs = doc_ho_so(ctx, ma) or {}
@@ -69,7 +71,14 @@ def phu_luc_sai_lech(ctx) -> str:
         s += ["## Chẩn đoán Bayes không đạt (b08)", "",
               f"- Các mốc NUTS không đạt (R_hat, ESS, phân kỳ): {cd.get('so_moc_nuts_khong_dat')}",
               f"- Pareto k_hat của VB đạt theo mốc: {cd.get('vb_k_hat_dat')}", ""]
-    s += ["## Lựa chọn của nhóm nghiên cứu ở những chỗ đề cương không quy định", "",
+    kq = cfg["ky_quy"]
+    s += ["## Bổ sung ngoài đề cương (lựa chọn thiết kế của nhóm nghiên cứu, chốt trước khi mở khối KT)", "",
+          f"- Vùng không điều chỉnh của tỷ lệ ký quỹ (bước 6): tăng khi mức mục tiêu cao hơn mức áp dụng từ {100 * kq['nguong_tang']:g} điểm %, "
+          f"giảm khi thấp hơn từ {100 * kq['nguong_giam']:g} điểm %; đối chứng không ngưỡng và hai mức ngưỡng khác ở b12. BM02 chỉ nêu \"giới hạn thay đổi giữa hai phiên\".",
+          f"- Đối chứng cách tính của VSDC (QĐ 61/QĐ-VSD 2022, QĐ 12/QĐ-HĐTV 2023, QĐ 26/QĐ-HĐTV 2025), n = {cfg['vsdc']['n']}, kỳ quan sát 90/120/250 ngày, "
+          "cập nhật hằng ngày và theo lịch 1, 10, 20 (b12). Đây là tính lại theo văn bản, không phải chuỗi VSDC công bố.",
+          "- Quy đổi ký quỹ và thiếu hụt ra đồng mỗi hợp đồng bằng hệ số nhân 100.000 đồng/điểm (b12).", "",
+          "## Lựa chọn của nhóm nghiên cứu ở những chỗ đề cương không quy định", "",
           "Xem `cau_hinh/de_cuong.toml` (chú thích từng giá trị) và THIET_KE_CODE.md mục 6b.", ""]
     return "\n".join(s)
 

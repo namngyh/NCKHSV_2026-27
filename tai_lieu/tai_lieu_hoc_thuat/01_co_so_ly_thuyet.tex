@@ -69,7 +69,7 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-\noindent Tài liệu trình bày toàn bộ cơ sở lý thuyết của nghiên cứu dự báo rủi ro và xây dựng cơ chế ký quỹ động cho hợp đồng tương lai chỉ số VN30 kỳ hạn gần nhất (VN30F1M). Nội dung gồm sáu phần. Phần thứ nhất xây dựng dữ liệu và biến: Lợi suất có xử lý phiên chuyển hợp đồng, đại lượng đại diện cho phương sai theo biên độ giá, biến lịch và năm biến ngoại sinh ứng viên. Phần thứ hai đặc tả ba mô hình phương sai có điều kiện, GARCH(1,1), EGARCH và EGARCH-X, cùng bốn phân phối sai số chuẩn hóa. Phần thứ ba trình bày bốn phương pháp ước lượng và suy diễn trên cùng một hàm hợp lý: Hợp lý cực đại, Bayes biến phân mean-field, Bayes biến phân full-rank và Monte Carlo Hamilton với thuật toán NUTS. Phần thứ tư trình bày nghiên cứu mô phỏng khôi phục tham số. Phần thứ năm trình bày hệ thống tiêu chí đánh giá dự báo ngoài mẫu. Phần thứ sáu chuyển dự báo phân phối có điều kiện thành giá trị chịu rủi ro, tổn thất kỳ vọng ở phần đuôi và một quy tắc ký quỹ năm bước có các thành phần chống thuận chu kỳ. Mọi khái niệm được định nghĩa ở lần xuất hiện đầu tiên; mọi công thức đi kèm mục đích sử dụng và ý nghĩa của từng ký hiệu.
+\noindent Tài liệu trình bày toàn bộ cơ sở lý thuyết của nghiên cứu dự báo rủi ro và xây dựng cơ chế ký quỹ động cho hợp đồng tương lai chỉ số VN30 kỳ hạn gần nhất (VN30F1M). Nội dung gồm sáu phần. Phần thứ nhất xây dựng dữ liệu và biến: Lợi suất có xử lý phiên chuyển hợp đồng, đại lượng đại diện cho phương sai theo biên độ giá, biến lịch và năm biến ngoại sinh ứng viên. Phần thứ hai đặc tả ba mô hình phương sai có điều kiện, GARCH(1,1), EGARCH và EGARCH-X, cùng bốn phân phối sai số chuẩn hóa. Phần thứ ba trình bày bốn phương pháp ước lượng và suy diễn trên cùng một hàm hợp lý: Hợp lý cực đại, Bayes biến phân mean-field, Bayes biến phân full-rank và Monte Carlo Hamilton với thuật toán NUTS. Phần thứ tư trình bày nghiên cứu mô phỏng khôi phục tham số. Phần thứ năm trình bày hệ thống tiêu chí đánh giá dự báo ngoài mẫu. Phần thứ sáu chuyển dự báo phân phối có điều kiện thành giá trị chịu rủi ro, tổn thất kỳ vọng ở phần đuôi và một quy tắc ký quỹ gồm năm bước và một vùng không điều chỉnh, có các thành phần chống thuận chu kỳ. Mọi khái niệm được định nghĩa ở lần xuất hiện đầu tiên; mọi công thức đi kèm mục đích sử dụng và ý nghĩa của từng ký hiệu.
 
 \medskip
 \noindent\textbf{Từ khóa:} EGARCH-X, phương sai có điều kiện, giá trị chịu rủi ro, tổn thất kỳ vọng ở phần đuôi, suy diễn biến phân, NUTS, ký quỹ động, VN30F1M.
@@ -766,9 +766,9 @@ một tích phân không có nguyên hàm sơ cấp; với $H$ tổng quát cầ
 \end{enumerate}
 Biến thể mô phỏng lịch sử có lọc \cite{mcneilfrey2000} thay $\Ecal$ tham số ở bước 3 bằng việc lấy mẫu lại phần dư chuẩn hóa $\hat z_t$ của cửa sổ ước lượng.
 
-\subsection{Quy tắc ký quỹ năm bước}\label{sec:quytac}
+\subsection{Quy tắc ký quỹ năm bước và vùng không điều chỉnh}\label{sec:quytac}
 
-Ký quỹ thường áp dụng cùng một tỷ lệ cho hai phía, nên gọi $\widehat{\VaR}_t$ và $\widehat{\ES}_t$ là giá trị lớn hơn giữa hai phía. Quy tắc gồm năm bước nối tiếp.
+Ký quỹ thường áp dụng cùng một tỷ lệ cho hai phía, nên gọi $\widehat{\VaR}_t$ và $\widehat{\ES}_t$ là giá trị lớn hơn giữa hai phía. Quy tắc gồm năm bước nối tiếp tính mức ký quỹ mục tiêu, rồi một bước thứ sáu quyết định có đổi mức áp dụng hay không.
 
 \paragraph{Bước 1: Mức cơ sở.} Với trọng số $w\in[0,1]$,
 \begin{equation}
@@ -788,18 +788,24 @@ Khi mức mục tiêu tăng, $m^{(4)}_t=m^{(3)}_t$, tức ký quỹ tăng ngay; 
 
 \paragraph{Bước 5: Giới hạn tốc độ giảm và làm tròn.} Với mức giảm tối đa mỗi phiên $\Delta$ và bước làm tròn $g$,
 \begin{equation}
-m_t=\max\Big\{\underline m_t,\ g\,\Big\lceil\frac{1}{g}\max\big\{m^{(4)}_t,\ m_{t-1}-\Delta\big\}\Big\rceil\Big\}.
+m^{\ast}_t=\max\Big\{\underline m_t,\ g\,\Big\lceil\frac{1}{g}\max\big\{m^{(4)}_t,\ m^{\ast}_{t-1}-\Delta\big\}\Big\rceil\Big\}.
 \end{equation}
-Nghiên cứu dùng $g=0{,}5\%$ và $\Delta=1\%$. Quy tắc không giới hạn tốc độ tăng, vì giới hạn tăng sẽ gây thiếu hụt đúng lúc biến động bùng nổ.
+Nghiên cứu dùng $g=0{,}5\%$ và $\Delta=1\%$. Quy tắc không giới hạn tốc độ tăng, vì giới hạn tăng sẽ gây thiếu hụt đúng lúc biến động bùng nổ. Ở bước 5, $m^{\ast}_t$ là mức ký quỹ mục tiêu của phiên $t$.
+
+\paragraph{Bước 6: Vùng không điều chỉnh.} Các quy chế của tổ chức bù trừ tính lại VaR ba lần mỗi tháng nhưng không nêu ngưỡng để đổi tỷ lệ áp dụng. Gọi $m_t$ là tỷ lệ áp dụng, $a^{+}\ge0$ là ngưỡng tăng và $a^{-}\ge0$ là ngưỡng giảm:
+\begin{equation}
+m_t=\begin{cases} m^{\ast}_t, & m^{\ast}_t\ge m_{t-1}+a^{+}\ \text{hoặc}\ m^{\ast}_t\le m_{t-1}-a^{-},\\ m_{t-1}, & \text{các trường hợp còn lại,}\end{cases}\qquad m_t\leftarrow\max\{m_t,\ \underline m_t\}.
+\end{equation}
+Mức áp dụng giữ nguyên khi mức mục tiêu nằm trong vùng $(m_{t-1}-a^{-},\,m_{t-1}+a^{+})$ và nhảy thẳng tới mức mục tiêu khi vượt vùng; mức sàn lịch sử luôn được giữ. Đệ quy của các bước 4 và 5 chạy trên mức mục tiêu, không chạy trên mức áp dụng. Khi $a^{+}=a^{-}=0$, quy tắc trùng quy tắc năm bước. Nghiên cứu lấy $a^{+}=1$ và $a^{-}=2$ điểm phần trăm (tăng nhanh, giảm chậm để hạn chế thuận chu kỳ), chọn trước khi mở khối $\KT$. Vì hàm chi phí $\mathcal C$ ở mục sau không phạt số lần đổi mức, cực tiểu hóa $\mathcal C$ luôn chọn ngưỡng bằng không; ngưỡng vì vậy là tham số thiết kế và không được hiệu chỉnh theo $\mathcal C$. Kết quả được báo cáo dưới dạng bảng đánh đổi giữa số lần điều chỉnh, tỷ lệ vượt và ký quỹ trung bình với ba mức $(a^{+},a^{-})\in\{(0,0);\,(1,2);\,(2,3)\}$ điểm phần trăm. Các quy chế không có quy định tương ứng và đề cương BM02 chỉ nêu ``giới hạn thay đổi giữa hai phiên'', nên đây là một lựa chọn thiết kế của nhóm nghiên cứu.
 
 \paragraph{Ví dụ tính từng bước.} Xét năm phiên với VaR dự báo (lấy $w=0$ nên $m^{(1)}=\widehat{\VaR}$) lần lượt $8\%$, $12\%$ (cú sốc), rồi trở lại $8\%$; tham số $b=0{,}1$, sàn $\underline m_t=6\%$, $\eta=0{,}8$, $\Delta=1\%$, $g=0{,}5\%$. Bảng~\ref{tab:vidukyquy} cho từng bước; các giá trị trùng với kết quả của hàm cài đặt quy tắc trong mã nguồn.
 
 \begin{table}[h]
 \centering
-\caption{Ví dụ quy tắc ký quỹ năm bước (đơn vị \%)}\label{tab:vidukyquy}
+\caption{Ví dụ năm bước đầu của quy tắc ký quỹ, chưa áp dụng vùng không điều chỉnh (đơn vị \%)}\label{tab:vidukyquy}
 \begin{tabular}{@{}cccccp{6.8cm}@{}}
 \toprule
-\textbf{Phiên} & $m^{(1)}$ & $m^{(2)}=m^{(3)}$ & $m^{(4)}$ & $m_t$ & \textbf{Giải thích bước 4 và 5} \\
+\textbf{Phiên} & $m^{(1)}$ & $m^{(2)}=m^{(3)}$ & $m^{(4)}$ & $m^{\ast}_t$ & \textbf{Giải thích bước 4 và 5} \\
 \midrule
 1 & $8$ & $8{,}8$ & $8{,}80$ & $9{,}0$ & Phiên đầu: $m^{(4)}=m^{(3)}$, làm tròn lên $9{,}0$ \\
 2 & $12$ & $13{,}2$ & $13{,}20$ & $13{,}5$ & Mục tiêu tăng: Tăng ngay, làm tròn lên $13{,}5$ \\
@@ -812,7 +818,7 @@ Nghiên cứu dùng $g=0{,}5\%$ và $\Delta=1\%$. Quy tắc không giới hạn 
 
 Bước 3 không ràng buộc trong ví dụ ($8{,}8>6$). Ví dụ cho thấy tính bất đối xứng của quy tắc: Ký quỹ tăng từ $9\%$ lên $13{,}5\%$ trong một phiên khi rủi ro tăng, nhưng khi rủi ro trở lại mức cũ, nó giảm dần $13{,}5\to12{,}5\to12{,}0\to11{,}5$ thay vì quay ngay về $9\%$. Phần ký quỹ dôi ra trong các phiên 3 đến 5 là chi phí của sự ổn định; đổi lại, nếu cú sốc thứ hai đến ngay sau đó, thành viên không bị gọi ký quỹ lớn lần nữa.
 
-\paragraph{Quy đổi ra tiền.} Ký quỹ bằng tiền trên một hợp đồng là $m_t\,K\,P_t$, với hệ số nhân $K=100.000$ đồng trên một điểm. Ví dụ, với $m_t=12\%$ và giá $P_t=1.300$ điểm, ký quỹ là $0{,}12\times100.000\times1.300=15{,}6$ triệu đồng mỗi hợp đồng. Quy tắc và mọi chỉ tiêu được tính theo tỷ lệ; phép quy đổi chỉ dùng để trình bày, và hiện chưa nằm trong đầu ra tự động của mã nguồn.
+\paragraph{Quy đổi ra tiền.} Ký quỹ bằng tiền trên một hợp đồng là $m_t\,K\,P_t$, với hệ số nhân $K=100.000$ đồng trên một điểm. Ví dụ, với $m_t=12\%$ và giá $P_t=1.300$ điểm, ký quỹ là $0{,}12\times100.000\times1.300=15{,}6$ triệu đồng mỗi hợp đồng. Quy tắc và mọi chỉ tiêu được tính theo tỷ lệ; phép quy đổi do hàm \texttt{\_quy\_doi\_tien} của bước b12 thực hiện với giá đóng cửa của phiên gốc, và báo cáo ký quỹ trung bình, ký quỹ lớn nhất, thiếu hụt bình quân mỗi phiên, thiếu hụt mỗi lần vượt, thiếu hụt lớn nhất và tổng thiếu hụt, tính bằng đồng mỗi hợp đồng.
 
 \subsection{Hiệu chỉnh siêu tham số theo chi phí kỳ vọng}
 
@@ -838,13 +844,25 @@ Vì $c_{th}$ không quan sát được, nghiên cứu báo cáo thêm \emph{đư
 
 \subsection{Quy tắc đối chứng}
 
-Quy tắc đề xuất được so với: (i) ký quỹ cố định, mức chọn trên $\XT$ sao cho tỷ lệ vượt bằng của quy tắc đề xuất; (ii) VaR theo trung bình trượt hàm mũ với hệ số $0{,}94$; (iii) mô phỏng lịch sử $250$ phiên; (iv) mô phỏng lịch sử có lọc theo EGARCH-X; (v) VaR thô của hợp lý cực đại, chưa qua quy tắc năm bước; (vi) mức ký quỹ của tổ chức bù trừ, cả mức hằng số $17\%$ và chuỗi lịch sử theo các thời kỳ ($10\%$, $13\%$, $17\%$); (vii) mốc trên bằng $H$ lần biên độ giá ngày. Để so sánh công bằng theo giả thuyết của CH3, các quy tắc còn được co giãn về cùng ký quỹ trung bình rồi so thiếu hụt bình quân bằng kiểm định Diebold--Mariano.
+Quy tắc đề xuất được so với: (i) ký quỹ cố định, mức chọn trên $\XT$ sao cho tỷ lệ vượt bằng của quy tắc đề xuất; (ii) VaR theo trung bình trượt hàm mũ với hệ số $0{,}94$; (iii) mô phỏng lịch sử $250$ phiên; (iv) mô phỏng lịch sử có lọc theo EGARCH-X; (v) VaR thô của hợp lý cực đại, chưa qua quy tắc năm bước; (vi) mức ký quỹ của tổ chức bù trừ, cả mức hằng số $17\%$ và chuỗi lịch sử theo các thời kỳ ($10\%$, $13\%$, $17\%$); (vii) mốc trên bằng $H$ lần biên độ giá ngày; (viii) cách tính của tổ chức bù trừ được tính lại theo văn bản của ba quy chế (Mục~\ref{sec:vsdcdoichung}). Để so sánh công bằng theo giả thuyết của CH3, các quy tắc còn được co giãn về cùng ký quỹ trung bình rồi so thiếu hụt bình quân bằng kiểm định Diebold--Mariano.
 
 Hai đối chứng cần công thức cụ thể. VaR theo trung bình trượt hàm mũ dùng phương sai làm trơn $\hat\sigma^2_t=\lambda\hat\sigma^2_{t-1}+(1-\lambda)r_t^2$ với $\lambda=0{,}94$, và giả định tổn thất $H$ phiên có phân phối chuẩn với phương sai $H\hat\sigma^2_t$:
 \begin{equation*}
 \VaR^{\mathrm{EWMA}}_{t,H,\alpha}=z_{1-\alpha}\sqrt{H\,\hat\sigma^2_t}\,/\,100 ,
 \end{equation*}
 với $z_{1-\alpha}$ là phân vị chuẩn tắc (chia $100$ để đổi từ phần trăm sang tỷ lệ). Phép co giãn về cùng ký quỹ trung bình nhân chuỗi $m_t$ của một quy tắc với hằng số $\bar m^{\mathrm{động}}/\bar m$, giữ nguyên hình dạng theo thời gian nhưng đổi mức trung bình; nhờ đó sự khác biệt về thiếu hụt chỉ còn đến từ việc phân bổ ký quỹ theo thời gian, không đến từ việc giữ nhiều hay ít vốn hơn.
+
+\subsection{Đối chứng theo cách tính của tổ chức bù trừ}\label{sec:vsdcdoichung}
+
+Ba quy chế bù trừ (Quyết định 61/QĐ-VSD năm 2022, 12/QĐ-HĐTV năm 2023 và 26/QĐ-HĐTV năm 2025) đều đặt tỷ lệ ký quỹ ban đầu bằng một VaR tham số nhân $\sqrt n$, với $n$ là số ngày cần thiết để thanh lý một vị thế khi thành viên mất khả năng thanh toán. Hai quy chế đầu dùng VaR hiệu chỉnh theo độ lệch và độ nhọn (Cornish--Fisher) trên biến động hằng ngày:
+\begin{equation*}
+\text{IM}=\text{MVaR}\sqrt n,\quad \text{MVaR}=\mu_u+Z\,\sigma_u,\quad Z=z_c+\frac{(z_c^2-1)S}{6}+\frac{(z_c^3-3z_c)K}{24}-\frac{(2z_c^3-5z_c)S^2}{36},
+\end{equation*}
+trong đó $\mu_u$ và $\sigma_u$ là trung bình và độ lệch chuẩn của biến động giá hằng ngày $u_t$ trong kỳ quan sát, $S$ và $K$ là độ lệch và độ nhọn của chuỗi đó. Quy chế năm 2025 dùng VaR tham số đơn giản trên biến động hai ngày $w_t$:
+\begin{equation*}
+\text{IM}=\text{VaR}\sqrt n,\qquad \text{VaR}=\mu_w+3\sigma_w\quad(\text{độ tin cậy }99{,}73\%).
+\end{equation*}
+Phép tính lại theo văn bản dùng các lựa chọn sau, đã chốt trước khi đọc kết quả. Thứ nhất, $n=2$, và biến thể $n=1$ cho bản 2025 vì biến động hai ngày đã chứa hệ số thời gian nên $n=2$ nhân đôi nó theo nghĩa đen của văn bản. Thứ hai, $z_c=2{,}89$, là giá trị ví dụ của quy chế 2022; quy chế không nêu độ tin cậy chính thức, và không nói độ nhọn là thô hay thừa (mã dùng độ nhọn thừa). Thứ ba, kỳ quan sát $90$ ngày cho hai quy chế đầu (mức tối thiểu); cho bản 2025 là $250$ ngày (điểm 1.3.b) làm kết quả chính và $120$ ngày (điểm 1.3.a) làm độ bền, vì văn bản tự mâu thuẫn. Thứ tư, lấy phía lớn hơn của vị thế mua và vị thế bán, để so với $L_{t,H}$. Thứ năm, hai chế độ cập nhật: hằng ngày, và theo lịch ngày $1$, $10$, $20$ hằng tháng với dữ liệu đến hai phiên trước ngày áp dụng (công bố trước ít nhất hai ngày làm việc). Đây là phép tính lại theo văn bản trên chuỗi VN30F1M, không phải chuỗi tỷ lệ mà tổ chức bù trừ đã công bố, nên chỉ cho biết kết quả của quy tắc, không cho biết thực tế vận hành.
 
 \subsection{Chỉ tiêu đánh giá}\label{sec:danhgiakyquy}
 
@@ -864,7 +882,7 @@ Với $H\ge2$, các tổn thất $L_{t,H}$ chồng lấn nên $V_t$ có tương 
 Tổn thất $H$ phiên được tính từ chuỗi lợi suất cùng hợp đồng, $R_{t,H}=\exp\big(\sum_{j=1}^{H}r_{t+j}/100\big)-1$, nên một cửa sổ $(t,t+H]$ chứa phiên chuyển cho đúng tổn thất của một vị thế được cuộn sang hợp đồng mới khi đáo hạn, và được giữ lại trong đánh giá. Chỉ các cửa sổ chứa phiên có $\chi=1$ bị loại.
 \end{nhanxet}
 
-\paragraph{Kiểm tra độ bền.} Thay đổi $w$ và $\eta$ quanh cấu hình được chọn; tổng hợp theo $H$ và $\alpha$; so sánh ký quỹ từ hợp lý cực đại và từ mật độ dự báo hậu nghiệm; đánh giá riêng các nhóm phiên căng thẳng, quanh đáo hạn và sau kỳ nghỉ dài.
+\paragraph{Kiểm tra độ bền.} Thay đổi $w$ và $\eta$ quanh cấu hình được chọn; đổi ngưỡng $(a^{+},a^{-})$ và cập nhật theo lịch ngày $1$, $10$, $20$; đối chứng cách tính của tổ chức bù trừ ở các kỳ quan sát $90$, $120$ và $250$ ngày; tổng hợp theo $H$ và $\alpha$; so sánh ký quỹ từ hợp lý cực đại và từ mật độ dự báo hậu nghiệm; đánh giá riêng các nhóm phiên căng thẳng, quanh đáo hạn và sau kỳ nghỉ dài. Đề cương BM02 còn yêu cầu độ bền theo tập biến ngoại sinh và theo cửa sổ ước lượng; hai phân tích này chưa được cài đặt (dự kiến chạy sau khi mô phỏng Bayes xong).
 
 % =====================================================================
 \section{Điều kiện chuyển giai đoạn}\label{sec:cong}

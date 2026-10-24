@@ -149,7 +149,7 @@ b08b & Độ nhạy tiên nghiệm & NUTS với hai phương án tiên nghiệm 
 b09 & Đánh giá ngoài mẫu & So sánh bốn phương pháp, QLIKE, điểm logarit, VaR, ES, DM, MCS & $260$ \\
 b10 & Dự báo rủi ro $H$ phiên & Mô phỏng $10.000$ đường cho $6$ nguồn dự báo $\times$ $65$ mốc & $390$ \\
 b11 & Ký quỹ & Hiệu chỉnh trên $\XT$, đánh giá trên $\KT$, đối chứng & $9$ \\
-b12 & Độ bền & Đổi $w$, $\eta$; tổng hợp theo $H$, $\alpha$ & $1$ \\
+b12 & Độ bền & Đổi $w$, $\eta$ và ngưỡng $(a^{+},a^{-})$; cập nhật theo lịch; đối chứng cách tính của tổ chức bù trừ ($14$ cấu hình); quy đổi ra tiền; tổng hợp theo $H$, $\alpha$ & $1$ \\
 b13 & Báo cáo & Sinh bảng, hình, phụ lục sai lệch từ tệp kết quả & $1$ \\
 b15 & Kiểm toán & Tính lại con số chính, kiểm tra không rò rỉ $\KT$ & $1$ \\
 b14 & Đóng gói & Đóng gói hồ sơ nộp & $1$ \\
@@ -177,7 +177,7 @@ Số đơn vị của b08 gồm $390$ ước lượng hợp lý cực đại ($6
 
 \paragraph{Ước lượng ngoài mẫu (b08, b09).} Cấu hình đã khóa được ước lượng lại tại $65$ mốc bằng cả bốn phương pháp, cùng mô hình nền GARCH(1,1) và EGARCH. b09 đánh giá toàn bộ trên khối $\KT$.
 
-\paragraph{Ký quỹ (b10 đến b12).} Chuyển phân phối dự báo thành mức ký quỹ và đánh giá.
+\paragraph{Ký quỹ (b10 đến b12).} Chuyển phân phối dự báo thành mức ký quỹ và đánh giá. Quy tắc gồm năm bước và vùng không điều chỉnh (ngưỡng tăng $1$, ngưỡng giảm $2$ điểm phần trăm, chốt trước khi mở khối $\KT$); b11 hiệu chỉnh $(w,b,\varphi,\eta)$ với ngưỡng đó và thêm đối chứng không ngưỡng; b12 đổi ngưỡng, thêm phương án cập nhật theo lịch ngày $1$, $10$, $20$, đối chứng cách tính của tổ chức bù trừ và quy đổi ký quỹ ra đồng mỗi hợp đồng. Độ bền theo tập biến ngoại sinh và theo cửa sổ ước lượng (đề cương BM02) chưa được cài đặt.
 
 % =====================================================================
 \section{Thiết kế của hai bước mô phỏng}

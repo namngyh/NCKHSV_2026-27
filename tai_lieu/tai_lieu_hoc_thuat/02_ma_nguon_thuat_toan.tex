@@ -76,7 +76,7 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-\noindent Tài liệu mô tả cách các phương pháp ở Tài liệu 1 được cài đặt thành mã nguồn Python có khả năng tái lập. Nội dung gồm kiến trúc mã, các thuật toán lõi (đệ quy phương sai, hàm hợp lý, ước lượng hợp lý cực đại, Bayes biến phân, NUTS, mô phỏng rủi ro nhiều phiên, quy tắc ký quỹ năm bước) và hạ tầng bảo đảm tính đúng đắn của quy trình tính toán dài hạn (băm đầu vào, điểm kiểm tra ba tầng, ghi nguyên tử, phân mảnh, cổng chuyển giai đoạn, khóa khối kiểm tra). Tài liệu chỉ mô tả những gì mã thực sự làm; những điểm thiết kế còn là lựa chọn tạm thời được nêu ở Mục~\ref{sec:luuy}.
+\noindent Tài liệu mô tả cách các phương pháp ở Tài liệu 1 được cài đặt thành mã nguồn Python có khả năng tái lập. Nội dung gồm kiến trúc mã, các thuật toán lõi (đệ quy phương sai, hàm hợp lý, ước lượng hợp lý cực đại, Bayes biến phân, NUTS, mô phỏng rủi ro nhiều phiên, quy tắc ký quỹ năm bước và vùng không điều chỉnh, đối chứng cách tính của tổ chức bù trừ) và hạ tầng bảo đảm tính đúng đắn của quy trình tính toán dài hạn (băm đầu vào, điểm kiểm tra ba tầng, ghi nguyên tử, phân mảnh, cổng chuyển giai đoạn, khóa khối kiểm tra). Tài liệu chỉ mô tả những gì mã thực sự làm; những điểm thiết kế còn là lựa chọn tạm thời được nêu ở Mục~\ref{sec:luuy}.
 
 \medskip
 \noindent\textbf{Từ khóa:} Cài đặt, vi phân tự động, JAX, NumPyro, điểm kiểm tra, khả năng tái lập.
@@ -267,23 +267,30 @@ Hai đặc điểm của cài đặt cần nêu. Thứ nhất, các số ngẫu 
 
 Hàm \ma{tong\_that\_thuc} tính $R_{t,H}=\exp\big(\sum_{j=1}^{H}r_{t+j}/100\big)-1$ cho $H=1,2,3$ từ chuỗi lợi suất cùng hợp đồng (đã lấp tại phiên chuyển bằng giá F2M), và cờ hợp lệ (cửa sổ $(t,t+H]$ không chứa lợi suất khuyết). Nhờ vậy tổn thất qua phiên chuyển là tổn thất của một vị thế được cuộn sang hợp đồng mới. Mô phỏng lịch sử \ma{san\_lich\_su} lấy VaR $H$ phiên là phân vị của các $R_{s,H}$ đã hoàn tất trước $t$ (cửa sổ mở rộng, cần tối thiểu $100$ quan sát) và chọn phía lớn hơn; \ma{lich\_su\_cua\_so} làm tương tự với cửa sổ $250$ phiên; \ma{ewma\_var} cho VaR chuẩn $z_{1-\alpha}\sqrt{H\hat\sigma_{t+1}^2}/100$ với $\hat\sigma^2$ làm trơn mũ hệ số $0{,}94$.
 
-\subsection{Quy tắc ký quỹ năm bước}
+\subsection{Quy tắc ký quỹ năm bước và vùng không điều chỉnh}
 
 \begin{thuattoan}{Quy tắc ký quỹ (hàm \ma{quy\_tac})}
-\textbf{Đầu vào:} Chuỗi $\widehat{\VaR}_t$, $\widehat{\ES}_t$, sàn lịch sử $V^{LS}_t$ (cùng độ dài, theo thời gian); $(w,b,\varphi,\eta)$; $\Delta=0{,}01$, $g=0{,}005$.\\
-\textbf{Đầu ra:} Chuỗi $m_t$.
+\textbf{Đầu vào:} Chuỗi $\widehat{\VaR}_t$, $\widehat{\ES}_t$, sàn lịch sử $V^{LS}_t$ (cùng độ dài, theo thời gian); $(w,b,\varphi,\eta)$; $\Delta=0{,}01$, $g=0{,}005$; ngưỡng $a^{+}=0{,}01$, $a^{-}=0{,}02$ (\ma{ng\_tang}, \ma{ng\_giam}; cấu hình \ma{nguong\_tang}, \ma{nguong\_giam}).\\
+\textbf{Đầu ra:} Chuỗi mức áp dụng $m_t$.
 \begin{enumerate}
 \item $m^{(1)}_t\leftarrow(1-w)\widehat{\VaR}_t+w\widehat{\ES}_t$, rồi $m^{(3)}_t\leftarrow\max\{(1+b)\,m^{(1)}_t,\ \varphi V^{LS}_t\}$.
-\item Với phiên hợp lệ đầu tiên: $m^{(4)}\leftarrow m^{(3)}_t$ và $m\leftarrow g\lceil m^{(3)}_t/g\rceil$.
+\item Với phiên hợp lệ đầu tiên: $m^{(4)}\leftarrow m^{(3)}_t$, $m^{\ast}\leftarrow g\lceil m^{(3)}_t/g\rceil$ và mức áp dụng $m\leftarrow m^{\ast}$.
 \item Với mỗi phiên hợp lệ tiếp theo:
  \begin{enumerate}
  \item $m^{(4)}_t\leftarrow\max\{m^{(3)}_t,\ \eta\,m^{(4)}_{t-1}+(1-\eta)\,m^{(3)}_t\}$.
- \item $m_t\leftarrow\max\big\{\varphi V^{LS}_t,\ g\lceil\max(m^{(4)}_t,\ m_{t-1}-\Delta)/g\rceil\big\}$.
+ \item $m^{\ast}_t\leftarrow\max\big\{\varphi V^{LS}_t,\ g\lceil\max(m^{(4)}_t,\ m^{\ast}_{t-1}-\Delta)/g\rceil\big\}$ (mức mục tiêu).
+ \item Nếu $m^{\ast}_t\ge m_{t-1}+a^{+}$ hoặc $m^{\ast}_t\le m_{t-1}-a^{-}$ thì $m_t\leftarrow m^{\ast}_t$, ngược lại $m_t\leftarrow m_{t-1}$; sau đó $m_t\leftarrow\max\{m_t,\ \varphi V^{LS}_t\}$.
  \end{enumerate}
 \end{enumerate}
 \end{thuattoan}
 
+Hai đệ quy (bước 3a và 3b) chạy trên mức mục tiêu $m^{\ast}$, mức áp dụng $m$ chỉ là đầu ra của bước 3c; với $a^{+}=a^{-}=0$ hàm trả về đúng kết quả của quy tắc năm bước. Hàm \ma{theo\_lich\_vsdc} cho phương án cập nhật theo lịch ngày $1$, $10$, $20$ (đổi mức ở phiên đầu tiên của mỗi kỳ, giữ nguyên giữa kỳ).
+
 Phép làm tròn lên có trừ một sai số số học nhỏ ($10^{-12}$) để tránh làm tròn lệch một bậc do sai số dấu phẩy động khi tỷ số là số nguyên. Các tham số $g=0{,}5\%$, $\Delta=1\%$ và mức ký quỹ đối chứng $17\%$ được đọc từ \ma{the\_che.toml}, nơi mỗi thông số phải có nguồn và ngày xác minh; hồ sơ chính thức không chạy nếu còn thông số thiếu nguồn.
+
+\subsection{Đối chứng cách tính của tổ chức bù trừ và quy đổi ra tiền}
+
+Hàm \ma{vsdc\_gia\_tri} tính tỷ lệ ký quỹ theo văn bản của ba quy chế tại các chỉ số phiên cho trước: Với \ma{kieu="mvar"} (Quyết định 61 và 12) là $\mu_u+Z\sigma_u$ với $Z$ Cornish--Fisher, $z_c=2{,}89$ và độ nhọn thừa của \ma{scipy.stats.kurtosis}; với \ma{kieu="var3"} (Quyết định 26) là $\mu_w+3\sigma_w$ trên biến động hai ngày; cả hai nhân $\sqrt n$, lấy phía lớn hơn của vị thế mua và bán, và đặt sàn bằng không. Cửa sổ gồm đúng $N$ phiên liền trước và tại chỉ số $t$, nên không dùng dữ liệu sau $t$; nếu cửa sổ chưa đủ $N$ phiên hoặc chứa lợi suất khuyết thì trả về không xác định. Hàm \ma{vsdc\_theo\_lich} tại phiên đầu tiên của mỗi kỳ (ngày $1$, $10$, $20$) dùng giá trị tính bằng dữ liệu đến $2$ phiên trước và giữ nguyên đến kỳ sau. Tham số ($n$, $z_c$, kỳ quan sát, độ trễ công bố) nằm ở mục \ma{[vsdc]} của \ma{de\_cuong.toml}; hàm \ma{\_doi\_chung\_vsdc} của b12 chạy $14$ cấu hình và báo cáo bằng \ma{chi\_tieu}, Kupiec, Christoffersen và chi phí. Hàm \ma{\_quy\_doi\_tien} của b12 nhân tỷ lệ ký quỹ và thiếu hụt với giá đóng cửa của phiên gốc và hệ số nhân hợp đồng ($100.000$ đồng trên điểm, đọc từ \ma{the\_che.toml}).
 
 \subsection{Chỉ tiêu và kiểm định}
 
