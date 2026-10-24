@@ -4,6 +4,8 @@ Hồ sơ chạy: `day_du`.
 
 ## Tham số khác đề cương
 
+- `du_lieu.xu_ly_dao_han`: đề cương loai, đang dùng f2m
+- `mo_phong.khuyet_phien_chuyen`: đề cương True, đang dùng False
 - `khoi_bm02.XT`: đề cương 420, đang dùng 925
 - `bam_sat_bm02.ged_tham_gia_chon`: đề cương False, đang dùng True
 - `mo_phong.B_mle`: đề cương 100, đang dùng 1000
@@ -24,8 +26,8 @@ Hồ sơ chạy: `day_du`.
 
 ## Chẩn đoán Bayes không đạt (b08)
 
-- Các mốc NUTS không đạt (R_hat, ESS, phân kỳ): [0, 5, 7, 22]
-- Pareto k_hat của VB đạt theo mốc: {'vb_mf': [False, False, False, False, False, True, True, False, False, True, False, False, False, False, False, False, False, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, True, False, False, False, False, False, False, False, False, False, True, False, False, False, True, False, False, False, False, True, False, True, False, True, False, False, False, True, True], 'vb_fr': [False, True, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, True, True, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]}
+- Các mốc NUTS không đạt (R_hat, ESS, phân kỳ): []
+- Pareto k_hat của VB đạt theo mốc: {'vb_mf': [False, False, True, False, False, True, False, False, False, True, False, False, False, False, True, False, False, False, False, False, False, False, False, True, True, False, True, False, False, False, True, False, True, False, False, False, False, False, True, False, True, True, False, False, True, False, False, False, True, False, False, False, True, False, False, False, True, False, True, False, False, False, True, False, False], 'vb_fr': [True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, True, True, True, False, True, True, True, False, True, True, True]}
 
 ## Lựa chọn của nhóm nghiên cứu ở những chỗ đề cương không quy định
 
