@@ -1,14 +1,14 @@
 {
  "trang_thai": "xong",
- "h_vao": "3c4744a60d24088bf3237b1e6cf64e323256b2c87a8cc089fc9aa4442e786c5d",
- "h_ra": "c6c8c127d93b73fcecac426a4fc72dde4a465d7f7420d1dd088ca3dd4dc00af9",
+ "h_vao": "647b8132c851dac3ada21b0365be95bceaa8e92869f4091445b9f5b10e6258dd",
+ "h_ra": "1fc95e433e8fc1c496e5bb6785207b2f8e024d783044bf091c84c197cb425bb7",
  "so_don_vi": 1,
- "bat_dau": "2026-10-24 17:28:10",
- "ket_thuc": "2026-10-24 17:28:18",
- "giay_tong_hop": 0.1,
+ "bat_dau": "2026-10-24 18:33:40",
+ "ket_thuc": "2026-10-24 18:33:48",
+ "giay_tong_hop": 0.2,
  "cong": null,
  "chap_nhan_cong": false,
- "thu_muc_diem_kiem_tra": "_diem_kiem_tra\\b12\\3c4744a60d24",
+ "thu_muc_diem_kiem_tra": "_diem_kiem_tra\\b12\\647b8132c851",
  "so_don_vi_theo_may": {
   "may_manh": 1
  }

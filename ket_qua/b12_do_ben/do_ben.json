@@ -450,6 +450,73 @@
     },
     "chi_phi": 0.13339159380368348
    }
+  },
+  "tien": {
+   "he_so_nhan": 100000.0,
+   "gia_tri_hop_dong_tb": 168076543.77880183,
+   "dong_mle": {
+    "n": 434,
+    "ky_quy_tb": 9809870.04608295,
+    "ky_quy_max": 21079500.0,
+    "thieu_hut_moi_phien_tb": 25059.548187484255,
+    "thieu_hut_max": 3591999.9999999967,
+    "tong_thieu_hut": 10875843.913368167,
+    "thieu_hut_moi_lan_vuot": 2718960.9783420414
+   },
+   "dong_mle_khong_nguong": {
+    "n": 434,
+    "ky_quy_tb": 8759765.668202765,
+    "ky_quy_max": 20309000.0,
+    "thieu_hut_moi_phien_tb": 41875.67721974232,
+    "thieu_hut_max": 5649399.999999996,
+    "tong_thieu_hut": 18174043.913368165,
+    "thieu_hut_moi_lan_vuot": 2596291.9876240236
+   },
+   "VSD_hang_so": {
+    "n": 434,
+    "ky_quy_tb": 28573012.442396313,
+    "ky_quy_max": 35511300.0,
+    "thieu_hut_moi_phien_tb": 0.0,
+    "thieu_hut_max": 0.0,
+    "tong_thieu_hut": 0.0,
+    "thieu_hut_moi_lan_vuot": 0.0
+   },
+   "co_dinh_khop_XT": {
+    "n": 434,
+    "ky_quy_tb": 13025896.45546963,
+    "ky_quy_max": 16188930.646765396,
+    "thieu_hut_moi_phien_tb": 10821.349937087973,
+    "thieu_hut_max": 3770525.0122602256,
+    "tong_thieu_hut": 4696465.87269618,
+    "thieu_hut_moi_lan_vuot": 2348232.93634809
+   },
+   "VaR_tho_mle": {
+    "n": 434,
+    "ky_quy_tb": 8245701.525429168,
+    "ky_quy_max": 19683387.848504122,
+    "thieu_hut_moi_phien_tb": 56939.746837223385,
+    "thieu_hut_max": 6820351.207541239,
+    "tong_thieu_hut": 24711850.12735495,
+    "thieu_hut_moi_lan_vuot": 2745761.125261661
+   },
+   "EWMA": {
+    "n": 434,
+    "ky_quy_tb": 7072395.963214068,
+    "ky_quy_max": 14529432.40414898,
+    "thieu_hut_moi_phien_tb": 103910.98419757304,
+    "thieu_hut_max": 8056257.970427078,
+    "tong_thieu_hut": 45097367.1417467,
+    "thieu_hut_moi_lan_vuot": 2505409.2856525946
+   },
+   "lich_su_cua_so": {
+    "n": 434,
+    "ky_quy_tb": 9808838.185975369,
+    "ky_quy_max": 15021105.984244563,
+    "thieu_hut_moi_phien_tb": 72847.49517823305,
+    "thieu_hut_max": 6784064.414086685,
+    "tong_thieu_hut": 31615812.907353144,
+    "thieu_hut_moi_lan_vuot": 3951976.613419143
+   }
   }
  },
  "theo_H_alpha": {
@@ -1835,7 +1902,7 @@
  "_nguon": {
   "may": "may_manh",
   "host": "Cloudiso",
-  "thoi_diem": "2026-10-24 17:28:17",
-  "giay": 7.61
+  "thoi_diem": "2026-10-24 18:33:48",
+  "giay": 7.46
  }
 }
