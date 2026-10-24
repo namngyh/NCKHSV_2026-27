@@ -10,6 +10,7 @@
 - Tài liệu 01–03 và P1 đã đồng bộ (quy tắc sáu bước, đối chứng VSDC, quy đổi tiền). Bản thảo cũ `bai_bao_ky_quy_dong.tex` CHƯA đồng bộ.
 - Báo cáo kết quả (chỉ số liệu, hình, công thức): `ICCIES 2027/bao cao ket qua/`, chạy `chay_bao_cao.bat`.
 - Còn mở: độ bền theo tập biến ngoại sinh và cửa sổ ước lượng, chạy lại xử lý đáo hạn cũ (làm sau khi b03b xong).
+- `danh_gia.chan_doan` bỏ cột phiên chuyển (D_sau) khi hồi quy theo biến lịch (sai từ khi xử lý đáo hạn bằng F2M: 36 phiên D_sau trên UL, 105 trên cả mẫu). KHÔNG sửa trong đường ống (sửa danh_gia.py kéo b02 đổi băm nên b03a, b03b, b04–b15 chạy lại, và b15 sẽ đánh dấu b05, b06 chạy sau khi mở KT). Đã tính lại riêng bằng `ICCIES 2027/bao cao ket qua/tinh_lai_F_D.py`: p của F_D đủ ba cột trên UL là 0,520 (chuẩn), 0,461 (Student-t), 0,380 (skew-t), 0,458 (GED), so với 0,721; 0,685; 0,521; 0,671 đã lưu ở b04. Cổng b07 điều kiện (ii) dùng F_tau nên không đổi.
 
 ## 000000. GED ĐƯỢC CHỌN, THÊM MÔ PHỎNG KHÔI PHỤC GED (23/10/2026)
 
