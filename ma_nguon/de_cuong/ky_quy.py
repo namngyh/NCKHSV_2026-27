@@ -9,7 +9,7 @@ tích lũy không có công thức đóng nên được xấp xỉ bằng mô ph
   4. R = exp(tổng r / 100) - 1, tổn thất mua -R, bán R; VaR = L^(j*), ES = trung bình j* tổn thất lớn nhất.
 Quy tắc năm bước (7.3): m1 = (1-w) VaR + w ES; m2 = (1+b) m1; m3 = max(m2, phi VaR_LS);
   m4_t = max(m3_t, eta m4_{t-1} + (1-eta) m3_t); m_t = max(sàn, g ceil(max(m4_t, m_{t-1} - D) / g)).
-Chi phí kỳ vọng C = mean[c_v m + c_th (L - m)+], mức đuôi tối ưu alpha* = c_v / c_th (7.4).
+Chi phí ky vọng C = mean[c_v m + c_th (L - m)+], mức đuôi tối ưu alpha* = c_v / c_th (7.4).
 Đối chứng (7.5) và chỉ tiêu (7.6); cửa sổ (t, t+H] chứa phiên chuyển hợp đồng bị loại khỏi đánh giá (Nhận xét 4).
 
 THƯ VIỆN: numpy (mô phỏng vectơ hóa, phân hoạch lấy phân vị đuôi), scipy.stats, jax (lọc ln h theo từng bộ tham số).
@@ -187,6 +187,24 @@ def quy_tac(var, es, san, w, b, phi, eta, giam=0.01, g=0.005, ng_tang=0.0, ng_gi
         ap = max(ap, phi * san[i])
         m[i] = ap
     return m
+
+
+def theo_lich_vsdc(m, san, ngay, moc=(1, 10, 20)):
+    """Cập nhật theo lịch VSDC: mức áp dụng chỉ đổi ở phiên đầu tiên có ngày >= 1, 10, 20 của tháng (kể từ lần
+    cập nhật trước), nhảy tới mức mục tiêu m; giữa hai ky giữ nguyên; luôn giữ mức sàn san. ngay: chuỗi ngày cùng độ dài."""
+    import pandas as pd
+    ngay = pd.DatetimeIndex(ngay)
+    ky = [(t.year, t.month, sum(t.day >= x for x in moc)) for t in ngay]
+    out = np.full(len(m), np.nan)
+    ap, ky_truoc = None, None
+    for i in range(len(m)):
+        if not np.isfinite(m[i]):
+            continue
+        if ap is None or ky[i] != ky_truoc:
+            ap, ky_truoc = m[i], ky[i]
+        ap = max(ap, san[i])
+        out[i] = ap
+    return out
 
 
 def chi_tieu(m: np.ndarray, L: np.ndarray, hop_le: np.ndarray, H: int, mask: np.ndarray | None = None) -> dict:

@@ -221,6 +221,8 @@ def _lam_b12(ctx, khoa, truoc):
     for nt_, nd_ in kqc["nguong_do_ben"]:
         m = KQ.quy_tac(v, e, san, c0["w"], c0["b"], c0["phi"], c0["eta"], giam, g, nt_, nd_)
         doi["nguong"][f"{nt_}|{nd_}"] = KQ.chi_tieu(m, L, hop, H)
+    m0 = KQ.quy_tac(v, e, san, c0["w"], c0["b"], c0["phi"], c0["eta"], giam, g)
+    doi["lich_vsdc"] = KQ.chi_tieu(KQ.theo_lich_vsdc(m0, c0["phi"] * san, d["date"].iloc[tmoc].to_numpy()), L, hop, H)
     theo_thiet_ke = {k: {x: v_["KT"]["dong_mle"][x] for x in ("m_tb", "ty_le_vuot", "thieu_hut_tb", "thieu_hut_moi_phien")}
                      for k, v_ in tk.items()}
     mle_vs_hau_nghiem = {k: {ng: v_["KT"][f"dong_{ng}"] for ng in ["mle"] + list(ctx.cfg["bayes"]["phuong_phap"])

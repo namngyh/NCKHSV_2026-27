@@ -237,3 +237,17 @@ def test_quy_tac_vung_khong_dieu_chinh():
     m1 = KQ.quy_tac(v, e, san, 0.5, 0.1, 0.5, 0.8, ng_tang=0.01, ng_giam=0.02)
     assert (np.abs(np.diff(m1)) > 1e-12).sum() < (np.abs(np.diff(m0)) > 1e-12).sum()
     assert (m1 >= 0.5 * san - 1e-12).all()
+
+
+def test_theo_lich_vsdc():
+    """Mức chỉ đổi ở phiên đầu mỗi kỳ (ngày 1, 10, 20) và không dưới mức sàn."""
+    import numpy as np
+    import pandas as pd
+    from de_cuong import ky_quy as KQ
+    ngay = pd.bdate_range("2025-01-01", periods=60)
+    m = 0.10 + 0.01 * np.arange(60)
+    out = KQ.theo_lich_vsdc(m, np.full(60, 0.0), ngay)
+    doi = np.flatnonzero(np.abs(np.diff(out)) > 1e-12) + 1
+    assert all(ngay[i].day >= 1 and (ngay[i - 1].day < 10 <= ngay[i].day or ngay[i - 1].day < 20 <= ngay[i].day
+               or ngay[i].month != ngay[i - 1].month) for i in doi)
+    assert (KQ.theo_lich_vsdc(m, np.full(60, 0.5), ngay) >= 0.5).all()
