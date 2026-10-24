@@ -4748,3 +4748,15 @@
 [19:35:57] [b03b] [may_manh] het gio trong don vi mpb|chuan|vb_mf|E1|466|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [19:35:58] [b03b] [may_manh] het gio trong don vi mpb|chuan|vb_mf|E1|466|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [19:35:59] [b03b] [may_manh] het gio trong don vi mpb|chuan|vb_mf|E1|464|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:37:39] [b03b] [may_manh] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 119200 don vi / 119200 nhom; cua may nay 119200 nhom, con thieu 117812 nhom
+[19:39:12] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|463|l1::0 (61.8 s)
+[19:39:12] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|463|l0::0 (61.8 s)
+[19:39:12] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|462|l2::0 (61.8 s)
+[19:39:18] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|463|l2::0 (68.4 s)
+[19:39:28] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|464|l0::0 (78.2 s)
+[19:39:30] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|465|l0::0 (79.7 s)
+[19:39:37] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|464|l2::0 (86.9 s)
+[19:39:37] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|464|l1::0 (87.0 s)
+[19:39:38] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|465|l1::0 (88.0 s)
+[19:39:38] [b03b] [may_manh] xong don vi mpb|chuan|vb_mf|E1|465|l2::0 (88.0 s)
+[19:39:40] [b03b] [may_manh] TIEN TRINH CON BI DUNG DOT NGOT (thuong do thieu bo nho). Don vi da xong van duoc giu; lan sau dung 7 tien trinh. Neu lap lai, dat chung.so_tien_trinh nho hon trong cau hinh.
