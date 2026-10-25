@@ -1,8 +1,8 @@
 {
- "commit": "590979a9c0fbca2b29e9fed7480ffc0a1e81c3d4",
- "h_vao": "234d0787c677654eb05554641a0a6082d8fbc84c4323fc46e6925bf2b4fffa21",
+ "commit": "e0f36c9ff5f25b37746ff773eb33c5549b94c108",
+ "h_vao": "bbe7c14d7ec6061c6eff960c50cf624bbc4c6e5dea3d56ec8a0a9010becf1b8c",
  "bam_du_lieu": "03556da1416026874136b20eb2bc304d142e28daae413b801b6f4b876f6fbee8",
- "bam_ma": "cefdf15c509725e498182b44271ad6ced851777495c71335e7162f349cfb7477",
+ "bam_ma": "26ce822a6ae146125ed1d6c846882487222fc1186b5383f34fc4764bc8f218fa",
  "ho_so": "day_du",
  "may_tong_hop": {
   "host": "Cloudiso",
@@ -12,7 +12,7 @@
   "bo_xu_ly": "AMD64 Family 25 Model 33 Stepping 2, AuthenticAMD"
  },
  "so_don_vi_theo_may": {
-  "may_manh": 1446
+  "may_manh": 2167
  },
- "thoi_diem": "2026-10-24 12:43:26"
+ "thoi_diem": "2026-10-25 16:11:56"
 }
