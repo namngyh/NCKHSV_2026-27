@@ -69,7 +69,7 @@
 \thispagestyle{empty}
 
 \begin{abstract}
-\noindent Tài liệu trình bày toàn bộ cơ sở lý thuyết của nghiên cứu dự báo rủi ro và xây dựng cơ chế ký quỹ động cho hợp đồng tương lai chỉ số VN30 kỳ hạn gần nhất (VN30F1M). Nội dung gồm sáu phần. Phần thứ nhất xây dựng dữ liệu và biến: Lợi suất có xử lý phiên chuyển hợp đồng, đại lượng đại diện cho phương sai theo biên độ giá, biến lịch và năm biến ngoại sinh ứng viên. Phần thứ hai đặc tả ba mô hình phương sai có điều kiện, GARCH(1,1), EGARCH và EGARCH-X, cùng bốn phân phối sai số chuẩn hóa. Phần thứ ba trình bày bốn phương pháp ước lượng và suy diễn trên cùng một hàm hợp lý: Hợp lý cực đại, Bayes biến phân mean-field, Bayes biến phân full-rank và Monte Carlo Hamilton với thuật toán NUTS. Phần thứ tư trình bày nghiên cứu mô phỏng khôi phục tham số. Phần thứ năm trình bày hệ thống tiêu chí đánh giá dự báo ngoài mẫu. Phần thứ sáu chuyển dự báo phân phối có điều kiện thành giá trị chịu rủi ro, tổn thất kỳ vọng ở phần đuôi và một quy tắc ký quỹ gồm năm bước và một vùng không điều chỉnh, có các thành phần chống thuận chu kỳ. Mọi khái niệm được định nghĩa ở lần xuất hiện đầu tiên; mọi công thức đi kèm mục đích sử dụng và ý nghĩa của từng ký hiệu.
+\noindent Tài liệu trình bày toàn bộ cơ sở lý thuyết của nghiên cứu dự báo rủi ro và xây dựng cơ chế ký quỹ động cho hợp đồng tương lai chỉ số VN30 kỳ hạn gần nhất (VN30F1M). Nội dung gồm sáu phần. Phần thứ nhất xây dựng dữ liệu và biến: Lợi suất có xử lý phiên chuyển hợp đồng, đại lượng đại diện cho phương sai theo biên độ giá, biến lịch và sáu biến ngoại sinh ứng viên (năm của đề cương và RV bổ sung). Phần thứ hai đặc tả ba mô hình phương sai có điều kiện, GARCH(1,1), EGARCH và EGARCH-X, cùng bốn phân phối sai số chuẩn hóa. Phần thứ ba trình bày bốn phương pháp ước lượng và suy diễn trên cùng một hàm hợp lý: Hợp lý cực đại, Bayes biến phân mean-field, Bayes biến phân full-rank và Monte Carlo Hamilton với thuật toán NUTS. Phần thứ tư trình bày nghiên cứu mô phỏng khôi phục tham số. Phần thứ năm trình bày hệ thống tiêu chí đánh giá dự báo ngoài mẫu. Phần thứ sáu chuyển dự báo phân phối có điều kiện thành giá trị chịu rủi ro, tổn thất kỳ vọng ở phần đuôi và một quy tắc ký quỹ gồm năm bước và một vùng không điều chỉnh, có các thành phần chống thuận chu kỳ. Mọi khái niệm được định nghĩa ở lần xuất hiện đầu tiên; mọi công thức đi kèm mục đích sử dụng và ý nghĩa của từng ký hiệu.
 
 \medskip
 \noindent\textbf{Từ khóa:} EGARCH-X, phương sai có điều kiện, giá trị chịu rủi ro, tổn thất kỳ vọng ở phần đuôi, suy diễn biến phân, NUTS, ký quỹ động, VN30F1M.
@@ -227,7 +227,11 @@ Mọi biến ngoại sinh vào phương trình phương sai của phiên $t$ đ�
 \begin{equation}
 \hat\varsigma(k)=\text{trung bình của } \frac{V_t}{\bar V_{t-1}} \text{ trên các phiên } t\le s \text{ có } \tau_t=k .
 \end{equation}
-Bảng~\ref{tab:ungvien} định nghĩa năm ứng viên; $\epsilon=10^{-6}$ tránh logarit của không.
+Bảng~\ref{tab:ungvien} định nghĩa sáu ứng viên, trong đó năm biến đầu thuộc đề cương đã đăng ký và biến thứ sáu $RV_t$ là biến bổ sung ngoài đề cương (được ghi vào phụ lục sai lệch); $\epsilon=10^{-6}$ tránh logarit của không. Biến động thực tế đóng-đến-đóng được tính như sau. Mỗi phiên tách thành buổi sáng và buổi chiều tại khoảng trống trên $30$ phút giữa hai nến (nghỉ trưa). Trong mỗi buổi, nến đầu dùng lợi suất từ giá mở đến giá đóng của nến, các nến sau dùng lợi suất giữa hai giá đóng cửa liền nhau; bình phương rồi cộng cho $RV^{\text{sáng}}_t$ và $RV^{\text{chiều}}_t$. Khoảng nghỉ trưa và khoảng qua đêm được cộng như hai số hạng riêng:
+\begin{equation}
+RV^{\text{ngày}}_t=RV^{\text{sáng}}_t+RV^{\text{chiều}}_t+\big(o^{\text{trưa}}_t\big)^2+o_t^2,\qquad o^{\text{trưa}}_t=100\ln\frac{P^{o,\text{chiều}}_t}{P^{c,\text{sáng}}_t},\quad o_t=100\ln\frac{P^{o}_t}{P_{t-1}},
+\end{equation}
+với $P^{c,\text{sáng}}_t$ là giá đóng cửa của nến cuối buổi sáng và $P^{o,\text{chiều}}_t$ là giá mở cửa của nến đầu buổi chiều. Bốn đoạn nối tiếp nhau nên $RV^{\text{ngày}}_t$ phủ đúng khoảng đóng-đến-đóng của $r_t$. Ở phiên đầu tiên sau đáo hạn, $o_t$ dùng giá VN30F2M của phiên trước (cùng hợp đồng), nên cú nhảy giữa hai hợp đồng không lọt vào $RV_t$. Khác với $\rho^{GK}_t$ chỉ dùng bốn mức giá của phiên, $RV^{\text{ngày}}_t$ dùng toàn bộ đường đi giá trong phiên. Khi giá khóa ở biên độ, $RV^{\text{ngày}}_t$ được thay như $G_t$ bằng bình phương lợi suất của phiên. Hai biến $G_t$ và $RV_t$ tương quan rất mạnh (hệ số $0{,}87$ trên mẫu ước lượng), vượt ngưỡng $0{,}8$ của thủ tục chọn biến nên chúng không cùng xuất hiện trong một tập; $RV_t$ chỉ có thể thay $G_t$.
 
 \begin{table}[h]
 \centering
@@ -241,6 +245,7 @@ $G_t$ & $\ln\big(\rho^{GK}_t+\epsilon\big)$ & Phương sai trong phiên theo bi�
 $F_t$ & $\ln\big(\tfrac{1}{60}\sum_{j=0}^{59}\rho^{GK}_{t-j}+\epsilon\big)$ & Thành phần chậm của biến động \\
 $B_t$ & $\big|V^{+}_t-V^{-}_t\big|\,/\,\big(V^{+}_t+V^{-}_t\big)$ & Độ lớn của mất cân bằng lệnh \\
 $O_t$ & $\ln\big((r^{d}_t)^2+\epsilon\big)$ & Độ lớn của khoảng nhảy qua đêm; khuyết khi $\chi_t=1$ \\
+$RV_t$ & $\ln\big(RV^{\text{ngày}}_t+\epsilon\big)$ & Biến động thực tế đóng-đến-đóng từ nến một phút, tách buổi sáng, nghỉ trưa, buổi chiều và qua đêm (bổ sung ngoài đề cương) \\
 \bottomrule
 \end{tabular}
 \end{table}

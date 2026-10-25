@@ -1,6 +1,17 @@
 # Ghi chú dự án: dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
-## 0000000. CỔNG ĐẠT, KHỐI KT ĐÃ MỞ; QUY TẮC SÁU BƯỚC, ĐỐI CHỨNG VSDC, QUY ĐỔI TIỀN (24/10/2026) — mới nhất
+## 00000000. THÊM BIẾN NGOẠI SINH RV VÀO TOÀN BỘ ĐƯỜNG ỐNG (25/10/2026) — mới nhất, đọc trước
+
+- Yêu cầu của người dùng: thêm RV (biến động thực tế đóng-đến-đóng từ nến 1 phút) làm biến ngoại sinh ứng viên, chấp nhận chạy lại. RV là biến BỔ SUNG NGOÀI ĐỀ CƯƠNG đã đăng ký (A, G, F, B, O): cần báo TS. Châu; điểm này tự ghi vào phụ lục sai lệch (b13) qua `[de_cuong_goc]."chon_bien.them_bien_ung_vien" = []`.
+- Định nghĩa (RV cải tiến của mã cũ `uoc_luong_mle_khoang_nghi.py` và `uoc_luong_mle_roll_f2m.py`): tách mỗi ngày thành buổi sáng và buổi chiều tại khoảng trống trên 30 phút (mỗi ngày đúng một khoảng); nến đầu buổi dùng lợi suất mở-đến-đóng; RV_t = rv_sang + rv_chieu + nghi_trua^2 + qua_dem^2, với qua_dem là cột `dem` của bảng ngày (đã sửa bằng giá F2M ở phiên sau đáo hạn; khuyết thì bằng 0). RV phủ đúng khoảng đóng-đến-đóng của r_t. Tỷ trọng toàn mẫu: sáng 31,5%, chiều 46,0%, nghỉ trưa 0,8%, qua đêm 21,7%. X = log(RV_{t-1} + 1e-6), cột cuối (`DL.TEN_BIEN` = A, G, F, B, O, RV). Mẫu: RV > 0 mọi phiên, không có phiên khóa biên.
+- Tương quan RV–G = 0,866 (trên UL + XT, đã chuẩn hóa) vượt ngưỡng 0,8 nên tập {G, RV} bị loại; RV chỉ có thể thay G. RV–A 0,702, RV–F 0,569, RV–O 0,447. Số tập hợp lệ ở b05: 48 trên 64. Cấu hình chính A+G không đổi.
+- RV nằm trong mô-đun riêng `ma_nguon/de_cuong/bien_rv.py` (`gan()` thêm "RV" vào `DL.TEN_BIEN` và bọc `DL.dac_trung`; `quy_trinh/_chung.py` gọi `BRV.gan()` khi nhập). KHÔNG sửa `du_lieu.py`: b01 và b02 khai báo mô-đun này; b02 ghi kèm tên máy, giờ, số giây vào đầu ra nên chạy lại b02 đổi mã băm đầu ra, kéo theo mất hiệu lực b03a và b03b (đã kiểm chứng bằng chạy lại b02: số liệu giống hệt, chỉ khác may/host/thoi_diem/giay).
+- Danh sách ứng viên = `[mo_hinh].bien_ung_vien` + `[chon_bien].them_bien_ung_vien` (hàm `quy_trinh/_chung.py::ung_vien`). CỐ Ý không sửa `[mo_hinh]`: b03a/b03b khai báo `mo_hinh` và mô phỏng bằng dữ liệu giả X1, X2, không phụ thuộc danh sách biến; sửa mục đó sẽ làm mất hiệu lực tiến độ b03b đang chạy (hơn chín ngày). Không được sửa `mo_phong.py`, `uoc_luong.py`, `mo_hinh_jax.py`, `phan_phoi.py` và `quy_trinh/b03_mo_phong.py` vì cùng lý do.
+- Phải chạy lại (máy mạnh): b04, b04b, b05–b07, b08, b08b, b09–b15 (tệp bước của chúng đổi). KHÔNG chạy lại b00, b01, b02, b03a, b03b: đã kiểm chứng cấu hình, tệp bước và thư viện khai báo của chúng đồng nhất với bản đã commit. Sau khi máy mạnh pull, xem `python quy_trinh/chay.py --tien_do` để chắc b03b vẫn ở trạng thái đang chạy.
+- Hồ sơ `nhanh` chạy thông b00, b01, b02, b05 với sáu ứng viên (48 tập hợp lệ, ma trận tương quan 6x6); đó chỉ là kiểm tra đường ống, không phải kết quả nghiên cứu.
+- Đã cập nhật: `bien_rv.py` (mới), `_chung.py`, `b04_b07`/`b08_b09`/`b10_b12` (thêm `bien_rv` vào `thu_vien`), `b04_b07_giai_doan_1.py`, `de_cuong.toml`, kiểm thử `kiem_thu/test_rv.py`, tài liệu 01, P3/P4, `tao_hinh_mo_ta.py` (hình 6 và các bảng), `bao cao ket qua/tao_bao_cao.py`.
+
+## 0000000. CỔNG ĐẠT, KHỐI KT ĐÃ MỞ; QUY TẮC SÁU BƯỚC, ĐỐI CHỨNG VSDC, QUY ĐỔI TIỀN (24/10/2026)
 
 - Cổng b07 đạt lúc 12:56 ngày 24/10 (GED, biến G, cấu hình chính A+G). b08–b15 xong lúc 16:22. b03b (119.200 đơn vị) đang chạy, ước tính còn ít nhất khoảng 5 ngày.
 - Vùng không điều chỉnh (bước 6 của quy tắc ký quỹ): `nguong_tang = 0.01`, `nguong_giam = 0.02` trong `[ky_quy]`, chốt và push trước khi cổng mở KT. b11 có đối chứng `dong_mle_khong_nguong`; b12 đổi ngưỡng (0/0, 1/2, 2/3) và phương án theo lịch VSDC 1/10/20.

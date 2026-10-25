@@ -90,6 +90,11 @@ phan_phoi = "student"
 muc_y_nghia = 0.05
 tuong_quan_toi_da = 0.8
 alpha_fz = 0.025
+# 25/10/2026: bổ sung biến ngoại sinh RV (biến động thực tế trong ngày từ nến 1 phút) vào tập ứng viên, theo yêu cầu
+# của người dùng. Đặt ở mục này (không đặt trong [mo_hinh]) vì mô phỏng b03a/b03b sinh dữ liệu giả với X1, X2 và không
+# phụ thuộc danh sách biến; sửa [mo_hinh] sẽ làm mất hiệu lực tiến độ b03b đang chạy. Tập ứng viên = [mo_hinh].bien_ung_vien
+# + them_bien_ung_vien. Đề cương đăng ký chỉ có A, G, F, B, O: điểm này tự ghi vào phụ lục sai lệch (b13).
+them_bien_ung_vien = ["RV"]
 
 [ky_quy]                        # mục 7
 H = [1, 2, 3]
@@ -173,6 +178,7 @@ may_manh = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 "ky_quy.nguong_tang" = 0.0           # đề cương chi tiết không có vùng không điều chỉnh
 "ky_quy.nguong_giam" = 0.0
 "chon_bien.tuong_quan_toi_da" = 0.8
+"chon_bien.them_bien_ung_vien" = []
 "chon_bien.muc_y_nghia" = 0.05
 
 [cong]                          # mục 8.1 điều kiện chuyển giai đoạn

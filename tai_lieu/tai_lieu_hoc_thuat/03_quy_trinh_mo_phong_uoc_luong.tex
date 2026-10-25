@@ -141,7 +141,7 @@ b02k & Cỡ và lực kiểm định & Mô phỏng cỡ và lực của kiểm �
 b03a & Mô phỏng khôi phục (MLE) & $4$ phân phối (gồm GED) $\times$ $4$ trường hợp $\times$ $1.000$ lần lặp & $16.000$ \\
 b04 & MLE ban đầu & EGARCH-X trên $\UL$, $4$ phân phối, sai số chuẩn, chẩn đoán, khả nghịch & $4$ \\
 b04b & Dự báo tiên nghiệm & Kiểm tra tiên nghiệm có tạo ra lợi suất hợp lý không & $4$ \\
-b05 & Chọn biến & Dự báo cuốn chiếu trên $\XT$ cho mọi tập biến thỏa ngưỡng tương quan; chọn tiến; SPA; Holm & $1.446$ \\
+b05 & Chọn biến & Dự báo cuốn chiếu trên $\XT$ cho mọi tập biến thỏa ngưỡng tương quan (sáu ứng viên, trong đó RV là biến bổ sung); chọn tiến; SPA; Holm & $2.167$ \\
 b06 & Chọn phân phối & Dự báo cuốn chiếu trên $\XT$ cho $4$ phân phối & $360$ \\
 b07 & Cổng & Kiểm tra ba điều kiện; khóa cấu hình & $1$ \\
 b08 & Cuốn chiếu bốn phương pháp & MLE, GARCH, VB mean-field, VB full-rank, NUTS tại $65$ mốc & $1.105$ \\
@@ -273,7 +273,7 @@ b03a, toàn bước & $12.000$ đơn vị, $B=1.000$ & $\approx14{,}9$ giờ \\
 b03a, một đơn vị & Phân phối chuẩn & $\approx30$ giây \\
 b03a, một đơn vị & Student-$t$ & $40$ đến $60$ giây \\
 b03a, một đơn vị & Student-$t$ lệch & $40$ đến $85$ giây \\
-b05, toàn bước & $1.446$ đơn vị trên $\XT$ & $\approx55$ phút \\
+b05, toàn bước & $2.167$ đơn vị trên $\XT$ ($48$ tập $\times$ $45$ mốc $+\,7$) & $\approx55$ phút ở lần đo với $1.446$ đơn vị; ước tính $\approx1{,}5$ lần \\
 b06, toàn bước & $360$ đơn vị & $\approx18$ phút \\
 b08, một đơn vị MLE & Cuốn chiếu, một mốc & $\approx24$ giây \\
 b08, một đơn vị GARCH & Một mốc & $\approx1$ giây \\
@@ -356,6 +356,7 @@ Việc ghi lại các điều chỉnh giữa chừng là cần thiết cho tính
 23/10 & Phát hiện lần chạy trên dùng dữ liệu \emph{cũ} (lợi suất 16/08/2019 vẫn khuyết): Máy chủ chỉ tự khởi động lại khi mã hoặc cấu hình đổi, nên bản bổ sung dữ liệu 19:55 ngày 22/10 không được nhận. Kết quả b03a đến b07 của lần chạy đó chỉ để tham khảo. \\
 23/10 & Thêm GED vào mô phỏng khôi phục b03a ($16.000$ đơn vị) và b03b ($119.200$ đơn vị); mã băm khởi động lại nay theo dõi cả dữ liệu đầu vào. Máy chủ chạy lại từ b00 lúc 14:31 trên dữ liệu đầy đủ. \\
 23--24/10 & Máy chủ gặp sự cố sau lần đồng bộ 22:22; chạy lại lúc 00:10 ngày 24/10 và tiếp tục đúng chỗ dở nhờ điểm kiểm tra từng đơn vị (không mất đơn vị đã xong). Các lần khởi động 14:39 và 21:51 chỉ chạy khoảng $8$ đến $9$ tiến trình do RAM trống thấp. \\
+25/10 & Thêm biến ngoại sinh ứng viên thứ sáu RV (biến động thực tế đóng-đến-đóng từ nến một phút, tách nghỉ trưa và qua đêm, lợi suất qua đêm sau đáo hạn dùng giá F2M), ngoài đề cương đã đăng ký, theo yêu cầu của người nghiên cứu. Tương quan giữa RV và $G$ là $0{,}866$ nên hai biến không cùng xuất hiện trong một tập. RV nằm trong mô-đun riêng \ma{bien\_rv.py}, và danh sách ứng viên được đặt ngoài mục \ma{[mo\_hinh]}, để mã băm của b00 đến b03b không đổi và hơn chín ngày đã chạy của b03b được giữ. b04 đến b15 phải chạy lại. \\
 \bottomrule
 \end{tabular}
 \end{table}

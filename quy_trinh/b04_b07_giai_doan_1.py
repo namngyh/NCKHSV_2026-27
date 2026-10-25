@@ -31,7 +31,7 @@ from de_cuong.khung import Buoc, ghi_nguyen_tu, js
 from de_cuong.mo_hinh_jax import DacTa, ham
 
 TEP = __file__
-TV = ("du_lieu", "mo_hinh_jax", "uoc_luong", "phan_phoi", "danh_gia")
+TV = ("du_lieu", "bien_rv", "mo_hinh_jax", "uoc_luong", "phan_phoi", "danh_gia")
 
 
 def _cac_pp(ctx, them_thay_the=True):
@@ -134,7 +134,7 @@ def _tap_hop_le(ctx):
     d = ctx.du_lieu()
     xt1 = ctx.khoi()["XT"][1]
     f = DL.dac_trung(d, xt1 - 1)
-    ten = ctx.cfg["mo_hinh"]["bien_ung_vien"]
+    ten = C.ung_vien(ctx.cfg)
     X = f["X"][DL.BO_QUA:xt1][:, [DL.TEN_BIEN.index(b) for b in ten]]
     R = np.corrcoef(X.T)
     nguong = ctx.cfg["chon_bien"]["tuong_quan_toi_da"]
@@ -151,7 +151,7 @@ def _moc_khoi(ctx, ten_khoi):
 def _dv_b05(ctx):
     taps, _, _ = _tap_hop_le(ctx)
     moc, _ = _moc_khoi(ctx, "XT")
-    don = [(b,) for b in ctx.cfg["mo_hinh"]["bien_ung_vien"]]
+    don = [(b,) for b in C.ung_vien(ctx.cfg)]
     return ([f"cc|{C.ten_tap(t)}::{k:03d}" for t in taps for k in range(len(moc))]
             + [f"lr|{C.ten_tap(t)}::0" for t in [()] + don])
 
@@ -174,7 +174,7 @@ def _lam_b05(ctx, khoa, truoc):
 
 def _th_b05(ctx, kq):
     cfg = ctx.cfg
-    ten = cfg["mo_hinh"]["bien_ung_vien"]
+    ten = C.ung_vien(cfg)
     taps, R, X = _tap_hop_le(ctx)
     ten_taps = [C.ten_tap(t) for t in taps]
     dau, cuoi = ctx.khoi()["XT"]

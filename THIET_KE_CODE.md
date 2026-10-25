@@ -130,7 +130,7 @@ Trạng thái: ✔ đã có và đúng, ◐ có nhưng lệch/thiếu, ✘ chưa
 | 2.1, 2.2, Bảng 3, C.1 | Thông số thể chế, xác minh từng thời kỳ | b00 | ✘ chưa xác minh; **người dùng phải cung cấp nguồn** |
 | 2.3 | Lợi suất, phiên chuyển J_t theo lịch | b01 | ✔ |
 | 2.4 | ρ^P, ρ^GK, ρ^RS, ρ*, ĉ_ρ, Nhận xét 1 | b01 | ◐ có GK; thiếu P và RS |
-| 2.5, 2.6 | Biến lịch; A, G, F, B, O | b01 | ✔ |
+| 2.5, 2.6 | Biến lịch; A, G, F, B, O (+ RV bổ sung 25/10/2026) | b01 | ✔ |
 | 2.7 | Chuẩn hóa không rò rỉ | b01, kiem_thu | ◐ đúng nhưng chưa có kiểm thử chống rò rỉ |
 | 2.8, C.2, C.3 | Kiểm tra chất lượng, danh sách phiên đặc biệt | b01 | ◐ có số liệu; chưa đối chiếu lịch giao dịch chính thức |
 | 3.1 – 3.3 | Đặc tả, ba phân phối, chính quy | b02 | ✔ (có kiểm tra tích phân số; còn phải kiểm tra ν→∞, λ=0 theo C.5 bằng kiểm thử) |

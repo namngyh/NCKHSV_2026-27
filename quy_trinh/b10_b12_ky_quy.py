@@ -23,7 +23,7 @@ from de_cuong.khung import GOC, Buoc
 from de_cuong.mo_hinh_jax import DacTa
 
 TEP = __file__
-TV = ("du_lieu", "mo_hinh_jax", "uoc_luong", "phan_phoi", "ky_quy", "danh_gia")
+TV = ("du_lieu", "bien_rv", "mo_hinh_jax", "uoc_luong", "phan_phoi", "ky_quy", "danh_gia")
 
 
 def _moc(ctx):
