@@ -1,0 +1,19 @@
+{
+ "trang_thai": "xong",
+ "h_vao": "8b0ca56bbd39113fd52680b646c9c8e487b7262ab1ee00a10dba6518a67c6118",
+ "h_ra": "8ad855c26b55ebed49b87cd8c3f0d956e0b8c8fb00b267f87c0a1b287a386e65",
+ "so_don_vi": 1,
+ "bat_dau": "2026-10-26 20:26:19",
+ "ket_thuc": "2026-10-26 20:26:19",
+ "giay_tong_hop": 0.1,
+ "cong": {
+  "dat": true,
+  "thong_so_chua_xac_minh": [],
+  "ghi_chu": ""
+ },
+ "chap_nhan_cong": false,
+ "thu_muc_diem_kiem_tra": "_diem_kiem_tra\\b00\\8b0ca56bbd39",
+ "so_don_vi_theo_may": {
+  "may_manh": 1
+ }
+}

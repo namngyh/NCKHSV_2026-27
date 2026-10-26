@@ -1,0 +1,54 @@
+{
+ "the_che": {
+  "ngay_giao_dich_cuoi": {
+   "gia_tri": "thứ Năm thứ ba của tháng đáo hạn; nếu trùng ngày nghỉ thì lùi về ngày giao dịch liền trước",
+   "dung_cho": "J_t, tau_t, D_dh (mục 2.3, 2.5)",
+   "nguon": "HNX, Mẫu Hợp đồng Tương lai Chỉ số VN30, điều khoản 16: 'Ngày Thứ Năm thứ ba trong tháng đáo hạn, trường hợp trùng ngày nghỉ sẽ được điều chỉnh lên ngày giao dịch liền trước đó'. https://hnx.vn/vi-vn/huong-dan/chi-tiet-thu-tuc-36-65.html",
+   "ngay_xac_minh": "2026-10-20",
+   "thoi_ky": "Chưa thấy thay đổi từ khi niêm yết 10/8/2017 (trang HNX hiện hành)."
+  },
+  "bien_do_gia_ngay": {
+   "gia_tri": 0.07,
+   "don_vi": "tỷ lệ so với giá tham chiếu (giá tham chiếu = giá thanh toán cuối ngày liền trước)",
+   "dung_cho": "phiên chạm biên (Nhận xét 1), đối chứng mốc trên H x biên độ (mục 7.5)",
+   "nguon": "HNX, Mẫu Hợp đồng Tương lai Chỉ số VN30, điều khoản 13: 'Biên độ dao động +/-7% so với giá tham chiếu'. https://hnx.vn/vi-vn/huong-dan/chi-tiet-thu-tuc-36-65.html",
+   "ngay_xac_minh": "2026-10-20",
+   "thoi_ky": "Trang HNX hiện hành; chưa xác minh từng thời kỳ 2017-2026. Giá tham chiếu là giá thanh toán, không phải giá đóng cửa, nên lợi suất đóng-đóng có thể vượt 7%."
+  },
+  "he_so_nhan": {
+   "gia_tri": 100000,
+   "don_vi": "đồng / điểm chỉ số",
+   "dung_cho": "quy đổi ký quỹ ra tiền (mục 7.1)",
+   "nguon": "HNX, Mẫu Hợp đồng Tương lai Chỉ số VN30, điều khoản 4-5: 'Quy mô hợp đồng 100.000 đồng x điểm chỉ số VN30', 'Hệ số nhân hợp đồng 100.000 đồng'. https://hnx.vn/vi-vn/huong-dan/chi-tiet-thu-tuc-36-65.html",
+   "ngay_xac_minh": "2026-10-20"
+  },
+  "buoc_lam_tron_ky_quy": {
+   "gia_tri": 0.005,
+   "don_vi": "tỷ lệ giá trị hợp đồng (g)",
+   "dung_cho": "bước 5 của quy tắc ký quỹ (mục 7.3)",
+   "nguon": "Lựa chọn thiết kế của nhóm nghiên cứu. Không tìm thấy quy định của VSDC về bước làm tròn; các thông báo VSDC công bố tỷ lệ ở mức số nguyên phần trăm (10%, 13%, 17%).",
+   "ngay_xac_minh": "2026-10-20"
+  },
+  "gioi_han_giam_moi_phien": {
+   "gia_tri": 0.01,
+   "don_vi": "tỷ lệ giá trị hợp đồng mỗi phiên (Delta giảm)",
+   "dung_cho": "bước 5 của quy tắc ký quỹ (mục 7.3)",
+   "nguon": "Lựa chọn thiết kế của nhóm nghiên cứu (cơ chế chống thuận chu kỳ của quy tắc đề xuất); không có quy định tương ứng của VSDC.",
+   "ngay_xac_minh": "2026-10-20"
+  },
+  "ty_le_ky_quy_vsdc": {
+   "gia_tri": 0.17,
+   "don_vi": "tỷ lệ giá trị hợp đồng (tỷ lệ ký quỹ ban đầu tối thiểu, mức hiện hành)",
+   "dung_cho": "đối chứng thực tế (mục 7.5). Chuỗi lịch sử theo ngày ở du_lieu/ngoai/ky_quy_lich_su.csv được b11 dùng làm đối chứng 'VSD_lich_su'.",
+   "nguon": "VSD: 10% khi ra mắt (8/2017); 13% từ 18/7/2018; 17% từ 15/12/2022 (https://vsd.vn/vi/ad/155124); 17% tại các thông báo hiệu lực 18/10/2024 (https://vsdc.vn/vi/ad/175886) và 17/04, 22/05, 19/06, 17/07, 16/10/2026 (phụ lục VSDC). Chi tiết nguồn từng mốc trong du_lieu/ngoai/ky_quy_lich_su.csv.",
+   "ngay_xac_minh": "2026-10-20",
+   "thoi_ky": "Thay đổi trong mẫu: 10% -> 13% (18/7/2018) -> 17% (15/12/2022). Chưa rà từng thông báo giữa các mốc; không thấy thông báo điều chỉnh khác."
+  }
+ },
+ "_nguon": {
+  "may": "may_manh",
+  "host": "Cloudiso",
+  "thoi_diem": "2026-10-26 20:26:19",
+  "giay": 0.0
+ }
+}
