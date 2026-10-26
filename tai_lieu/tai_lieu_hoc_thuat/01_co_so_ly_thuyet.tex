@@ -765,7 +765,7 @@ một tích phân không có nguyên hàm sơ cấp; với $H$ tổng quát cầ
 \begin{enumerate}
 \item Với mỗi đường $s$: Lấy $\theta^{(s)}$ từ hậu nghiệm (suy diễn Bayes) hoặc đặt $\theta^{(s)}=\hat\theta$ (hợp lý cực đại).
 \item Đặt $\ln h^{(s)}_{t+1}$ bằng giá trị lọc tại cuối phiên $t$ theo chính bộ tham số đó.
-\item Với $j=1,\dots,H$: Sinh $z^{(s)}_{t+j}\sim\Ecal$, đặt $r^{(s)}_{t+j}=\sqrt{h^{(s)}_{t+j}}\,z^{(s)}_{t+j}$ (lấy $\mu=0$, một lựa chọn thận trọng cho ký quỹ), sinh biến ngoại sinh từ mô hình tự hồi quy bậc một ước lượng trên cùng cửa sổ với phần dư lấy mẫu lại, và cập nhật $\ln h^{(s)}_{t+j+1}$ theo \eqref{eq:pt}.
+\item Với $j=1,\dots,H$: Sinh $z^{(s)}_{t+j}\sim\Ecal$, đặt $r^{(s)}_{t+j}=\sqrt{h^{(s)}_{t+j}}\,z^{(s)}_{t+j}$ (lấy $\mu=0$, một lựa chọn thận trọng cho ký quỹ), sinh biến ngoại sinh của phiên sau từ hồi quy $X_{t+j+1}=c+\phi X_{t+j}+a|z_{t+j}|+b\,z_{t+j}+e$ ước lượng trên cùng cửa sổ với phần dư lấy mẫu lại (hai số hạng theo $z$ để biến đo đến cuối phiên, như RV, phản ứng với cú sốc của chính phiên đó; đề cương dùng tự hồi quy bậc một không có hai số hạng này), và cập nhật $\ln h^{(s)}_{t+j+1}$ theo \eqref{eq:pt}.
 \item Tính $R^{(s)}=\exp\big(\sum_{j}r^{(s)}_{t+j}/100\big)-1$ và hai tổn thất $\mp R^{(s)}$.
 \item Với các tổn thất xếp giảm dần $L^{(1)}\ge\dots\ge L^{(S)}$ và $j^{*}=\lceil\alpha S\rceil$: $\widehat{\VaR}=L^{(j^{*})}$ và $\widehat{\ES}=\frac1{j^{*}}\sum_{i\le j^{*}}L^{(i)}$.
 \end{enumerate}
@@ -894,7 +894,7 @@ Tổn thất $H$ phiên được tính từ chuỗi lợi suất cùng hợp đ�
 
 Nghiên cứu gồm hai giai đoạn: Giai đoạn 1 xây dựng mô hình rủi ro, giai đoạn 2 xây dựng ký quỹ. Khối kiểm tra chỉ được mở, và giai đoạn 2 chỉ được bắt đầu, khi ba điều kiện cùng đạt:
 \begin{enumerate}
-\item[(i)] Mô phỏng khôi phục tham số bằng hợp lý cực đại cho độ phủ của khoảng $95\%$ trong $[0{,}90;\,0{,}99]$ ở mọi tham số và mọi trường hợp, tỷ lệ bác bỏ sai trong $E_2$, $E_4$ không vượt $0{,}10$, và không có lần lặp thất bại.
+\item[(i)] Trong mô phỏng khôi phục tham số bằng hợp lý cực đại theo thiết kế của đề cương (b03a) và trong mô phỏng quanh ước lượng $\UL\cup\XT$ của cấu hình được chọn (b06c), không có ô nào mà độ phủ của khoảng $95\%$ thấp hơn $0{,}90$ hoặc cao hơn $0{,}99$, hay tỷ lệ bác bỏ sai trong $E_2$, $E_4$ cao hơn $0{,}10$, một cách có ý nghĩa; và không có lần lặp thất bại. Với ô có $k$ lần khoảng chứa tham số thật trên $B$ lần lặp, giá trị $p$ một phía cho $H_0:c\ge0{,}90$ là $P(\mathrm{Bin}(B;0{,}90)\le k)$, cho $H_0:c\le0{,}99$ là $P(\mathrm{Bin}(B;0{,}99)\ge k)$; tương tự cho tỷ lệ bác bỏ sai với ngưỡng $0{,}10$. Các giá trị $p$ được hiệu chỉnh Holm trên toàn bộ các kiểm định; điều kiện không đạt khi có giá trị $p$ hiệu chỉnh nhỏ hơn $0{,}05$. Đề cương so độ phủ ước lượng trực tiếp với ngưỡng; cách kiểm định nhị thức được đưa vào ngày 26/10/2026 và là một sai lệch được công bố.
 \item[(ii)] Trung bình của $\hat z_t^2$ theo nhóm $\tau_t$ không khác $1$ có ý nghĩa ở mức $5\%$, tức chu kỳ đáo hạn đã được hấp thụ. Cụ thể, ước lượng hồi quy
 \begin{equation*}
 \hat z_t^2-1=a+\sum_{g=0}^{4}c_g\,\ind\{\min(\tau_t,5)=g\}+u_t
@@ -902,7 +902,7 @@ Nghiên cứu gồm hai giai đoạn: Giai đoạn 1 xây dựng mô hình rủi
 trên khối $\UL\cup\XT$; nhóm $\tau_t\ge5$ là nhóm gốc. Kiểm định $F$ cho $H_0:c_0=c_1=\dots=c_4=0$ phải có $p>0{,}05$. Nếu mô hình đã mô tả đúng biến động quanh đáo hạn, trung bình của $\hat z_t^2$ như nhau ở mọi nhóm $\tau$, nên mọi hệ số $c_g$ bằng không.
 \item[(iii)] Dự báo VaR một phiên của cấu hình được chọn không bị các kiểm định Kupiec và Christoffersen bác bỏ ở mức $5\%$ trên khối $\XT$.
 \end{enumerate}
-Ngưỡng $0{,}90$ ở điều kiện (i) là ngưỡng nội bộ, rộng hơn thông lệ đánh giá mô phỏng \cite{morris2019}. Vì vậy bài viết báo cáo toàn bộ độ phủ kèm sai số mô phỏng, chứ không chỉ kết luận đạt hay không đạt.
+Ngưỡng $0{,}90$ ở điều kiện (i) là ngưỡng nội bộ, rộng hơn thông lệ đánh giá mô phỏng \cite{morris2019}. Vì vậy bài viết báo cáo toàn bộ độ phủ kèm sai số mô phỏng, chứ không chỉ kết luận đạt hay không đạt. Ở lần chạy ngày 25/10/2026, độ phủ của khoảng Wald cho $\kappa_1$ thấp nhất ở cả $16$ ô (bốn phân phối nhân bốn trường hợp), trung bình $0{,}912$, trong khi các tham số khác nằm trong khoảng $0{,}923$ đến $0{,}959$: Khoảng Wald của $\kappa_1$ thiếu độ phủ một cách có hệ thống, và ngưỡng $0{,}90$ không phản ánh điều này.
 
 % =====================================================================
 \section{Giới hạn về lý thuyết}\label{sec:gioihan}

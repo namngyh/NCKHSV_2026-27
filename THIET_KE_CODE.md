@@ -38,6 +38,7 @@ NCKHSV_2026-27/
 │   b00_b02_chuan_bi.py      b00 the_che, b01 du_lieu, b02 kiem_tra_cai_dat
 │   b03_mo_phong.py          b03 mo_phong_khoi_phuc (+ SBC)
 │   b04_b07_giai_doan_1.py   b04 mle_ban_dau, b05 chon_bien, b06 chon_phan_phoi, b07 chot_cau_hinh
+│   b06c_mo_phong_chon.py    b06b uoc_luong_chon, b06c mo_phong_cau_hinh_chon (26/10/2026: mô phỏng quanh mô hình chọn)
 │   b08_b09_ngoai_mau.py     b08 cuon_chieu_bon_phuong_phap, b09 danh_gia_KT
 │   b10_b12_ky_quy.py        b10 du_bao_H_phien, b11 ky_quy, b12 do_ben
 │   b13_b14_bao_cao.py       b13 bao_cao, b14 dong_goi

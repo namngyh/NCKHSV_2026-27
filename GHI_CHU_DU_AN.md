@@ -1,6 +1,17 @@
 # Ghi chú dự án: dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
-## 00000000. THÊM BIẾN NGOẠI SINH RV VÀO TOÀN BỘ ĐƯỜNG ỐNG (25/10/2026) — mới nhất, đọc trước
+## 000000000. SỬA THEO RÀ SOÁT, CHẠY LẠI TOÀN BỘ (26/10/2026) — mới nhất, đọc trước
+
+- Người dùng chấp nhận chạy lại toàn bộ (kể cả b03b từ đầu) để sửa chín điểm của bản rà soát. Kết quả 25/10 (RV, skew-t, cổng không đạt) lưu ở `ICCIES 2027/ket_qua_RV_25_10_cong_b07_khong_dat/` và thẻ git cục bộ `ket-qua-RV-cong-b07-khong-dat`.
+- (1) `danh_gia.chan_doan`: hồi quy z²−1 theo đủ ba biến giả lịch (bản cũ bỏ D_sau, sai từ khi dùng giá F2M), Wald với HC3; hồi quy theo nhóm tau cũng HC3 (điều kiện (ii) của cổng). Thêm `hoi_quy_D_he_so`. Ljung-Box giữ nguyên, ghi chú p lạc quan (không trừ bậc tự do; kiểm định đúng là Li-Mak).
+- (2)+(7) Cổng b07 điều kiện (i): `mo_phong.dieu_kien_cong` kiểm định nhị thức một phía từng ô (độ phủ ≥ 0,90, ≤ 0,99; bác bỏ sai ≤ 0,10), Holm, mức 0,05 (`[cong].kiem_dinh_do_phu = "nhi_thuc"`); vẫn ghi kết luận theo ngưỡng cứng. Bước mới b06b (ước lượng cấu hình chọn trên UL+XT, b07 dùng lại) và b06c (bootstrap tham số B = 1.000 quanh ước lượng đó, X và lịch thật; `quy_trinh/b06c_mo_phong_chon.py`); (i) = b03a và b06c (`kiem_tra_mo_hinh_chon = true`). Giới hạn của b06c: X cố định theo dữ liệu thật.
+- (8) `ky_quy.nguon_moc`: X_{k+1} = c + φX_k + a|z_k| + b z_k + e (`[ky_quy].x_tuong_lai = "ar1_kem_z"`; "ar1" là đề cương).
+- (9) RV đưa thẳng vào `du_lieu.py` (bỏ `bien_rv.py`, đã chuyển ra `ICCIES 2027/ban_cu_da_thay_the_25_10/`), RV vào `[mo_hinh].bien_ung_vien`; mặc định `XU_LY_DAO_HAN = "f2m"`, `chia_khoi(750, 925)`; `__init__.py`, docstring `ky_quy` (sáu bước), chú thích B trong toml, CLAUDE.md (13% → 17%).
+- (3)(4)(5)(6) không sửa được bằng mã: ghi vào `[cong_bo].su_kien` (b13 chép vào phụ lục sai lệch) và P4 mục thiết kế. Khối KT không còn là mẫu giữ lại thật sự; muốn có khối độc lập phải bổ sung dữ liệu F1M sau 17/07/2026 (cần người dùng cung cấp từ DataPro). F2M 15/08/2019 vẫn cần đối chiếu HNX/DataPro.
+- Mọi sai lệch so với đề cương đều có dòng trong `[de_cuong_goc]`: bien_ung_vien, kiem_dinh_do_phu, kiem_tra_mo_hinh_chon, x_tuong_lai.
+- Kiểm thử: 33 đạt (`kiem_thu/test_rv.py` gồm RV và cổng nhị thức).
+
+## 00000000. THÊM BIẾN NGOẠI SINH RV VÀO TOÀN BỘ ĐƯỜNG ỐNG (25/10/2026)
 
 - Yêu cầu của người dùng: thêm RV (biến động thực tế đóng-đến-đóng từ nến 1 phút) làm biến ngoại sinh ứng viên, chấp nhận chạy lại. RV là biến BỔ SUNG NGOÀI ĐỀ CƯƠNG đã đăng ký (A, G, F, B, O): cần báo TS. Châu; điểm này tự ghi vào phụ lục sai lệch (b13) qua `[de_cuong_goc]."chon_bien.them_bien_ung_vien" = []`.
 - Định nghĩa (RV cải tiến của mã cũ `uoc_luong_mle_khoang_nghi.py` và `uoc_luong_mle_roll_f2m.py`): tách mỗi ngày thành buổi sáng và buổi chiều tại khoảng trống trên 30 phút (mỗi ngày đúng một khoảng); nến đầu buổi dùng lợi suất mở-đến-đóng; RV_t = rv_sang + rv_chieu + nghi_trua^2 + qua_dem^2, với qua_dem là cột `dem` của bảng ngày (đã sửa bằng giá F2M ở phiên sau đáo hạn; khuyết thì bằng 0). RV phủ đúng khoảng đóng-đến-đóng của r_t. Tỷ trọng toàn mẫu: sáng 31,5%, chiều 46,0%, nghỉ trưa 0,8%, qua đêm 21,7%. X = log(RV_{t-1} + 1e-6), cột cuối (`DL.TEN_BIEN` = A, G, F, B, O, RV). Mẫu: RV > 0 mọi phiên, không có phiên khóa biên.
@@ -276,7 +287,7 @@ Thiết kế: H và α là tham số thiết kế nên được báo cáo trên 
 - Quy trình chọn biến (đề cương mục 6: chọn tiến, SPA, Holm) chưa có code.
 
 ### 4.3. Thông số thể chế cần xác minh trước khi dùng
-Chưa xác minh từ nguồn chính thức: mức 13% của VSD, biên độ giá ±7%, hệ số nhân 100.000 đồng/điểm, bước làm tròn tỷ lệ ký quỹ, lịch đáo hạn qua các thời kỳ. Dữ liệu không có chuỗi ký quỹ lịch sử.
+Đã xác minh (du_lieu/ngoai/ky_quy_lich_su.csv): 13% từ 18/7/2018, 17% từ 15/12/2022. Chưa xác minh từ nguồn chính thức: biên độ giá ±7%, hệ số nhân 100.000 đồng/điểm, bước làm tròn tỷ lệ ký quỹ, lịch đáo hạn qua các thời kỳ. Dữ liệu không có chuỗi ký quỹ lịch sử.
 
 ## 5. Việc còn mở (theo thứ tự đề xuất)
 

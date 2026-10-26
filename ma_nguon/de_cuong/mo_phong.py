@@ -1,8 +1,10 @@
 """Mô phỏng khôi phục tham số (mục 4.4, Bảng 6) và hiệu chuẩn dựa trên mô phỏng (SBC) cho suy diễn Bayes.
 
 LÝ THUYẾT: Sinh T = 2000 quan sát (sau 200 quan sát khởi động) từ EGARCH-X với psi_0 đã biết: mu_0 = 0,05,
-omega_0 = 0,04, kappa_0 = 0,15, beta_0 = 0,95, delta_0 = 0; theta_0, gamma_0, nu_0, lambda_0 theo kịch bản E1-E4
+omega_0 = 0,04, kappa_0 = 0,15, beta_0 = 0,95, delta_0 = 0; theta_0, gamma_0, nu_0, lambda_0 theo trường hợp E1-E4
 (với phân phối chuẩn bỏ nu, lambda; với Student-t bỏ lambda). Biến ngoại sinh: hai AR(1) chuẩn hóa hệ số 0,5.
+Thiết kế này cố định (đề cương) nên không khớp mô hình được chọn trên dữ liệu thật; b06c bổ sung bootstrap tham số
+quanh chính ước lượng của cấu hình được chọn.
 Biến lịch: phiên đáo hạn mỗi 21 phiên, phiên kế tiếp là phiên chuyển hợp đồng (J = 1, lợi suất khuyết), kỳ nghỉ
 dài ngẫu nhiên. Tiêu chí: độ chệch, RMSE, độ phủ khoảng 95% (Wald cho MLE, khoảng tin cậy Bayes cho VB và NUTS),
 tỷ lệ bác bỏ sai H0: theta = 0 (E2) và H0: gamma = 0 (E4).
@@ -175,6 +177,41 @@ def tong_hop(kq: list[dict], pp_suy_dien: str) -> dict:
     else:   # khoảng tin cậy 95% của ít nhất một gamma_j không chứa 0
         out["bac_bo_gamma0"] = float(np.mean(((lo_s[:, ig] > 0) | (hi_s[:, ig] < 0)).any(1)))
     return out
+
+
+def dieu_kien_cong(o_phu: dict, o_bb: dict, cg: dict) -> dict:
+    """Điều kiện (i) của cổng (mục 8.1) từ các ô mô phỏng.
+
+    o_phu: {nhãn ô: (độ phủ, B)}; o_bb: {nhãn ô: (tỷ lệ bác bỏ sai, B)}. Cách "nguong_cung" (đề cương): mọi độ phủ trong
+    [do_phu_min, do_phu_max] và mọi tỷ lệ bác bỏ sai <= bac_bo_sai_max. Cách "nhi_thuc": mỗi ô một kiểm định nhị thức chính
+    xác một phía, H0 là ô nằm đúng phía ngưỡng (độ phủ >= min, độ phủ <= max, bác bỏ sai <= max); p hiệu chỉnh Holm trên
+    toàn bộ các kiểm định; không đạt khi có p Holm < muc_y_nghia_do_phu. Kết quả ghi cả hai cách để đối chiếu."""
+    from scipy.stats import binom
+    phu = [v for v, _ in o_phu.values()]
+    bb = [v for v, _ in o_bb.values()]
+    nguong_cung = bool(phu and min(phu) >= cg["do_phu_min"] and max(phu) <= cg["do_phu_max"]
+                       and (not bb or max(bb) <= cg["bac_bo_sai_max"]))
+    kd = []
+    for nhan, (v, B) in o_phu.items():
+        k = int(round(v * B))
+        kd.append((f"{nhan}|duoi", float(binom.cdf(k, B, cg["do_phu_min"]))))
+        kd.append((f"{nhan}|tren", float(binom.sf(k - 1, B, cg["do_phu_max"]))))
+    for nhan, (v, B) in o_bb.items():
+        k = int(round(v * B))
+        kd.append((f"{nhan}|bac_bo_sai", float(binom.sf(k - 1, B, cg["bac_bo_sai_max"]))))
+    m, holm, mx = len(kd), {}, 0.0
+    for i, (nhan, p) in enumerate(sorted(kd, key=lambda x: x[1])):
+        mx = max(mx, min(1.0, (m - i) * p))
+        holm[nhan] = mx
+    a = cg.get("muc_y_nghia_do_phu", 0.05)
+    nhi_thuc = bool(kd) and all(v >= a for v in holm.values())
+    return {"do_phu_min": min(phu) if phu else None, "do_phu_max": max(phu) if phu else None,
+            "bac_bo_sai_max": max(bb) if bb else None, "so_kiem_dinh": m,
+            "p_holm_nho_nhat": min(holm.values()) if holm else None,
+            "o_khong_dat": sorted(k for k, v in holm.items() if v < a),
+            "dat_nguong_cung": nguong_cung, "dat_nhi_thuc": nhi_thuc,
+            "cach": cg.get("kiem_dinh_do_phu", "nguong_cung"),
+            "dat": nhi_thuc if cg.get("kiem_dinh_do_phu", "nguong_cung") == "nhi_thuc" else nguong_cung}
 
 
 def hang_sbc(lan: dict, L: int = 100) -> dict:

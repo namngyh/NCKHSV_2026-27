@@ -287,15 +287,25 @@ def chan_doan(z: np.ndarray, pit: np.ndarray, tau: np.ndarray, D: np.ndarray, ln
     from statsmodels.regression.linear_model import OLS
     from statsmodels.stats.diagnostic import acorr_ljungbox
     out = {}
+    # Ljung-Box trên z và z^2 không trừ bậc tự do cho tham số đã ước lượng (cách trừ đơn giản không đúng cho phần dư
+    # chuẩn hóa của mô hình phương sai; kiểm định đúng là Li-Mak), nên p có xu hướng lạc quan: chỉ dùng để mô tả.
     for lag in (10, 20):
         out[f"LB_z_{lag}_p"] = float(acorr_ljungbox(z, lags=[lag])["lb_pvalue"].iloc[0])
         out[f"LB_z2_{lag}_p"] = float(acorr_ljungbox(z ** 2, lags=[lag])["lb_pvalue"].iloc[0])
     y = z ** 2 - 1
-    Dm = np.column_stack([np.ones(len(y)), D[:, [0, 2]]])   # D_sau = J luôn bằng 0 trên các phiên có lợi suất
-    out["hoi_quy_D_F_p"] = float(OLS(y, Dm).fit().f_test(np.eye(Dm.shape[1])[1:]).pvalue)
+    # Hồi quy z^2 - 1 theo ba biến giả lịch (D_dh, D_sau, D_nghi). Từ khi phiên chuyển dùng giá F2M (22/10/2026), phiên
+    # D_sau có lợi suất nên phải giữ cả ba cột (bản trước bỏ D_sau). z^2 - 1 có đuôi rất dày và D_nghi rất thưa, nên kiểm
+    # định Wald dùng hiệp phương sai bền vững HC3; cột không có phiên nào bằng 1 trong mẫu bị bỏ để ma trận không suy biến.
+    cot = [j for j in range(D.shape[1]) if D[:, j].any() and not D[:, j].all()]
+    Dm = np.column_stack([np.ones(len(y))] + [D[:, j] for j in cot])
+    kq_D = OLS(y, Dm).fit(cov_type="HC3")
+    out["hoi_quy_D_F_p"] = float(kq_D.f_test(np.eye(Dm.shape[1])[1:]).pvalue) if cot else None
+    out["hoi_quy_D_he_so"] = {("D_dh", "D_sau", "D_nghi")[j]: {"he_so": float(kq_D.params[i + 1]),
+                                                               "p": float(kq_D.pvalues[i + 1]),
+                                                               "so_phien": int(D[:, j].sum())} for i, j in enumerate(cot)}
     nhom = np.minimum(tau.astype(int), 5)
     G = np.column_stack([np.ones(len(y))] + [(nhom == g).astype(float) for g in range(5)])
-    out["hoi_quy_tau_F_p"] = float(OLS(y, G).fit().f_test(np.eye(G.shape[1])[1:]).pvalue)
+    out["hoi_quy_tau_F_p"] = float(OLS(y, G).fit(cov_type="HC3").f_test(np.eye(G.shape[1])[1:]).pvalue)
     out["z2_tb_theo_tau"] = {int(g): float(np.mean(z[nhom == g] ** 2)) for g in range(6) if (nhom == g).any()}
     out["berkowitz_lr"], out["berkowitz_p"] = berkowitz(pit)
     out["gay_IT"], out["gay_vi_tri"] = diem_gay_phuong_sai(z)

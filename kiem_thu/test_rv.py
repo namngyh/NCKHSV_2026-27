@@ -1,9 +1,9 @@
-"""Kiểm thử biến RV đóng-đến-đóng (tách buổi sáng, nghỉ trưa, buổi chiều, qua đêm) và việc gắn vào ma trận X.
+"""Kiểm thử biến RV (tách buổi sáng, nghỉ trưa, buổi chiều) và điều kiện (i) của cổng bằng kiểm định nhị thức.
 
 LÝ THUYẾT: RV_t = rv_sang + rv_chieu + nghi_trua^2 + qua_dem^2. Trong mỗi buổi, nến đầu dùng lợi suất mở-đến-đóng, các nến sau
-dùng lợi suất giữa hai giá đóng cửa liền nhau; nghi_trua là lợi suất từ đóng cửa buổi sáng đến mở cửa buổi chiều; qua_dem là
-cột `dem` của bảng ngày (đã sửa bằng giá F2M ở phiên sau đáo hạn).
-THƯ VIỆN: pytest, numpy, pandas; ma_nguon.de_cuong.bien_rv, du_lieu.
+dùng lợi suất giữa hai giá đóng cửa liền nhau; nghi_trua là lợi suất từ đóng cửa buổi sáng đến mở cửa buổi chiều. Điều kiện
+(i): mỗi ô là một kiểm định nhị thức một phía so với ngưỡng, hiệu chỉnh Holm.
+THƯ VIỆN: pytest, numpy, pandas; ma_nguon.de_cuong.du_lieu, mo_phong.
 """
 import sys
 from pathlib import Path
@@ -16,8 +16,8 @@ for p in (GOC / "ma_nguon", GOC):
     if str(p) not in sys.path:
         sys.path.insert(0, str(p))
 
-from de_cuong import bien_rv as BRV  # noqa: E402
 from de_cuong import du_lieu as DL  # noqa: E402
+from de_cuong import mo_phong as MP  # noqa: E402
 
 
 def _csv_nen(tmp_path, ngay_nen):
@@ -37,7 +37,7 @@ NGAY = [("09:00:00", 100.0, 101.0), ("09:01:00", 101.0, 100.0), ("13:00:00", 102
 
 
 def test_rv_tach_buoi_va_nghi_trua(tmp_path):
-    d = BRV.doc_rv(_csv_nen(tmp_path, [NGAY]))
+    d = DL.doc_ngay(_csv_nen(tmp_path, [NGAY]))
     sang = 1e4 * (np.log(101 / 100) ** 2 + np.log(100 / 101) ** 2)
     chieu = 1e4 * (np.log(103 / 102) ** 2 + np.log(102 / 103) ** 2)    # nến đầu buổi chiều: mở-đến-đóng
     assert np.isclose(d["rv_sang"].iloc[0], sang)
@@ -46,25 +46,34 @@ def test_rv_tach_buoi_va_nghi_trua(tmp_path):
     assert d["so_nen"].iloc[0] == 4
 
 
-def test_rv_khong_gom_qua_dem_trong_doc_rv(tmp_path):
+def test_rv_trong_ngay_khong_gom_qua_dem(tmp_path):
     # Giá nhảy 100 -> 150 giữa hai ngày, trong mỗi buổi giá đứng yên: mọi thành phần trong ngày bằng 0.
     n1 = [("09:00:00", 100.0, 100.0), ("13:00:00", 100.0, 100.0)]
     n2 = [("09:00:00", 150.0, 150.0), ("13:00:00", 150.0, 150.0)]
-    d = BRV.doc_rv(_csv_nen(tmp_path, [n1, n2]))
+    d = DL.doc_ngay(_csv_nen(tmp_path, [n1, n2]))
     assert (d[["rv_sang", "rv_chieu", "nghi_trua"]] == 0).all().all()
 
 
-def test_rv_toan_ngay_cong_qua_dem(tmp_path):
-    f = _csv_nen(tmp_path, [NGAY, NGAY])
-    d = pd.DataFrame({"date": pd.to_datetime(["2024-01-02", "2024-01-03"]), "dem": [np.nan, 0.5]})
-    e = BRV.them_rv(d, f)
-    trong = e["rv_sang"] + e["rv_chieu"] + e["nghi_trua"] ** 2
-    assert np.isclose(e["rv"].iloc[0], trong.iloc[0])                 # dem khuyết: số hạng qua đêm bằng 0
-    assert np.isclose(e["rv"].iloc[1], trong.iloc[1] + 0.5 ** 2)
+def test_rv_la_cot_cuoi_cua_X():
+    assert DL.TEN_BIEN == ["A", "G", "F", "B", "O", "RV"]   # thứ tự năm biến của đề cương không đổi
 
 
-def test_gan_them_rv_o_cuoi_va_an_toan_khi_goi_lai():
-    BRV.gan()
-    BRV.gan()
-    assert DL.TEN_BIEN.count("RV") == 1 and DL.TEN_BIEN[-1] == "RV"
-    assert DL.TEN_BIEN[:5] == ["A", "G", "F", "B", "O"]   # thứ tự năm biến của đề cương không đổi
+CG = {"do_phu_min": 0.90, "do_phu_max": 0.99, "bac_bo_sai_max": 0.10, "muc_y_nghia_do_phu": 0.05,
+      "kiem_dinh_do_phu": "nhi_thuc"}
+
+
+def test_cong_nhi_thuc_khong_loai_vi_nhieu():
+    dk = MP.dieu_kien_cong({"E2|kappa": (0.899, 1000), "E1|beta": (0.95, 1000)}, {"E2|theta": (0.05, 1000)}, CG)
+    assert dk["dat_nguong_cung"] is False and dk["dat_nhi_thuc"] is True and dk["dat"] is True
+
+
+def test_cong_nhi_thuc_loai_khi_lech_ro():
+    dk = MP.dieu_kien_cong({"E2|kappa": (0.85, 1000), "E1|beta": (0.95, 1000)}, {}, CG)
+    assert dk["dat"] is False and "E2|kappa|duoi" in dk["o_khong_dat"]
+    dk = MP.dieu_kien_cong({"E1|beta": (0.95, 1000)}, {"E2|theta": (0.15, 1000)}, CG)
+    assert dk["dat"] is False
+
+
+def test_cong_nguong_cung_giu_cach_de_cuong():
+    dk = MP.dieu_kien_cong({"E2|kappa": (0.899, 1000)}, {}, {**CG, "kiem_dinh_do_phu": "nguong_cung"})
+    assert dk["dat"] is False

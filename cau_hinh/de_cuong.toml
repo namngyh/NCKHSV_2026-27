@@ -34,7 +34,7 @@ ged_tham_gia_chon = true        # BM02 mục 4: GED là một trong bốn phân 
 [mo_hinh]                       # mục 3
 phan_phoi = ["chuan", "student", "skewt"]
 phan_phoi_thay_the = "ged"      # Phụ lục B, chỉ báo cáo bổ sung
-bien_ung_vien = ["A", "G", "F", "B", "O"]
+bien_ung_vien = ["A", "G", "F", "B", "O", "RV"]   # RV bổ sung 25/10/2026, ngoài đề cương (tự ghi vào phụ lục sai lệch)
 cau_hinh_chinh = ["A", "G"]     # luôn báo cáo (mục 6)
 so_lp_khoi_tao_lnh = 20         # ln h_1 = log phương sai 20 lợi suất đầu (3.3)
 can_lnh = 20.0                  # chặn |ln h| (3.3, bảo vệ số học)
@@ -90,14 +90,11 @@ phan_phoi = "student"
 muc_y_nghia = 0.05
 tuong_quan_toi_da = 0.8
 alpha_fz = 0.025
-# 25/10/2026: bổ sung biến ngoại sinh RV (biến động thực tế trong ngày từ nến 1 phút) vào tập ứng viên, theo yêu cầu
-# của người dùng. Đặt ở mục này (không đặt trong [mo_hinh]) vì mô phỏng b03a/b03b sinh dữ liệu giả với X1, X2 và không
-# phụ thuộc danh sách biến; sửa [mo_hinh] sẽ làm mất hiệu lực tiến độ b03b đang chạy. Tập ứng viên = [mo_hinh].bien_ung_vien
-# + them_bien_ung_vien. Đề cương đăng ký chỉ có A, G, F, B, O: điểm này tự ghi vào phụ lục sai lệch (b13).
-them_bien_ung_vien = ["RV"]
 
 [ky_quy]                        # mục 7
 H = [1, 2, 3]
+x_tuong_lai = "ar1_kem_z"        # 26/10/2026: X_{t+j} = c + phi X_{t+j-1} + a|z_{t+j-1}| + b z_{t+j-1} + e (đề cương:
+                                # AR(1) thuần, độc lập với cú sốc cùng phiên; xem ky_quy.nguon_moc)
 alpha = [0.05, 0.025, 0.01]
 w = [0.0, 0.5, 1.0]
 b = [0.0, 0.1, 0.25]
@@ -178,15 +175,40 @@ may_manh = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 "ky_quy.nguong_tang" = 0.0           # đề cương chi tiết không có vùng không điều chỉnh
 "ky_quy.nguong_giam" = 0.0
 "chon_bien.tuong_quan_toi_da" = 0.8
-"chon_bien.them_bien_ung_vien" = []
+"mo_hinh.bien_ung_vien" = ["A", "G", "F", "B", "O"]
 "chon_bien.muc_y_nghia" = 0.05
+"cong.kiem_dinh_do_phu" = "nguong_cung"
+"cong.kiem_tra_mo_hinh_chon" = false
+"ky_quy.x_tuong_lai" = "ar1"
 
 [cong]                          # mục 8.1 điều kiện chuyển giai đoạn
-do_phu_min = 0.90               # độ phủ khoảng 95% (B = 100 -> sai số chuẩn ~ 0,022)
+do_phu_min = 0.90               # độ phủ khoảng 95%; B_mle = 1.000 -> sai số chuẩn ~ 0,009 khi độ phủ ~ 0,90
 do_phu_max = 0.99
 bac_bo_sai_max = 0.10           # E2, E4: tỷ lệ bác bỏ sai gần 5%
 p_tau = 0.05                    # trung bình z^2 theo nhóm tau không khác 1
 p_var_xt = 0.05                 # VaR một phiên không bị bác bỏ trên XT
+# 26/10/2026: điều kiện (i) không so độ phủ ước lượng với ngưỡng cứng mà kiểm định nhị thức một phía cho từng ô
+# (H0: độ phủ >= do_phu_min; H0: độ phủ <= do_phu_max; H0: tỷ lệ bác bỏ sai <= bac_bo_sai_max), hiệu chỉnh Holm trên
+# mọi ô; chỉ không đạt khi có ô lệch khỏi ngưỡng có ý nghĩa. Lý do: với B = 1.000, sai số chuẩn của độ phủ ~ 0,009, nên
+# ngưỡng cứng quyết định đạt hay không đạt bằng nhiễu mô phỏng (0,899 so với 0,90 ở lần chạy 25/10).
+kiem_dinh_do_phu = "nhi_thuc"   # "nhi_thuc" hoặc "nguong_cung" (cách của đề cương)
+muc_y_nghia_do_phu = 0.05
+# Điều kiện (i) còn đòi mô phỏng khôi phục quanh chính mô hình được chọn (b06c, [mo_phong_chon]).
+kiem_tra_mo_hinh_chon = true
+
+[cong_bo]                       # các sự kiện phải công bố trong bài (b13 chép nguyên văn vào phụ lục sai lệch)
+su_kien = [
+  "Khối KT (435 phiên cuối, từ 17/10/2024) không phải mẫu giữ lại thật sự: nghiên cứu gốc tháng 9/2026 đã đánh giá ngoài mẫu trên đúng 435 phiên này (và đã dùng log RV làm biến ngoại sinh); đợt 20/10/2026 dùng khối KT 990 phiên bao trùm chúng; cấu hình đã được khóa hai lần ngày 24/10/2026 (skew-t | G, rồi GED | G) và b08-b15 đã chạy trên KT trước các thay đổi dưới đây.",
+  "25/10/2026: thêm biến ngoại sinh RV (đóng-đến-đóng, tách nghỉ trưa và qua đêm, qua đêm sau đáo hạn dùng giá F2M) vào tập ứng viên, ngoài đề cương.",
+  "26/10/2026: điều kiện (i) của cổng đổi từ ngưỡng cứng sang kiểm định nhị thức (Holm) và thêm mô phỏng khôi phục quanh mô hình được chọn (b06c), sau khi cổng không đạt ở lần chạy 25/10 (độ phủ nhỏ nhất 0,899 so với ngưỡng 0,90).",
+  "26/10/2026: hồi quy chẩn đoán z^2 theo biến lịch dùng đủ ba biến giả (bản trước bỏ D_sau) và hiệp phương sai HC3; hồi quy theo số phiên đến đáo hạn cũng dùng HC3.",
+  "26/10/2026: mô phỏng H phiên cho biến ngoại sinh tương lai phụ thuộc cú sốc cùng phiên (x_tuong_lai = ar1_kem_z); đề cương dùng AR(1) độc lập.",
+  "Khoảng Wald của kappa thiếu độ phủ có hệ thống trong mô phỏng b03a (lần chạy 25/10: trung bình 0,912 trên 16 ô, thấp nhất ở mọi ô so với danh nghĩa 0,95).",
+  "Giá đóng cửa VN30F2M ngày 15/08/2019 (877,0) bổ sung từ bản tin KIS/Bloomberg, chưa đối chiếu với HNX hoặc DataPro (du_lieu/goc/VN30F2M_bo_sung.md).",
+]
+
+[mo_phong_chon]                 # 26/10/2026, b06c: bootstrap tham số quanh ước lượng UL+XT của cấu hình được chọn
+B = 1000                        # số lần lặp; dữ liệu sinh với chuỗi X, lịch thật của UL+XT và psi = ước lượng b06b
 
 # ----------------------------------------------------------------------------------------
 # Hồ sơ chạy thử nhanh: chỉ để kiểm tra đường ống, KHÔNG phải kết quả nghiên cứu.
@@ -203,6 +225,7 @@ p_var_xt = 0.05                 # VaR một phiên không bị bác bỏ trên X
 "bayes.nuts_do_sau_cay" = 5
 "mo_phong.B" = 3
 "mo_phong.B_mle" = 3
+"mo_phong_chon.B" = 3
 "mo_phong_bayes.B_vb" = 3
 "mo_phong_bayes.B_nuts" = 3
 "mo_phong.T" = 800

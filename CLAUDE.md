@@ -98,11 +98,11 @@ Ba mô hình GARCH MLE được tính với 6 điểm khởi tạo (lần chạy
   (hai bản thảo này vẫn còn mô tả MS-GARCH-X).
 - Khi phát hiện bất nhất về phạm vi nghiên cứu, hỏi trước khi tự quyết.
 - Người hướng dẫn: TS. Châu — muốn ứng dụng thực tế rõ hơn (hướng đã thống nhất:
-  ký quỹ động dựa trên VaR, đối chiếu mức 13% của VSD, Basel traffic-light).
+  ký quỹ động dựa trên VaR, đối chiếu tỷ lệ của VSD (13% từ 18/7/2018, 17% từ 15/12/2022), Basel traffic-light).
 
 ## Việc còn mở
 
-- **B1. Ứng dụng ký quỹ động** (chưa có code): VaR_t → tỷ lệ ký quỹ, so với 13% VSD,
+- **B1. Ứng dụng ký quỹ động** (đã có trong đường ống mới, b10-b12): VaR_t → tỷ lệ ký quỹ, so với tỷ lệ VSD (17% từ 15/12/2022),
   chấm Basel traffic-light cửa sổ 250 phiên.
 - **B3. Walk-forward** cho EGARCH-X (tái ước lượng theo quý) để tăng lực kiểm định VaR
   (435 phiên kiểm định chỉ cho lực ~0,37).

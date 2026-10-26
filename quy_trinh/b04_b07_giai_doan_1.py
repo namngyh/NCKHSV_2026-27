@@ -31,7 +31,7 @@ from de_cuong.khung import Buoc, ghi_nguyen_tu, js
 from de_cuong.mo_hinh_jax import DacTa, ham
 
 TEP = __file__
-TV = ("du_lieu", "bien_rv", "mo_hinh_jax", "uoc_luong", "phan_phoi", "danh_gia")
+TV = ("du_lieu", "mo_hinh_jax", "uoc_luong", "phan_phoi", "danh_gia")
 
 
 def _cac_pp(ctx, them_thay_the=True):
@@ -134,7 +134,7 @@ def _tap_hop_le(ctx):
     d = ctx.du_lieu()
     xt1 = ctx.khoi()["XT"][1]
     f = DL.dac_trung(d, xt1 - 1)
-    ten = C.ung_vien(ctx.cfg)
+    ten = ctx.cfg["mo_hinh"]["bien_ung_vien"]
     X = f["X"][DL.BO_QUA:xt1][:, [DL.TEN_BIEN.index(b) for b in ten]]
     R = np.corrcoef(X.T)
     nguong = ctx.cfg["chon_bien"]["tuong_quan_toi_da"]
@@ -151,7 +151,7 @@ def _moc_khoi(ctx, ten_khoi):
 def _dv_b05(ctx):
     taps, _, _ = _tap_hop_le(ctx)
     moc, _ = _moc_khoi(ctx, "XT")
-    don = [(b,) for b in C.ung_vien(ctx.cfg)]
+    don = [(b,) for b in ctx.cfg["mo_hinh"]["bien_ung_vien"]]
     return ([f"cc|{C.ten_tap(t)}::{k:03d}" for t in taps for k in range(len(moc))]
             + [f"lr|{C.ten_tap(t)}::0" for t in [()] + don])
 
@@ -174,7 +174,7 @@ def _lam_b05(ctx, khoa, truoc):
 
 def _th_b05(ctx, kq):
     cfg = ctx.cfg
-    ten = C.ung_vien(cfg)
+    ten = cfg["mo_hinh"]["bien_ung_vien"]
     taps, R, X = _tap_hop_le(ctx)
     ten_taps = [C.ten_tap(t) for t in taps]
     dau, cuoi = ctx.khoi()["XT"]
@@ -280,8 +280,13 @@ def _cong_b07(ctx):
     mp = ctx.doc("mo_phong_khoi_phuc.json", "b03a")
     pp, bien = cp["phan_phoi"], tuple(cb["chon"])
     cg = ctx.cfg["cong"]
-    dk1 = mp["dieu_kien_8_1_i"].get(pp, {"dat": False, "ghi_chu": f"phan phoi {pp} chua co mo phong khoi phuc tham so (b03a)"})
-    x = uoc_luong_day_du(ctx, pp, bien, ctx.khoi()["XT"][1], ("b07", pp), bootstrap=False)
+    dk1a = mp["dieu_kien_8_1_i"].get(pp, {"dat": False, "ghi_chu": f"phan phoi {pp} chua co mo phong khoi phuc tham so (b03a)"})
+    if cg.get("kiem_tra_mo_hinh_chon", False):
+        dk1b = ctx.doc("mo_phong_cau_hinh_chon.json", "b06c")["dieu_kien"]
+        dk1 = {"b03a_thiet_ke_de_cuong": dk1a, "b06c_mo_hinh_chon": dk1b, "dat": bool(dk1a["dat"] and dk1b["dat"])}
+    else:
+        dk1 = dk1a
+    x = ctx.doc("uoc_luong_chon.json", "b06b")      # ước lượng UL + XT của cấu hình được chọn (b06b)
     dk2 = {"hoi_quy_tau_F_p": x["chan_doan"]["hoi_quy_tau_F_p"], "z2_tb_theo_tau": x["chan_doan"]["z2_tb_theo_tau"]}
     dk2["dat"] = bool(dk2["hoi_quy_tau_F_p"] > cg["p_tau"])
     row = cp["bang_XT"][f"{pp}|{C.ten_tap(bien)}"]
@@ -308,5 +313,6 @@ def _th_b07(ctx, kq):
     ctx.log(f"DA KHOA CAU HINH: {x['phan_phoi']} | {C.ten_tap(x['bien'])}. Khoi KT duoc mo tu buoc b08.")
 
 
-Buoc("b07", "chot_cau_hinh", "8.1, C.7", TEP, _lam_b07, _th_b07, phu_thuoc=("b03a", "b04", "b04b", "b05", "b06"),
+Buoc("b07", "chot_cau_hinh", "8.1, C.7", TEP, _lam_b07, _th_b07,
+     phu_thuoc=("b03a", "b04", "b04b", "b05", "b06", "b06b", "b06c"),
      cau_hinh=("cong", "khoi"), thu_vien=TV, cong=_cong_b07, song_song=False, chi_chu_tri=True)

@@ -155,7 +155,11 @@ Hàm \ma{xay\_ngay} trong \ma{du\_lieu.py} gộp nến phút của F1M thành b�
 
 \subsection{Biến bổ sung RV}
 
-Mô-đun \ma{bien\_rv.py} thêm biến ngoại sinh thứ sáu, RV, ngoài năm biến của đề cương. Hàm \ma{doc\_rv} đọc nến phút, cắt mỗi ngày thành buổi sáng và buổi chiều tại khoảng trống trên $30$ phút, tính $RV^{\text{sáng}}$ và $RV^{\text{chiều}}$ (nến đầu buổi dùng lợi suất mở-đến-đóng) và lợi suất nghỉ trưa. Hàm \ma{them\_rv} cộng thêm bình phương lợi suất qua đêm lấy từ cột \ma{dem} của bảng ngày, vốn đã sửa bằng giá VN30F2M ở phiên sau đáo hạn, nên RV phủ đúng khoảng đóng-đến-đóng của lợi suất ngày và không chứa cú nhảy giữa hai hợp đồng. Hàm \ma{gan}, được \ma{quy\_trinh/\_chung.py} gọi khi nhập, thêm \ma{"RV"} vào cuối \ma{TEN\_BIEN} và bọc \ma{dac\_trung} để thêm cột thứ sáu; \ma{du\_lieu.py} giữ nguyên. Lý do tách riêng: mã băm của b01 và b02 gồm \ma{du\_lieu.py}, mà đầu ra của b02 ghi kèm tên máy và giờ chạy, nên sửa \ma{du\_lieu.py} sẽ làm mất hiệu lực b03a và b03b dù chúng không dùng RV. Danh sách ứng viên của b05 là \ma{[mo\_hinh].bien\_ung\_vien} cộng \ma{[chon\_bien].them\_bien\_ung\_vien}.
+Biến ngoại sinh thứ sáu, RV, ngoài năm biến của đề cương, được tính ngay trong \ma{du\_lieu.py}. Hàm \ma{doc\_ngay} cắt mỗi ngày thành buổi sáng và buổi chiều tại khoảng trống trên $30$ phút giữa hai nến (\ma{NGUONG\_NGHI}), tính \ma{rv\_sang}, \ma{rv\_chieu} (nến đầu buổi dùng lợi suất mở-đến-đóng) và \ma{nghi\_trua}; hàm \ma{xay\_ngay} cộng thêm bình phương lợi suất qua đêm \ma{dem}, vốn đã sửa bằng giá VN30F2M ở phiên sau đáo hạn, thành cột \ma{rv}; hàm \ma{dac\_trung} thêm cột thứ sáu $\ln(\mathrm{RV}+\epsilon)$ trễ một phiên, chuẩn hóa như năm biến khác. RV nằm trong \ma{[mo\_hinh].bien\_ung\_vien}; giá trị của đề cương (năm biến) ghi ở \ma{[de\_cuong\_goc]} nên điểm khác biệt tự vào phụ lục sai lệch.
+
+\subsection{Mô phỏng quanh mô hình được chọn (b06b, b06c)}
+
+Bước b06b ước lượng cấu hình được chọn (biến của b05, phân phối của b06) trên $\UL\cup\XT$ bằng \ma{uoc\_luong\_day\_du}; b07 dùng lại ước lượng này. Bước b06c lặp $B$ lần (\ma{[mo\_phong\_chon].B}): Sinh lợi suất bằng \ma{sinh\_tu\_mo\_hinh} với tham số của b06b và đúng chuỗi biến ngoại sinh, biến giả lịch, cờ phiên khuyết của $\UL\cup\XT$, ước lượng lại bằng hợp lý cực đại, rồi tổng hợp độ phủ, độ chệch, RMSE. Hàm \ma{mo\_phong.dieu\_kien\_cong} chuyển các ô độ phủ và tỷ lệ bác bỏ sai thành điều kiện (i) bằng kiểm định nhị thức một phía có hiệu chỉnh Holm; nó ghi cả kết luận theo ngưỡng cứng của đề cương để đối chiếu.
 
 \subsection{Đệ quy phương sai và hàm hợp lý}
 
@@ -254,7 +258,7 @@ Hàm \ma{du\_bao\_cam} nhận $\hat\theta$ cố định, lọc $\ln h_t$ trên t
 \begin{enumerate}
 \item Cho mỗi đường chọn ngẫu nhiên một bộ tham số trong $P$.
 \item Sinh trước ma trận $Z_{s,j}$ ($S\times H_{\max}$): Từ $\Ecal$ với tham số hình dạng của bộ đã chọn, hoặc bốc lại từ các phần dư chuẩn hóa trong mẫu (chế độ lọc). Ma trận này dùng chung cho mọi phiên gốc của mốc.
-\item Ước lượng mô hình tự hồi quy bậc một cho từng biến ngoại sinh trên cửa sổ ước lượng; lưu hệ số và phần dư.
+\item Ước lượng cho từng biến ngoại sinh hồi quy $X_{k+1}=c+\phi X_k+a|z_k|+b\,z_k+e$ trên cửa sổ ước lượng, với $z_k$ là phần dư chuẩn hóa của bộ tham số hợp lý cực đại (bỏ phiên khuyết); lưu hệ số và phần dư. Khóa \ma{[ky\_quy].x\_tuong\_lai = \"ar1\"} trở về tự hồi quy bậc một của đề cương.
 \item Với mỗi phiên gốc $t$ trong mốc: Lấy $\ln h^{(s)}_{t+1}$ đã lọc của bộ tham số tương ứng, đặt $X^{(s)}_{t+1}$ bằng giá trị quan sát được, và tích lũy $c^{(s)}\leftarrow0$.
 \item Với $j=1,\dots,H_{\max}$:
  \begin{enumerate}
@@ -335,7 +339,7 @@ Trên một máy, các nhóm đơn vị được chia cho các tiến trình con
 
 \subsection{Cổng chuyển giai đoạn và khóa khối kiểm tra}
 
-Bước b07 kiểm tra ba điều kiện của Mục~\ref{sec:cong} (Tài liệu 1). Nếu không đạt, bước ghi trạng thái ``cổng không đạt'', in lý do và dừng toàn bộ chuỗi (mã thoát $3$); chỉ khi người dùng chủ động chạy lại với cờ chấp nhận, bước mới tiếp tục và việc chấp nhận được ghi vào hồ sơ cùng phụ lục sai lệch của báo cáo. Khi cổng đạt, bước ghi tệp \ma{KHOA\_CAU\_HINH.json} (phân phối, biến, ranh giới khối).
+Bước b07 kiểm tra ba điều kiện của Mục~\ref{sec:cong} (Tài liệu 1); điều kiện (i) gồm kết quả của b03a và b06c, điều kiện (ii) dùng ước lượng của b06b với hồi quy chẩn đoán có hiệp phương sai HC3 (\ma{danh\_gia.chan\_doan}, đủ ba biến giả lịch). Nếu không đạt, bước ghi trạng thái ``cổng không đạt'', in lý do và dừng toàn bộ chuỗi (mã thoát $3$); chỉ khi người dùng chủ động chạy lại với cờ chấp nhận, bước mới tiếp tục và việc chấp nhận được ghi vào hồ sơ cùng phụ lục sai lệch của báo cáo. Khi cổng đạt, bước ghi tệp \ma{KHOA\_CAU\_HINH.json} (phân phối, biến, ranh giới khối).
 
 Trước khi có tệp khóa, hàm cấp dữ liệu cho mọi bước cắt bảng ngày tại hết khối $\XT$, nên không có dòng mã nào có thể đọc khối $\KT$; bước khai báo cần khối $\KT$ sẽ bị từ chối. Bước kiểm toán b15 kiểm tra thêm rằng không có đầu ra nào của giai đoạn 1 chứa quan sát thuộc $\KT$.
 

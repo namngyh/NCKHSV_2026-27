@@ -143,7 +143,9 @@ b04 & MLE ban đầu & EGARCH-X trên $\UL$, $4$ phân phối, sai số chuẩn,
 b04b & Dự báo tiên nghiệm & Kiểm tra tiên nghiệm có tạo ra lợi suất hợp lý không & $4$ \\
 b05 & Chọn biến & Dự báo cuốn chiếu trên $\XT$ cho mọi tập biến thỏa ngưỡng tương quan (sáu ứng viên, trong đó RV là biến bổ sung); chọn tiến; SPA; Holm & $2.167$ \\
 b06 & Chọn phân phối & Dự báo cuốn chiếu trên $\XT$ cho $4$ phân phối & $360$ \\
-b07 & Cổng & Kiểm tra ba điều kiện; khóa cấu hình & $1$ \\
+b06b & Ước lượng cấu hình chọn & MLE của cấu hình được chọn trên $\UL\cup\XT$ & $1$ \\
+b06c & Mô phỏng quanh cấu hình chọn & Bootstrap tham số quanh ước lượng b06b, độ phủ khoảng $95\%$ & $1.000$ \\
+b07 & Cổng & Kiểm tra ba điều kiện (điều kiện (i): kiểm định nhị thức, Holm); khóa cấu hình & $1$ \\
 b08 & Cuốn chiếu bốn phương pháp & MLE, GARCH, VB mean-field, VB full-rank, NUTS tại $65$ mốc & $1.105$ \\
 b08b & Độ nhạy tiên nghiệm & NUTS với hai phương án tiên nghiệm tại mốc đầu khối $\KT$ & $8$ \\
 b09 & Đánh giá ngoài mẫu & So sánh bốn phương pháp, QLIKE, điểm logarit, VaR, ES, DM, MCS & $260$ \\
@@ -162,8 +164,8 @@ Số đơn vị của b08 gồm $390$ ước lượng hợp lý cực đại ($6
 
 \begin{enumerate}
 \item b00, b01, b02 chạy trước và độc lập với ước lượng.
-\item b03a phụ thuộc b02. b04, b04b, b05 phụ thuộc b02. b06 phụ thuộc b05, vì cần biết biến được chọn.
-\item b07 phụ thuộc b03a, b04, b04b, b05, b06: Điều kiện (i) của cổng đọc kết quả b03a, điều kiện (ii) và (iii) đọc kết quả b04 đến b06.
+\item b03a phụ thuộc b02. b04, b04b, b05 phụ thuộc b02. b06 phụ thuộc b05, vì cần biết biến được chọn. b06b phụ thuộc b05 và b06; b06c phụ thuộc b06b.
+\item b07 phụ thuộc b03a, b04, b04b, b05, b06, b06b, b06c: Điều kiện (i) của cổng đọc kết quả b03a, điều kiện (ii) và (iii) đọc kết quả b04 đến b06.
 \item b08 phụ thuộc b07 (cần cấu hình đã khóa). b08b và b09 phụ thuộc b08. b10 phụ thuộc b08; b11 phụ thuộc b09, b10; b12 phụ thuộc b11.
 \item b13 phụ thuộc b12 và các bước phụ trợ; b15 phụ thuộc b13; b14 phụ thuộc b15.
 \item b03b chỉ phụ thuộc b02 (dữ liệu giả không phụ thuộc kết quả ước lượng), nên có thể chạy bất kỳ lúc nào.
@@ -357,6 +359,8 @@ Việc ghi lại các điều chỉnh giữa chừng là cần thiết cho tính
 23/10 & Thêm GED vào mô phỏng khôi phục b03a ($16.000$ đơn vị) và b03b ($119.200$ đơn vị); mã băm khởi động lại nay theo dõi cả dữ liệu đầu vào. Máy chủ chạy lại từ b00 lúc 14:31 trên dữ liệu đầy đủ. \\
 23--24/10 & Máy chủ gặp sự cố sau lần đồng bộ 22:22; chạy lại lúc 00:10 ngày 24/10 và tiếp tục đúng chỗ dở nhờ điểm kiểm tra từng đơn vị (không mất đơn vị đã xong). Các lần khởi động 14:39 và 21:51 chỉ chạy khoảng $8$ đến $9$ tiến trình do RAM trống thấp. \\
 25/10 & Thêm biến ngoại sinh ứng viên thứ sáu RV (biến động thực tế đóng-đến-đóng từ nến một phút, tách nghỉ trưa và qua đêm, lợi suất qua đêm sau đáo hạn dùng giá F2M), ngoài đề cương đã đăng ký, theo yêu cầu của người nghiên cứu. Tương quan giữa RV và $G$ là $0{,}866$ nên hai biến không cùng xuất hiện trong một tập. RV nằm trong mô-đun riêng \ma{bien\_rv.py}, và danh sách ứng viên được đặt ngoài mục \ma{[mo\_hinh]}, để mã băm của b00 đến b03b không đổi và hơn chín ngày đã chạy của b03b được giữ. b04 đến b15 phải chạy lại. \\
+25/10 & Lần chạy với RV: b05 chọn RV (DM $p=0{,}0037$), b06 chọn Student-$t$ lệch; cổng b07 không đạt vì một ô độ phủ $0{,}899$ (E2, $\kappa_1$) so với ngưỡng $0{,}90$. \\
+26/10 & Sửa theo rà soát: hồi quy chẩn đoán đủ ba biến giả lịch và HC3; điều kiện (i) dùng kiểm định nhị thức có Holm và thêm b06b, b06c (mô phỏng quanh mô hình được chọn); mô phỏng $H$ phiên cho biến ngoại sinh phụ thuộc cú sốc cùng phiên; đưa RV vào \ma{du\_lieu.py}; sửa chú thích và mặc định lỗi thời. Chạy lại toàn bộ từ b00, kể cả b03b. Các sự kiện cần công bố nằm ở \ma{[cong\_bo]} và được chép vào phụ lục sai lệch. \\
 \bottomrule
 \end{tabular}
 \end{table}

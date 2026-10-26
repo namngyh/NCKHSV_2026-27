@@ -20,7 +20,7 @@ from de_cuong import ky_quy as KQ
 from de_cuong.khung import GOC, Buoc, doc_ho_so
 
 TEP = __file__
-DANH = ("b00", "b01", "b02", "b02k", "b03a", "b03b", "b04", "b04b", "b05", "b06", "b07", "b08", "b08b", "b09", "b10",
+DANH = ("b00", "b01", "b02", "b02k", "b03a", "b03b", "b04", "b04b", "b05", "b06", "b06b", "b06c", "b07", "b08", "b08b", "b09", "b10",
         "b11", "b12")
 
 
@@ -78,7 +78,9 @@ def phu_luc_sai_lech(ctx) -> str:
           f"- Đối chứng cách tính của VSDC (QĐ 61/QĐ-VSD 2022, QĐ 12/QĐ-HĐTV 2023, QĐ 26/QĐ-HĐTV 2025), n = {cfg['vsdc']['n']}, kỳ quan sát 90/120/250 ngày, "
           "cập nhật hằng ngày và theo lịch 1, 10, 20 (b12). Đây là tính lại theo văn bản, không phải chuỗi VSDC công bố.",
           "- Quy đổi ký quỹ và thiếu hụt ra đồng mỗi hợp đồng bằng hệ số nhân 100.000 đồng/điểm (b12).", "",
-          "## Lựa chọn của nhóm nghiên cứu ở những chỗ đề cương không quy định", "",
+          "## Thay đổi sau khi khối KT đã được nhìn thấy và các sự kiện cần công bố", ""]
+    s += [f"- {x}" for x in cfg.get("cong_bo", {}).get("su_kien", [])] or ["- Không có."]
+    s += ["", "## Lựa chọn của nhóm nghiên cứu ở những chỗ đề cương không quy định", "",
           "Xem `cau_hinh/de_cuong.toml` (chú thích từng giá trị) và THIET_KE_CODE.md mục 6b.", ""]
     return "\n".join(s)
 

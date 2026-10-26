@@ -29,9 +29,9 @@ for p in (GOC / "ma_nguon", GOC):
         sys.path.insert(0, str(p))
 
 MO_DUN = ["quy_trinh.b00_b02_chuan_bi", "quy_trinh.b03_mo_phong", "quy_trinh.b03b_so_lan_lap", "quy_trinh.b03a_ged",
-          "quy_trinh.b04_b07_giai_doan_1",
+          "quy_trinh.b04_b07_giai_doan_1", "quy_trinh.b06c_mo_phong_chon",
           "quy_trinh.b08_b09_ngoai_mau", "quy_trinh.b10_b12_ky_quy", "quy_trinh.b13_b14_bao_cao"]
-THU_TU = ["b00", "b01", "b02", "b02k", "b03a", "b04", "b04b", "b05", "b06", "b07", "b08", "b08b", "b09", "b10",
+THU_TU = ["b00", "b01", "b02", "b02k", "b03a", "b04", "b04b", "b05", "b06", "b06b", "b06c", "b07", "b08", "b08b", "b09", "b10",
           "b11", "b12", "b13", "b15", "b14"]
 NEN = "b03b"
 CUOI = ("b13", "b15", "b14")

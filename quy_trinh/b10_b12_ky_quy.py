@@ -23,7 +23,7 @@ from de_cuong.khung import GOC, Buoc
 from de_cuong.mo_hinh_jax import DacTa
 
 TEP = __file__
-TV = ("du_lieu", "bien_rv", "mo_hinh_jax", "uoc_luong", "phan_phoi", "ky_quy", "danh_gia")
+TV = ("du_lieu", "mo_hinh_jax", "uoc_luong", "phan_phoi", "ky_quy", "danh_gia")
 
 
 def _moc(ctx):
@@ -59,7 +59,7 @@ def _lam_b10(ctx, khoa, truoc):
         P = ctx.doc("bayes_cuon_chieu.pkl", "b08")[k][ng]["psi_mau"]
         P = P[np.linspace(0, len(P) - 1, min(len(P), ctx.cfg["bayes"]["so_mau_hau_nghiem"])).astype(int)]
     kq = ctx.cfg["ky_quy"]
-    nguon = KQ.nguon_moc(spec, P, f, dl, s0, s1)
+    nguon = KQ.nguon_moc(spec, P, f, dl, s0, s1, kq.get("x_tuong_lai", "ar1"))
     sim = KQ.mo_phong_moc(spec, nguon, d[["D_dh", "D_sau", "D_nghi"]].to_numpy(float), d["khuyet"].to_numpy(),
                           kq["S"], max(kq["H"]), kq["alpha"], ctx.rng(khoa), "loc" if ng == "fhs" else "tham_so")
     return {"s0": s0, **sim}

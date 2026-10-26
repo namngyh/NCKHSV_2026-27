@@ -17,17 +17,8 @@ for p in (GOC / "ma_nguon", GOC):
         sys.path.insert(0, str(p))
 
 from de_cuong import du_lieu as DL          # noqa: E402
-from de_cuong import bien_rv as BRV         # noqa: E402
 from de_cuong import uoc_luong as U         # noqa: E402
 from de_cuong.mo_hinh_jax import DacTa      # noqa: E402
-
-BRV.gan()   # biến bổ sung RV: thêm vào DL.TEN_BIEN và DL.dac_trung (mọi bước nhập _chung đều thấy RV)
-
-
-def ung_vien(cfg: dict) -> list:
-    """Tập biến ngoại sinh ứng viên: [mo_hinh].bien_ung_vien (đề cương) cộng [chon_bien].them_bien_ung_vien (bổ sung)."""
-    return list(cfg["mo_hinh"]["bien_ung_vien"]) + [b for b in cfg["chon_bien"].get("them_bien_ung_vien", [])
-                                                    if b not in cfg["mo_hinh"]["bien_ung_vien"]]
 
 
 def ten_tap(bien) -> str:

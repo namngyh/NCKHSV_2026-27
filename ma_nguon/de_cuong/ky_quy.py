@@ -6,9 +6,13 @@ tích lũy không có công thức đóng nên được xấp xỉ bằng mô ph
   2. ln h_{t+1} là giá trị lọc tại cuối phiên t theo chính bộ tham số đó;
   3. với j = 1..H: z ~ G (hoặc lấy mẫu lại phần dư chuẩn hóa: mô phỏng lịch sử có lọc), r = sqrt(h) z (mu = 0),
      X_{t+j} sinh từ AR(1) ước lượng trên cùng cửa sổ với phần dư lấy mẫu lại, cập nhật ln h theo (11) và lịch;
+     với x_tuong_lai = "ar1_kem_z" (26/10/2026), X_{t+j+1} = c + phi X_{t+j} + a |z_{t+j}| + b z_{t+j} + e: biến đo đến cuối
+     phiên t+j (như RV, G, O) phụ thuộc cú sốc của chính phiên đó, nên cú sốc lớn kéo phương sai các phiên sau lên;
+     "ar1" là cách của đề cương (X độc lập với z cùng phiên, có thể làm đuôi lợi suất tích lũy bị đánh giá thấp);
   4. R = exp(tổng r / 100) - 1, tổn thất mua -R, bán R; VaR = L^(j*), ES = trung bình j* tổn thất lớn nhất.
-Quy tắc năm bước (7.3): m1 = (1-w) VaR + w ES; m2 = (1+b) m1; m3 = max(m2, phi VaR_LS);
-  m4_t = max(m3_t, eta m4_{t-1} + (1-eta) m3_t); m_t = max(sàn, g ceil(max(m4_t, m_{t-1} - D) / g)).
+Quy tắc sáu bước (7.3): m1 = (1-w) VaR + w ES; m2 = (1+b) m1; m3 = max(m2, phi VaR_LS);
+  m4_t = max(m3_t, eta m4_{t-1} + (1-eta) m3_t); m5_t = max(sàn, g ceil(max(m4_t, m5_{t-1} - D) / g));
+  bước 6 (vùng không điều chỉnh): mức áp dụng chỉ đổi khi m5_t lệch khỏi nó tối thiểu ng_tang hoặc ng_giam.
 Chi phí ky vọng C = mean[c_v m + c_th (L - m)+], mức đuôi tối ưu alpha* = c_v / c_th (7.4).
 Đối chứng (7.5) và chỉ tiêu (7.6); cửa sổ (t, t+H] chứa phiên chuyển hợp đồng bị loại khỏi đánh giá (Nhận xét 4).
 
@@ -30,30 +34,41 @@ from .mo_hinh_jax import DacTa, e_abs, ham
 # ----------------------------------------------------------------------------------------
 # Nguồn mô phỏng của một mốc ước lượng lại
 # ----------------------------------------------------------------------------------------
-def nguon_moc(spec: DacTa, P: np.ndarray, f: dict, dl, s0: int, s1: int) -> dict:
+def nguon_moc(spec: DacTa, P: np.ndarray, f: dict, dl, s0: int, s1: int, x_tuong_lai: str = "ar1_kem_z") -> dict:
     """Chuẩn bị cho các phiên gốc t = s0-1 .. s1-2 (dự báo cho phiên s0 .. s1-1) của một mốc.
 
-    P: (S_p, d) các bộ tham số (S_p = 1 với MLE). f, dl: dữ liệu và thống kê chuẩn hóa tại mốc."""
+    P: (S_p, d) các bộ tham số (S_p = 1 với MLE). f, dl: dữ liệu và thống kê chuẩn hóa tại mốc.
+    x_tuong_lai: "ar1" (đề cương) hoặc "ar1_kem_z" (thêm |z| và z của phiên vừa qua vào hồi quy của X)."""
     h = ham(spec.pp, spec.nx)
     lnh, z = (np.asarray(x) for x in h.loc_vmap(jnp.asarray(P), dl))
     a0, a1 = s0 - DL.BO_QUA, s1 - DL.BO_QUA
     cot = [DL.TEN_BIEN.index(b) for b in spec.bien]
     nx = spec.nx
-    c, phi, resid = np.zeros(nx), np.zeros(nx), np.zeros((1, nx))
+    c, phi, a_z, b_z, resid = np.zeros(nx), np.zeros(nx), np.zeros(nx), np.zeros(nx), np.zeros((1, nx))
+    J = np.asarray(dl[1])
     if nx:
         x = f["X"][DL.BO_QUA:s0][:, cot]
         y, xl = x[1:], x[:-1]
+        if x_tuong_lai == "ar1_kem_z":
+            # X ở hàng k+1 đo đến cuối phiên BO_QUA+k, nên hồi quy theo z của phiên đó (bộ tham số đầu = MLE); bỏ phiên J
+            zk = np.asarray(z[0, :a0 - 1], float)
+            dung = ~J[:a0 - 1] & np.isfinite(zk)
+            y, xl, zk = y[dung], xl[dung], zk[dung]
+        elif x_tuong_lai != "ar1":
+            raise ValueError(f"x_tuong_lai = {x_tuong_lai!r} khong hop le")
         resid = np.empty_like(y)
         for i in range(nx):
-            A = np.column_stack([np.ones(len(xl)), xl[:, i]])
+            cot_A = [np.ones(len(xl)), xl[:, i]] + ([np.abs(zk), zk] if x_tuong_lai == "ar1_kem_z" else [])
+            A = np.column_stack(cot_A)
             b = np.linalg.lstsq(A, y[:, i], rcond=None)[0]
-            c[i], phi[i] = b
+            c[i], phi[i] = b[0], b[1]
+            if x_tuong_lai == "ar1_kem_z":
+                a_z[i], b_z[i] = b[2], b[3]
             resid[:, i] = y[:, i] - A @ b
-    J = np.asarray(dl[1])
     pool_fhs = z[0, :a0][~J[:a0]]                    # phần dư chuẩn hóa trong mẫu (bộ tham số đầu = MLE)
     sh = P[:, 5 + nx + 3:]
     return {"P": P, "lnh_tiep": lnh[:, a0:a1], "X0": f["X"][s0:s1][:, cot] if nx else np.zeros((s1 - s0, 0)),
-            "c": c, "phi": phi, "resid": resid, "pool_fhs": pool_fhs,
+            "c": c, "phi": phi, "a_z": a_z, "b_z": b_z, "resid": resid, "pool_fhs": pool_fhs,
             "mabs": np.array([float(e_abs(spec.pp, jnp.asarray(s))) for s in sh]), "s0": s0}
 
 
@@ -91,7 +106,8 @@ def mo_phong_moc(spec: DacTa, ng: dict, D: np.ndarray, J: np.ndarray, S: int, Hm
                 var[i, j - 1, ia, 1], es[i, j - 1, ia, 1] = _duoi(R, a)
             if j < Hmax:
                 if nx:
-                    X = ng["c"] + ng["phi"] * X + ng["resid"][rng.integers(len(ng["resid"]), size=S)]
+                    X = (ng["c"] + ng["phi"] * X + ng["a_z"] * np.abs(z)[:, None] + ng["b_z"] * z[:, None]
+                         + ng["resid"][rng.integers(len(ng["resid"]), size=S)])
                 s_ = np.where(J[min(t + j, len(J) - 1)], 0.0, ka * (np.abs(z) - mabs) + th * z)
                 dj = D[min(t + j + 1, len(D) - 1)]
                 lnh = np.clip(om + s_ + be * lnh + (np.sum(X * gam, 1) if nx else 0.0) + dl @ dj, -20, 20)
@@ -164,7 +180,7 @@ def ewma_var(d, tmoc: np.ndarray, H: int, a: float, lam: float = 0.94) -> np.nda
 # Quy tắc năm bước và chỉ tiêu (7.3, 7.6)
 # ----------------------------------------------------------------------------------------
 def quy_tac(var, es, san, w, b, phi, eta, giam=0.01, g=0.005, ng_tang=0.0, ng_giam=0.0):
-    """Áp dụng quy tắc năm bước cho các chuỗi var, es, san (cùng độ dài, theo thứ tự thời gian).
+    """Áp dụng quy tắc sáu bước (năm bước của đề cương và vùng không điều chỉnh) cho các chuỗi var, es, san.
 
     Bước 6 (vùng không điều chỉnh): mức mục tiêu mi do năm bước tính; mức áp dụng chỉ đổi khi mi lệch khỏi mức đang áp
     dụng tối thiểu ng_tang (tăng) hoặc ng_giam (giảm), khi đó nhảy thẳng tới mi; luôn giữ mức sàn phi * san.

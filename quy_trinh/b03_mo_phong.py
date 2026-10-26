@@ -60,11 +60,14 @@ def _th_b03a(ctx, kq):
                if f"{pp}|mle|{kb}" in bang]
         bb = ([bang[f"{pp}|mle|E2"]["bac_bo_theta0"], bang[f"{pp}|mle|E4"]["bac_bo_gamma0"]]
               if f"{pp}|mle|E2" in bang and f"{pp}|mle|E4" in bang else [])
-        dieu_kien[pp] = {"do_phu_min": min(phu) if phu else None, "do_phu_max": max(phu) if phu else None,
+        o_phu = {f"{kb}|{t}": (bang[f"{pp}|mle|{kb}"]["tham_so"][t]["do_phu"], bang[f"{pp}|mle|{kb}"]["B"])
+                 for kb in MP.KICH_BAN for t in THAM_SO_CONG if f"{pp}|mle|{kb}" in bang}
+        o_bb = ({"E2|theta": (bb[0], bang[f"{pp}|mle|E2"]["B"]), "E4|gamma": (bb[1], bang[f"{pp}|mle|E4"]["B"])}
+                if bb else {})
+        dieu_kien[pp] = {**MP.dieu_kien_cong(o_phu, o_bb, cg),
                          "bac_bo_sai_E2_theta": bb[0] if bb else None, "bac_bo_sai_E4_gamma": bb[1] if bb else None,
-                         "so_that_bai": sum(len(v) for k, v in that_bai.items() if k.startswith(pp + "|")),
-                         "dat": bool(phu and bb and cg["do_phu_min"] <= min(phu) and max(phu) <= cg["do_phu_max"]
-                                     and max(bb) <= cg["bac_bo_sai_max"])}
+                         "so_that_bai": sum(len(v) for k, v in that_bai.items() if k.startswith(pp + "|"))}
+        dieu_kien[pp]["dat"] = bool(phu and bb and dieu_kien[pp]["dat"])
     ctx.ghi("mo_phong_khoi_phuc.json", {"B": ctx.cfg["mo_phong"]["B_mle"], "T": ctx.cfg["mo_phong"]["T"],
                                         "kich_ban": {k: list(v) for k, v in MP.KICH_BAN.items()}, "bang": bang,
                                         "dieu_kien_8_1_i": dieu_kien, "tham_so_xet_cong": THAM_SO_CONG,
