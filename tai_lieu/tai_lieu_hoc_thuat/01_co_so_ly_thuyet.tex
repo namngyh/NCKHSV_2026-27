@@ -203,6 +203,8 @@ lần lượt là biên độ lên, biên độ xuống và lợi suất trong p
 \end{equation}
 trong đó $s$ là mốc ước lượng gần nhất. Hệ số $\hat c_\rho$ bù cho hai nguồn chệch xuống: Biên độ quan sát rời rạc nhỏ hơn biên độ liên tục, và có những khoảng không giao dịch trong phiên. Lý do phải hiệu chỉnh được giải thích ở Mục~\ref{sec:qlike}.
 
+Cách dùng biên độ giá ở trên dành cho trường hợp chỉ có dữ liệu ngày. Dữ liệu của nghiên cứu là nến một phút, nên đại diện chính thức là phương sai thực hiện đóng cửa -- đóng cửa $\rho_t=RV^{\text{ngày}}_t$ (định nghĩa ở mục biến ngoại sinh RV), với cùng hệ số $\hat c_\rho$ tính trên cửa sổ ước lượng; đại diện~\eqref{eq:proxy} được giữ làm phương án đối chiếu. Hệ số $\hat c_\rho$ và mọi thống kê chuẩn hóa chỉ dùng các phiên của cửa sổ ước lượng (sau $61$ phiên đầu bị bỏ) đến mốc $s$.
+
 \paragraph{Diễn giải từng thành phần.} Lợi suất đóng cửa -- đóng cửa của một phiên gồm hai phần nối tiếp: Phần qua đêm (từ giá đóng cửa hôm trước đến giá mở cửa hôm nay) và phần trong phiên (từ giá mở cửa đến giá đóng cửa):
 \begin{equation*}
 \underbrace{\ln\frac{P_t}{P_{t-1}}}_{\text{cả ngày}}=\underbrace{\ln\frac{P^{o}_t}{P_{t-1}}}_{\text{qua đêm}}+\underbrace{\ln\frac{P_t}{P^{o}_t}}_{\text{trong phiên}} .
@@ -773,7 +775,7 @@ Biến thể mô phỏng lịch sử có lọc \cite{mcneilfrey2000} thay $\Ecal
 
 \subsection{Quy tắc ký quỹ năm bước và vùng không điều chỉnh}\label{sec:quytac}
 
-Ký quỹ thường áp dụng cùng một tỷ lệ cho hai phía, nên gọi $\widehat{\VaR}_t$ và $\widehat{\ES}_t$ là giá trị lớn hơn giữa hai phía. Quy tắc gồm năm bước nối tiếp tính mức ký quỹ mục tiêu, rồi một bước thứ sáu quyết định có đổi mức áp dụng hay không.
+Ký quỹ thường áp dụng cùng một tỷ lệ cho hai phía và được so với tổn thất của phía thua $L_{t,H}=|R_{t,H}|$, nên gọi $\widehat{\VaR}_t$ và $\widehat{\ES}_t$ là VaR và ES của $|R_{t,H}|$ ở mức $\alpha$: Khi đó $\Prob(L_{t,H}>\widehat{\VaR}_t\mid\Fcal_t)=\alpha$. Đề cương lấy giá trị lớn hơn giữa VaR của hai phía; với cách đó $\Prob(|R_{t,H}|>m_t)=\Prob(-R_{t,H}>m_t)+\Prob(R_{t,H}>m_t)\approx2\alpha$ và kiểm định độ phủ ở mức $\alpha$ bác bỏ có hệ thống, nên cách này chỉ được giữ làm phương án đối chiếu. Quy tắc gồm năm bước nối tiếp tính mức ký quỹ mục tiêu, rồi một bước thứ sáu quyết định có đổi mức áp dụng hay không.
 
 \paragraph{Bước 1: Mức cơ sở.} Với trọng số $w\in[0,1]$,
 \begin{equation}

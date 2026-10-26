@@ -129,8 +129,36 @@ def sai_so_chuan(spec: DacTa, psi, dl) -> dict:
     except np.linalg.LinAlgError:
         Ai = np.linalg.pinv(A)
     VS = Ai @ B @ Ai
+    # -Hessian không xác định dương (nghiệm ở biên, beta sát 1) thì sai số chuẩn không đáng tin; trị tuyệt đối của đường
+    # chéo che mất điều này, nên ghi cờ để báo cáo và để mô phỏng đếm số lần Hessian hợp lệ.
+    tri_rieng_nho_nhat = float(np.linalg.eigvalsh((A + A.T) / 2).min())
     return {"se_hessian": np.sqrt(np.abs(np.diag(Ai))), "se_banh_kep": np.sqrt(np.abs(np.diag(VS))),
-            "cov_banh_kep": VS, "cov_hessian": Ai}
+            "cov_banh_kep": VS, "cov_hessian": Ai, "hessian_xac_dinh_duong": bool(tri_rieng_nho_nhat > 0),
+            "tri_rieng_nho_nhat": tri_rieng_nho_nhat}
+
+
+def khoi_tao_phan_tan(spec: DacTa, m: dict, dl, rng, he_so: float = 2.0) -> np.ndarray:
+    """Điểm khởi tạo phân tán cho một chuỗi NUTS: xi_hat + he_so * se_xi * N(0, 1).
+
+    LÝ THUYẾT: R_hat chỉ phát hiện được chuỗi chưa hội tụ khi các chuỗi xuất phát phân tán hơn hậu nghiệm (Vehtari và cộng
+    sự 2021). se_xi là sai số chuẩn Hessian đổi sang không gian xi theo đạo hàm của phép đổi biến g (18): se_xi = se_psi /
+    |d psi / d xi| với beta: beta(1 - beta); nu: sigmoid(xi); lambda: 1 - lambda^2; các tham số khác: 1. Sai số chuẩn không
+    hữu hạn hoặc Hessian không xác định dương thì dùng 0,1; se_xi được chặn trong [0,01; 1] để tránh điểm đầu vô lý."""
+    psi, xi = np.asarray(m["psi"], float), np.asarray(m["xi"], float)
+    se = sai_so_chuan(spec, psi, dl)
+    se_psi = np.asarray(se["se_hessian"], float)
+    dao = np.ones(spec.d)
+    dao[4] = psi[4] * (1 - psi[4])
+    k = 5 + spec.nx + 3
+    if spec.pp in ("student", "skewt", "ged"):
+        dao[k] = 1 / (1 + math.exp(-xi[k]))
+    if spec.pp == "skewt":
+        dao[k + 1] = 1 - psi[k + 1] ** 2
+    se_xi = se_psi / np.maximum(np.abs(dao), 1e-12)
+    if not se["hessian_xac_dinh_duong"]:
+        se_xi = np.full(spec.d, 0.1)
+    se_xi = np.clip(np.where(np.isfinite(se_xi), se_xi, 0.1), 0.01, 1.0)
+    return xi + he_so * se_xi * rng.normal(size=spec.d)
 
 
 def kha_nghich(spec: DacTa, psi, dl, lech: float = 2.0) -> dict:

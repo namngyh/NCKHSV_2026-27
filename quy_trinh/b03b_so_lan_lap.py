@@ -39,3 +39,5 @@ def _dv_b03b(ctx):
 
 DANH_MUC["b03b"].don_vi = _dv_b03b
 DANH_MUC["b03b"].mo_rong_don_vi = True
+# tệp vá này và b03a_ged.py (cac_phan_phoi) quyết định danh sách đơn vị: phải được băm. B_vb, B_nuts vẫn không băm (mo_rong_don_vi)
+DANH_MUC["b03b"].tep_phu = (__file__, __file__.replace("b03b_so_lan_lap", "b03a_ged"))

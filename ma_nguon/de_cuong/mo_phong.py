@@ -108,7 +108,8 @@ def don_vi_mle(spec, psi0, dl, cfg, seed) -> dict:
     se = U.sai_so_chuan(spec, m["psi"], dl)
     long = _mle(DacTa(spec.pp, ()), U.bo_bien(dl, spec.nx), cfg, seed + 1)
     return {"that": psi0, "ten": spec.ten(), "uoc": m["psi"], "se_h": se["se_hessian"], "se_s": se["se_banh_kep"],
-            "LR_gamma": 2 * (m["ll"] - long["ll"]), "so_gan_tot": m["so_gan_tot"]}
+            "LR_gamma": 2 * (m["ll"] - long["ll"]), "so_gan_tot": m["so_gan_tot"],
+            "hessian_ok": se["hessian_xac_dinh_duong"]}
 
 
 def don_vi_bayes(spec, psi0, dl, cfg, pt: str, seed_khoi_tao: int, seed: int, chi_so: int, thu_muc) -> dict:
@@ -118,7 +119,8 @@ def don_vi_bayes(spec, psi0, dl, cfg, pt: str, seed_khoi_tao: int, seed: int, ch
     m = _mle(spec, dl, cfg, seed_khoi_tao)
     rng = np.random.default_rng(seed)
     if pt == "nuts":
-        r = U.nuts_chuoi(spec, dl, m["xi"] + rng.normal(0, 0.05, spec.d), b["nuts_khoi_dong"], b["nuts_so_mau"],
+        xi0 = U.khoi_tao_phan_tan(spec, m, dl, rng, b.get("nuts_he_so_phan_tan", 2.0))
+        r = U.nuts_chuoi(spec, dl, xi0, b["nuts_khoi_dong"], b["nuts_so_mau"],
                          b["nuts_dich_chap_nhan"], b["nuts_do_sau_cay"], seed, thu_muc=thu_muc,
                          vong_moi_doan=b["nuts_vong_moi_doan"])
         chan_doan = {"phan_ky": r["phan_ky"], "buoc_tb": r["buoc_tb"]}
@@ -160,6 +162,7 @@ def tong_hop(kq: list[dict], pp_suy_dien: str) -> dict:
         SH, SS = np.array([x["se_h"] for x in kq]), np.array([x["se_s"] for x in kq])
         lo_s, hi_s = U_ - 1.959964 * SS, U_ + 1.959964 * SS
         phu_h = np.mean(np.abs(U_ - T0) <= 1.959964 * SH, 0)
+        out["ty_le_hessian_xac_dinh_duong"] = float(np.mean([x.get("hessian_ok", True) for x in kq]))
     else:
         lo_s, hi_s = np.array([x["duoi"] for x in kq]), np.array([x["tren"] for x in kq])
         phu_h = None
@@ -224,7 +227,13 @@ def tong_hop_sbc(kq: list[dict], so_ngan: int = 10) -> dict:
     ten, L = kq[0]["ten"], kq[0]["L"]
     H = np.array([x["hang"] for x in kq])
     out = {}
+    # thứ hạng nhận L + 1 giá trị nguyên 0..L; khi L + 1 không chia hết cho số ngăn, các ngăn chứa số giá trị khác nhau, nên
+    # tần số kỳ vọng dưới H0 (thứ hạng đều) tỷ lệ với số giá trị nguyên của từng ngăn, không bằng nhau
+    bien = np.linspace(0, L + 1, so_ngan + 1)
+    so_gt = np.histogram(np.arange(L + 1), bins=bien)[0]
     for i, t in enumerate(ten):
-        dem = np.histogram(H[:, i], bins=so_ngan, range=(0, L + 1))[0]
-        out[t] = {"dem": dem.tolist(), "chi2_p": float(stats.chisquare(dem).pvalue)}
+        dem = np.histogram(H[:, i], bins=bien)[0]
+        ky_vong = dem.sum() * so_gt / so_gt.sum()
+        out[t] = {"dem": dem.tolist(), "ky_vong": ky_vong.tolist(),
+                  "chi2_p": float(stats.chisquare(dem, ky_vong).pvalue)}
     return {"so_lan": len(kq), "L": L, "tham_so": out}

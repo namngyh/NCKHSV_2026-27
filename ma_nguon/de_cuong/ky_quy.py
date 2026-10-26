@@ -9,7 +9,9 @@ tích lũy không có công thức đóng nên được xấp xỉ bằng mô ph
      với x_tuong_lai = "ar1_kem_z" (26/10/2026), X_{t+j+1} = c + phi X_{t+j} + a |z_{t+j}| + b z_{t+j} + e: biến đo đến cuối
      phiên t+j (như RV, G, O) phụ thuộc cú sốc của chính phiên đó, nên cú sốc lớn kéo phương sai các phiên sau lên;
      "ar1" là cách của đề cương (X độc lập với z cùng phiên, có thể làm đuôi lợi suất tích lũy bị đánh giá thấp);
-  4. R = exp(tổng r / 100) - 1, tổn thất mua -R, bán R; VaR = L^(j*), ES = trung bình j* tổn thất lớn nhất.
+  4. R = exp(tổng r / 100) - 1, tổn thất mua -R, bán R, phía thua |R|; VaR = L^(j*), ES = trung bình j* tổn thất lớn nhất.
+     Ký quỹ một tỷ lệ cho cả hai phía được so với L = |R| (7.4), nên mức đúng là phân vị (1 - alpha) của |R|: với
+     max(VaR mua, VaR bán) ở mức alpha, P(|R| > m) = P(-R > m) + P(R > m) xấp xỉ 2 alpha (26/10/2026, [ky_quy].phia).
 Quy tắc sáu bước (7.3): m1 = (1-w) VaR + w ES; m2 = (1+b) m1; m3 = max(m2, phi VaR_LS);
   m4_t = max(m3_t, eta m4_{t-1} + (1-eta) m3_t); m5_t = max(sàn, g ceil(max(m4_t, m5_{t-1} - D) / g));
   bước 6 (vùng không điều chỉnh): mức áp dụng chỉ đổi khi m5_t lệch khỏi nó tối thiểu ng_tang hoặc ng_giam.
@@ -50,8 +52,9 @@ def nguon_moc(spec: DacTa, P: np.ndarray, f: dict, dl, s0: int, s1: int, x_tuong
         x = f["X"][DL.BO_QUA:s0][:, cot]
         y, xl = x[1:], x[:-1]
         if x_tuong_lai == "ar1_kem_z":
-            # X ở hàng k+1 đo đến cuối phiên BO_QUA+k, nên hồi quy theo z của phiên đó (bộ tham số đầu = MLE); bỏ phiên J
-            zk = np.asarray(z[0, :a0 - 1], float)
+            # X ở hàng k+1 đo đến cuối phiên BO_QUA+k, nên hồi quy theo z của phiên đó; bỏ phiên J. MLE: z của nghiệm MLE;
+            # hậu nghiệm: trung bình z theo các bộ tham số (P[0] chỉ là một mẫu ngẫu nhiên, không phải ước lượng điểm)
+            zk = np.asarray(z[:, :a0 - 1].mean(0), float)
             dung = ~J[:a0 - 1] & np.isfinite(zk)
             y, xl, zk = y[dung], xl[dung], zk[dung]
         elif x_tuong_lai != "ar1":
@@ -74,7 +77,8 @@ def nguon_moc(spec: DacTa, P: np.ndarray, f: dict, dl, s0: int, s1: int, x_tuong
 
 def mo_phong_moc(spec: DacTa, ng: dict, D: np.ndarray, J: np.ndarray, S: int, Hmax: int, alphas, rng,
                  che_do: str = "tham_so") -> dict:
-    """VaR, ES H phiên cho mọi phiên gốc của một mốc. Trả về mảng (số phiên, Hmax, số alpha, 2 phía)."""
+    """VaR, ES H phiên cho mọi phiên gốc của một mốc. Trả về mảng (số phiên, Hmax, số alpha, 3): chỉ số cuối 0 = vị thế mua
+    (tổn thất -R), 1 = vị thế bán (R), 2 = tổn thất của phía thua |R| (một tỷ lệ cho cả hai phía, mục 7.4)."""
     P = ng["P"]
     Sp, nx = len(P), spec.nx
     idx = rng.integers(Sp, size=S)                   # bộ tham số của từng đường
@@ -84,13 +88,15 @@ def mo_phong_moc(spec: DacTa, ng: dict, D: np.ndarray, J: np.ndarray, S: int, Hm
     # kho z dùng chung cho các phiên của mốc (số ngẫu nhiên chung): z[đường, bước]
     if che_do == "loc":
         Zk = ng["pool_fhs"][rng.integers(len(ng["pool_fhs"]), size=(S, Hmax))]
+        # số hạng kappa (|z| - E|z|) phải dùng E|z| của chính phân phối được lấy mẫu (phần dư), nếu không ln h trôi có hệ thống
+        mabs = np.full(S, float(np.mean(np.abs(ng["pool_fhs"]))))
     else:
         Zk = np.empty((S, Hmax))
         for s in np.unique(idx):
             m = idx == s
             Zk[m] = PP.lay_mau(int(m.sum()) * Hmax, spec.pp, P[s, 5 + nx + 3:], rng).reshape(-1, Hmax)
     n_ngay = ng["lnh_tiep"].shape[1]
-    var = np.full((n_ngay, Hmax, len(alphas), 2), np.nan)
+    var = np.full((n_ngay, Hmax, len(alphas), 3), np.nan)
     es = np.full_like(var, np.nan)
     for i in range(n_ngay):
         t = ng["s0"] - 1 + i                          # phiên gốc
@@ -104,6 +110,7 @@ def mo_phong_moc(spec: DacTa, ng: dict, D: np.ndarray, J: np.ndarray, S: int, Hm
             for ia, a in enumerate(alphas):
                 var[i, j - 1, ia, 0], es[i, j - 1, ia, 0] = _duoi(-R, a)
                 var[i, j - 1, ia, 1], es[i, j - 1, ia, 1] = _duoi(R, a)
+                var[i, j - 1, ia, 2], es[i, j - 1, ia, 2] = _duoi(np.abs(R), a)
             if j < Hmax:
                 if nx:
                     X = (ng["c"] + ng["phi"] * X + ng["a_z"] * np.abs(z)[:, None] + ng["b_z"] * z[:, None]
@@ -143,29 +150,38 @@ def tong_that_thuc(d, Hmax: int = 3):
     return R, ok
 
 
-def san_lich_su(R: np.ndarray, tmoc: np.ndarray, H: int, a: float) -> np.ndarray:
-    """VaR H phiên theo mô phỏng lịch sử trên toàn bộ dữ liệu đến t (cửa sổ mở rộng): max hai phía."""
+def _phan_vi_ls(r: np.ndarray, a: float, tri_tuyet_doi: bool) -> float:
+    """Ký quỹ lịch sử một tỷ lệ cho hai phía: phân vị (1 - a) của |R| (tri_tuyet_doi) hoặc max hai phía mức a (đề cương)."""
+    if tri_tuyet_doi:
+        return float(np.quantile(np.abs(r), 1 - a))
+    return max(-np.quantile(r, a), np.quantile(r, 1 - a))
+
+
+def san_lich_su(R: np.ndarray, tmoc: np.ndarray, H: int, a: float, tri_tuyet_doi: bool = True) -> np.ndarray:
+    """VaR H phiên theo mô phỏng lịch sử trên toàn bộ dữ liệu đến t (cửa sổ mở rộng), một tỷ lệ cho hai phía."""
     out = np.full(len(tmoc), np.nan)
     for i, t in enumerate(tmoc):
         r = R[:t - H + 1, H - 1]
         r = r[np.isfinite(r)]
         if len(r) > 100:
-            out[i] = max(-np.quantile(r, a), np.quantile(r, 1 - a))
+            out[i] = _phan_vi_ls(r, a, tri_tuyet_doi)
     return out
 
 
-def lich_su_cua_so(R: np.ndarray, tmoc: np.ndarray, H: int, a: float, cua_so: int = 250) -> np.ndarray:
+def lich_su_cua_so(R: np.ndarray, tmoc: np.ndarray, H: int, a: float, cua_so: int = 250,
+                   tri_tuyet_doi: bool = True) -> np.ndarray:
     out = np.full(len(tmoc), np.nan)
     for i, t in enumerate(tmoc):
         r = R[max(0, t - H + 1 - cua_so):t - H + 1, H - 1]
         r = r[np.isfinite(r)]
         if len(r) > 100:
-            out[i] = max(-np.quantile(r, a), np.quantile(r, 1 - a))
+            out[i] = _phan_vi_ls(r, a, tri_tuyet_doi)
     return out
 
 
-def ewma_var(d, tmoc: np.ndarray, H: int, a: float, lam: float = 0.94) -> np.ndarray:
-    """VaR chuẩn theo trung bình trượt hàm mũ: sigma_{t+1} sqrt(H) z_{1-a} (đơn vị tỷ lệ)."""
+def ewma_var(d, tmoc: np.ndarray, H: int, a: float, lam: float = 0.94, tri_tuyet_doi: bool = True) -> np.ndarray:
+    """VaR chuẩn theo trung bình trượt hàm mũ: sigma_{t+1} sqrt(H) z (đơn vị tỷ lệ); z = z_{1-a/2} khi so với |R|
+    (P(|R| > m) = a dưới phân phối chuẩn), z = z_{1-a} theo cách mỗi phía của đề cương."""
     r = d["r"].to_numpy()
     s2 = np.full(len(r), np.nan)
     cur = float(np.nanvar(r[1:21]))
@@ -173,7 +189,7 @@ def ewma_var(d, tmoc: np.ndarray, H: int, a: float, lam: float = 0.94) -> np.nda
         if t > 0 and np.isfinite(r[t]):
             cur = lam * cur + (1 - lam) * r[t] ** 2
         s2[t] = cur
-    return stats.norm.ppf(1 - a) * np.sqrt(s2[tmoc] * H) / 100.0
+    return stats.norm.ppf(1 - a / 2 if tri_tuyet_doi else 1 - a) * np.sqrt(s2[tmoc] * H) / 100.0
 
 
 # ----------------------------------------------------------------------------------------

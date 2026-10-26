@@ -42,7 +42,8 @@ def _th_b06b(ctx, kq):
 
 
 Buoc("b06b", "uoc_luong_chon", "8.1", TEP, _lam_b06b, _th_b06b, phu_thuoc=("b05", "b06"),
-     cau_hinh=("du_lieu", "khoi", "mo_hinh", "mle"), thu_vien=B4.TV, song_song=False, chi_chu_tri=True)
+     cau_hinh=("du_lieu", "khoi", "mo_hinh", "mle"), thu_vien=B4.TV, song_song=False, chi_chu_tri=True,
+     tep_phu=(B4.TEP,))                          # uoc_luong_day_du nằm trong b04_b07_giai_doan_1.py
 
 
 # ---------------------------------------------------------------------------------------- b06c
@@ -66,7 +67,8 @@ def _lam_b06c(ctx, khoa, truoc):
         cm = ctx.cfg["mle"]
         m = U.mle(spec, dlb, cm["so_diem_khoi_tao"], cm["do_tan_khoi_tao"], rng, xi_am=g_nghich(psi, pp, spec.nx))
         se = U.sai_so_chuan(spec, m["psi"], dlb)
-        return {"uoc": m["psi"], "se_h": se["se_hessian"], "se_s": se["se_banh_kep"]}
+        return {"uoc": m["psi"], "se_h": se["se_hessian"], "se_s": se["se_banh_kep"],
+                "hessian_ok": se["hessian_xac_dinh_duong"]}
     except LOI as e:
         ctx.log(f"don vi {khoa} THAT BAI: {e}")
         return {"loi": str(e)}
@@ -88,6 +90,7 @@ def _th_b06c(ctx, kq):
     xet = [t for t in ten if t in ("omega", "kappa", "theta", "beta") or t.startswith("gamma_")]
     dk = MP.dieu_kien_cong({t: (bang[t]["do_phu"], B) for t in xet}, {}, ctx.cfg["cong"])
     dk["so_that_bai"] = len(kq) - B
+    dk["ty_le_hessian_xac_dinh_duong"] = float(np.mean([v.get("hessian_ok", True) for v in ok]))
     ctx.ghi("mo_phong_cau_hinh_chon.json", {"phan_phoi": x["phan_phoi"], "bien": x["bien"], "B": B,
                                             "T": ctx.khoi()["XT"][1] - DL.BO_QUA, "tham_so_xet_cong": xet,
                                             "bang": bang, "dieu_kien": dk,
@@ -95,4 +98,5 @@ def _th_b06c(ctx, kq):
 
 
 Buoc("b06c", "mo_phong_cau_hinh_chon", "8.1 (bổ sung 26/10/2026)", TEP, _lam_b06c, _th_b06c, don_vi=_dv_b06c,
-     phu_thuoc=("b06b",), cau_hinh=("du_lieu", "khoi", "mo_hinh", "mle", "mo_phong_chon", "cong"), thu_vien=B4.TV)
+     phu_thuoc=("b06b",), cau_hinh=("du_lieu", "khoi", "mo_hinh", "mle", "mo_phong_chon", "cong"),
+     thu_vien=B4.TV + ("mo_phong",), tep_phu=(B4.TEP,))

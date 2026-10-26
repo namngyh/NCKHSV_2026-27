@@ -1,6 +1,16 @@
 # Ghi chú dự án: dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
-## 000000000. SỬA THEO RÀ SOÁT, CHẠY LẠI TOÀN BỘ (26/10/2026) — mới nhất, đọc trước
+## 0000000000. RÀ SOÁT THUẬT TOÁN NHIỀU VÒNG TRƯỚC LẦN CHẠY LẠI (26/10/2026, tối) — mới nhất, đọc trước
+
+- Kết quả cũ đã xóa khỏi `ket_qua/` (commit fa5879ef9; còn ở thẻ `ket-qua-RV-cong-b07-khong-dat`, đã đẩy lên GitHub). Thẻ `dang-ky-truoc-chay-26-10` đóng băng thiết kế trước các sửa dưới đây; các sửa này được công bố trong `[cong_bo]`.
+- Người dùng xác nhận: RV đã có trong nghiên cứu gốc tháng 9 và bị bỏ sót khi viết đề cương (đề cương giả định "không có dữ liệu trong ngày", mục 2.9). Đây là sửa tiền đề sai, KHÔNG phải chỉnh theo KT; `[cong_bo]` và P4 đã viết lại theo hướng này.
+- Lỗi phương pháp: (a) ký quỹ một tỷ lệ cho hai phía so với L = |R| nhưng lấy max(VaR mua, VaR bán) mức alpha, nên P(|R| > m) xấp xỉ 2 alpha; nay là phân vị (1 - alpha) của |R| (`[ky_quy].phia = "tri_tuyet_doi"`, b10 có chiều thứ ba |R|, `b10_b12.mot_ty_le`), các đối chứng lịch sử, EWMA (z_{1-a/2}) và sàn cùng định nghĩa; (b) đại lượng đại diện phương sai đổi sang RV (`[du_lieu].dai_dien_phuong_sai = "rv"`), cùng lý do với RV.
+- Lỗi lập trình: bình phương lợi suất nghỉ trưa cộng theo từng khoảng (`nghi_trua2`); tau cuối mẫu tính tới đáo hạn tháng hiện tại; c_rho bỏ 61 phiên đầu; FHS dùng E|z| của phần dư; hồi quy X theo z của hậu nghiệm dùng trung bình z theo bộ tham số; SBC tần số kỳ vọng theo số giá trị nguyên mỗi ngăn; b01 thống kê mô tả lợi suất chỉ trên UL + XT (tránh lộ KT); cờ Hessian không xác định dương trong `sai_so_chuan` (b04, b03a, b06c ghi tỷ lệ); b13 băm `[cong_bo]`, `[de_cuong_goc]`.
+- `[de_cuong_goc]` thêm `du_lieu.dai_dien_phuong_sai = "gk"`, `ky_quy.phia = "max_hai_phia"`. Kiểm thử: 37 đạt (thêm 4 trong `test_rv.py`).
+- Lượt rà soát thứ hai (12 vòng): `khung._tep_ma` băm thêm `quy_trinh/_chung.py` và `Buoc.tep_phu` (b06b, b06c băm `b04_b07_giai_doan_1.py`, b06c khai báo `mo_phong`; b03a, b03b băm tệp vá); `uoc_luong.khoi_tao_phan_tan` khởi tạo NUTS phân tán theo se_xi (`[bayes].nuts_he_so_phan_tan = 2`, dùng ở b03b, b08, b08b); `b08_b09.nhom_phien` nhóm căng thẳng dùng lịch sử trước KT. Kiểm tra số độc lập (25 tổ hợp phân phối; bộ lọc khớp bộ sinh 1e-15; GARCH khớp arch; dữ liệu thật: c_rho RV = 1,296 trên UL+XT, tương quan r² với RV 0,611 so với 0,586 của GK). Kiểm thử: 40 đạt.
+- Còn là giới hạn, chưa sửa: b06c cố định X.
+
+## 000000000. SỬA THEO RÀ SOÁT, CHẠY LẠI TOÀN BỘ (26/10/2026)
 
 - Người dùng chấp nhận chạy lại toàn bộ (kể cả b03b từ đầu) để sửa chín điểm của bản rà soát. Kết quả 25/10 (RV, skew-t, cổng không đạt) lưu ở `ICCIES 2027/ket_qua_RV_25_10_cong_b07_khong_dat/` và thẻ git cục bộ `ket-qua-RV-cong-b07-khong-dat`.
 - (1) `danh_gia.chan_doan`: hồi quy z²−1 theo đủ ba biến giả lịch (bản cũ bỏ D_sau, sai từ khi dùng giá F2M), Wald với HC3; hồi quy theo nhóm tau cũng HC3 (điều kiện (ii) của cổng). Thêm `hoi_quy_D_he_so`. Ljung-Box giữ nguyên, ghi chú p lạc quan (không trừ bậc tự do; kiểm định đúng là Li-Mak).

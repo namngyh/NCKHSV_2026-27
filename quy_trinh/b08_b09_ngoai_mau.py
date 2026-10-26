@@ -62,7 +62,8 @@ def _bayes_mot(ctx, khoa, pt, spec, dl, m, chi_so, pa=TIEN_NGHIEM_GOC):
     seed = ctx.hat_giong(khoa)
     rng = ctx.rng(khoa, "khoi_tao")
     if pt == "nuts":
-        return U.nuts_chuoi(spec, dl, m["xi"] + rng.normal(0, 0.05, spec.d), b["nuts_khoi_dong"], b["nuts_so_mau"],
+        xi0 = U.khoi_tao_phan_tan(spec, m, dl, rng, b.get("nuts_he_so_phan_tan", 2.0))
+        return U.nuts_chuoi(spec, dl, xi0, b["nuts_khoi_dong"], b["nuts_so_mau"],
                             b["nuts_dich_chap_nhan"], b["nuts_do_sau_cay"], seed, thu_muc=ctx.thu_muc_doan(khoa),
                             vong_moi_doan=b["nuts_vong_moi_doan"], pa=pa)
     xi0 = m["xi"] + rng.normal(0, 0.02 * chi_so, spec.d)
@@ -259,14 +260,18 @@ def _lam_b09(ctx, khoa, truoc):
     return {"s0": s0, "s1": s1, "db": db, "rho_sao": f["rho_sao"][s0:s1]}
 
 
-def nhom_phien(d, rho_sao: np.ndarray, dau: int, cuoi: int) -> dict:
-    """Mục 5.6: quanh đáo hạn (tau <= 2 hoặc phiên chuyển), sau kỳ nghỉ dài, căng thẳng (rho* > P95 trượt 250 phiên)."""
+def nhom_phien(d, rho_sao: np.ndarray, dau: int, cuoi: int, lech: int = 0) -> dict:
+    """Mục 5.6: quanh đáo hạn (tau <= 2 hoặc phiên chuyển), sau kỳ nghỉ dài, căng thẳng (rho* > P95 trượt 250 phiên).
+
+    rho_sao: chuỗi rho* bắt đầu từ phiên dau - lech (lech > 0: có lịch sử trước khối, để cửa sổ 250 phiên của các phiên
+    đầu khối không bị cắt; bản trước chỉ dùng lịch sử trong khối nên 50 phiên đầu KT không thể là phiên căng thẳng)."""
     tau = d["tau"].to_numpy()[dau:cuoi]
     cang = np.zeros(cuoi - dau, bool)
     for i in range(cuoi - dau):
-        qk = rho_sao[max(0, i - 250):i]
+        j = i + lech
+        qk = rho_sao[max(0, j - 250):j]
         qk = qk[np.isfinite(qk)]
-        cang[i] = len(qk) > 50 and np.isfinite(rho_sao[i]) and rho_sao[i] > np.quantile(qk, 0.95)
+        cang[i] = len(qk) > 50 and np.isfinite(rho_sao[j]) and rho_sao[j] > np.quantile(qk, 0.95)
     return {"quanh_dao_han": (tau <= 2) | d["J"].to_numpy()[dau:cuoi],
             "sau_nghi_dai": d["D_nghi"].to_numpy()[dau:cuoi], "cang_thang": cang}
 
@@ -285,14 +290,15 @@ def _th_b09(ctx, kq):
     al = ctx.cfg["danh_gia"]["alphas"]
     kh = ctx.khoa()
     chon = f"{kh['phan_phoi']}|{C.ten_tap(kh['bien'])}"
-    mo_hinh = {f"MLE|{k}": C.cat(v, a0, v["lnh"].shape[0]) for k, v in ctx.doc("mle_cuon_chieu.pkl", "b08").items()}
+    mle_cc = ctx.doc("mle_cuon_chieu.pkl", "b08")
+    mo_hinh = {f"MLE|{k}": C.cat(v, a0, v["lnh"].shape[0]) for k, v in mle_cc.items()}
     for pt in ctx.cfg["bayes"]["phuong_phap"]:
         g = C.ghep([v for k, v in kq.items() if k.startswith(pt + "|")])
         mo_hinh[f"{pt}|{chon}"] = C.cat(g, a0, g["lnh"].shape[0])
     ctx.ghi("so_sanh_bon_phuong_phap.json", [v for k, v in sorted(kq.items()) if k.startswith("ss|")])
     lags = ctx.cfg["danh_gia"]["tre_phan_vi_dong"]
     bang = {k: DG.tom_tat(v, r, v["rho_sao"], khoa, al, lags=lags) for k, v in mo_hinh.items()}
-    nm = nhom_phien(d, mo_hinh[f"MLE|{chon}"]["rho_sao"], kt0, kt1)
+    nm = nhom_phien(d, mle_cc[chon]["rho_sao"], kt0, kt1, lech=a0)      # rho* từ đầu XT: có lịch sử trước KT
     theo_nhom = {k: {g: DG.tom_tat(v, r, v["rho_sao"], khoa, al, mask=m) for g, m in nm.items()} for k, v in mo_hinh.items()}
     ten = list(mo_hinh)
     mat = {"LS": {k: -v["ls"] for k, v in mo_hinh.items()}, "QLIKE": {k: _qlike_chuoi(v, khoa) for k, v in mo_hinh.items()}}

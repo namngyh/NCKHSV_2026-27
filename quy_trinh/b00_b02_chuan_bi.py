@@ -51,7 +51,9 @@ def _lam_b01(ctx, khoa, truoc):
     nguong = ctx.cfg["du_lieu"]["nguong_r_bat_thuong"]
     lon = d.loc[d.r.abs() > nguong, ["date", "r", "open", "high", "low", "close"]]
     dem = 100 * np.log(d.open / d.close.shift(1))
-    rr = d.r.dropna().to_numpy()
+    # b01 được đọc KT để kiểm tra chất lượng dữ liệu, nhưng thống kê mô tả của lợi suất chỉ tính trên UL + XT: các con số này
+    # được xem trước khi khóa cấu hình (b07), nên không được chứa thông tin về phân phối của khối KT
+    rr = d.r.iloc[k["UL"][0]:k["XT"][1]].dropna().to_numpy()
     gap = [int(np.busday_count(d.date[t - 1].date(), d.date[t].date())) - 1 for t in range(1, n)]
     f = DL.dac_trung(d, k["UL"][1] - 1)
     ok = np.isfinite(d.rho_gk) & np.isfinite(d.r)
@@ -68,12 +70,13 @@ def _lam_b01(ctx, khoa, truoc):
         "phien_cham_bien_khoa": [str(x.date()) for x in d.date[d.khoa_bien]],
         "qua_dem_trung_vi_tuyet_doi": {"phien_chuyen": float(dem[d.J].abs().median()),
                                       "phien_thuong": float(dem[~d.J].abs().median())},
-        "r_mo_ta": {"n": len(rr), "trung_binh": rr.mean(), "phuong_sai": rr.var(ddof=1),
+        "r_mo_ta": {"pham_vi": "UL + XT", "n": len(rr), "trung_binh": rr.mean(), "phuong_sai": rr.var(ddof=1),
                     "lech": float(((rr - rr.mean()) ** 3).mean() / rr.std() ** 3),
                     "nhon": float(((rr - rr.mean()) ** 4).mean() / rr.std() ** 4)},
         "dai_dien_phuong_sai": {"c_rho_UL": f["c_rho"],
                                 "tuong_quan_voi_r2": {c: float(np.corrcoef(d[c][ok], d.r[ok] ** 2)[0, 1])
-                                                       for c in ("rho_p", "rho_gk", "rho_rs")}},
+                                                       for c in ("rho_p", "rho_gk", "rho_rs", "rv")},
+                                "dang_dung": ctx.cfg["du_lieu"].get("dai_dien_phuong_sai", "rv")},
         "khoi": {kk: {"chi_so": v, "tu": str(d.date[v[0]].date()), "den": str(d.date[v[1] - 1].date()),
                       "so_phien": v[1] - v[0], "so_phien_chuyen": int(d.J[v[0]:v[1]].sum())} for kk, v in k.items()},
         "bang": d,

@@ -221,6 +221,7 @@ class Buoc:
     chi_chu_tri: bool = False             # bước nhỏ/tổng hợp: chỉ máy chủ trì (hoặc một mình) chạy
     mo_rong_don_vi: bool = False          # kết quả mỗi đơn vị chỉ phụ thuộc hạt giống riêng của nó (vd. lần lặp b của
                                           # mô phỏng): số đơn vị đổi (tăng B) thì chạy tiếp phần thiếu, không làm lại
+    tep_phu: tuple = ()                   # tệp mã khác mà bước gọi tới (mô-đun bước khác, tệp vá đơn vị): cũng được băm
 
     def __post_init__(self):
         DANH_MUC[self.ma] = self
@@ -364,6 +365,14 @@ class ChuaXongPhuThuoc(RuntimeError):
 BUOC_KHONG_PHU_THUOC_XT = ("b01", "b02")
 
 
+def _tep_ma(b: Buoc) -> list:
+    """Mọi tệp mã quyết định con số của bước: tệp bước, các mô-đun thư viện khai báo, tệp phụ (mô-đun bước khác được gọi,
+    tệp vá đơn vị) và quy_trinh/_chung.py (MLE cuốn chiếu một mốc, ghép dự báo: dùng ở b05, b06, b08)."""
+    chung = GOC / "quy_trinh" / "_chung.py"
+    return ([b.tep] + [THU_VIEN / f"{m}.py" for m in b.thu_vien] + [Path(p) for p in b.tep_phu]
+            + ([chung] if chung.exists() else []))
+
+
 def _bam_vao(ctx: NguCanh, b: Buoc) -> str:
     dep = {}
     for m in b.phu_thuoc:
@@ -371,7 +380,7 @@ def _bam_vao(ctx: NguCanh, b: Buoc) -> str:
         if not hs or hs.get("trang_thai") != "xong":
             raise ChuaXongPhuThuoc(f"Buoc {b.ma} can buoc {m} xong truoc")
         dep[m] = hs["h_ra"]
-    tep = [b.tep] + [THU_VIEN / f"{m}.py" for m in b.thu_vien]      # khung không ảnh hưởng con số nên không băm
+    tep = _tep_ma(b)                                                  # khung không ảnh hưởng con số nên không băm
     # chỉ băm phần cấu hình ảnh hưởng con số; số tiến trình, bộ nhớ, phân tán không làm bước phải chạy lại
     chon = {s: ({k: ctx.cfg[s][k] for k in ("hat_giong", "du_lieu_goc")} if s == "chung" else ctx.cfg[s])
             for s in b.cau_hinh}
@@ -526,7 +535,7 @@ def chay_buoc(ma: str, ho_so: str = "day_du", chay_lai: bool = False, chap_nhan_
         m = v.get("_nguon", {}).get("may", "khong_ro") if isinstance(v, dict) else "khong_ro"
         theo_may[m] = theo_may.get(m, 0) + 1
     ctx.ghi("nguon_goc.json", {"commit": commit_git(), "h_vao": h_vao, "bam_du_lieu": bam_du_lieu(ctx.cfg),
-                               "bam_ma": bam_tep([b.tep] + [THU_VIEN / f"{m}.py" for m in b.thu_vien]),
+                               "bam_ma": bam_tep(_tep_ma(b)),
                                "ho_so": ho_so, "may_tong_hop": thong_tin_may(), "so_don_vi_theo_may": theo_may,
                                "thoi_diem": time.strftime("%Y-%m-%d %H:%M:%S")})
     h_ra = bam_tep([p for p in ctx.thu_muc().rglob("*") if p.is_file() and p.name != "nguon_goc.json"])

@@ -223,7 +223,8 @@ def _th_b13(ctx, kq):
     shutil.copytree(ctx.thu_muc(), dich, dirs_exist_ok=True)
 
 
-Buoc("b13", "bao_cao", "8.3", TEP, _lam_b13, _th_b13, phu_thuoc=("b12", "b02k", "b04b", "b08b"), cau_hinh=(),
+Buoc("b13", "bao_cao", "8.3", TEP, _lam_b13, _th_b13, phu_thuoc=("b12", "b02k", "b04b", "b08b"),
+     cau_hinh=("cong_bo", "de_cuong_goc"),        # phụ lục sai lệch đọc hai mục này: sửa chúng phải làm lại báo cáo
      song_song=False, can_khoa_KT=True, chi_chu_tri=True)
 
 

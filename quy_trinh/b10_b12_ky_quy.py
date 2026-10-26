@@ -39,6 +39,14 @@ def _the_che(ctx, ten):
     return ctx.cfg["the_che"][ten]
 
 
+def mot_ty_le(ctx, x: np.ndarray, H: int, ia: int) -> np.ndarray:
+    """Một tỷ lệ cho cả hai phía từ mảng (phiên, Hmax, alpha, 3) của b10. [ky_quy].phia = "tri_tuyet_doi": phân vị của
+    |R| (P(|R| > m) = alpha, khớp L = |R| của 7.4); "max_hai_phia" (đề cương): max(VaR mua, VaR bán), vượt xấp xỉ 2 alpha."""
+    if ctx.cfg["ky_quy"].get("phia", "tri_tuyet_doi") == "tri_tuyet_doi":
+        return x[:, H - 1, ia, 2]
+    return np.max(x[:, H - 1, ia, :2], axis=1)
+
+
 # ---------------------------------------------------------------------------------------- b10
 def _lam_b10(ctx, khoa, truoc):
     ng, k = khoa.split("::")[0].split("|")
@@ -112,10 +120,11 @@ def _lam_b11(ctx, khoa, truoc):
     g = float(_the_che(ctx, "buoc_lam_tron_ky_quy")["gia_tri"])
     giam = float(_the_che(ctx, "gioi_han_giam_moi_phien")["gia_tri"])
     nt, nd = kqc["nguong_tang"], kqc["nguong_giam"]
-    san = KQ.san_lich_su(R, tmoc, H, a)
+    ttd = kqc.get("phia", "tri_tuyet_doi") == "tri_tuyet_doi"
+    san = KQ.san_lich_su(R, tmoc, H, a, ttd)
     luoi = list(itertools.product(kqc["w"], kqc["b"], kqc["phi"], kqc["eta"]))
-    vmax = lambda ng: np.max(db[ng]["var"][:, H - 1, ia, :], axis=1)
-    emax = lambda ng: np.max(db[ng]["es"][:, H - 1, ia, :], axis=1)
+    vmax = lambda ng: mot_ty_le(ctx, db[ng]["var"], H, ia)
+    emax = lambda ng: mot_ty_le(ctx, db[ng]["es"], H, ia)
     dong, chon, luoi_xt = {}, {}, {}
     for ng in ["mle", "egarch_mle"] + list(ctx.cfg["bayes"]["phuong_phap"]):
         tot, bang = None, []
@@ -135,8 +144,8 @@ def _lam_b11(ctx, khoa, truoc):
     nang["dong_mle_khong_nguong"] = KQ.quy_tac(vmax("mle"), emax("mle"), san, c_["w"], c_["b"], c_["phi"], c_["eta"], giam, g)
     nang["VaR_tho_mle"] = vmax("mle")
     nang["FHS_EGARCH-X"] = vmax("fhs")
-    nang["EWMA"] = KQ.ewma_var(d, tmoc, H, a, kqc["lambda_ewma"])
-    nang["lich_su_cua_so"] = KQ.lich_su_cua_so(R, tmoc, H, a, kqc["cua_so_lich_su"])
+    nang["EWMA"] = KQ.ewma_var(d, tmoc, H, a, kqc["lambda_ewma"], ttd)
+    nang["lich_su_cua_so"] = KQ.lich_su_cua_so(R, tmoc, H, a, kqc["cua_so_lich_su"], ttd)
     nang["co_dinh_khop_XT"] = np.full(len(tmoc), float(np.quantile(L[hop_xt], 1 - max(vuot_xt, 1 / hop_xt.sum()))))
     vsd = _the_che(ctx, "ty_le_ky_quy_vsdc")
     nang["VSD_hang_so" + ("" if vsd.get("nguon") else "_chua_xac_minh")] = np.full(len(tmoc), float(vsd["gia_tri"]))
@@ -204,12 +213,12 @@ def _lam_b12(ctx, khoa, truoc):
     L, hop, tmoc = s["L"], s["hop_kt"], s["tmoc"]
     d = ctx.du_lieu()
     R, _ = KQ.tong_that_thuc(d, max(kqc["H"]))
-    san = KQ.san_lich_su(R, tmoc, H, a)
+    san = KQ.san_lich_su(R, tmoc, H, a, kqc.get("phia", "tri_tuyet_doi") == "tri_tuyet_doi")
     c0 = tk[key]["chon"]["mle"]
     g = tk[key]["g"]
     giam = tk[key]["giam"]
-    v = np.max(db["mle"]["var"][:, H - 1, ia, :], axis=1)
-    e = np.max(db["mle"]["es"][:, H - 1, ia, :], axis=1)
+    v = mot_ty_le(ctx, db["mle"]["var"], H, ia)
+    e = mot_ty_le(ctx, db["mle"]["es"], H, ia)
     doi = {}
     for ten, luoi in (("w", kqc["w"]), ("eta", kqc["eta"])):
         doi[ten] = {}

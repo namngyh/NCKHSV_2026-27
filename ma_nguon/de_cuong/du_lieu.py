@@ -7,11 +7,13 @@ thuộc hợp đồng cũ. Cách xử lý chọn bằng [du_lieu].xu_ly_dao_han 
            vì hợp đồng là F2M ở phiên t-1 chính là F1M ở phiên t; chỉ khuyết khi thiếu giá F2M phiên t-1;
   "loai" : lợi suất phiên chuyển là quan sát khuyết (cách cũ, mục 2.3 của đề cương chi tiết).
 Cột `J` luôn là chỉ thị phiên chuyển theo lịch (dùng cho biến giả D_sau, nhóm phiên); cột `khuyet` là cờ lợi suất
-khuyết (dùng cho hàm hợp lý và đệ quy phương sai). Đại lượng đại diện phương sai là Garman-Klass cộng
-phần qua đêm, nhân hệ số thang đo c_rho (mục 2.4).
+khuyết (dùng cho hàm hợp lý và đệ quy phương sai). Đại lượng đại diện phương sai rho (mục 2.4), nhân hệ số thang đo c_rho:
+[du_lieu].dai_dien_phuong_sai = "rv" dùng RV đóng-đến-đóng (dữ liệu là nến phút; đề cương chọn biên độ giá vì giả định "không
+có dữ liệu trong ngày", mục 2.9, giả định này sai với dữ liệu thực tế); "gk" là Garman-Klass cộng bình phương lợi suất qua đêm.
 Biến ngoại sinh thứ sáu RV (bổ sung ngoài đề cương, 25/10/2026; theo mã cũ uoc_luong_mle_khoang_nghi.py): mỗi ngày tách
 thành buổi sáng và buổi chiều tại khoảng trống trên NGUONG_NGHI phút giữa hai nến; trong mỗi buổi nến đầu dùng lợi suất
-mở-đến-đóng, các nến sau dùng lợi suất giữa hai giá đóng liền nhau; RV_t = rv_sang + rv_chieu + nghi_trua^2 + dem^2, với dem
+mở-đến-đóng, các nến sau dùng lợi suất giữa hai giá đóng liền nhau; RV_t = rv_sang + rv_chieu + nghi_trua2 + dem^2 (nghi_trua2: tổng
+bình phương lợi suất qua các khoảng nghỉ trong ngày), với dem
 là lợi suất qua đêm đã sửa bằng giá F2M ở phiên chuyển (khuyết thì bằng 0). RV phủ đúng khoảng đóng-đến-đóng của r_t.
 Biến ngoại sinh và các thống kê chuẩn hóa
 chỉ dùng dữ liệu đến thời điểm ước lượng lại s (mục 2.7), nên hàm `dac_trung(ngay, s)` nhận s.
@@ -37,15 +39,17 @@ NGHI = 3            # số ngày làm việc liên tiếp không giao dịch đ�
 XU_LY_DAO_HAN = "f2m"    # "f2m" (cấu hình chính thức) hoặc "loai" (cách cũ)
 NGUONG_NGHI = 30.0  # phút: khoảng trống giữa hai nến lớn hơn ngưỡng này là khoảng nghỉ trưa (tách buổi cho RV)
 TEN_BIEN = ["A", "G", "F", "B", "O", "RV"]   # RV: bổ sung ngoài đề cương (đề cương: A, G, F, B, O)
+DAI_DIEN = "rv"     # đại lượng đại diện phương sai: "rv" (nến phút) hoặc "gk" (Garman-Klass + qua đêm, khi chỉ có dữ liệu ngày)
 
 
 def ap_dung_cau_hinh(cfg: dict | None):
     """Đặt các hằng số của mục 2 theo cấu hình (một nguồn sự thật duy nhất)."""
-    global N_V, EPS, BO_QUA, NGHI, XU_LY_DAO_HAN, CSV_F2M
+    global N_V, EPS, BO_QUA, NGHI, XU_LY_DAO_HAN, CSV_F2M, DAI_DIEN
     if cfg:
         c = cfg["du_lieu"]
         N_V, EPS, BO_QUA, NGHI = int(c["n_V"]), float(c["eps"]), int(c["bo_qua_dau"]), int(c["nghi_dai_toi_thieu"])
         XU_LY_DAO_HAN = c.get("xu_ly_dao_han", "f2m")
+        DAI_DIEN = c.get("dai_dien_phuong_sai", "rv")
         if c.get("du_lieu_f2m"):
             CSV_F2M = GOC / c["du_lieu_f2m"]
 
@@ -79,6 +83,9 @@ def doc_ngay(csv: Path = CSV) -> pd.DataFrame:
     n["rv_sang"] = bp.where(buoi == 0, 0.0).groupby(ngay).sum()
     n["rv_chieu"] = bp.where(buoi > 0, 0.0).groupby(ngay).sum()
     n["nghi_trua"] = nghi.fillna(0.0).groupby(ngay).sum()
+    # tổng bình phương lợi suất qua mọi khoảng trống > NGUONG_NGHI trong ngày (thường chỉ có nghỉ trưa); ngày có hai
+    # khoảng trống (mất dữ liệu giữa buổi) phải cộng bình phương từng khoảng, không bình phương tổng
+    n["nghi_trua2"] = (nghi.fillna(0.0) ** 2).groupby(ngay).sum()
     n["so_nen"] = b.groupby(ngay).size()
     n.index = pd.to_datetime(n.index.astype(str), format="%Y%m%d")
     n.index.name = "date"
@@ -122,10 +129,11 @@ def xay_ngay(csv: Path = CSV, cfg: dict | None = None) -> pd.DataFrame:
         sau = moc[moc >= t]
         if len(sau):
             tau[t] = sau[0] - t
-        else:   # sau kỳ đáo hạn cuối của mẫu: đếm ngày làm việc tới thứ Năm thứ ba tháng kế tiếp
+        else:   # sau kỳ đáo hạn cuối của mẫu: đếm ngày làm việc tới kỳ đáo hạn kế tiếp (tháng này nếu chưa qua)
             ngay_t = d["date"][t]
-            th = ngay_t.month % 12 + 1
-            moc_sau = thu_nam_thu_ba(ngay_t.year + (ngay_t.month == 12), th)
+            moc_sau = thu_nam_thu_ba(ngay_t.year, ngay_t.month)
+            if moc_sau < ngay_t:
+                moc_sau = thu_nam_thu_ba(ngay_t.year + (ngay_t.month == 12), ngay_t.month % 12 + 1)
             tau[t] = len(pd.bdate_range(ngay_t, moc_sau)) - 1
     # kỳ nghỉ: số ngày làm việc (thứ 2-6) không có phiên giữa hai phiên liên tiếp
     nghi = np.zeros(n, bool)
@@ -152,8 +160,15 @@ def xay_ngay(csv: Path = CSV, cfg: dict | None = None) -> pd.DataFrame:
     elif XU_LY_DAO_HAN != "loai":
         raise ValueError(f"xu_ly_dao_han = {XU_LY_DAO_HAN!r} khong hop le (chi 'f2m' hoac 'loai')")
     d["khuyet"] = d["r"].isna().to_numpy()
-    d["rho"] = d["rho_gk"] + d["dem"] ** 2
-    d["rv"] = d["rv_sang"] + d["rv_chieu"] + d["nghi_trua"] ** 2 + np.nan_to_num(d["dem"].to_numpy(float)) ** 2
+    d["rv"] = d["rv_sang"] + d["rv_chieu"] + d["nghi_trua2"] + np.nan_to_num(d["dem"].to_numpy(float)) ** 2
+    if DAI_DIEN == "rv":
+        # có nến phút nên đại lượng đại diện là phương sai thực hiện đóng-đến-đóng (đề cương mục 2.4: biên độ giá chỉ dùng
+        # khi không có dữ liệu trong ngày); khuyết qua đêm (phiên chuyển thiếu F2M) thì khuyết như rho cũ
+        d["rho"] = d["rv"].where(d["dem"].notna())
+    elif DAI_DIEN == "gk":
+        d["rho"] = d["rho_gk"] + d["dem"] ** 2
+    else:
+        raise ValueError(f"dai_dien_phuong_sai = {DAI_DIEN!r} khong hop le (chi 'rv' hoac 'gk')")
     d["khoa_bien"] = (d["open"] == d["high"]) & (d["high"] == d["low"]) & (d["low"] == d["close"])
     return d
 
@@ -183,7 +198,7 @@ def dac_trung(d: pd.DataFrame, s: int) -> dict:
     r = d["r"].to_numpy()
     rho = d["rho"].to_numpy()
     khoa = d["khoa_bien"].to_numpy()
-    ok = (~np.isnan(r)) & (~np.isnan(rho)) & (ti <= s) & ~khoa
+    ok = (~np.isnan(r)) & (~np.isnan(rho)) & (ti >= BO_QUA) & (ti <= s) & ~khoa     # chỉ cửa sổ ước lượng [BO_QUA, s]
     c_rho = float(np.sum(r[ok] ** 2) / np.sum(rho[ok]))
     gk = d["rho_gk"].to_numpy()
     gk_thay = np.where(khoa, np.where(np.isnan(r), 0.0, r ** 2), gk)   # Nhận xét 1

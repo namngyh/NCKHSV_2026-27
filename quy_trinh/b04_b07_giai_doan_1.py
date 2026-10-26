@@ -51,7 +51,8 @@ def uoc_luong_day_du(ctx, pp, bien, s1, khoa_rng, bootstrap=True) -> dict:
     n = int(np.asarray(dl[3]).sum())
     se = U.sai_so_chuan(spec, m["psi"], dl)
     out = {"cau_hinh": repr(spec), "ten": spec.ten(), "psi": m["psi"], "se_hessian": se["se_hessian"],
-           "se_banh_kep": se["se_banh_kep"], "ll": m["ll"], "k": spec.d, "n": n,
+           "se_banh_kep": se["se_banh_kep"], "hessian_xac_dinh_duong": se["hessian_xac_dinh_duong"],
+           "ll": m["ll"], "k": spec.d, "n": n,
            "aic": 2 * spec.d - 2 * m["ll"], "bic": spec.d * math.log(n) - 2 * m["ll"],
            "so_gan_tot": m["so_gan_tot"], "so_diem": m["so_diem"], "do_tan_ll": m["do_tan_ll"]}
     if spec.nx:

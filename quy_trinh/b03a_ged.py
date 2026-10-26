@@ -66,3 +66,4 @@ def _th_b03a(ctx, kq):
 DANH_MUC["b03a"].don_vi = _dv_b03a
 DANH_MUC["b03a"].tong_hop = _th_b03a
 DANH_MUC["b03a"].mo_rong_don_vi = True
+DANH_MUC["b03a"].tep_phu = (__file__,)      # tệp vá này quyết định danh sách đơn vị và cách tổng hợp: phải được băm
