@@ -65,7 +65,13 @@ def vong_lap(a, K, DB) -> int:
     may = a.may if a.vai_tro != "mot_minh" else None
     ten_may = a.may or "mot_minh"
     if a.git:
+        # mã các bước đã được nạp vào bộ nhớ (nap_buoc) TRƯỚC lần pull này: nếu pull mang về mã mới thì tiến trình chính đang
+        # giữ bản cũ còn tiến trình con (spawn) sẽ đọc bản mới; phải khởi động lại ngay (chay.bat bắt mã thoát 4)
+        ma_truoc = DB.bam_ma()
         DB.keo()
+        if DB.bam_ma() != ma_truoc:
+            print("[dung] Vua lay ban ma moi tu GitHub. Khoi dong lai de dung ban moi.")
+            return 4
         canh = DB.dang_ky(ten_may, ctx0.ket_qua)
         if canh:
             print("[canh bao]", canh)
