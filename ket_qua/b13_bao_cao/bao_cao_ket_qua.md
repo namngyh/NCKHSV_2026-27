@@ -1,0 +1,210 @@
+# Kết quả theo đề cương EGARCH-X ký quỹ động (hồ sơ: day_du)
+
+Sinh tự động lúc 2026-10-27 23:36. Hồ sơ `nhanh` chỉ để kiểm tra đường ống.
+
+## 1. Dữ liệu (mục 2)
+
+2171 phiên, 2017-11-06 – 2026-07-17; 105 phiên chuyển hợp đồng; 0 phiên khóa biên; c_rho (UL) = 1.3315.
+
+| Khối | Từ | Đến | Số phiên | Phiên chuyển |
+|---|---|---|---|---|
+| UL | 2018-01-31 | 2021-01-28 | 750 | 36 |
+| XT | 2021-01-29 | 2024-10-16 | 925 | 44 |
+| KT | 2024-10-17 | 2026-07-17 | 435 | 22 |
+
+## 2. Kiểm tra cài đặt và đối chiếu độc lập (Phụ lục A, C.5)
+
+Bảng 11 lệch lớn nhất 0.00046; đối chiếu gói arch: EGARCH chênh tham số lớn nhất 0.0004, MCS trùng tập = True, SPA cùng kết luận = True.
+
+### Cỡ và lực của các kiểm định (mô phỏng, N = khối KT)
+
+| Kiểm định | Tỷ lệ bác bỏ 5% | Sai số MC |
+|---|---|---|
+| berkowitz|co | 0.0510 | 0.0031 |
+| christoffersen|a0.01|co | 0.0214 | 0.0020 |
+| christoffersen|a0.025|co | 0.0276 | 0.0023 |
+| christoffersen|a0.05|co | 0.0494 | 0.0031 |
+| dm|ar1 | 0.0858 | 0.0040 |
+| dm|iid | 0.0576 | 0.0033 |
+| dq_hac|a0.01|H2 | 0.1258 | 0.0047 |
+| dq_hac|a0.01|H3 | 0.0910 | 0.0041 |
+| dq_hac|a0.025|H2 | 0.0836 | 0.0039 |
+| dq_hac|a0.025|H3 | 0.1000 | 0.0042 |
+| dq_hac|a0.05|H2 | 0.0658 | 0.0035 |
+| dq_hac|a0.05|H3 | 0.0750 | 0.0037 |
+| dq|a0.01|co | 0.1596 | 0.0052 |
+| dq|a0.025|co | 0.0818 | 0.0039 |
+| dq|a0.05|co | 0.0628 | 0.0034 |
+| gw|iid | 0.0490 | 0.0031 |
+| kupiec|a0.01|co | 0.0256 | 0.0022 |
+| kupiec|a0.01|luc | 0.3780 | 0.0069 |
+| kupiec|a0.025|co | 0.0720 | 0.0037 |
+| kupiec|a0.025|luc | 0.8242 | 0.0054 |
+| kupiec|a0.05|co | 0.0492 | 0.0031 |
+| kupiec|a0.05|luc | 0.9778 | 0.0021 |
+
+## 3. Mô phỏng khôi phục tham số bằng MLE (mục 4.4)
+
+| Cấu hình | theta chệch | theta độ phủ | beta độ phủ | bác bỏ theta=0 | bác bỏ gamma=0 |
+|---|---|---|---|---|---|
+| chuan|mle|E1 | -0.0009 | 0.9400 | 0.9450 | 1.0000 | 1.0000 |
+| chuan|mle|E2 | -0.0000 | 0.9500 | 0.9410 | 0.0500 | 1.0000 |
+| chuan|mle|E3 | -0.0004 | 0.9350 | 0.9480 | 1.0000 | 1.0000 |
+| chuan|mle|E4 | -0.0014 | 0.9430 | 0.9350 | 1.0000 | 0.0620 |
+| ged|mle|E1 | -0.0020 | 0.9460 | 0.9530 | 1.0000 | 1.0000 |
+| ged|mle|E2 | -0.0006 | 0.9450 | 0.9440 | 0.0550 | 1.0000 |
+| ged|mle|E3 | -0.0009 | 0.9430 | 0.9330 | 1.0000 | 1.0000 |
+| ged|mle|E4 | -0.0015 | 0.9310 | 0.9430 | 0.9990 | 0.0620 |
+| skewt|mle|E1 | -0.0008 | 0.9560 | 0.9390 | 0.9990 | 1.0000 |
+| skewt|mle|E2 | -0.0012 | 0.9520 | 0.9390 | 0.0480 | 1.0000 |
+| skewt|mle|E3 | -0.0021 | 0.9370 | 0.9390 | 0.9980 | 1.0000 |
+| skewt|mle|E4 | -0.0021 | 0.9350 | 0.9340 | 0.9990 | 0.0620 |
+| student|mle|E1 | -0.0009 | 0.9490 | 0.9420 | 1.0000 | 1.0000 |
+| student|mle|E2 | -0.0006 | 0.9330 | 0.9310 | 0.0670 | 1.0000 |
+| student|mle|E3 | -0.0006 | 0.9530 | 0.9350 | 0.9990 | 1.0000 |
+| student|mle|E4 | -0.0007 | 0.9450 | 0.9430 | 1.0000 | 0.0470 |
+
+*Mô phỏng Bayes và SBC (b03b) đang chạy; báo cáo sẽ được làm lại khi xong.*
+
+## 4. MLE trên khối UL (mục 4.2)
+
+**chuan|A+G**: logL = -1253.19, AIC = 2526.39, BIC = 2572.59, LR(gamma=0) p = 0.0000, 17/20 điểm khởi tạo về cùng nghiệm.
+
+| Tham số | Ước lượng | SE Hessian | SE bánh kẹp |
+|---|---|---|---|
+| mu | 0.0107 | 0.0391 | 0.0402 |
+| omega | 0.1043 | 0.0273 | 0.0477 |
+| kappa | 0.0655 | 0.0772 | 0.1041 |
+| theta | -0.2255 | 0.0413 | 0.0632 |
+| beta | 0.7624 | 0.0504 | 0.0766 |
+| gamma_A | -0.1134 | 0.0315 | 0.0464 |
+| gamma_G | 0.3039 | 0.0673 | 0.0978 |
+| delta_dh | 0.5677 | 0.2467 | 0.3063 |
+| delta_sau | -0.3702 | 0.2461 | 0.3136 |
+| delta_nghi | 2.0159 | 0.4864 | 0.7610 |
+
+**student|A+G**: logL = -1203.03, AIC = 2428.05, BIC = 2478.88, LR(gamma=0) p = 0.0003, 19/20 điểm khởi tạo về cùng nghiệm.
+
+| Tham số | Ước lượng | SE Hessian | SE bánh kẹp |
+|---|---|---|---|
+| mu | 0.0630 | 0.0324 | 0.0326 |
+| omega | 0.0904 | 0.0492 | 0.0579 |
+| kappa | 0.1636 | 0.0938 | 0.0917 |
+| theta | -0.1970 | 0.0550 | 0.0619 |
+| beta | 0.7579 | 0.0762 | 0.0954 |
+| gamma_A | -0.0686 | 0.0400 | 0.0412 |
+| gamma_G | 0.2960 | 0.0946 | 0.1085 |
+| delta_dh | 0.7094 | 0.3199 | 0.3211 |
+| delta_sau | -0.3486 | 0.3126 | 0.3060 |
+| delta_nghi | 1.7769 | 0.7764 | 1.1241 |
+| nu | 4.2194 | 0.6648 | 0.7107 |
+
+**skewt|A+G**: logL = -1197.15, AIC = 2418.30, BIC = 2473.74, LR(gamma=0) p = 0.0001, 20/20 điểm khởi tạo về cùng nghiệm.
+
+| Tham số | Ước lượng | SE Hessian | SE bánh kẹp |
+|---|---|---|---|
+| mu | 0.0072 | 0.0370 | 0.0375 |
+| omega | 0.0941 | 0.0465 | 0.0528 |
+| kappa | 0.1387 | 0.0826 | 0.0769 |
+| theta | -0.1776 | 0.0499 | 0.0549 |
+| beta | 0.7718 | 0.0708 | 0.0856 |
+| gamma_A | -0.0852 | 0.0374 | 0.0404 |
+| gamma_G | 0.2946 | 0.0914 | 0.1049 |
+| delta_dh | 0.6987 | 0.3137 | 0.3298 |
+| delta_sau | -0.3686 | 0.3013 | 0.3064 |
+| delta_nghi | 1.5914 | 0.6811 | 0.8323 |
+| nu | 4.4743 | 0.7564 | 0.7780 |
+| lambda | -0.1746 | 0.0508 | 0.0512 |
+
+**ged|A+G**: logL = -1207.68, AIC = 2437.37, BIC = 2488.19, LR(gamma=0) p = 0.0002, 19/20 điểm khởi tạo về cùng nghiệm.
+
+| Tham số | Ước lượng | SE Hessian | SE bánh kẹp |
+|---|---|---|---|
+| mu | 0.0648 | 0.0068 | 0.0016 |
+| omega | 0.0826 | 0.0390 | 0.0441 |
+| kappa | 0.1223 | 0.0996 | 0.0963 |
+| theta | -0.2141 | 0.0553 | 0.0600 |
+| beta | 0.7567 | 0.0726 | 0.0829 |
+| gamma_A | -0.0868 | 0.0407 | 0.0403 |
+| gamma_G | 0.3035 | 0.0933 | 0.0995 |
+| delta_dh | 0.7044 | 0.3302 | 0.3016 |
+| delta_sau | -0.3986 | 0.3233 | 0.2983 |
+| delta_nghi | 1.8798 | 0.6845 | 0.8809 |
+| nu | 1.1126 | 0.0721 | 0.0884 |
+
+### Kiểm tra dự báo tiên nghiệm (mục 4.3.1): phân vị của thống kê dữ liệu trong phân phối dự báo tiên nghiệm
+
+| Phân phối | độ lệch chuẩn | độ nhọn | max |r| | chạm chặn ln h |
+|---|---|---|---|---|
+| chuan | 0.2130 | 0.0840 | 0.1460 | 0.5560 |
+| student | 0.1930 | 0.0740 | 0.1440 | 0.5530 |
+| skewt | 0.2130 | 0.0510 | 0.1540 | 0.5610 |
+| ged | 0.1890 | 0.0690 | 0.1370 | 0.5800 |
+
+## 5. Chọn biến và phân phối trên XT (mục 6)
+
+Tập biến được chọn: **RV**; SPA p = 0.0285; Holm: {'RV': 2.140844168607714e-09, 'G': 5.310829415128282e-07, 'F': 0.0919450415405203, 'B': 0.5894986226348657, 'A': 0.5894986226348657, 'O': 0.7503896580190077}; VIF: [1.0].
+Phân phối được chọn: **skewt**.
+
+## 6. Cổng chuyển giai đoạn (mục 8.1)
+
+(i) True; (ii) True; (iii) True; tổng: **True**.
+
+## 7. Độ nhạy tiên nghiệm (mục 4.3.1): chênh lệch trung bình hậu nghiệm theo đơn vị độ lệch chuẩn gốc
+
+| Phương án | mu | omega | kappa | theta | beta | gamma_RV | delta_dh | delta_sau | delta_nghi | nu | lambda |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| rong |  |  |  |  |  |  |  |  |  |  |  |
+| hep |  |  |  |  |  |  |  |  |  |  |  |
+
+## 8. Đánh giá ngoài mẫu trên KT (2024-10-17 – 2026-07-17) (mục 5)
+
+| Mô hình | QLIKE | LS | Vi phạm 1% | Kupiec p | FZ0 2,5% | Berkowitz p |
+|---|---|---|---|---|---|---|
+| MLE|skewt|EGARCH | 1.3178 | -1.5197 | 4 | 0.8642 | 1.4385 | 0.2394 |
+| MLE|skewt|A+G | 1.3404 | -1.5096 | 4 | 0.8642 | 1.4535 | 0.1553 |
+| MLE|chuan|RV | 1.3504 | -1.6592 | 8 | 0.1154 | 1.5552 | 0.3191 |
+| MLE|student|RV | 1.3521 | -1.5068 | 5 | 0.7596 | 1.4820 | 0.2347 |
+| MLE|skewt|RV | 1.3468 | -1.5071 | 5 | 0.7596 | 1.4607 | 0.2110 |
+| MLE|ged|RV | 1.3508 | -1.5212 | 5 | 0.7596 | 1.4948 | 0.3738 |
+| MLE|skewt|GARCH | 1.3337 | -1.5227 | 4 | 0.8642 | 1.4888 | 0.3942 |
+| vb_mf|skewt|RV | 1.3377 | -1.5075 | 5 | 0.7596 | 1.4437 | 0.2254 |
+| vb_fr|skewt|RV | 1.3415 | -1.5098 | 5 | 0.7596 | 1.4580 | 0.2030 |
+| nuts|skewt|RV | 1.3392 | -1.5078 | 5 | 0.7596 | 1.4599 | 0.2131 |
+
+Tập mô hình tin cậy: {'LS': ['MLE|skewt|EGARCH', 'MLE|skewt|A+G', 'MLE|chuan|RV', 'MLE|student|RV', 'MLE|skewt|RV', 'MLE|ged|RV', 'MLE|skewt|GARCH', 'vb_mf|skewt|RV', 'vb_fr|skewt|RV', 'nuts|skewt|RV'], 'QLIKE': ['MLE|skewt|EGARCH', 'MLE|skewt|A+G', 'MLE|chuan|RV', 'MLE|student|RV', 'MLE|skewt|RV', 'MLE|ged|RV', 'MLE|skewt|GARCH', 'vb_mf|skewt|RV', 'vb_fr|skewt|RV', 'nuts|skewt|RV'], 'FZ0_0.01': ['MLE|skewt|EGARCH', 'MLE|skewt|A+G', 'MLE|chuan|RV', 'MLE|student|RV', 'MLE|skewt|RV', 'MLE|ged|RV', 'MLE|skewt|GARCH', 'vb_mf|skewt|RV', 'vb_fr|skewt|RV', 'nuts|skewt|RV'], 'FZ0_0.025': ['MLE|skewt|EGARCH', 'MLE|skewt|A+G', 'MLE|chuan|RV', 'MLE|student|RV', 'MLE|skewt|RV', 'MLE|ged|RV', 'MLE|skewt|GARCH', 'vb_mf|skewt|RV', 'vb_fr|skewt|RV', 'nuts|skewt|RV']}
+
+CH1 (EGARCH-X so với EGARCH): {'LS': {'t': -1.666116367549938, 'p_mot_phia_goc_tot_hon': 0.04784511956315058}, 'QLIKE': {'t': 1.6984714587575553, 'p_mot_phia_goc_tot_hon': 0.955290592463185}, 'FZ0_0.01': {'t': 0.6670039180566496, 'p_mot_phia_goc_tot_hon': 0.7476151846246535}, 'FZ0_0.025': {'t': 0.5083875608331322, 'p_mot_phia_goc_tot_hon': 0.6944092126988892}}
+
+### So sánh bốn phương pháp tại mốc cuối (s0 = 2155): tỷ số độ lệch chuẩn so với NUTS
+
+| Phương pháp | mu | omega | kappa | theta | beta | gamma_RV | delta_dh | delta_sau | delta_nghi | nu | lambda |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| mle | 1.0067 | 1.1787 | 1.0331 | 1.1493 | 1.2286 | 1.1767 | 0.9832 | 1.0394 | 1.2801 | 1.0018 | 0.9442 |
+| vb_mf | 0.8172 | 0.4119 | 0.7829 | 0.8520 | 0.2906 | 0.3408 | 0.7043 | 0.7399 | 0.9924 | 0.6787 | 0.8529 |
+| vb_fr | 0.9881 | 0.8894 | 1.0437 | 0.9511 | 0.9188 | 0.8673 | 1.0074 | 0.9987 | 0.9599 | 0.8376 | 0.9817 |
+
+## 9. Ký quỹ động (mục 7), thiết kế trình bày H2|a0.01
+
+Siêu tham số chọn trên XT: {'w': 0.0, 'b': 0.0, 'phi': 0.5, 'eta': 0.0}.
+
+| Quy tắc | m tb | Tỷ lệ vượt | Thiếu hụt tb | Cùng m_tb: thiếu hụt/phiên | DM p |
+|---|---|---|---|---|---|
+| dong_mle | 0.0677 | 0.0092 | 0.0180 | 0.0002 | 0.5000 |
+| dong_egarch_mle | 0.0677 | 0.0069 | 0.0153 | 0.0001 | 0.9067 |
+| dong_vb_mf | 0.0681 | 0.0069 | 0.0153 | 0.0001 | 0.9308 |
+| dong_vb_fr | 0.0685 | 0.0069 | 0.0169 | 0.0001 | 0.9388 |
+| dong_nuts | 0.0676 | 0.0069 | 0.0203 | 0.0001 | 0.8759 |
+| dong_mle_khong_nguong | 0.0629 | 0.0092 | 0.0205 | 0.0002 | 0.5998 |
+| VaR_tho_mle | 0.0580 | 0.0138 | 0.0188 | 0.0002 | 0.2608 |
+| FHS_EGARCH-X | 0.0580 | 0.0115 | 0.0224 | 0.0002 | 0.2290 |
+| EWMA | 0.0457 | 0.0323 | 0.0164 | 0.0002 | 0.2208 |
+| lich_su_cua_so | 0.0610 | 0.0184 | 0.0280 | 0.0004 | 0.1666 |
+| co_dinh_khop_XT | 0.0866 | 0.0023 | 0.0229 | 0.0002 | 0.4055 |
+| VSD_hang_so | 0.1700 | 0.0000 | 0.0000 | 0.0002 | 0.4055 |
+| VSD_lich_su | 0.1700 | 0.0000 | 0.0000 | 0.0002 | 0.4055 |
+| moc_tren_H_x_bien_do | 0.1400 | 0.0000 | 0.0000 | 0.0002 | 0.4055 |
+
+![Ký quỹ](hinh_ky_quy.png)
+
+![Đường biên](hinh_duong_bien.png)

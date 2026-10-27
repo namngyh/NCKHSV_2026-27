@@ -1,0 +1,46 @@
+{
+ "b09_lech_lon_nhat": 0.0,
+ "b11_lech_lon_nhat": 0.0,
+ "b05_lech_lon_nhat": 0.0,
+ "b05_b06_chi_truoc_KT": true,
+ "khoa_truoc_b08": true,
+ "commit_theo_buoc": {
+  "b5e00ce1836d4598f53f6be516c9309b5cd24dfc": [
+   "b00",
+   "b01",
+   "b02",
+   "b02k"
+  ],
+  "63b508c003978d18a20931c20ef3f804db0bd42a": [
+   "b03a",
+   "b04",
+   "b04b"
+  ],
+  "64f663703314cf6a007015bd274655b899f9ccfe": [
+   "b05",
+   "b06",
+   "b06b"
+  ],
+  "21ff82bd29c81e8439f689226014f5ccfe5b48c4": [
+   "b06c",
+   "b07"
+  ],
+  "a9735bb281c2ffea1105761bff025e12b16306ca": [
+   "b08",
+   "b08b",
+   "b09",
+   "b10",
+   "b11",
+   "b12",
+   "b13"
+  ]
+ },
+ "buoc_thieu_nguon_goc": [],
+ "dat": true,
+ "_nguon": {
+  "may": "may_manh",
+  "host": "Cloudiso",
+  "thoi_diem": "2026-10-27 23:36:45",
+  "giay": 1.38
+ }
+}
