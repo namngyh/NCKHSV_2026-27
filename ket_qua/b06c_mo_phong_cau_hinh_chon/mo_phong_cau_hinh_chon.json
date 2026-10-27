@@ -1,0 +1,109 @@
+{
+ "phan_phoi": "skewt",
+ "bien": [
+  "RV"
+ ],
+ "B": 1000,
+ "T": 1675,
+ "tham_so_xet_cong": [
+  "omega",
+  "kappa",
+  "theta",
+  "beta",
+  "gamma_RV"
+ ],
+ "bang": {
+  "mu": {
+   "that": 0.04064881974037422,
+   "chech": 0.00014443784912544994,
+   "rmse": 0.025876486669836732,
+   "do_phu": 0.946,
+   "do_phu_hessian": 0.944
+  },
+  "omega": {
+   "that": 0.11932513817478184,
+   "chech": -0.0006894171623876532,
+   "rmse": 0.0338163544325741,
+   "do_phu": 0.934,
+   "do_phu_hessian": 0.934
+  },
+  "kappa": {
+   "that": 0.058976275333868046,
+   "chech": -0.00769510777046,
+   "rmse": 0.049770005788492964,
+   "do_phu": 0.939,
+   "do_phu_hessian": 0.938
+  },
+  "theta": {
+   "that": -0.16435929234962418,
+   "chech": -0.003291194763501889,
+   "rmse": 0.03626349113615472,
+   "do_phu": 0.939,
+   "do_phu_hessian": 0.936
+  },
+  "beta": {
+   "that": 0.6994954404808176,
+   "chech": -0.0033999267296827935,
+   "rmse": 0.05089854982906679,
+   "do_phu": 0.934,
+   "do_phu_hessian": 0.939
+  },
+  "gamma_RV": {
+   "that": 0.2621043580358024,
+   "chech": 0.0037220321056453806,
+   "rmse": 0.04333766578794673,
+   "do_phu": 0.943,
+   "do_phu_hessian": 0.936
+  },
+  "delta_dh": {
+   "that": 0.17051291000139338,
+   "chech": -0.006767035212947851,
+   "rmse": 0.20321433243110792,
+   "do_phu": 0.946,
+   "do_phu_hessian": 0.95
+  },
+  "delta_sau": {
+   "that": 0.15343969649918082,
+   "chech": -0.007394332013435243,
+   "rmse": 0.20627516303121904,
+   "do_phu": 0.958,
+   "do_phu_hessian": 0.954
+  },
+  "delta_nghi": {
+   "that": 0.3156330274041497,
+   "chech": -0.043156003141566535,
+   "rmse": 0.4488725651486846,
+   "do_phu": 0.911,
+   "do_phu_hessian": 0.937
+  },
+  "nu": {
+   "that": 4.442298693299666,
+   "chech": 0.1279479996844339,
+   "rmse": 0.5408692410578592,
+   "do_phu": 0.957,
+   "do_phu_hessian": 0.958
+  },
+  "lambda": {
+   "that": -0.10954212856925773,
+   "chech": -0.00043858892622169576,
+   "rmse": 0.034931964344869976,
+   "do_phu": 0.943,
+   "do_phu_hessian": 0.939
+  }
+ },
+ "dieu_kien": {
+  "do_phu_min": 0.934,
+  "do_phu_max": 0.943,
+  "bac_bo_sai_max": null,
+  "so_kiem_dinh": 10,
+  "p_holm_nho_nhat": 1.0,
+  "o_khong_dat": [],
+  "dat_nguong_cung": true,
+  "dat_nhi_thuc": true,
+  "cach": "nhi_thuc",
+  "dat": true,
+  "so_that_bai": 0,
+  "ty_le_hessian_xac_dinh_duong": 1.0
+ },
+ "loi_that_bai": []
+}
