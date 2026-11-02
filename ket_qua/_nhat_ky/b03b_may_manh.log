@@ -28730,3 +28730,42 @@
 [14:09:51] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|014|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [14:10:06] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|014|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [14:11:37] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|008|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:12:13] [b03b] [may_manh] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 119200 don vi / 119200 nhom; cua may nay 59848 nhom, con thieu 44984 nhom
+[14:13:12] [b03b] [may_manh] xong don vi sbc|chuan|nuts|015|c2::0 (55.4 s)
+[14:13:12] [b03b] [may_manh] xong don vi sbc|chuan|nuts|015|c0::0 (55.7 s)
+[14:14:28] [b03b] [may_manh] xong don vi sbc|chuan|nuts|015|c3::0 (131.8 s)
+[14:14:37] [b03b] [may_manh] xong don vi sbc|chuan|nuts|012|c2::0 (140.6 s)
+[14:16:34] [b03b] [may_manh] xong don vi sbc|chuan|nuts|017|c0::0 (125.9 s)
+[14:16:39] [b03b] [may_manh] xong don vi sbc|chuan|nuts|017|c1::0 (121.7 s)
+[14:19:22] [b03b] [may_manh] xong don vi sbc|chuan|nuts|013|c2::0 (425.5 s)
+[14:20:51] [b03b] [may_manh] xong don vi sbc|chuan|nuts|016|c0::0 (514.9 s)
+[14:24:25] [b03b] [may_manh] xong don vi sbc|chuan|nuts|016|c2::0 (672.9 s)
+[14:24:57] [b03b] [may_manh] xong don vi sbc|chuan|nuts|019|c1::0 (335.2 s)
+[14:26:08] [b03b] [may_manh] xong don vi sbc|chuan|nuts|020|c3::0 (102.8 s)
+[14:26:28] [b03b] [may_manh] xong don vi sbc|chuan|nuts|019|c2::0 (336.7 s)
+[14:27:31] [b03b] [may_manh] xong don vi sbc|chuan|nuts|021|c0::0 (153.7 s)
+[14:29:09] [b03b] [may_manh] xong don vi sbc|chuan|nuts|021|c2::0 (160.6 s)
+[14:29:15] [b03b] [may_manh] xong don vi sbc|chuan|nuts|021|c1::0 (186.8 s)
+[14:29:49] [b03b] [may_manh] xong don vi sbc|chuan|nuts|022|c0::0 (138.5 s)
+[14:31:49] [b03b] [may_manh] xong don vi sbc|chuan|nuts|023|c0::0 (160.3 s)
+[14:31:50] [b03b] [may_manh] xong don vi sbc|chuan|nuts|023|c2::0 (154.7 s)
+[14:32:25] [b03b] [may_manh] xong don vi sbc|chuan|nuts|023|c3::0 (155.3 s)
+[14:36:45] [b03b] [may_manh] xong don vi sbc|chuan|nuts|012|c3::0 (1468.0 s)
+[14:38:57] [b03b] [may_manh] xong don vi sbc|chuan|nuts|025|c0::0 (132.5 s)
+[14:41:00] [b03b] [may_manh] xong don vi sbc|chuan|nuts|012|c0::0 (1723.5 s)
+[14:41:05] [b03b] [may_manh] xong don vi sbc|chuan|nuts|025|c1::0 (127.7 s)
+[14:42:17] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|014|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:42:33] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|002|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:42:36] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|025|c2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:42:54] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|025|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:44:05] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|002|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:44:59] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|008|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:45:28] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|006|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:45:55] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|014|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:46:03] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|004|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:52:45] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|024|c2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:53:39] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|024|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:55:55] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|024|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[15:00:08] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|016|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[15:02:01] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|018|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[15:02:29] [b03b] [may_manh] het gio trong don vi sbc|chuan|nuts|018|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
