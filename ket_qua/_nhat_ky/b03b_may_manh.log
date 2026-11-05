@@ -43939,3 +43939,90 @@
 [06:12:02] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|012|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [06:12:04] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|012|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [06:12:05] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|012|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:12:43] [b03b] [may_manh] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 119200 don vi / 119200 nhom; cua may nay 119200 nhom, con thieu 77376 nhom
+[06:18:38] [b03b] [may_manh] xong don vi sbc|student|vb_mf|009|l1::0 (351.3 s)
+[06:18:42] [b03b] [may_manh] xong don vi sbc|student|vb_mf|009|l0::0 (355.6 s)
+[06:18:44] [b03b] [may_manh] xong don vi sbc|student|vb_mf|009|l2::0 (357.2 s)
+[06:19:11] [b03b] [may_manh] xong don vi sbc|student|vb_mf|010|l0::0 (384.8 s)
+[06:19:13] [b03b] [may_manh] xong don vi sbc|student|vb_mf|010|l2::0 (386.0 s)
+[06:19:17] [b03b] [may_manh] xong don vi sbc|student|vb_mf|010|l1::0 (390.6 s)
+[06:19:49] [b03b] [may_manh] xong don vi sbc|student|vb_mf|011|l1::0 (422.1 s)
+[06:19:51] [b03b] [may_manh] xong don vi sbc|student|vb_mf|011|l0::0 (424.1 s)
+[06:20:01] [b03b] [may_manh] xong don vi sbc|student|vb_mf|011|l2::0 (434.2 s)
+[06:20:03] [b03b] [may_manh] xong don vi sbc|student|vb_mf|012|l2::0 (436.5 s)
+[06:20:04] [b03b] [may_manh] xong don vi sbc|student|vb_mf|012|l1::0 (437.2 s)
+[06:20:16] [b03b] [may_manh] xong don vi sbc|student|vb_mf|012|l0::0 (449.0 s)
+[06:22:40] [b03b] [may_manh] xong don vi sbc|student|vb_mf|006|l0::0 (593.0 s)
+[06:22:42] [b03b] [may_manh] xong don vi sbc|student|vb_mf|006|l2::0 (595.1 s)
+[06:22:55] [b03b] [may_manh] xong don vi sbc|student|vb_mf|006|l1::0 (608.0 s)
+[06:23:48] [b03b] [may_manh] xong don vi sbc|student|vb_mf|013|l0::0 (310.1 s)
+[06:23:51] [b03b] [may_manh] xong don vi sbc|student|vb_mf|013|l1::0 (308.5 s)
+[06:23:52] [b03b] [may_manh] xong don vi sbc|student|vb_mf|013|l2::0 (308.7 s)
+[06:24:07] [b03b] [may_manh] xong don vi sbc|student|vb_mf|016|l1::0 (242.8 s)
+[06:24:22] [b03b] [may_manh] xong don vi sbc|student|vb_mf|016|l2::0 (246.8 s)
+[06:24:28] [b03b] [may_manh] xong don vi sbc|student|vb_mf|016|l0::0 (265.0 s)
+[06:25:39] [b03b] [may_manh] xong don vi sbc|student|vb_mf|014|l0::0 (387.6 s)
+[06:25:41] [b03b] [may_manh] xong don vi sbc|student|vb_mf|014|l1::0 (388.4 s)
+[06:25:43] [b03b] [may_manh] xong don vi sbc|student|vb_mf|014|l2::0 (386.2 s)
+[06:27:00] [b03b] [may_manh] xong don vi sbc|student|vb_mf|017|l1::0 (258.0 s)
+[06:27:01] [b03b] [may_manh] xong don vi sbc|student|vb_mf|017|l2::0 (246.1 s)
+[06:27:01] [b03b] [may_manh] xong don vi sbc|student|vb_mf|017|l0::0 (261.4 s)
+[06:28:38] [b03b] [may_manh] xong don vi sbc|student|vb_mf|018|l0::0 (290.3 s)
+[06:28:51] [b03b] [may_manh] xong don vi sbc|student|vb_mf|018|l1::0 (300.3 s)
+[06:28:53] [b03b] [may_manh] xong don vi sbc|student|vb_mf|018|l2::0 (300.6 s)
+[06:29:37] [b03b] [may_manh] xong don vi sbc|student|vb_mf|019|l0::0 (330.8 s)
+[06:29:41] [b03b] [may_manh] xong don vi sbc|student|vb_mf|019|l1::0 (318.6 s)
+[06:30:20] [b03b] [may_manh] xong don vi sbc|student|vb_mf|019|l2::0 (352.2 s)
+[06:30:34] [b03b] [may_manh] xong don vi sbc|student|vb_mf|020|l0::0 (295.2 s)
+[06:30:39] [b03b] [may_manh] xong don vi sbc|student|vb_mf|021|l0::0 (219.0 s)
+[06:30:45] [b03b] [may_manh] xong don vi sbc|student|vb_mf|021|l2::0 (224.1 s)
+[06:30:47] [b03b] [may_manh] xong don vi sbc|student|vb_mf|020|l1::0 (305.6 s)
+[06:30:48] [b03b] [may_manh] xong don vi sbc|student|vb_mf|020|l2::0 (304.2 s)
+[06:30:49] [b03b] [may_manh] xong don vi sbc|student|vb_mf|021|l1::0 (228.4 s)
+[06:31:30] [b03b] [may_manh] xong don vi sbc|student|vb_mf|015|l0::0 (701.2 s)
+[06:31:55] [b03b] [may_manh] xong don vi sbc|student|vb_mf|015|l2::0 (714.3 s)
+[06:32:08] [b03b] [may_manh] xong don vi sbc|student|vb_mf|015|l1::0 (737.7 s)
+[06:32:39] [b03b] [may_manh] xong don vi sbc|student|vb_mf|022|l0::0 (240.1 s)
+[06:32:45] [b03b] [may_manh] xong don vi sbc|student|vb_mf|022|l1::0 (234.1 s)
+[06:33:02] [b03b] [may_manh] xong don vi sbc|student|vb_mf|022|l2::0 (248.7 s)
+[06:34:54] [b03b] [may_manh] xong don vi sbc|student|vb_mf|025|l1::0 (246.5 s)
+[06:35:03] [b03b] [may_manh] xong don vi sbc|student|vb_mf|025|l0::0 (256.6 s)
+[06:35:07] [b03b] [may_manh] xong don vi sbc|student|vb_mf|025|l2::0 (258.0 s)
+[06:35:55] [b03b] [may_manh] xong don vi sbc|student|vb_mf|026|l0::0 (265.2 s)
+[06:36:14] [b03b] [may_manh] xong don vi sbc|student|vb_mf|026|l1::0 (258.8 s)
+[06:36:31] [b03b] [may_manh] xong don vi sbc|student|vb_mf|026|l2::0 (262.5 s)
+[06:37:02] [b03b] [may_manh] xong don vi sbc|student|vb_mf|024|l2::0 (376.6 s)
+[06:37:03] [b03b] [may_manh] xong don vi sbc|student|vb_mf|024|l0::0 (388.6 s)
+[06:37:10] [b03b] [may_manh] xong don vi sbc|student|vb_mf|024|l1::0 (391.5 s)
+[06:38:12] [b03b] [may_manh] xong don vi sbc|student|vb_mf|023|l0::0 (513.9 s)
+[06:38:14] [b03b] [may_manh] xong don vi sbc|student|vb_mf|023|l1::0 (513.1 s)
+[06:38:56] [b03b] [may_manh] xong don vi sbc|student|vb_mf|028|l0::0 (241.4 s)
+[06:38:59] [b03b] [may_manh] xong don vi sbc|student|vb_mf|028|l1::0 (236.1 s)
+[06:39:01] [b03b] [may_manh] xong don vi sbc|student|vb_mf|028|l2::0 (234.1 s)
+[06:39:14] [b03b] [may_manh] xong don vi sbc|student|vb_mf|023|l2::0 (533.4 s)
+[06:39:16] [b03b] [may_manh] xong don vi sbc|student|vb_mf|027|l0::0 (397.2 s)
+[06:39:30] [b03b] [may_manh] xong don vi sbc|student|vb_mf|027|l1::0 (404.8 s)
+[06:39:31] [b03b] [may_manh] xong don vi sbc|student|vb_mf|027|l2::0 (388.9 s)
+[06:40:58] [b03b] [may_manh] xong don vi sbc|student|vb_mf|030|l0::0 (236.7 s)
+[06:41:03] [b03b] [may_manh] xong don vi sbc|student|vb_mf|030|l1::0 (240.3 s)
+[06:41:12] [b03b] [may_manh] xong don vi sbc|student|vb_mf|030|l2::0 (241.9 s)
+[06:41:13] [b03b] [may_manh] xong don vi sbc|student|vb_mf|029|l0::0 (317.9 s)
+[06:41:35] [b03b] [may_manh] xong don vi sbc|student|vb_mf|029|l1::0 (320.7 s)
+[06:41:56] [b03b] [may_manh] xong don vi sbc|student|vb_mf|029|l2::0 (325.4 s)
+[06:42:26] [b03b] [may_manh] xong don vi sbc|student|vb_mf|031|l0::0 (253.7 s)
+[06:42:38] [b03b] [may_manh] xong don vi sbc|student|vb_mf|031|l1::0 (263.5 s)
+[06:42:45] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|032|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:42:47] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|031|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:42:49] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|035|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:42:49] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|035|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:42:52] [b03b] [may_manh] xong don vi sbc|student|vb_mf|032|l0::0 (232.4 s)
+[06:42:56] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|035|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:43:01] [b03b] [may_manh] xong don vi sbc|student|vb_mf|032|l1::0 (239.5 s)
+[06:43:20] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|034|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:43:22] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|036|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:43:25] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|034|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:43:31] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|036|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:43:32] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|034|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:43:49] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|033|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:43:57] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|033|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[06:43:57] [b03b] [may_manh] het gio trong don vi sbc|student|vb_mf|033|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
