@@ -49,3 +49,58 @@
 [09:34:13] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|068|l2::0 (56.6 s)
 [09:35:19] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|070|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_5>, { bitcast_add_fusion.1 }) }
 [09:35:19] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|070|l2::0 (65.9 s)
+[09:36:26] [b03b] [colab_1] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 119200 don vi / 119200 nhom; cua may nay 9791 nhom, con thieu 5190 nhom
+[09:37:31] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|072|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_28>, { bitcast_pad_fusion.9 }) }
+[09:37:31] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|072|l2::0 (64.4 s)
+[09:38:31] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|073|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_11>, { subtract_divide_fusion.1 }) }
+[09:38:31] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|073|l2::0 (60.5 s)
+[09:39:49] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|080|l0::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_24>, { wrapped_broadcast.7 }) }
+[09:39:49] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|080|l0::0 (77.8 s)
+[09:40:46] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|082|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_9>, { compare_and_fusion }) }
+[09:40:46] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|082|l2::0 (57.1 s)
+[09:42:00] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|091|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_25>, { wrapped_broadcast.8 }) }
+[09:42:00] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|091|l2::0 (73.9 s)
+[09:42:51] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|098|l0::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_9>, { slice_pad_fusion }) }
+[09:42:51] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|098|l0::0 (50.8 s)
+[09:44:41] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|101|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_25>, { add_divide_fusion.4 }) }
+[09:44:41] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|101|l2::0 (109.7 s)
+[09:45:48] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|106|l0::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_27>, { sine_divide_fusion.1 }) }
+[09:45:48] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|106|l0::0 (67.1 s)
+[09:46:57] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|108|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_9>, { call.22_kernel }) }
+[09:46:57] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|108|l2::0 (69.4 s)
+[09:47:57] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|111|l0::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_5>, { broadcast_multiply_fusion }) }
+[09:47:57] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|111|l0::0 (60.3 s)
+[09:48:59] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|111|l1::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_10>, { xor_xor_fusion.3 }) }
+[09:48:59] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|111|l1::0 (61.7 s)
+[09:50:10] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|112|l0::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_0>, { broadcast_add_fusion.15 }) }
+[09:50:10] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|112|l0::0 (70.7 s)
+[09:51:05] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|113|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_11>, { bitcast_dynamic-update-slice_fusion.12 }) }
+[09:51:05] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|113|l2::0 (55.4 s)
+[09:52:05] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|116|l1::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_13>, { add_divide_fusion.11 }) }
+[09:52:05] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|116|l1::0 (59.3 s)
+[09:52:59] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|125|l1::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_0>, { broadcast_add_fusion.15 }) }
+[09:52:59] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|125|l1::0 (54.1 s)
+[09:54:04] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|126|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_13>, { subtract_divide_fusion.3 }) }
+[09:54:04] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|126|l2::0 (65.2 s)
+[09:55:07] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|130|l0::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_18>, { negate_add_fusion.2 }) }
+[09:55:07] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|130|l0::0 (63.5 s)
+[09:55:56] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|133|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_7>, { dot.20_kernel }) }
+[09:55:56] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|133|l2::0 (49.0 s)
+[09:57:55] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|134|l1::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_1>, { multiply_bitcast_fusion }) }
+[09:57:55] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|134|l1::0 (118.3 s)
+[09:59:05] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|136|l0::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_12>, { add_divide_fusion.10 }) }
+[09:59:05] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|136|l0::0 (69.8 s)
+[09:59:59] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|139|l1::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_23>, { wrapped_broadcast.5 }) }
+[09:59:59] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|139|l1::0 (54.1 s)
+[10:00:54] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|143|l0::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_10>, { bitcast_divide_fusion.1 }) }
+[10:00:54] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|143|l0::0 (55.4 s)
+[10:02:09] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|149|l0::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_20>, { bitcast_pad_fusion.13 }) }
+[10:02:09] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|149|l0::0 (74.9 s)
+[10:03:24] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|149|l1::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_2>, { add_sqrt_fusion }) }
+[10:03:24] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|149|l1::0 (75.6 s)
+[10:04:29] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|154|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_21>, { exponential_log-plus-one_fusion.4 }) }
+[10:04:29] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|154|l2::0 (64.7 s)
+[10:05:33] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|155|l1::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_30>, { add_divide_fusion.9 }) }
+[10:05:33] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|155|l1::0 (63.7 s)
+[10:07:07] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|159|l1::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_31>, { slice_bitcast_fusion.1 }) }
+[10:07:07] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|159|l1::0 (93.9 s)
