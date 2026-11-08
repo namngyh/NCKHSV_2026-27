@@ -2439,3 +2439,44 @@
 [02:24:05] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|322|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [02:24:07] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|316|l1::0 (289.2 s)
 [02:24:09] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|320|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[02:25:44] [b03b] [may_phu_1] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 119200 don vi / 119200 nhom; cua may nay 35758 nhom, con thieu 20085 nhom
+[02:27:04] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|322|l1::0 (76.1 s)
+[02:27:06] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|317|l1::0 (78.5 s)
+[02:27:22] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|320|l2::0 (94.5 s)
+[02:27:24] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|323|l2::0 (95.9 s)
+[02:31:20] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|328|l1::0 (332.6 s)
+[02:31:22] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|328|l0::0 (334.1 s)
+[02:32:42] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|331|l2::0 (335.6 s)
+[02:32:43] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|330|l1::0 (339.2 s)
+[02:32:53] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|333|l2::0 (330.8 s)
+[02:32:58] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|337|l0::0 (334.9 s)
+[02:36:27] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|337|l2::0 (307.1 s)
+[02:36:32] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|338|l1::0 (310.5 s)
+[02:37:42] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|341|l1::0 (289.5 s)
+[02:37:46] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|339|l1::0 (303.8 s)
+[02:37:49] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|339|l2::0 (306.0 s)
+[02:38:03] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|344|l0::0 (304.5 s)
+[02:41:24] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|344|l2::0 (296.8 s)
+[02:41:29] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|345|l1::0 (296.7 s)
+[02:42:34] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|346|l0::0 (291.3 s)
+[02:42:39] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|346|l2::0 (293.6 s)
+[02:42:45] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|348|l0::0 (296.2 s)
+[02:42:59] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|348|l2::0 (295.7 s)
+[02:46:19] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|350|l2::0 (294.8 s)
+[02:46:24] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|352|l0::0 (295.2 s)
+[02:47:29] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|352|l1::0 (295.1 s)
+[02:47:44] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|353|l0::0 (304.7 s)
+[02:47:51] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|353|l1::0 (305.8 s)
+[02:48:05] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|353|l2::0 (306.1 s)
+[02:51:29] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|361|l0::0 (304.5 s)
+[02:51:50] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|356|l0::0 (331.2 s)
+[02:52:26] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|364|l0::0 (297.4 s)
+[02:52:48] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|367|l1::0 (303.5 s)
+[02:52:57] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|374|l0::0 (291.8 s)
+[02:53:08] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|368|l1::0 (317.5 s)
+[02:55:44] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|377|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[02:55:54] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|375|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[02:55:56] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|381|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[02:55:58] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|383|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[02:56:00] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|376|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[02:56:01] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|377|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
