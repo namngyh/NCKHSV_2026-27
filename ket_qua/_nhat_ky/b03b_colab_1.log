@@ -26,3 +26,12 @@
 [08:22:50] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|030|l2::0 (73.9 s)
 [08:24:19] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|031|l1::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_21>, { pad_bitcast_fusion }) }
 [08:24:19] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|031|l1::0 (89.2 s)
+[08:33:23] [b03b] [colab_1] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 119200 don vi / 119200 nhom; cua may nay 9791 nhom, con thieu 5206 nhom
+[08:36:33] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|007|l2::0 (189.8 s)
+[08:40:50] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|009|l2::0 (256.9 s)
+[08:45:16] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|026|l1::0 (266.2 s)
+[08:49:26] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|029|l0::0 (250.4 s)
+[08:53:30] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|029|l2::0 (243.6 s)
+[08:58:11] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|030|l2::0 (280.9 s)
+[09:02:59] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|031|l1::0 (288.0 s)
+[09:04:05] [b03b] [colab_1] het gio trong don vi mpb|student|vb_fr|E4|032|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
