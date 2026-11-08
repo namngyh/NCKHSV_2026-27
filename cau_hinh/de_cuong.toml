@@ -149,8 +149,7 @@ phut_dong_bo = 30               # chu kỳ git pull / push khi chạy với --gi
 nhan_thay_sau_gio = 6           # máy khác không gửi nhịp tim quá số giờ này -> máy chủ trì tự làm thay phần việc của nó
 [phan_tan.may]                  # phân mảnh của từng máy (tổng 10). Hiện CHỈ MỘT MÁY: may_manh giữ cả 10 phân mảnh.
 may_manh = [0, 1, 2, 3, 4]
-may_phu_1 = [5, 6, 7, 8]
-colab_1 = [9]                   # 08/11/2026: Colab (Linux) lam phan manh 9, khong nhan NUTS
+may_phu_1 = [5, 6, 7, 8, 9]     # 08/11/2026: bo Colab (het RAM), may_phu_1 nhan them phan manh 9
 # Muốn thêm Colab: đổi may_manh = [0..8] và thêm dòng  colab_1 = [9]  (xem colab/chay_tren_colab.ipynb).
 
 [de_cuong_goc]                  # giá trị đề cương quy định; khác đi sẽ tự ghi vào nhật ký sai lệch (b13)
