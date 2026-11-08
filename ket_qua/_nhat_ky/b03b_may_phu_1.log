@@ -2350,3 +2350,9 @@
 [18:32:56] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|180|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [18:33:26] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|179|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [18:33:55] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|180|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[20:48:25] [b03b] [may_phu_1] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 119200 don vi / 119200 nhom; cua may nay 35758 nhom, con thieu 20162 nhom
+[20:52:56] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|182|l2::0 (267.6 s)
+[20:52:58] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|182|l0::0 (269.6 s)
+[20:53:06] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|187|l2::0 (277.7 s)
+[20:53:10] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|188|l1::0 (281.7 s)
+[20:53:21] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|185|l1::0 (292.6 s)
