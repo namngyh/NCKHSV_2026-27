@@ -113,7 +113,12 @@ if exist "cau_hinh\ten_may.txt" (set /p TEN_MAY=<"cau_hinh\ten_may.txt") else (
     set /p TEN_MAY="Ten may trong [phan_tan.may] cua cau hinh (vd: may_B): "
     >"cau_hinh\ten_may.txt" echo !TEN_MAY!
 )
+:lap_don_vi
 %PYEXE% quy_trinh\chay.py --buoc tat_ca --vai_tro don_vi --may %TEN_MAY% --git
+if "%ERRORLEVEL%"=="4" (
+    echo [INFO] Ma nguon tren GitHub vua thay doi: khoi dong lai voi ban moi...
+    goto :lap_don_vi
+)
 call :bao_ma
 goto :xong
 
