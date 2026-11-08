@@ -35,3 +35,17 @@
 [08:58:11] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|030|l2::0 (280.9 s)
 [09:02:59] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|031|l1::0 (288.0 s)
 [09:04:05] [b03b] [colab_1] het gio trong don vi mpb|student|vb_fr|E4|032|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[09:05:15] [b03b] [colab_1] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 119200 don vi / 119200 nhom; cua may nay 9791 nhom, con thieu 5199 nhom
+[09:09:09] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|032|l1::0 (234.4 s)
+[09:13:43] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|034|l0::0 (273.9 s)
+[09:19:03] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|038|l0::0 (319.9 s)
+[09:23:10] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|047|l0::0 (247.2 s)
+[09:27:56] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|054|l0::0 (286.1 s)
+[09:32:03] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|058|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_4>, { wrapped_reduce-window.3 }) }
+[09:32:03] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|058|l2::0 (246.4 s)
+[09:33:16] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|063|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_3>, { wrapped_scatter.2 }) }
+[09:33:16] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|063|l2::0 (73.5 s)
+[09:34:13] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|068|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_17>, { exponential_log-plus-one_fusion }) }
+[09:34:13] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|068|l2::0 (56.6 s)
+[09:35:19] [b03b] [colab_1] don vi mpb|student|vb_fr|E4|070|l2::0 THAT BAI: INTERNAL: Failed to materialize symbols: { (<xla_jit_dylib_5>, { bitcast_add_fusion.1 }) }
+[09:35:19] [b03b] [colab_1] xong don vi mpb|student|vb_fr|E4|070|l2::0 (65.9 s)
