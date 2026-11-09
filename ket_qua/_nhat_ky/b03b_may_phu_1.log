@@ -2827,3 +2827,22 @@
 [07:15:59] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|808|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [07:16:00] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|809|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [07:16:27] [b03b] [may_phu_1] het gio trong don vi mpb|student|vb_fr|E4|811|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[07:17:57] [b03b] [may_phu_1] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 119200 don vi / 119200 nhom; cua may nay 35758 nhom, con thieu 19759 nhom
+[07:19:14] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|806|l0::0 (72.8 s)
+[07:20:48] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|806|l1::0 (166.8 s)
+[07:21:32] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|809|l2::0 (210.7 s)
+[07:21:37] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|808|l2::0 (216.5 s)
+[07:21:47] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|807|l2::0 (226.0 s)
+[07:22:06] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|811|l1::0 (245.4 s)
+[07:23:25] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|812|l1::0 (251.4 s)
+[07:25:18] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|812|l2::0 (270.1 s)
+[07:26:00] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|814|l2::0 (268.3 s)
+[07:26:16] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|817|l2::0 (269.4 s)
+[07:26:19] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|816|l1::0 (281.5 s)
+[07:26:46] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|819|l0::0 (279.5 s)
+[07:28:29] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|820|l2::0 (303.8 s)
+[07:30:11] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|823|l0::0 (292.8 s)
+[07:31:13] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|823|l1::0 (312.9 s)
+[07:31:29] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|825|l1::0 (310.3 s)
+[07:31:36] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|824|l2::0 (319.2 s)
+[07:32:39] [b03b] [may_phu_1] xong don vi mpb|student|vb_fr|E4|828|l2::0 (353.1 s)
