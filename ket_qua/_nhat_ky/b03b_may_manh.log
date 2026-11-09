@@ -60476,3 +60476,13 @@
 [22:00:07] [b03b] [may_manh] xong don vi sbc|student|nuts|033|c0::0 (2034.9 s)
 [22:01:09] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|041|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [22:01:38] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|041|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:03:03] [b03b] [may_manh] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 64800 don vi / 64800 nhom; cua may nay 25847 nhom, con thieu 12905 nhom
+[22:33:21] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|044|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:33:38] [b03b] [may_manh] xong don vi sbc|student|nuts|043|c3::0 (1831.0 s)
+[22:34:33] [b03b] [may_manh] xong don vi sbc|student|nuts|043|c0::0 (1886.2 s)
+[22:34:47] [b03b] [may_manh] xong don vi sbc|student|nuts|043|c1::0 (1900.5 s)
+[22:34:48] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|045|c2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:35:05] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|044|c2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:36:24] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|044|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:36:43] [b03b] [may_manh] xong don vi sbc|student|nuts|041|c3::0 (2016.4 s)
+[22:37:06] [b03b] [may_manh] xong don vi sbc|student|nuts|041|c0::0 (2038.9 s)
