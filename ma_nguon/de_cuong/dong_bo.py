@@ -1,8 +1,13 @@
 """Đồng bộ kết quả giữa các máy qua git (máy chủ trì và các máy chỉ làm đơn vị).
 
 THIẾT KẾ (THIET_KE_CODE.md mục 6c): mỗi tệp trong ket_qua/ chỉ có đúng một máy ghi (đơn vị theo chủ sở hữu, nhật ký
-theo máy, hồ sơ/tổng hợp chỉ máy chủ trì), nên `git pull --rebase` không bao giờ gặp xung đột nội dung. Hàm `day`
+theo máy, hồ sơ/tổng hợp chỉ máy chủ trì), nên bình thường `git pull --rebase` không gặp xung đột nội dung. Hàm `day`
 thử lại nhiều lần khi push bị từ chối (máy khác vừa push): pull --rebase rồi push lại.
+NGOẠI LỆ (sửa 09/11/2026): máy chủ trì làm thay phần việc của máy vắng mặt quá `nhan_thay_sau_gio`; khi máy đó quay lại,
+hai máy có thể cùng ghi một tệp đơn vị (cùng hạt giống, khác nhiễu số học giữa máy) và rebase dừng giữa chừng ở trạng
+thái HEAD tách rời. Trước đây `keo` chỉ thử lại pull nên máy kẹt vĩnh viễn (may_phu_1, 17:24 ngày 09/11/2026). Nay:
+gỡ trạng thái rebase/merge dở dang, rồi gộp bằng merge giữ bản đã có trên GitHub cho tệp trùng (-X theirs), để mọi
+máy hội tụ về một bản. Cả hai bản đều là kết quả hợp lệ của cùng một đơn vị, nên giữ bản nào cũng không đổi thiết kế.
 Không ghi token ra màn hình: thông báo lỗi của git được cắt bớt và che phần xác thực trong URL.
 THƯ VIỆN: subprocess, json, socket.
 """
@@ -42,12 +47,44 @@ def bam_ma() -> str:
     return bam_tep(tep + du_lieu + [GOC / "cau_hinh" / "de_cuong.toml", GOC / "cau_hinh" / "the_che.toml"])
 
 
+def _thu_muc_git() -> Path:
+    return GOC / _git("rev-parse", "--git-dir").stdout.strip()
+
+
+def go_ket(log=print) -> None:
+    """Gỡ trạng thái rebase/merge dở dang do lần đồng bộ trước dừng giữa chừng (không đụng tới tệp kết quả)."""
+    g = _thu_muc_git()
+    if (g / "rebase-merge").exists() or (g / "rebase-apply").exists():
+        _git("rebase", "--abort")
+        log("[git] da go rebase do dang cua lan dong bo truoc")
+    if (g / "MERGE_HEAD").exists():
+        _git("merge", "--abort")
+        log("[git] da go merge do dang cua lan dong bo truoc")
+
+
+def _gop_giu_ban_github(log=print) -> bool:
+    """Gộp bằng merge; tệp trùng (hai máy cùng ghi một đơn vị) giữ bản đã có trên GitHub."""
+    r = _git("pull", "--no-rebase", "--no-edit", "--autostash", "-X", "theirs")
+    if r.returncode == 0:
+        log("[git] da gop bang merge (tep trung giu ban tren GitHub)")
+        return True
+    log(f"[git] gop bang merge loi: {_che((r.stderr or r.stdout).strip())[:300]}")
+    go_ket(log)
+    return False
+
+
 def keo(log=print) -> bool:
+    go_ket(log)
     for i in range(5):
         r = _git("pull", "--rebase", "--autostash")
         if r.returncode == 0:
             return True
         log(f"[git] pull loi (lan {i + 1}): {_che(r.stderr.strip())[:300]}")
+        g = _thu_muc_git()
+        if (g / "rebase-merge").exists() or (g / "rebase-apply").exists():   # xung đột tệp: đổi sang merge
+            _git("rebase", "--abort")
+            if _gop_giu_ban_github(log):
+                return True
         time.sleep(15 * (i + 1))
     return False
 
@@ -59,16 +96,20 @@ def day(may: str, thu_muc_ket_qua: Path, log=print) -> bool:
     except ValueError:
         log(f"[git] LOI: thu muc ket qua {thu_muc_ket_qua} nam ngoai repo {GOC}; khong the dong bo")
         return False
+    go_ket(log)
     r = _git("add", "-A", str(rel))
     if r.returncode != 0:
         log(f"[git] LOI git add: {_che(r.stderr.strip())[:300]}")
         return False
     if _git("diff", "--cached", "--quiet").returncode == 0:
-        return True
-    r = _git("commit", "-q", "-m", f"ket qua {may} {time.strftime('%Y-%m-%d %H:%M:%S')}")
-    if r.returncode != 0:
-        log(f"[git] commit loi: {_che(r.stderr.strip())[:300]}")
-        return False
+        # không có tệp mới, nhưng có thể còn commit chưa đẩy (vd. commit gộp của `keo`, hoặc lần push trước thất bại)
+        if _git("rev-list", "--count", "@{u}..HEAD").stdout.strip() in ("", "0"):
+            return True
+    else:
+        r = _git("commit", "-q", "-m", f"ket qua {may} {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        if r.returncode != 0:
+            log(f"[git] commit loi: {_che(r.stderr.strip())[:300]}")
+            return False
     for i in range(8):
         r = _git("push", "-q")
         if r.returncode == 0:
