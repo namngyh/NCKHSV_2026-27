@@ -79,8 +79,8 @@ sbc_so_lan = 100                # hiệu chuẩn dựa trên mô phỏng cho suy
 sbc_kich_ban = "E1"
 
 [mo_phong_bayes]                # b03b (quy_trinh/b03b_so_lan_lap.py), 22/10/2026. KHÔNG được băm: tăng B chỉ chạy thêm phần thiếu
-B_vb = 200                      # 09/11/2026: giảm từ 1000 để kịp hạn 15/11 (sai số độ phủ 95% khoảng 0,015)
-B_nuts = 100                    # 09/11/2026: giảm từ 300 (sai số độ phủ 95% khoảng 0,022); có thể tăng lại sau, lần lặp đã chạy được dùng lại
+B_vb = 500                      # 09/11/2026: 1000 -> 200 -> 500 theo ý kiến TS. Châu, để kịp hạn 15/11 (sai số độ phủ 95% khoảng 0,010)
+B_nuts = 200                    # 09/11/2026: 300 -> 100 -> 200 (sai số độ phủ 95% khoảng 0,015); có thể tăng lại sau, lần lặp đã chạy được dùng lại
 
 [danh_gia]                      # mục 5
 alphas = [0.01, 0.025, 0.05]
