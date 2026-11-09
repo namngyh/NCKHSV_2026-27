@@ -37,7 +37,7 @@ if exist "%REPO%\quy_trinh\chay.py" goto :co_repo
 set "REPO=%THU_MUC_MAC_DINH%"
 if exist "%REPO%\quy_trinh\chay.py" goto :co_repo
 echo [2/6] Dang tai repo ve %REPO% - lan dau mat khoang 10-30 phut tuy mang...
-git clone -c core.longpaths=true -c core.autocrlf=false --depth 1 "%REPO_URL%" "%REPO%"
+git clone -c core.longpaths=true -c core.autocrlf=true --depth 1 "%REPO_URL%" "%REPO%"
 if errorlevel 1 (
     echo [LOI] Tai repo that bai. Kiem tra mang va quyen truy cap GitHub roi mo lai tep nay.
     pause
@@ -62,7 +62,7 @@ set "PYTHONUNBUFFERED=1"
 
 rem ---------------------------------------------------------------- 3. Cau hinh git, cap nhat ma moi
 git config core.longpaths true
-git config core.autocrlf false
+git config core.autocrlf true
 git config user.name >nul 2>nul || git config user.name "%COMPUTERNAME%"
 git config user.email >nul 2>nul || git config user.email "%COMPUTERNAME%@may-phu.local"
 git rebase --abort >nul 2>nul
@@ -128,7 +128,7 @@ echo [LOI] Kiem tra khong dat ^(ma %MA%^). Chup man hinh gui nhom.
 pause
 exit /b 1
 :sua_xuong_dong
-echo [5/6] Ma bam lech do xuong dong CRLF. Dang lay lai ma nguon dang LF...
+echo [5/6] Ma bam lech do xuong dong. Dang lay lai ma nguon dang CRLF nhu cac may khac...
 set "DA_SUA_XUONG_DONG=1"
 git rm -r --cached -q -- ma_nguon quy_trinh du_lieu cau_hinh/de_cuong.toml cau_hinh/the_che.toml
 git checkout HEAD -- ma_nguon quy_trinh du_lieu cau_hinh/de_cuong.toml cau_hinh/the_che.toml

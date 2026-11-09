@@ -2,8 +2,9 @@
 
 LÝ THUYẾT: Máy phụ chỉ làm đơn vị của mình và đẩy lên GitHub; kết quả chỉ dùng được nếu (i) tên máy có trong
 [phan_tan.may] và không trùng với máy đang chạy khác (trùng tên thì hai máy làm cùng đơn vị, git xung đột), (ii) mã
-băm đầu vào của b03b trên máy này trùng với thư mục điểm kiểm tra đã có (khác băm, thường do git đổi xuống dòng
-CRLF, thì máy ghi vào thư mục khác và mọi công sức bị bỏ phí).
+băm đầu vào của b03b trên máy này trùng với thư mục điểm kiểm tra đã có. Băm tính trên byte của tệp mã, mà các máy
+đang chạy lấy mã với core.autocrlf=true (xuống dòng CRLF); máy lấy mã dạng LF sẽ ra băm khác, ghi vào thư mục khác và
+mọi công sức bị bỏ phí.
 THƯ VIỆN: tomllib (qua khung), json, socket.
 Tham số: tên máy (dòng lệnh).
 Trả về: mã thoát 0 đạt; 2 tên máy sai hoặc đang được máy khác dùng; 3 mã băm không khớp.
@@ -43,7 +44,7 @@ def main() -> int:
     h = K._bam_vao(ctx, b)[:12]
     if not (GOC / "ket_qua" / "_diem_kiem_tra" / "b03b" / h).exists():
         print(f"[LOI] Ma bam b03b cua may nay ({h}) khong khop voi ket qua tren GitHub. Thuong do git doi xuong dong:")
-        print("      xoa thu muc repo va chay lai may_phu.bat (tep nay tu clone voi core.autocrlf=false).")
+        print("      xoa thu muc repo va chay lai may_phu.bat (tep nay tu clone voi core.autocrlf=true, giong may chu tri).")
         return 3
     so = sum(1 for k in b.don_vi(ctx) if K.chu_so_huu(k.split("::")[0], cfg) == ten)
     print(f"[OK] May '{ten}' (host {socket.gethostname()}), ma bam b03b {h} khop; may nay phu trach {so} don vi.")
