@@ -107,7 +107,14 @@ exit /b 1
 
 rem ---------------------------------------------------------------- 5. Ten may va kiem tra
 set "DA_SUA_XUONG_DONG="
+set /a SO_LAN_HOI=0
 :hoi_ten
+set /a SO_LAN_HOI+=1
+if %SO_LAN_HOI% GTR 4 (
+    echo [LOI] Nhap ten may sai qua nhieu lan. Mo lai tep nay va nhap 1, 2 hoac 3.
+    pause
+    exit /b 1
+)
 set "TEN_MAY="
 if exist "cau_hinh\ten_may.txt" set /p TEN_MAY=<"cau_hinh\ten_may.txt"
 if defined TEN_MAY goto :kiem_tra
