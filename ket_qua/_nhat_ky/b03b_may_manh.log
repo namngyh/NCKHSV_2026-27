@@ -60450,3 +60450,18 @@
 [20:45:12] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|043|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [20:45:49] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|041|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [20:46:49] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|045|c2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[20:47:31] [b03b] [may_manh] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 64800 don vi / 64800 nhom; cua may nay 25847 nhom, con thieu 12911 nhom
+[21:00:28] [b03b] [may_manh] xong don vi sbc|student|nuts|028|c2::0 (772.8 s)
+[21:01:23] [b03b] [may_manh] xong don vi sbc|student|nuts|024|c3::0 (827.2 s)
+[21:11:15] [b03b] [may_manh] xong don vi sbc|student|nuts|024|c1::0 (1419.5 s)
+[21:20:06] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|043|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:20:36] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|043|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:20:42] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|033|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:21:32] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|034|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:21:44] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|043|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:22:09] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|044|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:22:12] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|044|c2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:22:42] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|044|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:22:45] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|034|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:23:25] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|041|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:23:52] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|041|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
