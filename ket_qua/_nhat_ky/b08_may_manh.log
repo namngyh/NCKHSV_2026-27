@@ -2396,3 +2396,7 @@
 [01:01:12] [b08] [may_manh] xong don vi nuts|064|c2::0 (128.1 s)
 [01:01:18] [b08] [may_manh] xong don vi nuts|064|c1::0 (189.9 s)
 [01:13:11] [b08] [may_manh] het gio trong don vi nuts|037|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[01:13:56] [b08] [may_manh] cuon_chieu_bon_phuong_phap (4.3, 5.1): 1105 don vi / 657 nhom; cua may nay 657 nhom, con thieu 1 nhom
+[01:34:35] [b08] [may_manh] NUTS nuts|037|c0::0 ket (thieu hut lp 3679.4 > 17.2); chay lai lan 1
+[01:35:46] [b08] [may_manh] xong don vi nuts|037|c0::0 (1309.9 s)
+[01:35:59] [b08] [may_manh] XONG b08_cuon_chieu_bon_phuong_phap

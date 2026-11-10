@@ -1,6 +1,6 @@
 {
- "commit": "a9735bb281c2ffea1105761bff025e12b16306ca",
- "h_vao": "053842d02cab85a7737cd6e65b287c93aec3e6aea836f77b06dfe194dcfd3c9c",
+ "commit": "6c73d4e5852d1d04005dbaeae07e33ef3b5ae759",
+ "h_vao": "0693c25f099f17e699319cb4a54f9d8e26cc67bf212c370207b24cbf9cca6285",
  "bam_du_lieu": "03556da1416026874136b20eb2bc304d142e28daae413b801b6f4b876f6fbee8",
  "bam_ma": "6fad87f85531702cb79a1ddd0e9491c01e0b9c5e5e29fccb167d0a0ef92075b9",
  "ho_so": "day_du",
@@ -14,5 +14,5 @@
  "so_don_vi_theo_may": {
   "may_manh": 390
  },
- "thoi_diem": "2026-10-27 23:36:26"
+ "thoi_diem": "2026-11-11 01:44:57"
 }

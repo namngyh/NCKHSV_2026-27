@@ -57,7 +57,15 @@
     "rhat_max": 1.001882767983535,
     "ess_min": 2337.833184992692,
     "phan_ky": 0,
-    "dat": true
+    "dat": true,
+    "hoi_tu_dat": true,
+    "chuoi_bi_loai": [],
+    "so_lan_chay_lai": [
+     0,
+     0,
+     0,
+     0
+    ]
    }
   },
   "hep": {
@@ -97,7 +105,15 @@
     "rhat_max": 1.0023926809080148,
     "ess_min": 2645.6433706608123,
     "phan_ky": 0,
-    "dat": true
+    "dat": true,
+    "hoi_tu_dat": true,
+    "chuoi_bi_loai": [],
+    "so_lan_chay_lai": [
+     0,
+     0,
+     0,
+     0
+    ]
    }
   }
  }

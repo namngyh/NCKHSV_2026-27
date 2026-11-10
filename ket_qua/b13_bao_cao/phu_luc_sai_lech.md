@@ -37,7 +37,9 @@ là có chủ đích: nhóm bám đề cương đã đăng ký BM02, vốn khác
 
 ## Chẩn đoán Bayes không đạt (b08)
 
-- Các mốc NUTS không đạt (R_hat, ESS, phân kỳ): [2, 3, 30, 37, 52]
+- Các mốc NUTS không đạt (R_hat, ESS, phân kỳ): [2, 3, 30, 52]
+- Trong đó không hội tụ (R_hat hoặc ESS): []; hội tụ nhưng có bước phân kỳ: [2, 3, 30, 52]
+- Chuỗi NUTS kẹt được chạy lại [mốc, chuỗi, số lần]: [[37, 0, 1]]; vẫn kẹt nên bị loại [mốc, chuỗi]: []
 - Pareto k_hat của VB đạt theo mốc: {'vb_mf': [False, False, False, False, False, True, True, False, False, True, False, True, False, False, True, False, False, False, True, False, False, False, False, False, False, False, False, True, False, False, False, False, True, False, False, False, False, False, False, False, False, False, False, False, False, False, True, False, False, False, False, False, True, True, False, False, False, True, False, False, False, False, False, False, True], 'vb_fr': [False, True, False, True, True, True, True, True, True, True, True, True, True, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, False, True, True, False, True, True, True, True, False, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True, True]}
 
 ## Bổ sung ngoài đề cương (lựa chọn thiết kế của nhóm nghiên cứu, chốt trước khi mở khối KT)

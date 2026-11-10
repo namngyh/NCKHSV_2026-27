@@ -1,6 +1,6 @@
 # Kết quả theo đề cương EGARCH-X ký quỹ động (hồ sơ: day_du)
 
-Sinh tự động lúc 2026-10-27 23:36. Hồ sơ `nhanh` chỉ để kiểm tra đường ống.
+Sinh tự động lúc 2026-11-11 01:45. Hồ sơ `nhanh` chỉ để kiểm tra đường ống.
 
 ## 1. Dữ liệu (mục 2)
 
