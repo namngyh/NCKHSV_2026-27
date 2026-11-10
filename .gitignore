@@ -60,6 +60,11 @@ luu_tru/code thuật toán/logs/
 # và nhật ký (_nhat_ky/), vì máy mạnh và Colab đồng bộ kết quả qua git. Kết quả chạy thử nhanh không theo dõi.
 ket_qua_nhanh/
 bao_cao/nhanh/
+# 10/11/2026: KHÔNG đẩy trạng thái giữa chừng (tầng 3) của đơn vị dài nữa. Chỉ còn may_manh chạy nên _doan chỉ cần nằm
+# trên máy đó để chạy tiếp đơn vị dở; trước đây _doan chiếm khoảng 20 GB repo (148.000 tệp), trong khi đơn vị đã xong
+# (tệp .pkl cùng cấp, vẫn được theo dõi) chỉ khoảng 0,6 GB. Tệp _doan đã theo dõi từ trước vẫn giữ nguyên (không xóa,
+# tránh xung đột sửa/xóa khi máy mạnh pull). Nếu thêm máy (Colab), đơn vị dở không chạy tiếp được ở máy khác.
+ket_qua/_diem_kiem_tra/*/*/_doan/
 # tệp tạm khi ghi nguyên tử (ghi tạm rồi đổi tên)
 *.tam[0-9]*
 
