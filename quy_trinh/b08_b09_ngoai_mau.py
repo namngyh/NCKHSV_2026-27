@@ -4,6 +4,9 @@ b08 (mục 4.3, 5.1): ước lượng lại mỗi 21 phiên, cửa sổ mở r�
     MLE cho: EGARCH (gamma = 0), cấu hình chính (A, G), cấu hình được chọn với mọi phân phối (và GED để báo cáo).
     VB mean-field, VB full-rank (mỗi lần khởi tạo là một đơn vị) và NUTS (mỗi chuỗi là một đơn vị, điểm kiểm tra
     tầng 3 sau khởi động và mỗi đoạn lấy mẫu) cho cấu hình được chọn ở mọi mốc.
+    10/11/2026: mỗi chuỗi NUTS được kiểm tra kẹt (de_cuong/chan_doan.py, [chuoi_ket]); chuỗi kẹt được chạy lại từ điểm
+    khởi tạo và hạt giống mới, vẫn kẹt thì bị loại khỏi mẫu gộp. Chuỗi không kẹt giữ nguyên hạt giống như trước.
+    Chẩn đoán ghi thêm phần tách hội tụ (R_hat, ESS) và phân kỳ. Áp dụng như nhau cho b08b.
 b08b (mục 4.3.1): phân tích độ nhạy tiên nghiệm bằng NUTS tại mốc đầu khối KT (dữ liệu đến hết XT) với các phương án
     trong [do_nhay_tien_nghiem]; so trung bình và độ lệch chuẩn hậu nghiệm với tiên nghiệm Bảng 5.
 b09 (mục 4.3.5, 5): so sánh bốn phương pháp tại từng mốc (tỷ số độ lệch chuẩn biên so với NUTS, chênh lệch trung bình
@@ -17,6 +20,7 @@ from __future__ import annotations
 import numpy as np
 
 import quy_trinh._chung as C
+from de_cuong import chan_doan as CD
 from de_cuong import danh_gia as DG
 from de_cuong import du_lieu as DL
 from de_cuong import uoc_luong as U
@@ -24,7 +28,7 @@ from de_cuong.khung import Buoc
 from de_cuong.mo_hinh_jax import TIEN_NGHIEM_GOC, DacTa
 
 TEP = __file__
-TV = ("du_lieu", "mo_hinh_jax", "uoc_luong", "phan_phoi", "danh_gia", "garch_nen")
+TV = ("du_lieu", "mo_hinh_jax", "uoc_luong", "phan_phoi", "danh_gia", "garch_nen", "chan_doan")
 
 
 def _moc(ctx):
@@ -57,15 +61,54 @@ def _mle_khoi_tao(ctx, s0):
     return spec, dl, m
 
 
+def _nuts_mot(ctx, khoa, spec, dl, m, pa, lan: int = 0):
+    """Một chuỗi NUTS. lan = 0: hạt giống và điểm khởi tạo như trước 10/11/2026; lan >= 1: lần chạy lại chuỗi kẹt với
+    hạt giống, điểm khởi tạo phân tán và thư mục điểm kiểm tra riêng (không chạy tiếp trạng thái đã kẹt)."""
+    b = ctx.cfg["bayes"]
+    phu = () if lan == 0 else ("chay_lai", lan)
+    xi0 = U.khoi_tao_phan_tan(spec, m, dl, ctx.rng(khoa, "khoi_tao", *phu), b.get("nuts_he_so_phan_tan", 2.0))
+    thu_muc = ctx.thu_muc_doan(khoa) if lan == 0 else ctx.thu_muc_doan(khoa) / f"chay_lai_{lan}"
+    return U.nuts_chuoi(spec, dl, xi0, b["nuts_khoi_dong"], b["nuts_so_mau"], b["nuts_dich_chap_nhan"],
+                        b["nuts_do_sau_cay"], ctx.hat_giong(khoa, *phu), thu_muc=thu_muc,
+                        vong_moi_doan=b["nuts_vong_moi_doan"], pa=pa)
+
+
+def _nuts_kiem_tra_ket(ctx, khoa, spec, dl, m, pa):
+    """Chạy một chuỗi NUTS, kiểm tra kẹt (chan_doan.kiem_tra_chuoi) và chạy lại tối đa [chuoi_ket].so_lan_chay_lai lần.
+    Kết quả mang thêm `chuoi_ket` = {ket (sau lần cuối), so_lan_chay_lai, lich_su (kiểm tra của từng lần)}."""
+    ck = ctx.cfg["chuoi_ket"]
+    out = _nuts_mot(ctx, khoa, spec, dl, m, pa)
+    kt = CD.kiem_tra_chuoi(spec, out["xi_mau"], m["xi"], dl, ck["he_so_nguong"], pa)
+    lich_su, lan = [kt], 0
+    while kt["ket"] and lan < ck["so_lan_chay_lai"]:
+        lan += 1
+        ctx.log(f"NUTS {khoa} ket (thieu hut lp {kt['thieu_hut']:.1f} > {kt['nguong']:.1f}); chay lai lan {lan}")
+        out = _nuts_mot(ctx, khoa, spec, dl, m, pa, lan)
+        kt = CD.kiem_tra_chuoi(spec, out["xi_mau"], m["xi"], dl, ck["he_so_nguong"], pa)
+        lich_su.append(kt)
+    out["chuoi_ket"] = {"ket": kt["ket"], "so_lan_chay_lai": lan, "lich_su": lich_su}
+    return out
+
+
+def _gop_nuts(ds: list[dict], b: dict) -> tuple[list[dict], dict]:
+    """Loại chuỗi vẫn kẹt rồi chẩn đoán trên các chuỗi còn lại; ghi kèm số lần chạy lại, chuỗi bị loại và phần tách
+    hội tụ/phân kỳ (chan_doan.phan_loai)."""
+    giu, loai = CD.chon_chuoi(ds)
+    cd = U.chan_doan_nuts(giu, b["rhat_toi_da"], b["ess_toi_thieu"]) if len(giu) > 1 else {"dat": None}
+    if len(giu) > 1:
+        cd.update(CD.phan_loai(cd, b["rhat_toi_da"], b["ess_toi_thieu"]))
+    cd["chuoi_bi_loai"] = loai
+    cd["so_lan_chay_lai"] = [c.get("chuoi_ket", {}).get("so_lan_chay_lai", 0) for c in ds]
+    cd["thieu_hut_lp"] = [c["chuoi_ket"]["lich_su"][-1]["thieu_hut"] if "chuoi_ket" in c else None for c in ds]
+    return giu, cd
+
+
 def _bayes_mot(ctx, khoa, pt, spec, dl, m, chi_so, pa=TIEN_NGHIEM_GOC):
     b = ctx.cfg["bayes"]
     seed = ctx.hat_giong(khoa)
     rng = ctx.rng(khoa, "khoi_tao")
     if pt == "nuts":
-        xi0 = U.khoi_tao_phan_tan(spec, m, dl, rng, b.get("nuts_he_so_phan_tan", 2.0))
-        return U.nuts_chuoi(spec, dl, xi0, b["nuts_khoi_dong"], b["nuts_so_mau"],
-                            b["nuts_dich_chap_nhan"], b["nuts_do_sau_cay"], seed, thu_muc=ctx.thu_muc_doan(khoa),
-                            vong_moi_doan=b["nuts_vong_moi_doan"], pa=pa)
+        return _nuts_kiem_tra_ket(ctx, khoa, spec, dl, m, pa)
     xi0 = m["xi"] + rng.normal(0, 0.02 * chi_so, spec.d)
     out = U.vb(spec, dl, xi0, pt, b["vb_so_buoc"], b["vb_toc_do_hoc"], b["so_mau_hau_nghiem"], seed,
                thu_muc=ctx.thu_muc_doan(khoa), buoc_moi_doan=b["vb_buoc_moi_doan"], pa=pa)
@@ -122,10 +165,11 @@ def _lam_b08(ctx, khoa, truoc):
 
 
 def _gop_bayes_moc(ctx, kq) -> tuple[dict, dict]:
-    """Gộp theo mốc: VB chọn lần khởi tạo có ELBO lớn nhất; NUTS ghép các chuỗi và chẩn đoán R_hat, ESS, phân kỳ."""
+    """Gộp theo mốc: VB chọn lần khởi tạo có ELBO lớn nhất; NUTS bỏ chuỗi vẫn kẹt sau khi chạy lại, ghép các chuỗi còn
+    lại và chẩn đoán R_hat, ESS, phân kỳ (_gop_nuts)."""
     b = ctx.cfg["bayes"]
     theo = {}
-    for k, v in kq.items():
+    for k, v in sorted(kq.items()):                 # thứ tự khóa: chuỗi c0, c1, ... (chỉ số chuỗi trong chẩn đoán)
         p = k.split("::")[0].split("|")
         if p[0] in b["phuong_phap"]:
             theo.setdefault(int(p[1]), {}).setdefault(p[0], []).append(v)
@@ -134,8 +178,8 @@ def _gop_bayes_moc(ctx, kq) -> tuple[dict, dict]:
         gop[km], chan_doan[km] = {}, {}
         for pt, ds in x.items():
             if pt == "nuts":
-                cd = U.chan_doan_nuts(ds, b["rhat_toi_da"], b["ess_toi_thieu"]) if len(ds) > 1 else {"dat": None}
-                gop[km][pt] = {"psi_mau": np.concatenate([c["psi_mau"] for c in ds]), "s0": ds[0]["s0"],
+                giu, cd = _gop_nuts(ds, b)
+                gop[km][pt] = {"psi_mau": np.concatenate([c["psi_mau"] for c in giu]), "s0": ds[0]["s0"],
                                "s1": ds[0]["s1"], "giay": max(c["giay"] for c in ds),
                                "buoc_tb": float(np.mean([c["buoc_tb"] for c in ds])), "chan_doan": cd}
                 chan_doan[km][pt] = cd
@@ -162,11 +206,17 @@ def _th_b08(ctx, kq):
         "theo_moc": chan_doan,
         "nuts_dat_moi_moc": all(v.get("nuts", {}).get("dat") for v in chan_doan.values() if "nuts" in v),
         "so_moc_nuts_khong_dat": [k for k, v in chan_doan.items() if "nuts" in v and not v["nuts"].get("dat")],
+        # 10/11/2026: tách lý do không đạt và ghi các chuỗi kẹt (de_cuong/chan_doan.py)
+        "so_moc_nuts_khong_hoi_tu": [k for k, v in chan_doan.items() if "nuts" in v and v["nuts"].get("hoi_tu_dat") is False],
+        "so_moc_nuts_chi_vi_phan_ky": [k for k, v in chan_doan.items() if "nuts" in v and v["nuts"].get("chi_vi_phan_ky")],
+        "chuoi_nuts_chay_lai": [[k, c, n] for k, v in chan_doan.items() if "nuts" in v
+                                for c, n in enumerate(v["nuts"]["so_lan_chay_lai"]) if n],
+        "chuoi_nuts_bi_loai": [[k, c] for k, v in chan_doan.items() if "nuts" in v for c in v["nuts"]["chuoi_bi_loai"]],
         "vb_k_hat_dat": {pt: [v[pt]["dat"] for v in chan_doan.values() if pt in v] for pt in ("vb_mf", "vb_fr")}})
 
 
 Buoc("b08", "cuon_chieu_bon_phuong_phap", "4.3, 5.1", TEP, _lam_b08, _th_b08, don_vi=_dv_b08, phu_thuoc=("b07",),
-     cau_hinh=("du_lieu", "khoi", "mo_hinh", "mle", "bayes", "danh_gia"), thu_vien=TV, can_khoa_KT=True)
+     cau_hinh=("du_lieu", "khoi", "mo_hinh", "mle", "bayes", "danh_gia", "chuoi_ket"), thu_vien=TV, can_khoa_KT=True)
 
 
 # ---------------------------------------------------------------------------------------- b08b
@@ -203,11 +253,12 @@ def _th_b08b(ctx, kq):
     ten = DacTa(kh["phan_phoi"], tuple(kh["bien"])).ten()
     out = {"moc_s0": s0, "ten": ten, "tien_nghiem_goc": TIEN_NGHIEM_GOC, "phuong_an": {}}
     for pa in _phuong_an(ctx):
-        ds = [v for k, v in kq.items() if k.split("|")[1] == pa]
-        M = np.concatenate([c["psi_mau"] for c in ds])
-        cd = U.chan_doan_nuts(ds, b["rhat_toi_da"], b["ess_toi_thieu"]) if len(ds) > 1 else {}
+        ds = [v for k, v in sorted(kq.items()) if k.split("|")[1] == pa]
+        giu, cd = _gop_nuts(ds, b)
+        M = np.concatenate([c["psi_mau"] for c in giu])
         row = {"tham_so": _phuong_an(ctx)[pa], "trung_binh": M.mean(0), "do_lech_chuan": M.std(0),
-               "chan_doan": {k: cd.get(k) for k in ("rhat_max", "ess_min", "phan_ky", "dat")}}
+               "chan_doan": {k: cd.get(k) for k in ("rhat_max", "ess_min", "phan_ky", "dat", "hoi_tu_dat",
+                                                    "chuoi_bi_loai", "so_lan_chay_lai")}}
         if goc is not None:
             row["chenh_tb_don_vi_sd_goc"] = (M.mean(0) - goc.mean(0)) / goc.std(0)
             row["ty_so_sd_so_voi_goc"] = M.std(0) / goc.std(0)
@@ -218,7 +269,7 @@ def _th_b08b(ctx, kq):
 
 
 Buoc("b08b", "do_nhay_tien_nghiem", "4.3.1", TEP, _lam_b08b, _th_b08b, don_vi=_dv_b08b, phu_thuoc=("b08",),
-     cau_hinh=("khoi", "mle", "bayes", "do_nhay_tien_nghiem"), thu_vien=TV, can_khoa_KT=True)
+     cau_hinh=("khoi", "mle", "bayes", "do_nhay_tien_nghiem", "chuoi_ket"), thu_vien=TV, can_khoa_KT=True)
 
 
 # ---------------------------------------------------------------------------------------- b09

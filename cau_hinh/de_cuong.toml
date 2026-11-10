@@ -68,7 +68,13 @@ rhat_toi_da = 1.01
 ess_toi_thieu = 400
 k_hat_toi_da = 0.7
 
-[mo_phong]                      # mục 4.4, Bảng 6
+[chuoi_ket]                     # 10/11/2026, chỉ b08 và b08b (ma_nguon/de_cuong/chan_doan.py). Mục RIÊNG, không đặt trong [bayes],
+                                # vì [bayes] nằm trong mã băm của b03b: thêm khóa vào [bayes] sẽ làm b03b chạy lại từ đầu.
+he_so_nguong = 5.0              # chuỗi kẹt khi lp(xi_MLE) - trung vị lp của chuỗi > d/2 + 5 sqrt(d/2) (= 17,2 khi d = 11). Lần chạy
+                                # 27/10: 259 chuỗi bình thường có thiếu hụt -0,84 đến 4,71; chuỗi 0 của mốc 37 có 3.679
+so_lan_chay_lai = 2             # chạy lại chuỗi kẹt từ điểm khởi tạo và hạt giống mới; vẫn kẹt thì loại khỏi mẫu gộp (ghi vào chẩn đoán)
+
+[mo_phong]                    # mục 4.4, Bảng 6
 B = 1000                        # KHÔNG còn dùng cho b03b từ 22/10/2026 (xem [mo_phong_bayes]); giữ nguyên để mã băm b03a không đổi
 B_mle = 1000                    # số lần lặp của mô phỏng MLE (b03a); tăng từ 100 vì độ phủ kappa (E2) = 0,89 sát ngưỡng 0,90 (21/10/2026)
 T = 2000
@@ -79,8 +85,8 @@ sbc_so_lan = 100                # hiệu chuẩn dựa trên mô phỏng cho suy
 sbc_kich_ban = "E1"
 
 [mo_phong_bayes]                # b03b (quy_trinh/b03b_so_lan_lap.py), 22/10/2026. KHÔNG được băm: tăng B chỉ chạy thêm phần thiếu
-B_vb = 500                      # 09/11/2026: 1000 -> 200 -> 500 theo ý kiến TS. Châu, để kịp hạn 15/11 (sai số độ phủ 95% khoảng 0,010)
-B_nuts = 200                    # 09/11/2026: 300 -> 100 -> 200 (sai số độ phủ 95% khoảng 0,015); có thể tăng lại sau, lần lặp đã chạy được dùng lại
+B_vb = 1000                     # 10/11/2026: khôi phục cấu hình đầy đủ (không còn gấp hạn 15/11). Từng là 1000 -> 200 -> 500
+B_nuts = 300                    # 10/11/2026: khôi phục cấu hình đầy đủ. Từng là 300 -> 100 -> 200; lần lặp đã chạy được dùng lại
 
 [danh_gia]                      # mục 5
 alphas = [0.01, 0.025, 0.05]
@@ -144,14 +150,11 @@ nu_toc_do = 0.2
 
 [phan_tan]                      # chạy song song nhiều máy (THIET_KE_CODE.md mục 6c)
 chu_tri = "may_manh"            # máy duy nhất được tổng hợp, kiểm tra cổng, khóa cấu hình, viết báo cáo
-may_nuts = ["may_manh", "may_phu_1", "may_phu_2", "may_phu_3"]         # các máy nhận nhóm đơn vị NUTS (chuỗi dài)
+may_nuts = ["may_manh"]         # các máy nhận nhóm đơn vị NUTS (chuỗi dài)
 phut_dong_bo = 30               # chu kỳ git pull / push khi chạy với --git
 nhan_thay_sau_gio = 6           # máy khác không gửi nhịp tim quá số giờ này -> máy chủ trì tự làm thay phần việc của nó
 [phan_tan.may]                  # phân mảnh của từng máy (tổng 10). Hiện CHỈ MỘT MÁY: may_manh giữ cả 10 phân mảnh.
-may_manh = [0, 1, 2, 3]
-may_phu_1 = [4, 5]
-may_phu_2 = [6, 7]
-may_phu_3 = [8, 9]              # 09/11/2026: 1 may manh + 3 may phu, chia 4/2/2/2 phan manh
+may_manh = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]   # 10/11/2026: dừng các máy phụ, chỉ chạy trên may_manh (trước: 4/2/2/2 phân mảnh)
 # Muốn thêm Colab: đổi may_manh = [0..8] và thêm dòng  colab_1 = [9]  (xem colab/chay_tren_colab.ipynb).
 
 [de_cuong_goc]                  # giá trị đề cương quy định; khác đi sẽ tự ghi vào nhật ký sai lệch (b13)

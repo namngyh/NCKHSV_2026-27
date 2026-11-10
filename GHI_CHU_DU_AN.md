@@ -1,5 +1,13 @@
 # Ghi chú dự án: dự báo rủi ro và ký quỹ động VN30F1M bằng EGARCH-X
 
+## 00000000000. CHỈ CHẠY TRÊN MÁY MẠNH; SỬA CHUỖI NUTS KẸT Ở b08 BẰNG MÔ-ĐUN MỚI (10/11/2026) — mới nhất, đọc trước
+
+- Người dùng: dừng các máy phụ, chỉ `may_manh` chạy (`[phan_tan.may]` chỉ còn `may_manh` với 10 phân mảnh); B đầy đủ `B_vb = 1000`, `B_nuts = 300` (không băm, phần đã chạy được dùng lại). Hạn mới: tháng 3/2027. Giữ thiết kế b03b như đề cương.
+- Rà soát toàn bộ thuật toán (kiểm tra độc lập ngoài repo): phân phối, hàm hợp lý JAX/numba, gradient, không nhìn trước, VaR mô phỏng, MLE lại với 200 điểm khởi tạo đều đạt. Lỗi thật duy nhất: chuỗi NUTS 0 của mốc 37 b08 (s0 = 1588, trong XT) kẹt ở vùng lp thấp hơn khoảng 3.680, R_hat 1,59, bị gộp vào mẫu (25% mẫu NUTS của mốc đó là rác; ảnh hưởng nguồn NUTS ở b09–b11). b03b: 0/1.928 lần lặp có R_hat > 1,1.
+- Sửa: mô-đun MỚI `ma_nguon/de_cuong/chan_doan.py` (không sửa `uoc_luong.py` vì nó nằm trong mã băm của b02–b07 và b03b): kiểm tra từng chuỗi bằng thiếu hụt lp(xi_MLE) − trung vị lp(chuỗi) > d/2 + 5 sqrt(d/2); chuỗi kẹt chạy lại tối đa 2 lần với hạt giống/điểm khởi tạo mới, vẫn kẹt thì loại khỏi mẫu gộp. Chẩn đoán tách "không hội tụ" (R_hat/ESS) và "chỉ vì phân kỳ". Cấu hình ở mục riêng `[chuoi_ket]` (không đặt trong `[bayes]` vì `[bayes]` băm vào b03b). b08, b08b khai báo mô-đun và mục này; b13 in thêm các dòng chẩn đoán.
+- Đã kiểm: mã băm b02–b07, b03a, b03b (`14e4a097af61`) không đổi; chỉ b08, b08b, b09 và sau đó chạy lại (b08 lần trước khoảng 5 giờ trên máy mạnh). Chuỗi không kẹt giữ nguyên hạt giống nên trùng kết quả cũ. Ngưỡng hiệu chỉnh trên 260 chuỗi thật: 259 chuỗi có thiếu hụt −0,84 đến 4,71; chuỗi kẹt 3.679. Kiểm thử: 46 đạt (`kiem_thu/test_chan_doan.py`, có kiểm thử chặn mô-đun lọt vào mã băm b03b).
+- Còn treo (người dùng và TS. Châu quyết): ghi việc chạy lại/loại chuỗi kẹt vào `[cong_bo]`; mẫu giữ lại mới bằng dữ liệu sau 17/07/2026; mô phỏng Bayes quanh mô hình được chọn; SBC.
+
 ## 0000000000. RÀ SOÁT THUẬT TOÁN NHIỀU VÒNG TRƯỚC LẦN CHẠY LẠI (26/10/2026, tối) — mới nhất, đọc trước
 
 - Kết quả cũ đã xóa khỏi `ket_qua/` (commit fa5879ef9; còn ở thẻ `ket-qua-RV-cong-b07-khong-dat`, đã đẩy lên GitHub). Thẻ `dang-ky-truoc-chay-26-10` đóng băng thiết kế trước các sửa dưới đây; các sửa này được công bố trong `[cong_bo]`.

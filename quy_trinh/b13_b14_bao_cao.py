@@ -70,6 +70,10 @@ def phu_luc_sai_lech(ctx) -> str:
         cd = ctx.doc("chan_doan_bayes.json", "b08")
         s += ["## Chẩn đoán Bayes không đạt (b08)", "",
               f"- Các mốc NUTS không đạt (R_hat, ESS, phân kỳ): {cd.get('so_moc_nuts_khong_dat')}",
+              f"- Trong đó không hội tụ (R_hat hoặc ESS): {cd.get('so_moc_nuts_khong_hoi_tu')}; "
+              f"hội tụ nhưng có bước phân kỳ: {cd.get('so_moc_nuts_chi_vi_phan_ky')}",
+              f"- Chuỗi NUTS kẹt được chạy lại [mốc, chuỗi, số lần]: {cd.get('chuoi_nuts_chay_lai')}; "
+              f"vẫn kẹt nên bị loại [mốc, chuỗi]: {cd.get('chuoi_nuts_bi_loai')}",
               f"- Pareto k_hat của VB đạt theo mốc: {cd.get('vb_k_hat_dat')}", ""]
     kq = cfg["ky_quy"]
     s += ["## Bổ sung ngoài đề cương (lựa chọn thiết kế của nhóm nghiên cứu, chốt trước khi mở khối KT)", "",
