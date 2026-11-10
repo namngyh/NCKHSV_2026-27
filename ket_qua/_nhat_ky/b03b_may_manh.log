@@ -61641,3 +61641,34 @@
 [19:00:49] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|066|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [19:01:22] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|070|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [19:10:06] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|069|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:10:45] [b03b] [may_manh] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 64800 don vi / 64800 nhom; cua may nay 51707 nhom, con thieu 25956 nhom
+[19:19:03] [b03b] [may_manh] xong don vi sbc|student|nuts|072|c1::0 (489.6 s)
+[19:23:39] [b03b] [may_manh] xong don vi sbc|student|nuts|059|c3::0 (765.3 s)
+[19:23:41] [b03b] [may_manh] don vi sbc|student|nuts|074|c0::0 THAT BAI: MLE student|X1+X2: khong co nghiem huu han
+[19:23:41] [b03b] [may_manh] xong don vi sbc|student|nuts|074|c0::0 (2.8 s)
+[19:23:44] [b03b] [may_manh] don vi sbc|student|nuts|074|c1::0 THAT BAI: MLE student|X1+X2: khong co nghiem huu han
+[19:23:44] [b03b] [may_manh] xong don vi sbc|student|nuts|074|c1::0 (2.9 s)
+[19:27:41] [b03b] [may_manh] xong don vi sbc|student|nuts|066|c2::0 (1007.8 s)
+[19:30:43] [b03b] [may_manh] xong don vi sbc|student|nuts|073|c3::0 (700.3 s)
+[19:32:47] [b03b] [may_manh] xong don vi sbc|student|nuts|072|c3::0 (1313.5 s)
+[19:32:56] [b03b] [may_manh] xong don vi sbc|student|nuts|076|c3::0 (314.4 s)
+[19:33:39] [b03b] [may_manh] xong don vi sbc|student|nuts|075|c0::0 (594.9 s)
+[19:35:36] [b03b] [may_manh] xong don vi sbc|student|nuts|066|c3::0 (1482.3 s)
+[19:35:56] [b03b] [may_manh] xong don vi sbc|student|nuts|070|c1::0 (1502.3 s)
+[19:37:10] [b03b] [may_manh] xong don vi sbc|student|nuts|078|c2::0 (94.5 s)
+[19:39:20] [b03b] [may_manh] xong don vi sbc|student|nuts|058|c0::0 (1707.1 s)
+[19:41:17] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|069|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:41:23] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|073|c2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:41:43] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|066|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:41:57] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|069|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:42:47] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|066|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:43:49] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|059|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:45:26] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|077|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:45:50] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|058|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:46:00] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|073|c0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:46:53] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|079|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[19:48:16] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|079|c2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[20:18:31] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|077|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[20:18:52] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|077|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[20:24:41] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|078|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[20:25:19] [b03b] [may_manh] het gio trong don vi sbc|student|nuts|078|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
