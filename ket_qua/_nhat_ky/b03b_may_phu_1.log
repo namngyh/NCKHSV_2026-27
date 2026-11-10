@@ -3080,3 +3080,21 @@
 [14:40:46] [b03b] [may_phu_1] het gio trong don vi sbc|student|nuts|099|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [14:41:10] [b03b] [may_phu_1] het gio trong don vi sbc|student|nuts|089|c1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [14:50:49] [b03b] [may_phu_1] het gio trong don vi sbc|student|nuts|093|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[14:51:45] [b03b] [may_phu_1] mo_phong_bayes_sbc (4.4, 4.3.3 (Bayes, SBC)): 64800 don vi / 64800 nhom; cua may nay 13093 nhom, con thieu 6540 nhom
+[14:53:53] [b03b] [may_phu_1] xong don vi sbc|student|nuts|099|c3::0 (124.9 s)
+[14:58:27] [b03b] [may_phu_1] xong don vi mpb|skewt|vb_mf|E1|000|l1::0 (273.2 s)
+[15:03:15] [b03b] [may_phu_1] xong don vi mpb|skewt|vb_mf|E1|001|l1::0 (288.2 s)
+[15:07:34] [b03b] [may_phu_1] xong don vi mpb|skewt|vb_mf|E1|001|l2::0 (259.7 s)
+[15:10:12] [b03b] [may_phu_1] xong don vi sbc|student|nuts|089|c1::0 (1103.6 s)
+[15:11:14] [b03b] [may_phu_1] xong don vi mpb|skewt|vb_mf|E1|005|l0::0 (219.2 s)
+[15:13:15] [b03b] [may_phu_1] xong don vi sbc|student|nuts|083|c2::0 (1286.5 s)
+[15:14:18] [b03b] [may_phu_1] xong don vi mpb|skewt|vb_mf|E1|005|l2::0 (246.6 s)
+[15:15:33] [b03b] [may_phu_1] xong don vi mpb|skewt|vb_mf|E1|007|l1::0 (259.1 s)
+[15:18:00] [b03b] [may_phu_1] xong don vi mpb|skewt|vb_mf|E1|007|l2::0 (285.0 s)
+[15:19:17] [b03b] [may_phu_1] xong don vi mpb|skewt|vb_mf|E1|011|l0::0 (298.9 s)
+[15:20:30] [b03b] [may_phu_1] xong don vi mpb|skewt|vb_mf|E1|011|l1::0 (296.9 s)
+[15:21:45] [b03b] [may_phu_1] het gio trong don vi mpb|skewt|vb_mf|E1|014|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[15:21:47] [b03b] [may_phu_1] het gio trong don vi mpb|skewt|vb_mf|E1|011|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[15:22:02] [b03b] [may_phu_1] het gio trong don vi mpb|skewt|vb_mf|E1|013|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[15:22:49] [b03b] [may_phu_1] het gio trong don vi sbc|student|nuts|093|c3::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[15:23:28] [b03b] [may_phu_1] het gio trong don vi sbc|student|nuts|093|c2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
