@@ -1790,3 +1790,64 @@
 [21:27:58] [b08] [may_manh] het gio trong don vi vb_mf|042|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [21:28:21] [b08] [may_manh] het gio trong don vi vb_mf|043|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
 [21:28:30] [b08] [may_manh] het gio trong don vi vb_mf|043|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:29:30] [b08] [may_manh] cuon_chieu_bon_phuong_phap (4.3, 5.1): 1105 don vi / 657 nhom; cua may nay 657 nhom, con thieu 531 nhom
+[21:31:16] [b08] [may_manh] xong don vi vb_mf|040|l1::0 (101.7 s)
+[21:31:16] [b08] [may_manh] xong don vi vb_mf|040|l2::0 (101.9 s)
+[21:31:28] [b08] [may_manh] xong don vi vb_mf|040|l0::0 (114.3 s)
+[21:31:33] [b08] [may_manh] xong don vi vb_mf|039|l2::0 (118.8 s)
+[21:31:50] [b08] [may_manh] xong don vi vb_mf|041|l0::0 (136.5 s)
+[21:32:10] [b08] [may_manh] xong don vi vb_mf|041|l2::0 (155.7 s)
+[21:32:12] [b08] [may_manh] xong don vi vb_mf|041|l1::0 (157.9 s)
+[21:32:13] [b08] [may_manh] xong don vi vb_mf|042|l0::0 (159.2 s)
+[21:32:23] [b08] [may_manh] xong don vi vb_mf|042|l1::0 (168.6 s)
+[21:33:08] [b08] [may_manh] xong don vi vb_mf|042|l2::0 (213.7 s)
+[21:35:10] [b08] [may_manh] xong don vi vb_mf|044|l0::0 (335.6 s)
+[21:35:29] [b08] [may_manh] xong don vi vb_mf|044|l1::0 (355.1 s)
+[21:36:03] [b08] [may_manh] xong don vi vb_mf|043|l0::0 (389.2 s)
+[21:36:05] [b08] [may_manh] xong don vi vb_mf|043|l2::0 (390.8 s)
+[21:36:05] [b08] [may_manh] xong don vi vb_mf|043|l1::0 (390.8 s)
+[21:37:25] [b08] [may_manh] xong don vi vb_mf|044|l2::0 (369.5 s)
+[21:38:04] [b08] [may_manh] xong don vi vb_mf|045|l0::0 (407.7 s)
+[21:38:29] [b08] [may_manh] xong don vi vb_mf|045|l2::0 (415.8 s)
+[21:38:34] [b08] [may_manh] xong don vi vb_mf|045|l1::0 (425.4 s)
+[21:38:48] [b08] [may_manh] xong don vi vb_mf|046|l0::0 (417.4 s)
+[21:39:13] [b08] [may_manh] xong don vi vb_mf|047|l0::0 (419.5 s)
+[21:39:17] [b08] [may_manh] xong don vi vb_mf|046|l1::0 (427.5 s)
+[21:39:28] [b08] [may_manh] xong don vi vb_mf|046|l2::0 (435.8 s)
+[21:39:38] [b08] [may_manh] xong don vi vb_mf|047|l1::0 (435.7 s)
+[21:40:38] [b08] [may_manh] xong don vi vb_mf|047|l2::0 (450.0 s)
+[21:43:39] [b08] [may_manh] xong don vi vb_mf|048|l0::0 (508.9 s)
+[21:44:50] [b08] [may_manh] xong don vi vb_mf|048|l1::0 (560.9 s)
+[21:45:58] [b08] [may_manh] xong don vi vb_mf|048|l2::0 (595.2 s)
+[21:46:18] [b08] [may_manh] xong don vi vb_mf|049|l0::0 (613.0 s)
+[21:46:21] [b08] [may_manh] xong don vi vb_mf|049|l1::0 (616.2 s)
+[21:48:04] [b08] [may_manh] xong don vi vb_mf|049|l2::0 (638.4 s)
+[21:48:34] [b08] [may_manh] xong don vi vb_mf|050|l0::0 (630.7 s)
+[21:49:20] [b08] [may_manh] xong don vi vb_mf|050|l2::0 (646.1 s)
+[21:49:21] [b08] [may_manh] xong don vi vb_mf|050|l1::0 (652.6 s)
+[21:49:46] [b08] [may_manh] xong don vi vb_mf|051|l0::0 (657.6 s)
+[21:50:30] [b08] [may_manh] xong don vi vb_mf|051|l1::0 (677.4 s)
+[21:50:47] [b08] [may_manh] xong don vi vb_mf|052|l0::0 (679.1 s)
+[21:50:47] [b08] [may_manh] xong don vi vb_mf|051|l2::0 (689.6 s)
+[21:51:05] [b08] [may_manh] xong don vi vb_mf|052|l1::0 (687.0 s)
+[21:52:12] [b08] [may_manh] xong don vi vb_mf|052|l2::0 (694.3 s)
+[21:55:49] [b08] [may_manh] xong don vi vb_mf|053|l0::0 (730.6 s)
+[21:57:23] [b08] [may_manh] xong don vi vb_mf|053|l1::0 (752.8 s)
+[21:58:22] [b08] [may_manh] xong don vi vb_mf|053|l2::0 (743.2 s)
+[21:58:56] [b08] [may_manh] xong don vi vb_mf|054|l0::0 (757.6 s)
+[21:59:02] [b08] [may_manh] xong don vi vb_mf|054|l1::0 (761.2 s)
+[21:59:35] [b08] [may_manh] het gio trong don vi vb_mf|055|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:59:50] [b08] [may_manh] het gio trong don vi vb_mf|058|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:59:50] [b08] [may_manh] het gio trong don vi vb_mf|056|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[21:59:56] [b08] [may_manh] het gio trong don vi vb_mf|056|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:09] [b08] [may_manh] het gio trong don vi vb_mf|057|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:09] [b08] [may_manh] het gio trong don vi vb_mf|055|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:11] [b08] [may_manh] het gio trong don vi vb_mf|058|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:12] [b08] [may_manh] het gio trong don vi vb_mf|055|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:13] [b08] [may_manh] het gio trong don vi vb_mf|057|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:15] [b08] [may_manh] xong don vi vb_mf|054|l2::0 (730.6 s)
+[22:00:17] [b08] [may_manh] het gio trong don vi vb_mf|057|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:18] [b08] [may_manh] het gio trong don vi vb_mf|056|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:32] [b08] [may_manh] het gio trong don vi vb_mf|058|l2::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:35] [b08] [may_manh] het gio trong don vi vb_mf|059|l0::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
+[22:00:37] [b08] [may_manh] het gio trong don vi vb_mf|059|l1::0: da ghi diem kiem tra giua chung, se tiep tuc lan sau
